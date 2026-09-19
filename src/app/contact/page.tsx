@@ -1,0 +1,2 @@
+import { ContentPage } from "@/components/content-page";
+export default function ContactPage() { return <ContentPage eyebrow="Fale com a gente" title="Contact." intro="Tem uma dúvida sobre uma peça, pedido ou parceria? Estamos por aqui." sections={[{ title: "Atendimento", text: "Escreva para equipe@merano.com. Respondemos em até 2 dias úteis." }, { title: "Redes", text: "Acompanhe a Merano no Instagram para ver novidades, processos e próximos lançamentos." }]}/>; }

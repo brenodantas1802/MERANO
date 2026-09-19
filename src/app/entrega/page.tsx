@@ -1,0 +1,2 @@
+import { ContentPage } from "@/components/content-page";
+export default function DeliveryPage() { return <ContentPage eyebrow="Depois da escolha" title="Entrega." intro="Cada pedido é produzido com calma e enviado para chegar até você." sections={[{ title: "Prazo", text: "Produção em até 7 dias úteis. O prazo de transporte varia conforme o CEP e aparece na confirmação do pedido." }, { title: "Acompanhamento", text: "Enviamos o código de rastreio por e-mail assim que a peça sair do ateliê." }]}/>; }

@@ -1,0 +1,2 @@
+import { ContentPage } from "@/components/content-page";
+export default function TermsPage() { return <ContentPage eyebrow="Transparência" title="Termos." intro="Ao comprar na Merano, você concorda com as condições abaixo." sections={[{ title: "Pedidos", text: "Os pedidos são confirmados manualmente nesta fase e entram em produção após a validação dos dados." }, { title: "Pagamento", text: "Não armazenamos dados de cartão. Qualquer pagamento futuro será processado por um provedor certificado." }]}/>; }

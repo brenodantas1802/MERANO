@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Size {
+  PP
+  P
+  M
+  G
+  GG
+}
+
+enum ProductionMode {
+  SOB_DEMANDA
+  ESTOQUE
+}
+
+enum OrderStatus {
+  RECEBIDO
+  EM_PRODUCAO
+  ENVIADO
+  ENTREGUE
+  CANCELADO
+}
+
+enum AdminRole {
+  ADMIN
+  OPERADOR
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  description String
+  basePrice   Decimal          @db.Decimal(10, 2)
+  images      String[]
+  variants    ProductVariant[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ProductVariant {
+  id                   String         @id @default(cuid())
+  productId            String
+  product              Product        @relation(fields: [productId], references: [id])
+  size                 Size
+  fit                  String
+  color                String
+  fabric               String
+  sku                  String         @unique
+  stockOrProductionMode ProductionMode
+  priceOverride        Decimal?       @db.Decimal(10, 2)
+  orderItems           OrderItem[]
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  customerId String
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  status     OrderStatus @default(RECEBIDO)
+  createdAt  DateTime    @default(now())
+  totalPrice Decimal     @db.Decimal(10, 2)
+  items      OrderItem[]
+}
+
+model OrderItem {
+  id                String         @id @default(cuid())
+  orderId           String
+  order             Order          @relation(fields: [orderId], references: [id])
+  productVariantId  String
+  productVariant    ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity          Int
+  customizationData Json?
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  street    String
+  number    String
+  complement String?
+  city      String
+  state     String
+  zipCode   String
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(OPERADOR)
+}
