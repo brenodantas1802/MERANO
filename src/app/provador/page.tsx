@@ -87,7 +87,10 @@ function ProvadorContent() {
     if (!personPhoto) return setError("Adicione a sua foto antes de gerar.");
 
     setRun({ status: "loading" });
-    const shirtUrl = new URL(selectedProduct.image, window.location.origin).toString();
+    // product.image is the back/"verso" hero shot; gallery[1] is the front view.
+    // The customer photo is always frontal, so the shirt reference must match.
+    const shirtImage = selectedProduct.gallery[1] ?? selectedProduct.image;
+    const shirtUrl = new URL(shirtImage, window.location.origin).toString();
     const body = { prompt: HIDDEN_PROMPT, references: [personPhoto, shirtUrl], aspectRatio: "3:4", resolution: "1K" };
     try {
       const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
