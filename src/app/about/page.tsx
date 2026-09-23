@@ -1,2 +1,0 @@
-import { ContentPage } from "@/components/content-page";
-export default function AboutPage() { return <ContentPage eyebrow="A marca" title="About." intro="A Merano nasce do encontro entre corpo, território e tempo." sections={[{ title: "Brasil como origem", text: "Criamos peças que carregam uma relação afetiva com a paisagem brasileira, sem pressa e sem excesso." }, { title: "Produção consciente", text: "Produzimos sob demanda para evitar estoque parado e aproximar cada peça do corpo que vai recebê-la." }]}/>; }

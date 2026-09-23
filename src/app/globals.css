@@ -3,11 +3,18 @@
 :root {
 	--ink: #19231e;
 	--muted: #69736d;
-	--paper: #f5f4ef;
-	--cream: #ebe9df;
+	--paper: #FCF5EB;
+	--cream: #C7BAA7;
 	--moss: #536a57;
 	--clay: #b88768;
 	--line: #d8d8ce;
+	--origem: #000000;
+	--areia: #C7BAA7;
+	--creme: #FCF5EB;
+	--terra-dark: #201C17;
+	--terra: #4C2D1A;
+	--sol-1: #F37C22;
+	--sol-2: #FABD4B;
 }
 
 * { box-sizing: border-box; }
