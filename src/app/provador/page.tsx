@@ -7,16 +7,11 @@ import { SiteHeader } from "@/components/site-header";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import { getProduct, products, type Product } from "@/lib/products";
 
-type GenerateResult = { image: string; cost: number; model: string } | { error: string };
+type Pose = "frente" | "lado" | "costas";
+type GenerateResult = { image: string; cost: number; model: string; pose: Pose } | { error: string };
 type Run = { status: "idle" } | { status: "loading" } | { status: "done"; result: GenerateResult };
 
-const HIDDEN_PROMPT = `EDITAR A FOTO DA PESSOA, não criar uma pessoa nova. A foto da pessoa é a imagem-base e deve ser preservada: mantenha exatamente a mesma pessoa, rosto, identidade, expressão, tom de pele, cabelo, pose, mãos, proporções corporais, enquadramento, câmera, iluminação e fundo. Faça somente uma troca virtual de roupa sobre a pessoa. Use as fotos da camisa exclusivamente como referência exata da roupa. Não substitua a pessoa, não mude a pose e não faça uma nova sessão de fotos.
-
-Vista a pessoa da imagem 1 com a roupa da imagem 2, mantendo fielmente modelo, corte, caimento, comprimento, gola, mangas, costuras, textura, material, cores, etiquetas e todos os detalhes visuais. Se a imagem 2 mostrar a roupa de frente e de costas, interprete as duas vistas da mesma peça: use a vista frontal na parte da frente e reproduza no verso a estampa ou arte traseira maior na posição, escala e cores corretas. Não invente logotipos, textos, estampas ou detalhes que não estejam na imagem 2.
-
-Resultado: uma edição fotográfica realista da imagem 1, com a roupa trocada e todo o restante praticamente idêntico. Preserve a anatomia e evite mãos extras, membros deformados, rosto alterado, pessoa diferente, roupa genérica, estampa inventada ou fundo modificado.
-
-VISTA FRONTAL: edite somente a imagem da pessoa de frente. Preserve exatamente a pessoa, pose, rosto, fundo e enquadramento da referência. Troque apenas a camisa pela referência da peça. Gere somente a vista frontal, sem mostrar as costas.`;
+const POSE_LABELS: Record<Pose, string> = { frente: "De frente", lado: "De lado", costas: "De costas" };
 
 function readImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -87,16 +82,16 @@ function ProvadorContent() {
     if (!personPhoto) return setError("Adicione a sua foto antes de gerar.");
 
     setRun({ status: "loading" });
-    // product.image is the back/"verso" hero shot; gallery[1] is the front view.
-    // The customer photo is always frontal, so the shirt reference must match.
-    const shirtImage = selectedProduct.gallery[1] ?? selectedProduct.image;
-    const shirtUrl = new URL(shirtImage, window.location.origin).toString();
-    const body = { prompt: HIDDEN_PROMPT, references: [personPhoto, shirtUrl], aspectRatio: "3:4", resolution: "1K" };
+    // product.image is the back/"verso" hero shot, gallery[1] is the front view.
+    // The server detects the customer's pose and picks whichever of these matches it.
+    const shirtFront = new URL(selectedProduct.gallery[1] ?? selectedProduct.image, window.location.origin).toString();
+    const shirtBack = new URL(selectedProduct.gallery[0] ?? selectedProduct.image, window.location.origin).toString();
+    const body = { personPhoto, shirtFront, shirtBack, aspectRatio: "3:4", resolution: "1K" };
     try {
       const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Falha na geração.");
-      setRun({ status: "done", result: data as { image: string; cost: number; model: string } });
+      setRun({ status: "done", result: data as { image: string; cost: number; model: string; pose: Pose } });
     } catch (generationError) {
       setRun({ status: "done", result: { error: generationError instanceof Error ? generationError.message : "Falha na geração." } });
     }
@@ -145,7 +140,7 @@ function ProvadorContent() {
           <section className="border-t border-[var(--origem)] py-8">
             <div className="mb-7 flex gap-5">
               <span className="sans pt-1 text-xs text-[var(--sol-1)]">02</span>
-              <div><h2 className="text-2xl">Sua foto</h2><p className="sans mt-1 text-xs text-[var(--muted)]">Envie uma foto sua de corpo inteiro, de frente.</p></div>
+              <div><h2 className="text-2xl">Sua foto</h2><p className="sans mt-1 text-xs text-[var(--muted)]">Envie uma foto sua de corpo inteiro — de frente, de lado ou de costas. A gente identifica a pose automaticamente.</p></div>
             </div>
             <label className="group relative flex min-h-[220px] cursor-pointer flex-col items-center justify-center overflow-hidden border border-dashed border-[var(--areia)] text-center transition-colors hover:bg-[var(--areia)]/25">
               <input type="file" accept="image/*" className="hidden" onChange={(event) => handlePersonFile(event.target.files?.[0] ?? null)} />
@@ -200,7 +195,7 @@ function ProvadorContent() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={run.result.image} alt={`Você vestindo ${selectedProduct?.name ?? "a peça"}`} className="aspect-[3/4] w-full object-cover" />
                 <div className="flex items-center justify-between gap-4 p-4">
-                  <div><div className="text-sm font-semibold">{selectedProduct?.name}</div><div className="sans mt-0.5 text-[10px] text-[var(--muted)]">{run.result.model}</div></div>
+                  <div><div className="text-sm font-semibold">{selectedProduct?.name}</div><div className="sans mt-0.5 text-[10px] uppercase tracking-[.08em] text-[var(--muted)]">Pose detectada: {POSE_LABELS[run.result.pose]}</div></div>
                   <div className="sans text-right text-sm"><div>{money(run.result.cost)}</div><small className="text-[9px] text-[var(--muted)]">custo real</small></div>
                 </div>
               </article>
