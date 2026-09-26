@@ -5,10 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Download, Shirt, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
+import type { PersonBox } from "@/lib/people";
 import { getProduct, products, type Product } from "@/lib/products";
 
 type GenerateSuccess = { image: string; cost: number; model: string; pose: string; poseLabel: string; shown: string; productId: string };
 type GenerateResult = GenerateSuccess | { error: string };
+type People = { boxes: PersonBox[]; total: number };
 type Run = { status: "idle" } | { status: "loading" } | { status: "done"; result: GenerateResult };
 
 const MAX_PHOTO_SIDE = 1600;
@@ -40,6 +42,22 @@ async function readImage(file: File): Promise<string> {
   } catch {
     return readDataUrl(file);
   }
+}
+
+// Crop of the chosen person (with a small margin), so their pose is detected on them alone.
+async function cropPerson(dataUrl: string, box: PersonBox): Promise<string> {
+  const image = new Image();
+  image.src = dataUrl;
+  await image.decode();
+  const left = Math.max(0, box.x - box.w * 0.06) * image.width;
+  const top = Math.max(0, box.y - box.h * 0.06) * image.height;
+  const width = Math.min(1, box.x + box.w * 1.06) * image.width - left;
+  const height = Math.min(1, box.y + box.h * 1.06) * image.height - top;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(width));
+  canvas.height = Math.max(1, Math.round(height));
+  canvas.getContext("2d")!.drawImage(image, left, top, width, height, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.9);
 }
 
 function money(value: number) {
@@ -104,10 +122,35 @@ function ProvadorContent() {
   const [error, setError] = useState("");
   const [run, setRun] = useState<Run>({ status: "idle" });
 
+  const [people, setPeople] = useState<People | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [targetIndex, setTargetIndex] = useState<number | null>(null);
+  const photoVersion = useRef(0);
+
   async function handlePersonFile(file: File | null) {
     if (!file || !file.type.startsWith("image/")) return;
-    setPersonPhoto(await readImage(file));
+    const version = ++photoVersion.current;
+    const photo = await readImage(file);
+    if (version !== photoVersion.current) return;
+    setPersonPhoto(photo);
+    setPeople(null);
+    setTargetIndex(null);
+    setError("");
+    setAnalyzing(true);
+    // Finds who is in the photo so the customer can pick one when there are several.
+    try {
+      const response = await fetch("/api/people", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ personPhoto: photo }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      if (version === photoVersion.current) setPeople({ boxes: data.people, total: data.total });
+    } catch {
+      // Without the analysis we go ahead as if the photo had a single person.
+    } finally {
+      if (version === photoVersion.current) setAnalyzing(false);
+    }
   }
+
+  const needsChoice = !!people && people.boxes.length >= 2;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -115,10 +158,15 @@ function ProvadorContent() {
     if (!selectedProduct) return setError("Escolha uma camisa antes de gerar.");
     if (!personPhoto) return setError("Adicione a sua foto antes de gerar.");
 
+    if (needsChoice && targetIndex === null) return setError("Toque em quem vai vestir a camiseta.");
+
     setRun({ status: "loading" });
-    // The server detects the customer's pose and picks the matching shirt view (front, back or side) from the catalog.
-    const body = { personPhoto, productId: selectedProduct.id, aspectRatio: "3:4", resolution: "1K" };
     try {
+      // With several people in the photo, the server is told which one to dress (a lone big person among small
+      // background ones is chosen automatically). It then detects that person's pose and picks the matching shirt view.
+      const box = people && people.total >= 2 ? (people.boxes.length === 1 ? people.boxes[0] : people.boxes[targetIndex!]) : null;
+      const target = box && people ? { box, total: people.total, crop: await cropPerson(personPhoto, box) } : undefined;
+      const body = { personPhoto, productId: selectedProduct.id, target, aspectRatio: "3:4", resolution: "1K" };
       const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Falha na geração.");
@@ -187,15 +235,38 @@ function ProvadorContent() {
               )}
               {personPhoto && <span className="sans absolute inset-x-0 bottom-0 bg-[var(--origem)]/80 py-2 text-center text-[10px] uppercase tracking-[.1em] text-[var(--creme)]">Trocar foto</span>}
             </label>
+            {analyzing && <p className="sans mt-3 text-[11px] text-[var(--muted)]">Analisando a foto...</p>}
+            {needsChoice && personPhoto && people && (
+              <div className="mt-5">
+                <p className="sans mb-3 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]">Mais de uma pessoa na foto — toque em quem vai vestir a camiseta</p>
+                <div className="relative inline-block max-w-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={personPhoto} alt="Sua foto, com as pessoas numeradas" className="block h-auto max-h-[520px] w-auto max-w-full" />
+                  {people.boxes.map((box, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => { setTargetIndex(index); setError(""); }}
+                      aria-label={`Escolher a pessoa ${index + 1}`}
+                      aria-pressed={targetIndex === index}
+                      style={{ left: `${box.x * 100}%`, top: `${box.y * 100}%`, width: `${box.w * 100}%`, height: `${box.h * 100}%` }}
+                      className={`absolute border-2 transition-colors ${targetIndex === index ? "border-[var(--sol-1)] bg-[var(--sol-1)]/20" : "border-white/80 hover:bg-white/20"}`}
+                    >
+                      <span className={`sans absolute top-1 left-1 flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${targetIndex === index ? "bg-[var(--sol-1)] text-[var(--origem)]" : "bg-[var(--origem)] text-[var(--creme)]"}`}>{index + 1}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           <section className="border-t border-[var(--origem)] py-8">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || analyzing}
               className="sans flex w-full items-center justify-between bg-gradient-to-r from-[var(--sol-1)] to-[var(--sol-2)] px-6 py-4 text-[13px] font-semibold uppercase tracking-[.1em] text-[var(--origem)] transition-opacity disabled:cursor-wait disabled:opacity-60"
             >
-              <span>{loading ? "Gerando provador virtual..." : "Gerar provador virtual"}</span>
+              <span>{loading ? "Gerando provador virtual..." : analyzing ? "Analisando a foto..." : "Gerar provador virtual"}</span>
               <span aria-hidden>↗</span>
             </button>
             {error && <p role="alert" className="sans mt-3 min-h-[16px] text-xs text-[#8a3a2c]">{error}</p>}

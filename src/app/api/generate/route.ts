@@ -2,32 +2,23 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { detectPose, POSE_LABELS, type Pose } from "@/lib/pose";
 import { getProduct } from "@/lib/products";
+import { clientKey, createRateLimiter } from "@/lib/rate-limit";
 import { planTryOn, type ViewKey } from "@/lib/tryon";
 
 const IMAGE_MODEL = "openai/gpt-image-2.5-flare";
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-const RATE_LIMIT_MAX = 5;
-const hits = new Map<string, number[]>();
-
-function isRateLimited(key: string) {
-  const now = Date.now();
-  const recent = (hits.get(key) ?? []).filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
-  if (recent.length >= RATE_LIMIT_MAX) {
-    hits.set(key, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(key, recent);
-  return false;
-}
-
-function clientKey(request: Request) {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
-}
+const isRateLimited = createRateLimiter(5);
 
 const generateSchema = z.object({
   personPhoto: z.string("Adicione a sua foto antes de gerar.").min(1, "Adicione a sua foto antes de gerar.").startsWith("data:image/", "Foto inválida. Envie uma imagem."),
   productId: z.string("Escolha uma camisa antes de gerar.").min(1, "Escolha uma camisa antes de gerar."),
+  // Set when the photo has several people: a crop of the chosen one (for pose detection) and where they are.
+  target: z
+    .object({
+      crop: z.string().startsWith("data:image/", "Recorte inválido."),
+      box: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), w: z.number().min(0).max(1), h: z.number().min(0).max(1) }),
+      total: z.number().int().min(2).max(10),
+    })
+    .optional(),
   aspectRatio: z.string().optional(),
   resolution: z.string().optional(),
 });
@@ -68,7 +59,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "OPENROUTER_API_KEY não configurada no servidor." }, { status: 500 });
   }
 
-  const { personPhoto, productId, aspectRatio, resolution } = parsed.data;
+  const { personPhoto, productId, target, aspectRatio, resolution } = parsed.data;
   const product = getProduct(productId);
   if (!product) {
     return NextResponse.json({ error: "Camisa não encontrada." }, { status: 404 });
@@ -83,7 +74,7 @@ export async function POST(request: Request) {
 
     let detection;
     try {
-      detection = await detectPose(personPhoto, apiKey);
+      detection = await detectPose(target?.crop ?? personPhoto, apiKey);
     } catch (error) {
       console.error("Pose detection failed:", error);
       return NextResponse.json({ error: "Não conseguimos identificar a pose da sua foto agora. Tente novamente em instantes." }, { status: 502 });
@@ -93,7 +84,7 @@ export async function POST(request: Request) {
     }
 
     const { pose } = detection;
-    const plan = planTryOn(product.views, pose);
+    const plan = planTryOn(product.views, pose, target && { box: target.box, total: target.total });
     const garments = new Map(await garmentImages);
 
     const response = await fetch("https://openrouter.ai/api/v1/images", {

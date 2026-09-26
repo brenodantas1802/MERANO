@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { askVision } from "./vision";
 
 // Orientation of the person's chest relative to the camera. "esq"/"dir" are always the left/right of
 // the IMAGE (as seen by whoever looks at the photo), which is unambiguous for a vision model.
@@ -34,9 +35,6 @@ export type PoseDetection = {
   cost: number;
 };
 
-// Tried in order per call: if a model errors out or answers something unparseable, the next one takes over.
-const POSE_MODELS = ["google/gemini-2.5-flash", "openai/gpt-5.4-mini"];
-
 const POSE_PROMPT = `Você é o classificador de orientação de um provador virtual de camisetas. Analise a foto e escolha a PESSOA PRINCIPAL (a maior e mais central; ignore pessoas ao fundo).
 
 Descubra para onde o PEITO/TRONCO dessa pessoa aponta em relação à câmera e escolha uma orientação:
@@ -70,55 +68,9 @@ const poseAnswer = z.object({
   confianca: z.enum(["alta", "media", "baixa"]).catch("media"),
 });
 
-function extractJson(text: string): unknown {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end <= start) throw new Error("Resposta sem JSON.");
-  return JSON.parse(text.slice(start, end + 1));
-}
-
-async function classify(photoUrl: string, model: string, apiKey: string): Promise<PoseDetection> {
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: POSE_PROMPT },
-            { type: "image_url", image_url: { url: photoUrl } },
-          ],
-        },
-      ],
-      response_format: { type: "json_schema", json_schema: { name: "pose", strict: true, schema: poseSchema } },
-      // Reasoning models spend the token budget on thinking first; keep it small but leave room for the answer.
-      reasoning: { effort: "low" },
-      max_tokens: 1500,
-    }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || `HTTP ${response.status}`);
-  const content = data?.choices?.[0]?.message?.content;
-  if (typeof content !== "string" || !content.trim()) {
-    throw new Error(`Resposta vazia (finish_reason: ${data?.choices?.[0]?.finish_reason ?? "?"}).`);
-  }
-  const answer = poseAnswer.parse(extractJson(content));
-  return { pose: answer.orientacao, confidence: answer.confianca, personVisible: answer.pessoa_visivel, model, cost: Number(data?.usage?.cost || 0) };
-}
-
-// Throws instead of guessing: silently defaulting to "frente" is what used to hide a detector that never answered.
-async function classifyWithFallback(photoUrl: string, apiKey: string): Promise<PoseDetection> {
-  const failures: string[] = [];
-  for (const model of POSE_MODELS) {
-    try {
-      return await classify(photoUrl, model, apiKey);
-    } catch (error) {
-      failures.push(`${model}: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-  throw new Error(`Não foi possível identificar a pose da foto (${failures.join(" | ")}).`);
+async function classify(photoUrl: string, apiKey: string): Promise<PoseDetection> {
+  const { value, model, cost } = await askVision(apiKey, photoUrl, POSE_PROMPT, "pose", poseSchema, poseAnswer);
+  return { pose: value.orientacao, confidence: value.confianca, personVisible: value.pessoa_visivel, model, cost };
 }
 
 const ANGLES = ["frente", "frente_diagonal", "perfil", "costas_diagonal", "costas"] as const;
@@ -154,10 +106,10 @@ function mergeVotes(votes: PoseDetection[]): PoseDetection {
 // Front/back are what decide which side of the shirt is shown, and one call gets them right reliably.
 // Sideways poses, or any call that isn't sure, get two more parallel calls and a vote.
 export async function detectPose(photoUrl: string, apiKey: string): Promise<PoseDetection> {
-  const first = await classifyWithFallback(photoUrl, apiKey);
+  const first = await classify(photoUrl, apiKey);
   if (first.personVisible && first.confidence === "alta" && (first.pose === "frente" || first.pose === "costas")) return first;
 
-  const extra = await Promise.allSettled([classifyWithFallback(photoUrl, apiKey), classifyWithFallback(photoUrl, apiKey)]);
+  const extra = await Promise.allSettled([classify(photoUrl, apiKey), classify(photoUrl, apiKey)]);
   const votes = [first, ...extra.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []))];
   return mergeVotes(votes);
 }

@@ -3,6 +3,9 @@ import type { ShirtViews } from "./products";
 
 export type ViewKey = keyof ShirtViews;
 
+// The person to dress when the photo has several: where they are in the frame, and how many people there are.
+export type Subject = { box: { x: number; y: number; w: number; h: number }; total: number };
+
 export type TryOnPlan = {
   // Garment shots to send after the person's photo, in the order the prompt refers to them (image 2, 3...).
   views: ViewKey[];
@@ -34,6 +37,13 @@ function wantedViews(pose: Pose): ViewKey[] {
   return [pose.endsWith("_esq") ? "left" : "right", "front", "back"];
 }
 
+function subjectInstruction({ box, total }: Subject) {
+  const center = box.x + box.w / 2;
+  const where = center < 0.38 ? "do lado esquerdo da imagem" : center > 0.62 ? "do lado direito da imagem" : "no centro da imagem";
+  const pct = (value: number) => Math.round(value * 100);
+  return `Há ${total} pessoas na imagem 1. Vista a camiseta SOMENTE na pessoa que está ${where} (ela ocupa aproximadamente de ${pct(box.x)}% a ${pct(box.x + box.w)}% da largura e de ${pct(box.y)}% a ${pct(box.y + box.h)}% da altura da imagem). Todas as outras pessoas permanecem EXATAMENTE como estão, com as roupas originais, sem nenhuma camiseta nova. Nas instruções abaixo, "a pessoa da imagem 1" é apenas essa pessoa.`;
+}
+
 function orientationInstruction(pose: Pose, has: (key: ViewKey) => boolean, imageOf: (key: ViewKey) => number) {
   // "faces"/"behind" are sides of the IMAGE: the model needs to know where the person's chest and back end up.
   const faces = pose.endsWith("_esq") ? "esquerda" : "direita";
@@ -60,7 +70,7 @@ function orientationInstruction(pose: Pose, has: (key: ViewKey) => boolean, imag
   return `A pessoa da imagem 1 está de LADO, em perfil de 90°, voltada para a ${faces} da imagem: o peito dela fica do lado ${faces} da imagem e as COSTAS dela ficam do lado ${behind} da imagem.${sideRef} A estampa das costas (imagem ${imageOf("back")}) só pode aparecer como uma faixa estreita na borda traseira do tronco, do lado ${behind} da imagem, cortada pelo ângulo, e NUNCA no lado do peito nem na manga. ${chestRule} Não vire a pessoa para a câmera.`;
 }
 
-export function planTryOn(views: ShirtViews, pose: Pose): TryOnPlan {
+export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject): TryOnPlan {
   let keys = wantedViews(pose).filter((key) => views[key]);
   // The garment's plain colour/cut/fabric still has to come from somewhere when the catalog has no front shot.
   if (!views.front && !keys.includes("back")) keys = [...keys, "back"];
@@ -74,6 +84,6 @@ export function planTryOn(views: ShirtViews, pose: Pose): TryOnPlan {
 
   return {
     views: keys,
-    prompt: `${PRESERVE_PERSON_PROMPT}\n\n${imageList}\n\n${orientationInstruction(pose, has, imageOf)}`,
+    prompt: `${PRESERVE_PERSON_PROMPT}\n\n${subject ? `${subjectInstruction(subject)}\n\n` : ""}${imageList}\n\n${orientationInstruction(pose, has, imageOf)}`,
   };
 }
