@@ -2,18 +2,18 @@
 
 import { type FormEvent, Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, Shirt, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Shirt, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import { getProduct, products, type Product } from "@/lib/products";
 
-type Pose = "frente" | "lado" | "costas";
-type GenerateResult = { image: string; cost: number; model: string; pose: Pose } | { error: string };
+type GenerateSuccess = { image: string; cost: number; model: string; pose: string; poseLabel: string; shown: string; productId: string };
+type GenerateResult = GenerateSuccess | { error: string };
 type Run = { status: "idle" } | { status: "loading" } | { status: "done"; result: GenerateResult };
 
-const POSE_LABELS: Record<Pose, string> = { frente: "De frente", lado: "De lado", costas: "De costas" };
+const MAX_PHOTO_SIDE = 1600;
 
-function readImage(file: File): Promise<string> {
+function readDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -22,8 +22,42 @@ function readImage(file: File): Promise<string> {
   });
 }
 
+// Phone photos are huge and often carry an EXIF rotation. Re-encoding through a canvas bakes the rotation in
+// (so the pose is detected on the picture as the person sees it) and keeps the upload small.
+async function readImage(file: File): Promise<string> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const scale = Math.min(1, MAX_PHOTO_SIDE / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const context = canvas.getContext("2d")!;
+    context.fillStyle = "#fff"; // JPEG has no alpha: transparent PNGs would turn black
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    return canvas.toDataURL("image/jpeg", 0.9);
+  } catch {
+    return readDataUrl(file);
+  }
+}
+
 function money(value: number) {
   return `$${value.toFixed(4)}`;
+}
+
+// Goes through a blob: `download` on a huge data: URL is ignored by some mobile browsers.
+async function downloadImage(dataUrl: string, name: string) {
+  const blob = await (await fetch(dataUrl)).blob();
+  const extension = blob.type === "image/jpeg" ? "jpg" : blob.type.split("/")[1] || "png";
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${name}.${extension}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function ShirtPicker({ onSelect, onClose }: { onSelect: (product: Product) => void; onClose: () => void }) {
@@ -82,16 +116,13 @@ function ProvadorContent() {
     if (!personPhoto) return setError("Adicione a sua foto antes de gerar.");
 
     setRun({ status: "loading" });
-    // product.image is the back/"verso" hero shot, gallery[1] is the front view.
-    // The server detects the customer's pose and picks whichever of these matches it.
-    const shirtFront = new URL(selectedProduct.gallery[1] ?? selectedProduct.image, window.location.origin).toString();
-    const shirtBack = new URL(selectedProduct.gallery[0] ?? selectedProduct.image, window.location.origin).toString();
-    const body = { personPhoto, shirtFront, shirtBack, aspectRatio: "3:4", resolution: "1K" };
+    // The server detects the customer's pose and picks the matching shirt view (front, back or side) from the catalog.
+    const body = { personPhoto, productId: selectedProduct.id, aspectRatio: "3:4", resolution: "1K" };
     try {
       const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Falha na geração.");
-      setRun({ status: "done", result: data as { image: string; cost: number; model: string; pose: Pose } });
+      setRun({ status: "done", result: { ...(data as Omit<GenerateSuccess, "productId">), productId: selectedProduct.id } });
     } catch (generationError) {
       setRun({ status: "done", result: { error: generationError instanceof Error ? generationError.message : "Falha na geração." } });
     }
@@ -140,7 +171,7 @@ function ProvadorContent() {
           <section className="border-t border-[var(--origem)] py-8">
             <div className="mb-7 flex gap-5">
               <span className="sans pt-1 text-xs text-[var(--sol-1)]">02</span>
-              <div><h2 className="text-2xl">Sua foto</h2><p className="sans mt-1 text-xs text-[var(--muted)]">Envie uma foto sua de corpo inteiro — de frente, de lado ou de costas. A gente identifica a pose automaticamente.</p></div>
+              <div><h2 className="text-2xl">Sua foto</h2><p className="sans mt-1 text-xs text-[var(--muted)]">Envie uma foto sua de corpo inteiro — de frente, de lado ou de costas. A gente identifica a pose e veste o lado certo da camiseta.</p></div>
             </div>
             <label className="group relative flex min-h-[220px] cursor-pointer flex-col items-center justify-center overflow-hidden border border-dashed border-[var(--areia)] text-center transition-colors hover:bg-[var(--areia)]/25">
               <input type="file" accept="image/*" className="hidden" onChange={(event) => handlePersonFile(event.target.files?.[0] ?? null)} />
@@ -195,9 +226,20 @@ function ProvadorContent() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={run.result.image} alt={`Você vestindo ${selectedProduct?.name ?? "a peça"}`} className="aspect-[3/4] w-full object-cover" />
                 <div className="flex items-center justify-between gap-4 p-4">
-                  <div><div className="text-sm font-semibold">{selectedProduct?.name}</div><div className="sans mt-0.5 text-[10px] uppercase tracking-[.08em] text-[var(--muted)]">Pose detectada: {POSE_LABELS[run.result.pose]}</div></div>
+                  <div><div className="text-sm font-semibold">{selectedProduct?.name}</div><div className="sans mt-0.5 text-[10px] uppercase tracking-[.08em] text-[var(--muted)]">Pose detectada: {run.result.poseLabel}</div></div>
                   <div className="sans text-right text-sm"><div>{money(run.result.cost)}</div><small className="text-[9px] text-[var(--muted)]">custo real</small></div>
                 </div>
+                <p className="sans border-t border-[var(--origem)]/10 px-4 py-3 text-[11px] leading-relaxed text-[var(--muted)]">
+                  Vestimos {run.result.shown} para combinar com a sua foto.
+                  {run.result.pose.startsWith("frente") && " Para ver a estampa das costas, envie uma foto sua de costas."}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { const { image, productId, pose } = run.result as GenerateSuccess; void downloadImage(image, `merano-${productId}-${pose}`); }}
+                  className="sans flex w-full items-center justify-center gap-2 border-t border-[var(--origem)]/10 px-4 py-3 text-[10px] uppercase tracking-[.1em] transition-colors hover:bg-[var(--origem)] hover:text-[var(--creme)]"
+                >
+                  <Download size={14} /> Baixar foto
+                </button>
               </article>
             )}
           </section>

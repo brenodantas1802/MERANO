@@ -1,3 +1,7 @@
+// Catalog shots of the garment by angle, used by the virtual try-on to match the customer's pose.
+// "left"/"right" are the wearer's left/right side. `front` is absent when the catalog has no front shot.
+export type ShirtViews = { front?: string; back: string; left?: string; right?: string };
+
 export type Product = {
   id: string;
   name: string;
@@ -7,6 +11,7 @@ export type Product = {
   note: string;
   image: string;
   gallery: string[];
+  views: ShirtViews;
   category: string;
   collection: string;
   material: string;
@@ -23,6 +28,8 @@ export const collections: Collection[] = [
   { id: "colecao-01", name: "Coleção 01", tagline: "Sol, terra e a primeira coleção da Merano", image: "/imagens/merano-assets/banner-paisagem.png" },
 ];
 
+const GENERIC_FRONT = "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg";
+
 export const products: Product[] = [
   {
     id: "who-cares-preto",
@@ -32,6 +39,7 @@ export const products: Product[] = [
     note: "Estampa Who Cares · Preto",
     image: "/imagens/merano-assets/camiseta preta e vermelha verso.jpeg",
     gallery: ["/imagens/merano-assets/camiseta preta e vermelha verso.jpeg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg", "/imagens/merano-assets/produtos/preta-vermelha-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/preta-vermelha-lado-direito.jpg"],
+    views: { back: "/imagens/merano-assets/camiseta preta e vermelha verso.jpeg", front: "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg", left: "/imagens/merano-assets/produtos/preta-vermelha-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/preta-vermelha-lado-direito.jpg" },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -49,6 +57,7 @@ export const products: Product[] = [
     note: "Estampa Rastro no Lago",
     image: "/imagens/merano-assets/camiseta barco só verso.jpeg",
     gallery: ["/imagens/merano-assets/camiseta barco só verso.jpeg", "/imagens/merano-assets/produtos/barco-frente.jpg", "/imagens/merano-assets/produtos/barco-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/barco-lado-direito.jpg"],
+    views: { back: "/imagens/merano-assets/camiseta barco só verso.jpeg", front: "/imagens/merano-assets/produtos/barco-frente.jpg", left: "/imagens/merano-assets/produtos/barco-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/barco-lado-direito.jpg" },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -66,6 +75,7 @@ export const products: Product[] = [
     note: "Estampa Match Point",
     image: "/imagens/merano-assets/camiseta tenis verso.jpeg",
     gallery: ["/imagens/merano-assets/camiseta tenis verso.jpeg", "/imagens/merano-assets/produtos/tenis-frente.jpg", "/imagens/merano-assets/produtos/tenis-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/tenis-lado-direito.jpg"],
+    views: { back: "/imagens/merano-assets/camiseta tenis verso.jpeg", front: "/imagens/merano-assets/produtos/tenis-frente.jpg", left: "/imagens/merano-assets/produtos/tenis-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/tenis-lado-direito.jpg" },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -83,6 +93,7 @@ export const products: Product[] = [
     note: "Estampa Mamão",
     image: "/imagens/merano-assets/camieta mamao verso.jpeg",
     gallery: ["/imagens/merano-assets/camieta mamao verso.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
+    views: { back: "/imagens/merano-assets/camieta mamao verso.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -100,6 +111,7 @@ export const products: Product[] = [
     note: "Estampa Terraço ao Mar",
     image: "/imagens/merano-assets/camiseta cadeirinha praia verso.jpeg",
     gallery: ["/imagens/merano-assets/camiseta cadeirinha praia verso.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
+    views: { back: "/imagens/merano-assets/camiseta cadeirinha praia verso.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -117,6 +129,7 @@ export const products: Product[] = [
     note: "Estampa Who Cares",
     image: "/imagens/merano-assets/camiseta who cares verso.jpeg",
     gallery: ["/imagens/merano-assets/camiseta who cares verso.jpeg", "/imagens/merano-assets/produtos/who-cares-frente.jpg", "/imagens/merano-assets/produtos/who-cares-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/who-cares-lado-direito.jpg"],
+    views: { back: "/imagens/merano-assets/camiseta who cares verso.jpeg", front: "/imagens/merano-assets/produtos/who-cares-frente.jpg", left: "/imagens/merano-assets/produtos/who-cares-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/who-cares-lado-direito.jpg" },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -134,6 +147,7 @@ export const products: Product[] = [
     note: "Estampa Disco",
     image: "/imagens/merano-assets/camisite verso disco.jpeg",
     gallery: ["/imagens/merano-assets/camisite verso disco.jpeg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg"],
+    views: { back: "/imagens/merano-assets/camisite verso disco.jpeg", front: "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg" },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -151,6 +165,7 @@ export const products: Product[] = [
     note: "Estampa Match Point · Mini",
     image: "/imagens/merano-assets/estampa menor camiseta verso tenis.jpeg",
     gallery: ["/imagens/merano-assets/estampa menor camiseta verso tenis.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
+    views: { back: "/imagens/merano-assets/estampa menor camiseta verso tenis.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -168,6 +183,7 @@ export const products: Product[] = [
     note: "Estampa Mares Tranquilos",
     image: "/imagens/merano-assets/camiseta little verso.jpeg",
     gallery: ["/imagens/merano-assets/camiseta little verso.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
+    views: { back: "/imagens/merano-assets/camiseta little verso.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -185,6 +201,7 @@ export const products: Product[] = [
     note: "Estampa Café",
     image: "/imagens/merano-assets/camiseta verso café.jpeg",
     gallery: ["/imagens/merano-assets/camiseta verso café.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
+    views: { back: "/imagens/merano-assets/camiseta verso café.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
     collection: "colecao-01",
     material: "100% algodão de toque macio",
@@ -193,41 +210,6 @@ export const products: Product[] = [
     stock: 9,
     fits: ["PP", "P", "M", "G", "GG"],
     colors: ["Natural"],
-  },
-  {
-    id: "frutos-da-floresta",
-    name: "Frutos da floresta",
-    description: "Uma composição de frutos tropicais para vestir a abundância da terra e o equilíbrio que nasce dela.",
-    price: 189,
-    salePrice: 169,
-    note: "Estampa Frutos da Floresta · Nairu",
-    image: "/imagens/camisa 1.jpeg",
-    gallery: ["/imagens/camisa 1.jpeg", "/imagens/camisa 3.jpeg", "/imagens/camiseta 2.jpeg", "/imagens/merano-assets/etiqueta-linho.png"],
-    category: "Camisetas",
-    collection: "colecao-01",
-    material: "100% algodão de toque macio",
-    care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Produção em até 7 dias úteis + envio.",
-    stock: 12,
-    fits: ["PP", "P", "M", "G", "GG"],
-    colors: ["Natural", "Verde musgo", "Preto"],
-  },
-  {
-    id: "essencial",
-    name: "O essencial",
-    description: "Frutos, folhas e origem em uma estampa que celebra o essencial: aquilo que nasce da terra.",
-    price: 189,
-    note: "Estampa Da Terra Nasce o Essencial · Nairu",
-    image: "/imagens/camisa 3.jpeg",
-    gallery: ["/imagens/camisa 3.jpeg", "/imagens/camiseta 2.jpeg", "/imagens/camisa 1.jpeg", "/imagens/merano-assets/etiqueta-linho.png"],
-    category: "Camisetas",
-    collection: "colecao-01",
-    material: "100% algodão de toque macio",
-    care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Produção em até 7 dias úteis + envio.",
-    stock: 5,
-    fits: ["PP", "P", "M", "G", "GG"],
-    colors: ["Azul claro", "Natural", "Preto"],
   },
 ];
 
