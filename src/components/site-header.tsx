@@ -9,7 +9,6 @@ import { useEffect, useRef, useState } from "react";
 import { useCart } from "./cart-provider";
 import { MeranoSymbol } from "./merano-symbol";
 import { products } from "@/lib/products";
-import { INSTAGRAM_URL } from "./whatsapp-button";
 
 const NAV_LINKS = [
   { href: "/sobre-nos", label: "Sobre nós" },
@@ -127,7 +126,6 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
           <div className="grid grid-cols-1 gap-5 px-6 py-6 md:grid-flow-col md:grid-cols-none md:grid-rows-3 md:gap-x-16 md:gap-y-5 md:px-10">
             {NAV_LINKS.map((link) => <Link key={link.href} onClick={() => setMenuOpen(false)} href={link.href}>{link.label}</Link>)}
             <Link onClick={() => setMenuOpen(false)} href="/personalizar-estampa">Personalizar estampa</Link>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram</a>
           </div>
         </motion.nav>
       )}

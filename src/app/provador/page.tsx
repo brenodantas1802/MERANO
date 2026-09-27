@@ -123,7 +123,7 @@ function PhotoDrop({ slot, slotKey, onFile }: { slot: Slot; slotKey: SlotKey; on
       onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={(event) => { event.preventDefault(); setDragging(false); onFile(event.dataTransfer.files?.[0] ?? null); }}
-      className={`group relative flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] text-center transition-all ${slot.photo ? "bg-[var(--areia)]/30" : dragging ? "scale-[1.01] bg-[var(--sol-2)]/25" : "bg-[var(--areia)]/30 hover:bg-[var(--areia)]/45"}`}
+      className={`group relative flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] text-center transition-all ${slot.photo ? "bg-[var(--areia)]/30" : dragging ? "scale-[1.01] border border-dashed border-[var(--sol-2)] bg-[var(--sol-2)]/25" : "border border-dashed border-[var(--terra)]/25 bg-[var(--areia)]/70 hover:bg-[var(--areia)]"}`}
     >
       <input type="file" accept="image/*" className="hidden" onChange={(event) => { onFile(event.target.files?.[0] ?? null); event.target.value = ""; }} />
       {slot.photo ? (
