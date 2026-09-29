@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,7 +18,7 @@ const NAV_LINKS = [
 ];
 
 export function SiteHeader() {
-  const { count } = useCart();
+  const { count, openDrawer } = useCart();
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -32,9 +32,9 @@ export function SiteHeader() {
           </motion.span>
         </button>
 
-        <Link href="/" aria-label="Merano - início" className="flex items-center gap-3 justify-self-center md:gap-4">
-          <Image src="/imagens/logo-simbolo-trimmed.png" alt="" width={505} height={307} className="h-9 w-14 object-contain md:h-12 md:w-20" />
-          <Image src="/imagens/logo-nome-trimmed.png" alt="MERANO" width={560} height={66} className="h-9 w-40 object-contain md:h-12 md:w-56" />
+        <Link href="/" aria-label="Merano - início" className="flex items-center gap-2 justify-self-center md:gap-4">
+          <Image src="/imagens/logo-simbolo-trimmed.png" alt="" width={505} height={307} className="h-8 w-12 object-contain md:h-12 md:w-20" />
+          <Image src="/imagens/logo-nome-trimmed.png" alt="MERANO" width={560} height={66} className="h-8 w-32 object-contain md:h-12 md:w-56" />
         </Link>
 
         <div className="flex items-center justify-self-end"><GooeyInput
@@ -50,7 +50,7 @@ export function SiteHeader() {
             bubbleSurface: "bg-[var(--ink)] text-[var(--creme)] ring-[var(--areia)]/50",
             input: "text-[var(--creme)] placeholder:text-[var(--creme)]/50",
           }}
-        /></div>
+        /><button onClick={openDrawer} aria-label={`Abrir sacola (${count} ${count === 1 ? "item" : "itens"})`} className="relative ml-1.5 flex h-9 w-9 items-center md:ml-2 md:h-10 md:w-10 justify-center border border-[var(--line)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]"><ShoppingBag size={18} strokeWidth={1.5} />{count > 0 && <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--sol-1)] px-1 text-[10px] font-bold tracking-normal text-white">{count}</span>}</button></div>
       </div>
 
       {searchOpen && query && <div className="border-t border-[var(--line)] px-6 py-4 md:px-12"><div className="mx-auto max-w-360">{matches.length ? matches.map((product) => <Link onClick={() => setSearchOpen(false)} href={`/produto/${product.id}`} key={product.id} className="sans flex items-center justify-between py-2 text-xs"><span>{product.name}</span><ArrowUpRight size={14} /></Link>) : <p className="sans py-2 text-xs text-[var(--muted)]">Nenhum produto encontrado.</p>}</div></div>}
@@ -69,7 +69,6 @@ export function SiteHeader() {
                 {NAV_LINKS.map((link) => <Link key={link.href} onClick={() => setMenuOpen(false)} href={link.href}>{link.label}</Link>)}
                 <Link onClick={() => setMenuOpen(false)} href="/carrinho" className="flex items-center gap-2">Carrinho{count > 0 && <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--ink)] px-1 text-[9px] text-[var(--creme)]">{count}</span>}</Link>
                 <Link onClick={() => setMenuOpen(false)} href="/conta">Conta</Link>
-                <Link onClick={() => setMenuOpen(false)} href="/provador-3d">Provador 3D</Link>
                 <Link onClick={() => setMenuOpen(false)} href="/personalizar-estampa">Personalizar estampa</Link>
               </div>
             </div>

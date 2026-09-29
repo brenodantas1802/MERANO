@@ -27,7 +27,7 @@ export default function CategoriesPage() {
         ))}
         <ScrollReveal delay={categories.length * 0.08}>
           <div className="relative flex aspect-[.9] flex-col justify-end overflow-hidden p-7">
-            <Image src="/imagens/merano-assets/banner-paisagem.png" alt="Paisagem brasileira, próxima coleção Merano" fill className="object-cover opacity-70" />
+            <Image src="/imagens/merano-assets/banner-paisagem.jpg" alt="Paisagem brasileira, próxima coleção Merano" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover opacity-70" />
             <div className="absolute inset-0 bg-black/35" />
             <span className="sans relative z-10 text-[10px] uppercase tracking-[.14em] text-white/80">Em breve</span>
             <h2 className="relative z-10 mt-2 text-3xl text-white">Próxima coleção</h2>

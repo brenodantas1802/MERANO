@@ -53,6 +53,12 @@ function recommendSize(bustoCm: number) {
   return match ?? SIZE_CHART[SIZE_CHART.length - 1];
 }
 
+export function useRecommendedSize() {
+  const values = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const busto = Number(values.busto);
+  return busto > 0 ? recommendSize(busto).size : null;
+}
+
 export function MeuFitForm() {
   const values = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const saved = Object.values(values).some(Boolean);

@@ -13,13 +13,18 @@ type Run = { status: "idle" } | { status: "loading" } | { status: "done"; result
 
 const POSE_LABELS: Record<Pose, string> = { frente: "De frente", lado: "De lado", costas: "De costas" };
 
-function readImage(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+const MAX_PHOTO_SIDE = 1536;
+
+// Phone photos are often 4–8 MB; downscaling keeps the upload under hosting body limits and speeds up generation.
+async function readImage(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_PHOTO_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.88);
 }
 
 function money(value: number) {
@@ -72,7 +77,11 @@ function ProvadorContent() {
 
   async function handlePersonFile(file: File | null) {
     if (!file || !file.type.startsWith("image/")) return;
-    setPersonPhoto(await readImage(file));
+    try {
+      setPersonPhoto(await readImage(file));
+    } catch {
+      setError("Não conseguimos abrir essa foto. Tente uma imagem JPG ou PNG.");
+    }
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -82,11 +91,8 @@ function ProvadorContent() {
     if (!personPhoto) return setError("Adicione a sua foto antes de gerar.");
 
     setRun({ status: "loading" });
-    // product.image is the back/"verso" hero shot, gallery[1] is the front view.
-    // The server detects the customer's pose and picks whichever of these matches it.
-    const shirtFront = new URL(selectedProduct.gallery[1] ?? selectedProduct.image, window.location.origin).toString();
-    const shirtBack = new URL(selectedProduct.gallery[0] ?? selectedProduct.image, window.location.origin).toString();
-    const body = { personPhoto, shirtFront, shirtBack, aspectRatio: "3:4", resolution: "1K" };
+    // The server resolves the shirt's front/back views and picks whichever matches the customer's pose.
+    const body = { personPhoto, productId: selectedProduct.id };
     try {
       const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await response.json();

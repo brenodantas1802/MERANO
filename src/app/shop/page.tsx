@@ -38,7 +38,7 @@ function ShopContent() {
         {collections.map((collection) => {
           const count = products.filter((product) => product.collection === collection.id).length;
           return <button key={collection.id} onClick={() => pickCollection(collection.id)} className="group relative flex aspect-square flex-col justify-end overflow-hidden text-left">
-            <Image src={collection.image} alt={collection.name} fill className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+            <Image src={collection.image} alt={collection.name} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/30 transition-colors duration-300 group-hover:bg-black/40" />
             <div className="relative z-10 p-6 text-white">
               <span className="sans text-[10px] uppercase tracking-[.14em]">{count} peça{count > 1 ? "s" : ""}</span>

@@ -46,10 +46,10 @@ export default function MeuFitPage() {
       <ScrollReveal className="mt-24 border-t border-[var(--line)] pt-14"><p className="sans mb-6 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Tabela de medidas geral</p><SizeChart /></ScrollReveal>
 
       <ScrollReveal delay={0.1} className="mt-24 bg-[var(--areia)]/20 p-8 md:p-12">
-        <p className="sans mb-3 text-[10px] uppercase tracking-[.2em] text-[var(--terra-dark)]">Em breve, dentro do Meu Merano Fit</p>
-        <h2 className="text-3xl">Provador virtual em 3D.</h2>
-        <p className="mt-3 max-w-2xl text-[var(--muted)]">Um manequim virtual vestindo suas medidas, mostrando como cada peça cai no seu corpo antes da compra. Estamos reunindo os dados para calibrar essa experiência — assim que estiver pronta, ela aparece aqui.</p>
-        <Link href="/provador-3d" className="sans mt-6 inline-flex items-center gap-2 border-2 border-[var(--terra-dark)] px-5 py-2.5 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)]">Ver contagem regressiva <ArrowUpRight size={14} /></Link>
+        <p className="sans mb-3 text-[10px] uppercase tracking-[.2em] text-[var(--terra-dark)]">Provador virtual</p>
+        <h2 className="text-3xl">Veja a peça em você antes de comprar.</h2>
+        <p className="mt-3 max-w-2xl text-[var(--muted)]">Envie uma foto sua, escolha a estampa e a gente mostra você vestindo a peça.</p>
+        <Link href="/provador" className="sans mt-6 inline-flex items-center gap-2 border-2 border-[var(--terra-dark)] px-5 py-2.5 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)]">Experimentar agora <ArrowUpRight size={14} /></Link>
       </ScrollReveal>
     </div>
   </main>;

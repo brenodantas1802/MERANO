@@ -17,7 +17,7 @@ export function HeroVideo({ src, poster }: { src: string; poster: string }) {
         muted
         loop
         playsInline
-        preload="auto"
+        preload="metadata"
         className="h-full w-full object-cover"
       />
     </motion.div>

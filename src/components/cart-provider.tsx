@@ -1,9 +1,10 @@
 "use client";
 
-import { createContext, useContext, useSyncExternalStore } from "react";
+import { createContext, useContext, useState, useSyncExternalStore } from "react";
+import { CartDrawer } from "./cart-drawer";
 
-type CartItem = { id: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
-type CartContextValue = { items: CartItem[]; addItem: (item: Omit<CartItem, "quantity">) => void; removeItem: (id: string) => void; updateQuantity: (id: string, quantity: number) => void; clear: () => void; total: number; count: number };
+export type CartItem = { id: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
+type CartContextValue = { items: CartItem[]; addItem: (item: Omit<CartItem, "quantity">) => void; removeItem: (id: string) => void; updateQuantity: (id: string, quantity: number) => void; clear: () => void; total: number; count: number; drawerOpen: boolean; openDrawer: () => void; closeDrawer: () => void };
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -48,6 +49,7 @@ function getServerSnapshot() {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const items = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   function setItems(updater: (current: CartItem[]) => CartItem[]) {
     writeStorage(updater(initialized ? cachedItems : readStorage()));
@@ -61,7 +63,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   function removeItem(id: string) { setItems((current) => current.filter((item) => item.id !== id)); }
   function updateQuantity(id: string, quantity: number) { setItems((current) => quantity < 1 ? current.filter((item) => item.id !== id) : current.map((item) => item.id === id ? { ...item, quantity } : item)); }
   function clear() { setItems(() => []); }
-  return <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clear, total: items.reduce((sum, item) => sum + item.price * item.quantity, 0), count: items.reduce((sum, item) => sum + item.quantity, 0) }}>{children}</CartContext.Provider>;
+  return <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clear, total: items.reduce((sum, item) => sum + item.price * item.quantity, 0), count: items.reduce((sum, item) => sum + item.quantity, 0), drawerOpen, openDrawer: () => setDrawerOpen(true), closeDrawer: () => setDrawerOpen(false) }}>{children}<CartDrawer /></CartContext.Provider>;
 }
 
 export function useCart() {

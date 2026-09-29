@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getProduct } from "@/lib/products";
 
 const IMAGE_MODEL = "openai/gpt-image-2.5-flare";
 const POSE_MODEL = "openai/gpt-5-mini";
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX = 5;
+const DAILY_LIMIT = 100;
+const MAX_PHOTO_CHARS = 8_000_000;
 const hits = new Map<string, number[]>();
+let daily = { day: "", count: 0 };
+
+// In-memory, so per server instance: a safety net against runaway API spend, not a hard quota.
+function isOverDailyLimit() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (daily.day !== today) daily = { day: today, count: 0 };
+  if (daily.count >= DAILY_LIMIT) return true;
+  daily.count += 1;
+  return false;
+}
 
 function isRateLimited(key: string) {
   const now = Date.now();
@@ -24,11 +37,8 @@ function clientKey(request: Request) {
 }
 
 const generateSchema = z.object({
-  personPhoto: z.string().min(1, "Adicione a sua foto antes de gerar."),
-  shirtFront: z.string().min(1, "Escolha uma camisa antes de gerar."),
-  shirtBack: z.string().min(1, "Escolha uma camisa antes de gerar."),
-  aspectRatio: z.string().optional(),
-  resolution: z.string().optional(),
+  personPhoto: z.string().min(1, "Adicione a sua foto antes de gerar.").max(MAX_PHOTO_CHARS, "Foto muito grande. Tente uma imagem menor.").regex(/^data:image\/(jpeg|png|webp);base64,/, "Envie uma foto em JPG, PNG ou WEBP."),
+  productId: z.string().min(1, "Escolha uma camisa antes de gerar."),
 });
 
 type Pose = "frente" | "lado" | "costas";
@@ -54,12 +64,15 @@ async function detectPose(personPhotoUrl: string): Promise<Pose> {
             ],
           },
         ],
-        max_tokens: 5,
-        temperature: 0,
+        // gpt-5-mini is a reasoning model: without minimal effort it burns the whole token budget
+        // thinking and returns null content, which silently made every photo read as "frente".
+        reasoning: { effort: "minimal" },
+        max_tokens: 20,
       }),
     });
     const data = await response.json();
     const raw = String(data?.choices?.[0]?.message?.content ?? "").trim().toLowerCase();
+    console.log(`[provador] pose detectada: "${raw}"`);
     if (raw.includes("costas")) return "costas";
     if (raw.includes("lado") || raw.includes("perfil")) return "lado";
     return "frente";
@@ -77,7 +90,7 @@ Resultado: uma edição fotográfica realista da imagem 1, com a roupa trocada e
 function orientationInstruction(pose: Pose) {
   if (pose === "costas") return `\n\nA pessoa na imagem 1 está de costas. A imagem 2 mostra o verso da peça: reproduza fielmente a estampa traseira na posição, escala e cores corretas. Gere a pessoa de costas, vestindo essa vista da peça, sem mostrar a frente.`;
   if (pose === "lado") return `\n\nA pessoa na imagem 1 está de lado/perfil. A imagem 2 mostra a peça de frente: adapte-a naturalmente ao ângulo de perfil da pessoa, mantendo a perspectiva e o enquadramento originais.`;
-  return `\n\nA pessoa na imagem 1 está de frente. A imagem 2 mostra a peça de frente: vista a pessoa de frente com essa vista da peça, sem mostrar as costas.`;
+  return `\n\nA pessoa na imagem 1 está de frente. A imagem 2 mostra a peça de frente: vista a pessoa de frente com essa vista da peça, sem mostrar as costas. Reproduza a frente exatamente como na imagem 2 (inclusive se for lisa, com apenas a etiqueta/logotipo pequeno): não coloque no peito nenhuma estampa grande, pois estampas grandes pertencem apenas ao verso da peça.`;
 }
 
 export async function POST(request: Request) {
@@ -101,7 +114,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "OPENROUTER_API_KEY não configurada no servidor." }, { status: 500 });
   }
 
-  const { personPhoto, shirtFront, shirtBack, aspectRatio, resolution } = parsed.data;
+  const { personPhoto, productId } = parsed.data;
+  // Garment references come only from our own catalog, so the endpoint can't be used to edit arbitrary images.
+  const product = getProduct(productId);
+  if (!product) {
+    return NextResponse.json({ error: "Camisa não encontrada." }, { status: 400 });
+  }
+  const shirtFront = new URL(product.gallery[1] ?? product.image, request.url).toString();
+  const shirtBack = new URL(product.gallery[0] ?? product.image, request.url).toString();
+
+  if (isOverDailyLimit()) {
+    return NextResponse.json({ error: "O provador atingiu o limite de uso de hoje. Tente novamente amanhã." }, { status: 429 });
+  }
 
   try {
     const pose = await detectPose(personPhoto);
@@ -120,8 +144,8 @@ export async function POST(request: Request) {
         prompt,
         input_references: [personPhoto, shirtImage].map((url) => ({ type: "image_url", image_url: { url } })),
         n: 1,
-        aspect_ratio: aspectRatio || "3:4",
-        resolution: resolution || "1K",
+        aspect_ratio: "3:4",
+        resolution: "1K",
       }),
     });
     const data = await response.json();
