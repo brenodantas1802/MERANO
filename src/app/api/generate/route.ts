@@ -29,6 +29,8 @@ const generateSchema = z.object({
       crop: z.string().startsWith("data:image/", "Recorte inválido."),
       box: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), w: z.number().min(0).max(1), h: z.number().min(0).max(1) }),
       total: z.number().int().min(2).max(10),
+      order: z.number().int().min(1).max(10).optional(),
+      candidates: z.number().int().min(1).max(10).optional(),
     })
     .optional(),
   aspectRatio: z.string().optional(),
@@ -99,7 +101,7 @@ export async function POST(request: Request) {
     }
 
     const { pose } = detection;
-    const plan = planTryOn(product.views, pose, target && { box: target.box, total: target.total });
+    const plan = planTryOn(product.views, pose, target && { box: target.box, total: target.total, order: target.order, candidates: target.candidates, withCrop: true });
     const garments = new Map(await garmentImages);
 
     const response = await fetch("https://openrouter.ai/api/v1/images", {
@@ -112,7 +114,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model: IMAGE_MODEL,
         prompt: plan.prompt,
-        input_references: [personPhoto, ...plan.views.map((key) => garments.get(key)!)].map((url) => ({ type: "image_url", image_url: { url } })),
+        input_references: [personPhoto, ...plan.views.map((key) => garments.get(key)!), ...(target ? [target.crop] : [])].map((url) => ({ type: "image_url", image_url: { url } })),
         n: 1,
         aspect_ratio: aspectRatio || "3:4",
         resolution: resolution || "1K",

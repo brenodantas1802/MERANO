@@ -3,10 +3,8 @@ import Image from "next/image";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { ProductCard } from "@/components/product-card";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { Lens } from "@/components/ui/lens";
-import { products } from "@/lib/products";
 
 const steps = [
   { n: "01", title: "Você escolhe", text: "Você seleciona a estampa, a modelagem e a cor na página do produto. Nada é produzido antes disso." },
@@ -42,13 +40,6 @@ export default function BrandPage() {
         <div className="border-l-2 border-[var(--areia)] pl-5"><p className="text-3xl display normal-case tracking-normal text-[var(--ink)]">03</p><p className="mt-2">Materiais de toque macio, pensados para durar e envelhecer bem.</p></div>
       </ScrollReveal>
 
-      <div id="new-in" className="mt-28 border-t border-[var(--line)] pt-16">
-        <ScrollReveal className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <div><p className="sans mb-4 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Novidades · A primeira coleção</p><h2 className="display text-5xl md:text-7xl">O começo<br /><i>é agora.</i></h2></div>
-          <Link href="/shop" className="sans flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver tudo na loja <ArrowUpRight size={14} /></Link>
-        </ScrollReveal>
-        <div className="grid gap-8 md:grid-cols-3 md:gap-x-10 md:gap-y-16">{products.map((product) => <ProductCard product={product} key={product.id} />)}</div>
-      </div>
     </article>
 
     <ScrollReveal className="relative h-[70vh] min-h-[420px] overflow-hidden md:h-[85vh]">

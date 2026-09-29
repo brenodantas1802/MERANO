@@ -22,11 +22,10 @@ export default function Home() {
       <div className="relative z-10 flex min-h-screen flex-col justify-center">
         <div className="max-w-3xl"><HeroTextReveal className="display max-w-3xl text-[clamp(2.6rem,6.5vw,5.8rem)]" lines={["Feito para", "quem entende", <i key="excl">exclusividade.</i>]} /></div>
         <div className="mt-10"><NoiseBackground gradientColors={MERANO_GRADIENT} containerClassName="w-fit rounded-full bg-[var(--creme)]/10 shadow-none dark:bg-[var(--creme)]/10"><a href="#colecao" className="sans flex items-center justify-center gap-2 px-5 py-2.5 text-[11px] uppercase tracking-[.16em]">Ver coleção <ArrowUpRight size={14} /></a></NoiseBackground></div>
-        <div className="mt-6 flex items-end gap-2 pl-6 text-[var(--sol-2)]"><Doodle name="arrow" className="h-10 w-14 -scale-y-100 rotate-[200deg]" delay={1.4} /><span className="script -rotate-3 text-2xl md:text-3xl">mais dias assim, por favor.</span></div>
       </div>
     </section>
 
-    <Marquee items={["Terra", "Mar", "Gente", "Sempre", "Mais dias assim, por favor"]} />
+    <Marquee items={["Feito sob demanda", "Moda brasileira", "Coleção 01", "Feito para quem entende exclusividade"]} />
 
     <section id="colecao" className="mx-auto max-w-360 px-6 py-28 md:px-12 md:py-40">
       <ScrollReveal className="mb-16 flex items-end justify-between"><div><p className="sans mb-4 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Novidades · A primeira coleção</p><div className="relative w-fit"><h2 className="display text-5xl md:text-7xl">O começo<br /><i>é agora.</i></h2><Doodle name="sun" className="absolute -right-14 -top-6 h-12 w-12 text-[var(--sol-1)] md:-right-20 md:h-16 md:w-16" /><span className="script absolute -bottom-9 right-0 rotate-[-4deg] text-2xl text-[var(--terra)] md:-right-24 md:bottom-2">coleção 01</span></div></div><NoiseBackground gradientColors={MERANO_GRADIENT} containerClassName="hidden w-fit rounded-full bg-[var(--areia)]/15 p-0 shadow-none md:inline-flex dark:bg-[var(--areia)]/15"><Link href="/shop" className="sans flex items-center justify-center gap-2 rounded-full border-2 border-[var(--ink)] px-5 py-2.5 text-[11px] font-medium uppercase tracking-[.15em]">Ver loja <ArrowUpRight size={14} /></Link></NoiseBackground></ScrollReveal>

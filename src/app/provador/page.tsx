@@ -165,7 +165,7 @@ function ProvadorContent() {
       // With several people in the photo, the server is told which one to dress (a lone big person among small
       // background ones is chosen automatically). It then detects that person's pose and picks the matching shirt view.
       const box = people && people.total >= 2 ? (people.boxes.length === 1 ? people.boxes[0] : people.boxes[targetIndex!]) : null;
-      const target = box && people ? { box, total: people.total, crop: await cropPerson(personPhoto, box) } : undefined;
+      const target = box && people ? { box, total: people.total, order: people.boxes.indexOf(box) + 1, candidates: people.boxes.length, crop: await cropPerson(personPhoto, box) } : undefined;
       const body = { personPhoto, productId: selectedProduct.id, target, aspectRatio: "3:4", resolution: "1K" };
       const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await response.json();
