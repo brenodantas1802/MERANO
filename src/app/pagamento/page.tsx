@@ -116,7 +116,7 @@ export default function PaymentPage() {
     <Link href="/shop" className="sans mt-10 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Continuar explorando <ArrowRight size={14} /></Link>
   </div></main>;
 
-  if (items.length === 0) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><p className="mt-8 text-2xl">Sua sacola está vazia.</p><Link href="/shop" className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link></div></main>;
+  if (items.length === 0) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><p className="mt-8 text-2xl">Seu carrinho está vazio.</p><Link href="/shop" className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link></div></main>;
 
   return <main><SiteHeader /><div className="mx-auto max-w-360 px-6 pb-24 pt-10 md:px-12">
     <Link href="/shop" className="sans mb-10 flex w-fit items-center gap-2 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Continuar comprando</Link>

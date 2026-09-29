@@ -25,14 +25,14 @@ export function CartDrawer() {
   return <AnimatePresence>
     {drawerOpen && <>
       <motion.div key="overlay" onClick={closeDrawer} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm" />
-      <motion.aside key="drawer" role="dialog" aria-modal="true" aria-label="Sacola" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.45, ease: EASE }} className="fixed inset-y-0 right-0 z-[91] flex w-full max-w-md flex-col bg-[var(--paper)] shadow-2xl">
+      <motion.aside key="drawer" role="dialog" aria-modal="true" aria-label="Carrinho" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.45, ease: EASE }} className="fixed inset-y-0 right-0 z-[91] flex w-full max-w-md flex-col bg-[var(--paper)] shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--line)] px-6 py-5">
-          <p className="display text-3xl">Sua sacola <span className="sans ml-1 align-middle text-xs tracking-[.08em] text-[var(--muted)]">{count} {count === 1 ? "peça" : "peças"}</span></p>
-          <button onClick={closeDrawer} aria-label="Fechar sacola" className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]"><X size={18} strokeWidth={1.5} /></button>
+          <p className="display text-3xl">Seu carrinho <span className="sans ml-1 align-middle text-xs tracking-[.08em] text-[var(--muted)]">{count} {count === 1 ? "peça" : "peças"}</span></p>
+          <button onClick={closeDrawer} aria-label="Fechar carrinho" className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]"><X size={18} strokeWidth={1.5} /></button>
         </div>
 
         {items.length === 0 ? <div className="flex flex-1 flex-col items-start justify-center px-6">
-          <p className="text-3xl">Sua sacola está esperando uma peça.</p>
+          <p className="text-3xl">Seu carrinho está esperando uma peça.</p>
           <Link href="/shop" onClick={closeDrawer} className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link>
         </div> : <>
           <div className="flex-1 overflow-y-auto px-6">
@@ -51,7 +51,7 @@ export function CartDrawer() {
             <div className="flex items-baseline justify-between"><span className="text-lg text-[var(--muted)]">Subtotal</span><span className="display text-3xl">{formatPrice(total)}</span></div>
             <p className="script mt-1 -rotate-1 text-lg text-[var(--terra)]">o frete a gente calcula no próximo passo</p>
             <Link href="/pagamento" onClick={closeDrawer} className="sans mt-5 block rounded-full bg-[var(--ink)] px-6 py-4 text-center text-[12px] uppercase tracking-[.16em] text-[var(--creme)] transition-transform hover:-translate-y-0.5">Finalizar compra</Link>
-            <div className="sans mt-4 flex justify-between text-[10px] uppercase tracking-[.14em] text-[var(--muted)]"><button onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver sacola completa</Link></div>
+            <div className="sans mt-4 flex justify-between text-[10px] uppercase tracking-[.14em] text-[var(--muted)]"><button onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver carrinho completo</Link></div>
           </div>
         </>}
       </motion.aside>

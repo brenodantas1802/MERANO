@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { formatPrice, getProductPrice } from "@/lib/products";
-import { FavoriteButton } from "@/components/favorite-button";
+import { QuickAdd } from "@/components/quick-add";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -27,7 +27,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="flex items-start justify-between gap-4 py-4"><div><h3 className="text-xl">{product.name}</h3><p className="sans mt-1 text-[10px] uppercase tracking-[.11em] text-[var(--muted)]">{product.category}</p></div><div className="sans text-right text-sm">{discounted && <del className="mr-2 text-[var(--muted)]">{formatPrice(product.price)}</del>}<strong>{formatPrice(getProductPrice(product))}</strong></div></div>
     </Link>
-    <FavoriteButton productId={product.id} name={product.name} className="absolute right-3 top-3 z-10 rounded-full bg-[var(--creme)]/90 p-2 transition-opacity md:opacity-0 md:group-hover:opacity-100" />
+    <QuickAdd product={product} />
     <Link href={`/produto/${product.id}`} className="sans flex items-center gap-1 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]">Ver produto <ArrowUpRight size={13} /></Link>
   </motion.article>;
 }
