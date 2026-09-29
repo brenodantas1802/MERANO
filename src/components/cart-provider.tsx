@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useSyncExternalStore } from "react";
 import { CartDrawer } from "./cart-drawer";
 
-export type CartItem = { id: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
+export type CartItem = { id: string; productId?: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
 type CartContextValue = { items: CartItem[]; addItem: (item: Omit<CartItem, "quantity">) => void; removeItem: (id: string) => void; updateQuantity: (id: string, quantity: number) => void; clear: () => void; total: number; count: number; drawerOpen: boolean; openDrawer: () => void; closeDrawer: () => void };
 
 const CartContext = createContext<CartContextValue | null>(null);

@@ -4,14 +4,14 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ShoppingBag, X } from "lucide-react";
 import { useCart } from "./cart-provider";
-import { useRecommendedSize } from "./meu-fit-form";
+import { useSizeRecommendation } from "@/lib/use-size-recommendation";
 import { getProductPrice, type Product } from "@/lib/products";
 
 // Cart button on product cards: a size is required, so it opens a size picker over the photo first.
 export function QuickAdd({ product }: { product: Product }) {
   const [open, setOpen] = useState(false);
   const { addItem, openDrawer } = useCart();
-  const recommended = useRecommendedSize();
+  const recommended = useSizeRecommendation(product).recommendation?.size;
 
   function stop(event: React.MouseEvent) {
     event.preventDefault();
@@ -20,7 +20,7 @@ export function QuickAdd({ product }: { product: Product }) {
 
   function add(event: React.MouseEvent, size: string) {
     stop(event);
-    addItem({ id: `${product.id}-${size}-${product.colors[0]}`, name: product.name, price: getProductPrice(product), size, fit: "Ampla", color: product.colors[0], image: product.image });
+    addItem({ id: `${product.id}-${size}-${product.colors[0]}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Ampla", color: product.colors[0], image: product.image });
     setOpen(false);
     openDrawer();
   }

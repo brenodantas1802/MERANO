@@ -13,6 +13,10 @@ export type Product = {
   gallery: string[];
   views: ShirtViews;
   category: string;
+  // Style/theme tags, used to suggest similar pieces.
+  tags: string[];
+  // Garment measurements per size when this piece differs from the house chart (SIZE_CHART).
+  sizeChart?: SizeRow[];
   collection: string;
   material: string;
   care: string;
@@ -41,6 +45,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/produtos/who-cares-preto-verso.jpg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg", "/imagens/merano-assets/produtos/preta-vermelha-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/preta-vermelha-lado-direito.jpg"],
     views: { back: "/imagens/merano-assets/produtos/who-cares-preto-verso.jpg", front: "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg", left: "/imagens/merano-assets/produtos/preta-vermelha-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/preta-vermelha-lado-direito.jpg" },
     category: "Camisetas",
+    tags: ["frase", "relogio", "urbano", "preto"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -59,6 +64,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/produtos/wine-not-verso.jpg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg"],
     views: { back: "/imagens/merano-assets/produtos/wine-not-verso.jpg", front: "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg" },
     category: "Camisetas",
+    tags: ["frase", "vinho", "pintado-a-mao", "preto"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -77,6 +83,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg"],
     views: { back: "/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg" },
     category: "Camisetas",
+    tags: ["fruta", "botanico", "verao", "natureza"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -95,6 +102,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/camiseta barco só verso.jpeg", "/imagens/merano-assets/produtos/barco-frente.jpg", "/imagens/merano-assets/produtos/barco-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/barco-lado-direito.jpg"],
     views: { back: "/imagens/merano-assets/camiseta barco só verso.jpeg", front: "/imagens/merano-assets/produtos/barco-frente.jpg", left: "/imagens/merano-assets/produtos/barco-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/barco-lado-direito.jpg" },
     category: "Camisetas",
+    tags: ["agua", "barco", "paisagem", "pintura"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -113,6 +121,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/produtos/match-point-verso.jpg", "/imagens/merano-assets/produtos/tenis-frente.jpg", "/imagens/merano-assets/produtos/tenis-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/tenis-lado-direito.jpg"],
     views: { back: "/imagens/merano-assets/produtos/match-point-verso.jpg", front: "/imagens/merano-assets/produtos/tenis-frente.jpg", left: "/imagens/merano-assets/produtos/tenis-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/tenis-lado-direito.jpg" },
     category: "Camisetas",
+    tags: ["esporte", "tenis", "pintura"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -131,6 +140,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/camieta mamao verso.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
     views: { back: "/imagens/merano-assets/camieta mamao verso.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
+    tags: ["fruta", "tropical", "barco", "verao"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -149,6 +159,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/produtos/terraco-ao-mar-verso.jpg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
     views: { back: "/imagens/merano-assets/produtos/terraco-ao-mar-verso.jpg", front: GENERIC_FRONT },
     category: "Camisetas",
+    tags: ["mar", "vinho", "paisagem", "verao"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -167,6 +178,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/camiseta who cares verso.jpeg", "/imagens/merano-assets/produtos/who-cares-frente.jpg", "/imagens/merano-assets/produtos/who-cares-lado-esquerdo.jpg", "/imagens/merano-assets/produtos/who-cares-lado-direito.jpg"],
     views: { back: "/imagens/merano-assets/camiseta who cares verso.jpeg", front: "/imagens/merano-assets/produtos/who-cares-frente.jpg", left: "/imagens/merano-assets/produtos/who-cares-lado-esquerdo.jpg", right: "/imagens/merano-assets/produtos/who-cares-lado-direito.jpg" },
     category: "Camisetas",
+    tags: ["frase", "relogio", "urbano"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -185,6 +197,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/camisite verso disco.jpeg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg"],
     views: { back: "/imagens/merano-assets/camisite verso disco.jpeg", front: "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg" },
     category: "Camisetas",
+    tags: ["musica", "frase", "urbano", "preto"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -203,6 +216,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/estampa menor camiseta verso tenis.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
     views: { back: "/imagens/merano-assets/estampa menor camiseta verso tenis.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
+    tags: ["esporte", "tenis", "minimal"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -221,6 +235,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/camiseta little verso.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
     views: { back: "/imagens/merano-assets/camiseta little verso.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
+    tags: ["mar", "barco", "paisagem", "minimal"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -239,6 +254,7 @@ export const products: Product[] = [
     gallery: ["/imagens/merano-assets/camiseta verso café.jpeg", "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg"],
     views: { back: "/imagens/merano-assets/camiseta verso café.jpeg", front: GENERIC_FRONT },
     category: "Camisetas",
+    tags: ["cafe", "cidade", "encontro", "minimal"],
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -269,4 +285,22 @@ export function formatPrice(price: number) {
 
 export function getProductPrice(product: Product) {
   return product.salePrice ?? product.price;
+}
+
+export function getSizeChart(product: Product) {
+  return product.sizeChart ?? SIZE_CHART;
+}
+
+// Pieces that share the most style tags (then colours) with the given ones, leaving out the ones given.
+export function similarProducts(productIds: string[], limit = 3) {
+  const owned = products.filter((product) => productIds.includes(product.id));
+  if (!owned.length) return [];
+  const tags = new Set(owned.flatMap((product) => product.tags));
+  const colors = new Set(owned.flatMap((product) => product.colors));
+  return products
+    .filter((product) => !productIds.includes(product.id))
+    .map((product) => ({ product, score: product.tags.filter((tag) => tags.has(tag)).length * 2 + product.colors.filter((color) => colors.has(color)).length + (owned.some((item) => item.category === product.category) ? 0.5 : 0) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(({ product }) => product);
 }

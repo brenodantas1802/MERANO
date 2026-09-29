@@ -25,10 +25,15 @@ export default function AccountPage() {
         <h1 className="display text-7xl">Minha<br /><i>conta.</i></h1>
 
         {done ? (
-          <div className="mt-12 border-y border-[var(--line)] py-8">
-            <p className="text-2xl">Combinado.</p>
-            <p className="sans mt-3 text-xs text-[var(--muted)]">A conta ficará disponível quando o banco e a autenticação estiverem conectados.</p>
-          </div>
+          <nav aria-label="Menu da conta" className="mt-12 space-y-3">
+            <p className="script -rotate-1 text-2xl text-[var(--terra)]">que bom te ver por aqui.</p>
+            {[
+              { href: "/conta/sobre-mim", title: "Sobre mim", text: "Suas medidas, seu tamanho e suas peças." },
+              { href: "/conta/sobre-mim#pecas", title: "Meus pedidos", text: "O que você já escolheu na Merano." },
+              { href: "/provador", title: "Provador virtual", text: "Veja as estampas em você." },
+            ].map((item) => <Link key={item.title} href={item.href} className="group flex items-center justify-between rounded-2xl bg-[var(--creme)] px-6 py-5 shadow-[0px_2px_16px_-6px_rgba(32,28,23,0.18)] transition-transform hover:-translate-y-0.5"><span><span className="block text-2xl">{item.title}</span><span className="sans text-xs text-[var(--muted)]">{item.text}</span></span><span className="text-xl transition-transform group-hover:translate-x-1">→</span></Link>)}
+            <p className="sans pt-3 text-[11px] text-[var(--muted)]">O login de verdade chega com o banco de dados; por enquanto, seu perfil fica salvo neste navegador.</p>
+          </nav>
         ) : (
           <div className="mt-12 rounded-2xl bg-[var(--creme)] p-6 shadow-[0px_2px_16px_-4px_rgba(32,28,23,0.18)] md:p-8">
             <Tabs defaultValue="entrar">
@@ -67,6 +72,7 @@ export default function AccountPage() {
           </div>
         )}
 
+        {!done && <Link href="/conta/sobre-mim" className="mt-8 flex items-center justify-between rounded-2xl border border-[var(--ink)]/15 px-6 py-5 transition-colors hover:bg-[var(--creme)]"><span><span className="script block text-xl text-[var(--terra)]">ainda sem conta?</span><span className="text-lg">Monte seu perfil de medidas em Sobre mim</span></span><span className="text-xl">→</span></Link>}
         <Link href="/carrinho" className="sans mt-10 block text-[10px] uppercase tracking-[.14em] text-[var(--muted)]">Continuar como visitante no checkout</Link>
       </div>
     </main>

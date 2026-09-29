@@ -38,23 +38,26 @@ model Product {
   description String
   basePrice   Decimal          @db.Decimal(10, 2)
   images      String[]
+  // Style/theme tags, used for "similar to what you bought" suggestions.
+  tags        String[]
   variants    ProductVariant[]
+  sizeChart   SizeChartEntry[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 }
 
 model ProductVariant {
-  id                   String         @id @default(cuid())
-  productId            String
-  product              Product        @relation(fields: [productId], references: [id])
-  size                 Size
-  fit                  String
-  color                String
-  fabric               String
-  sku                  String         @unique
+  id                    String         @id @default(cuid())
+  productId             String
+  product               Product        @relation(fields: [productId], references: [id])
+  size                  Size
+  fit                   String
+  color                 String
+  fabric                String
+  sku                   String         @unique
   stockOrProductionMode ProductionMode
-  priceOverride        Decimal?       @db.Decimal(10, 2)
-  orderItems           OrderItem[]
+  priceOverride         Decimal?       @db.Decimal(10, 2)
+  orderItems            OrderItem[]
 }
 
 model Order {
@@ -78,18 +81,53 @@ model OrderItem {
 }
 
 model Customer {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String
-  street    String
-  number    String
-  complement String?
-  city      String
-  state     String
-  zipCode   String
-  createdAt DateTime @default(now())
-  orders    Order[]
+  id          String       @id @default(cuid())
+  name        String
+  email       String
+  phone       String
+  street      String
+  number      String
+  complement  String?
+  city        String
+  state       String
+  zipCode     String
+  createdAt   DateTime     @default(now())
+  orders      Order[]
+  bodyProfile BodyProfile?
+}
+
+// Body measurements a customer saves in "Sobre mim", used to recommend sizes. All in cm (weight in kg).
+model BodyProfile {
+  id              String   @id @default(cuid())
+  customerId      String   @unique
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  // Essential measurements
+  heightCm        Decimal? @db.Decimal(5, 1)
+  weightKg        Decimal? @db.Decimal(5, 1)
+  bustCm          Decimal? @db.Decimal(5, 1)
+  waistCm         Decimal? @db.Decimal(5, 1)
+  hipCm           Decimal? @db.Decimal(5, 1)
+  // Optional measurements that refine the recommendation
+  shoulderWidthCm Decimal? @db.Decimal(5, 1)
+  armLengthCm     Decimal? @db.Decimal(5, 1)
+  torsoLengthCm   Decimal? @db.Decimal(5, 1)
+  inseamCm        Decimal? @db.Decimal(5, 1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// A garment's real measurements for one size (flat, in cm), compared against the BodyProfile.
+model SizeChartEntry {
+  id              String   @id @default(cuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size            Size
+  chestWidthCm    Decimal  @db.Decimal(5, 1)
+  lengthCm        Decimal  @db.Decimal(5, 1)
+  shoulderWidthCm Decimal  @db.Decimal(5, 1)
+  sleeveLengthCm  Decimal? @db.Decimal(5, 1)
+
+  @@unique([productId, size])
 }
 
 model AdminUser {

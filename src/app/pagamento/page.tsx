@@ -7,7 +7,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Copy, CreditCard, QrCode } from "lucide-react";
 import { useCart, type CartItem } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
-import { formatPrice } from "@/lib/products";
+import { ProductCard } from "@/components/product-card";
+import { saveOrder } from "@/lib/orders";
+import { formatPrice, products, similarProducts } from "@/lib/products";
 
 // Demo checkout for presentations: nothing here is sent anywhere or charged.
 
@@ -71,7 +73,7 @@ export default function PaymentPage() {
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
   const [status, setStatus] = useState<"form" | "processing" | "paid">("form");
-  const [order, setOrder] = useState<{ id: string; total: number; method: Method } | null>(null);
+  const [order, setOrder] = useState<{ id: string; total: number; method: Method; productIds: string[] } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const shipping = cep.length === 9 ? SHIPPING.find((option) => option.id === shippingId) ?? null : null;
@@ -96,14 +98,19 @@ export default function PaymentPage() {
     event.preventDefault();
     setStatus("processing");
     setTimeout(() => {
-      setOrder({ id: `MR-${Math.floor(1000 + Math.random() * 9000)}`, total, method });
+      const id = `MR-${Math.floor(1000 + Math.random() * 9000)}`;
+      // Older cart entries have no productId: recover it from the "<product>-<size>-<color>" id.
+      const productIdOf = (item: CartItem) => item.productId ?? products.find((product) => item.id.startsWith(`${product.id}-`))?.id ?? item.id;
+      const records = items.map((item) => ({ productId: productIdOf(item), name: item.name, size: item.size, color: item.color, price: item.price, quantity: item.quantity, image: item.image }));
+      saveOrder({ id, date: new Date().toISOString(), total, items: records });
+      setOrder({ id, total, method, productIds: [...new Set(records.map((record) => record.productId))] });
       clear();
       setStatus("paid");
       window.scrollTo({ top: 0 });
     }, 2200);
   }
 
-  if (status === "paid" && order) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12">
+  if (status === "paid" && order) return <main><SiteHeader /><div className="mx-auto max-w-5xl px-6 py-24 md:px-12">
     <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 220, damping: 16 }} className="mb-10 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--moss)] text-white"><Check size={30} /></motion.div>
     <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Pedido {order.id} · {order.method === "pix" ? "Pix aprovado" : "Cartão aprovado"}</p>
     <h1 className="display text-6xl md:text-8xl">Obrigado.<br /><i>Sua peça começa agora.</i></h1>
@@ -114,6 +121,10 @@ export default function PaymentPage() {
       <div><span className="text-[var(--muted)]">03 · Envio</span><p className="mt-2 normal-case tracking-normal text-[var(--muted)]">Rastreio no seu e-mail</p></div>
     </div>
     <Link href="/shop" className="sans mt-10 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Continuar explorando <ArrowRight size={14} /></Link>
+    {similarProducts(order.productIds, 3).length > 0 && <section className="mt-20 border-t border-[var(--line)] pt-12">
+      <div className="mb-10 flex flex-wrap items-end gap-x-4 gap-y-1"><h2 className="display text-4xl md:text-5xl">Parecidas com o que você comprou.</h2><span className="script -rotate-2 pb-1 text-2xl text-[var(--sol-1)]">pra próxima</span></div>
+      <div className="grid gap-8 md:grid-cols-3 md:gap-x-10">{similarProducts(order.productIds, 3).map((product) => <ProductCard key={product.id} product={product} />)}</div>
+    </section>}
   </div></main>;
 
   if (items.length === 0) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><p className="mt-8 text-2xl">Seu carrinho está vazio.</p><Link href="/shop" className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link></div></main>;
