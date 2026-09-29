@@ -48,8 +48,11 @@ function getServerSnapshot() {
   return EMPTY;
 }
 
+// The chart is the garment's flat width, so the body needs some ease on top of it to fit comfortably.
+const EASE_CM = 8;
+
 function recommendSize(bustoCm: number) {
-  const match = SIZE_CHART.find((row) => row.largura * 2 >= bustoCm);
+  const match = SIZE_CHART.find((row) => row.largura * 2 >= bustoCm + EASE_CM);
   return match ?? SIZE_CHART[SIZE_CHART.length - 1];
 }
 
@@ -85,10 +88,13 @@ export function MeuFitForm() {
       <p className="sans mt-4 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Suas medidas são salvas automaticamente neste navegador.</p>
 
       {recommendation && (
-        <div className="mt-10 border-t border-[var(--line)] pt-8">
-          <p className="sans mb-3 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Com base nas suas medidas</p>
-          <p className="text-2xl">Seu tamanho recomendado é <strong>{recommendation.size}</strong>.</p>
-          <Link href="/a-marca#sob-demanda" className="sans mt-6 inline-flex items-center gap-2 border-2 border-[var(--ink)] px-5 py-2.5 text-[11px] uppercase tracking-[.15em]">Fazer sob medida <ArrowUpRight size={14} /></Link>
+        <div className="mt-10 flex items-center gap-6 border-y border-[var(--ink)] py-7">
+          <span className="display flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-[var(--sol-1)] text-5xl text-white">{recommendation.size}</span>
+          <div>
+            <p className="script -rotate-1 text-2xl text-[var(--terra)]">o seu tamanho é</p>
+            <p className="mt-1 text-lg leading-snug">Vamos deixar o <strong>{recommendation.size}</strong> marcado em todas as peças da loja.</p>
+            <Link href="/shop" className="sans mt-4 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-1 text-[11px] uppercase tracking-[.15em]">Ver a coleção <ArrowUpRight size={14} /></Link>
+          </div>
         </div>
       )}
 

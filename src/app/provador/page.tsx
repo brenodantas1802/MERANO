@@ -4,6 +4,7 @@ import { type FormEvent, Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Download, Shirt, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import { Doodle } from "@/components/doodle";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import type { PersonBox } from "@/lib/people";
 import { getProduct, products, type Product } from "@/lib/products";
@@ -182,14 +183,23 @@ function ProvadorContent() {
     <main>
       <SiteHeader />
       <div className="mx-auto max-w-3xl px-6 pb-28 md:px-12">
-        <section className="pt-14 pb-10 md:pt-20">
-          <p className="sans mb-4 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Provador virtual</p>
-          <h1 className="display text-6xl md:text-8xl">Vista a peça.<br /><em className="not-italic text-[var(--sol-1)]">Veja o caimento.</em></h1>
-          <p className="mt-8 max-w-xl text-xl leading-relaxed text-[var(--muted)]">Escolha uma camisa da MERANO e envie sua foto: a inteligência artificial gera você vestindo a peça.</p>
+        <section className="pt-14 pb-12 md:pt-20">
+          <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--terra)]">Provador virtual</p>
+          <h1 className="display text-6xl md:text-8xl">Vista a peça.<br /><i>Antes de comprar.</i></h1>
+          <p className="mt-8 max-w-xl text-xl leading-snug">Escolha uma estampa da Merano, envie uma foto sua e a gente mostra você vestindo a camiseta, do jeitinho que você está na foto.</p>
+          <p className="script mt-6 -rotate-2 text-2xl text-[var(--terra)]">de frente, de lado ou de costas.</p>
+          <div className="mt-12 grid grid-cols-3 gap-4 border-y border-[var(--ink)]/25 py-8">
+            {([["branch", "Escolha a estampa"], ["sun", "Envie sua foto"], ["boat", "Veja você vestindo"]] as const).map(([doodle, text], index) => <div key={text}><Doodle name={doodle} className="h-12 w-14 text-[var(--terra)]" delay={index * 0.25} /><p className="sans mt-3 text-[10px] uppercase tracking-[.12em] text-[var(--muted)]">0{index + 1}</p><p className="mt-1 leading-tight md:text-lg">{text}</p></div>)}
+          </div>
+          <ul className="sans mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-[var(--muted)]">
+            <li>· Corpo inteiro ou da cintura pra cima</li>
+            <li>· Boa luz, sem filtro</li>
+            <li>· Mais de uma pessoa? Você escolhe quem veste</li>
+          </ul>
         </section>
 
         <form onSubmit={handleSubmit}>
-          <section className="border-t border-[var(--origem)] py-8">
+          <section className="border-t border-[var(--ink)]/25 py-10">
             <div className="mb-7 flex gap-5">
               <span className="sans pt-1 text-xs text-[var(--sol-1)]">01</span>
               <div><h2 className="text-2xl">Escolha a camisa</h2><p className="sans mt-1 text-xs text-[var(--muted)]">Selecione qual peça da MERANO você quer experimentar.</p></div>
@@ -216,7 +226,7 @@ function ProvadorContent() {
             {pickerOpen && <ShirtPicker onSelect={(product) => { setSelectedProduct(product); setPickerOpen(false); }} onClose={() => setPickerOpen(false)} />}
           </section>
 
-          <section className="border-t border-[var(--origem)] py-8">
+          <section className="border-t border-[var(--ink)]/25 py-10">
             <div className="mb-7 flex gap-5">
               <span className="sans pt-1 text-xs text-[var(--sol-1)]">02</span>
               <div><h2 className="text-2xl">Sua foto</h2><p className="sans mt-1 text-xs text-[var(--muted)]">Envie uma foto sua de corpo inteiro — de frente, de lado ou de costas. A gente identifica a pose e veste o lado certo da camiseta.</p></div>
@@ -260,7 +270,7 @@ function ProvadorContent() {
             )}
           </section>
 
-          <section className="border-t border-[var(--origem)] py-8">
+          <section className="border-t border-[var(--ink)]/25 py-10">
             <button
               type="submit"
               disabled={loading || analyzing}

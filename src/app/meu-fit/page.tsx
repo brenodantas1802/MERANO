@@ -1,55 +1,62 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { MeuFitForm } from "@/components/meu-fit-form";
 import { SizeChart } from "@/components/size-chart";
+import { MeasureDiagram } from "@/components/measure-diagram";
+import { Doodle } from "@/components/doodle";
 
 const steps = [
-  { title: "Busto", text: "Passe a fita métrica ao redor da parte mais larga do busto, mantendo-a paralela ao chão." },
-  { title: "Ombro a ombro", text: "Meça a distância entre as pontas dos ombros, passando pelas costas." },
-  { title: "Comprimento", text: "Da base do pescoço até onde você quer que a peça termine." },
-  { title: "Postura", text: "Fique em pé, relaxado, sem prender a respiração — a medida precisa refletir seu corpo em repouso." },
+  { title: "Busto", text: "Passe a fita ao redor da parte mais larga do peito, paralela ao chão, sem apertar." },
+  { title: "Ombro a ombro", text: "Meça pelas costas, da ponta de um ombro até a ponta do outro." },
+  { title: "Comprimento", text: "Da base do pescoço até onde você quer que a camiseta termine." },
+  { title: "Postura", text: "Em pé e relaxado, sem prender a respiração: a medida é do corpo em repouso." },
 ];
 
 export default function MeuFitPage() {
   return <main>
     <SiteHeader />
 
-    <ScrollReveal className="relative flex h-[70vh] min-h-[420px] w-full items-center overflow-hidden">
-      <video src="/imagens/merano-assets/mar-2-web.mp4" autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-black/40" />
-      <Link href="/" className="sans absolute left-6 top-6 z-10 flex items-center gap-2 text-[10px] uppercase tracking-[.15em] text-white/80 md:left-12 md:top-8"><ArrowLeft size={14} /> Voltar para o início</Link>
-      <div className="relative z-10 px-6 text-white md:px-12">
-        <p className="sans mb-4 text-[10px] uppercase tracking-[.2em] text-white/80">Meu Merano Fit</p>
-        <h1 className="display text-6xl md:text-8xl">Suas medidas,<br /><i>guardadas.</i></h1>
-        <p className="mt-6 max-w-xl text-xl text-white/90">Salve suas medidas uma vez e a gente recomenda o tamanho certo sempre que você voltar.</p>
+    <section className="grain relative overflow-hidden">
+      <div className="mx-auto grid max-w-360 items-center gap-10 px-6 py-16 md:grid-cols-[1.1fr_.9fr] md:px-12 md:py-24">
+        <ScrollReveal>
+          <p className="sans mb-6 text-[10px] uppercase tracking-[.2em] text-[var(--terra)]">Meu Merano Fit</p>
+          <h1 className="display text-6xl md:text-8xl">Seu tamanho,<br /><i>sem achismo.</i></h1>
+          <p className="mt-8 max-w-md text-xl leading-snug">Três medidas, uma fita métrica e dois minutos. A gente guarda e já deixa o seu tamanho marcado em cada peça da loja.</p>
+          <p className="script mt-8 -rotate-2 text-3xl text-[var(--terra)]">pega a fita, a gente espera.</p>
+        </ScrollReveal>
+        <ScrollReveal delay={0.1} className="relative">
+          <div className="relative mx-auto aspect-square w-full max-w-md rounded-full bg-[var(--paper)]/70 p-6">
+            <MeasureDiagram className="h-full w-full" />
+          </div>
+          <Doodle name="sun" className="absolute -top-2 right-6 h-14 w-14 text-[var(--sol-1)]" delay={0.6} />
+        </ScrollReveal>
       </div>
-    </ScrollReveal>
+    </section>
 
-    <div className="mx-auto max-w-360 px-6 pb-28 pt-16 md:px-12">
+    <div className="mx-auto max-w-360 px-6 pb-28 pt-20 md:px-12">
       <div className="grid gap-16 md:grid-cols-[1fr_1fr] md:gap-24">
-        <ScrollReveal><p className="sans mb-6 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Suas medidas</p><MeuFitForm /></ScrollReveal>
+        <ScrollReveal>
+          <h2 className="display text-4xl md:text-5xl">Suas medidas.</h2>
+          <p className="mb-8 mt-3 text-[var(--muted)]">Ficam salvas só neste navegador.</p>
+          <MeuFitForm />
+        </ScrollReveal>
 
         <ScrollReveal delay={0.1}>
-          <p className="sans mb-6 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Como tirar suas medidas</p>
-          <div className="space-y-6">
-            {steps.map((step, index) => <div key={step.title} className="flex gap-4"><span className="display text-2xl text-[var(--areia)]">{String(index + 1).padStart(2, "0")}</span><div><h3 className="text-lg">{step.title}</h3><p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{step.text}</p></div></div>)}
-          </div>
-          <div className="mt-10 border-t border-[var(--line)] pt-6">
-            <p className="sans mb-2 text-[10px] uppercase tracking-[.14em] text-[var(--muted)]">Recomendação de sobra</p>
-            <p className="text-sm leading-relaxed text-[var(--muted)]">Peças sob medida saem com folga de 1 a 2 cm além da sua medida real, para garantir conforto e espaço para pequenos ajustes. Se você estiver entre dois tamanhos, prefira o maior.</p>
-          </div>
+          <h2 className="display text-4xl md:text-5xl">Como medir.</h2>
+          <ol className="mt-8 space-y-7">
+            {steps.map((step, index) => <li key={step.title} className="flex gap-5"><span className="display flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ink)] text-xl italic">{index + 1}</span><div><h3 className="text-xl">{step.title}</h3><p className="mt-1 leading-relaxed text-[var(--muted)]">{step.text}</p></div></li>)}
+          </ol>
+          <p className="mt-10 border-l-2 border-[var(--sol-1)] pl-5 leading-relaxed text-[var(--muted)]">Nossas camisetas têm modelagem ampla. Se ficar entre dois tamanhos, prefira o maior para um caimento mais solto.</p>
         </ScrollReveal>
       </div>
 
-      <ScrollReveal className="mt-24 border-t border-[var(--line)] pt-14"><p className="sans mb-6 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Tabela de medidas geral</p><SizeChart /></ScrollReveal>
+      <ScrollReveal className="mt-24 border-t border-[var(--ink)]/30 pt-14"><div className="mb-8 flex items-end justify-between gap-6"><h2 className="display text-4xl md:text-5xl">Tabela de medidas.</h2><Doodle name="wave" className="hidden h-6 w-32 text-[var(--moss)] md:block" /></div><SizeChart /></ScrollReveal>
 
-      <ScrollReveal delay={0.1} className="mt-24 bg-[var(--areia)]/20 p-8 md:p-12">
-        <p className="sans mb-3 text-[10px] uppercase tracking-[.2em] text-[var(--terra-dark)]">Provador virtual</p>
-        <h2 className="text-3xl">Veja a peça em você antes de comprar.</h2>
-        <p className="mt-3 max-w-2xl text-[var(--muted)]">Envie uma foto sua, escolha a estampa e a gente mostra você vestindo a peça.</p>
-        <Link href="/provador" className="sans mt-6 inline-flex items-center gap-2 border-2 border-[var(--terra-dark)] px-5 py-2.5 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)]">Experimentar agora <ArrowUpRight size={14} /></Link>
+      <ScrollReveal delay={0.1} className="mt-24 flex flex-col items-start justify-between gap-8 bg-[var(--terra-dark)] p-8 text-[var(--creme)] md:flex-row md:items-center md:p-12">
+        <div><p className="script mb-2 -rotate-1 text-2xl text-[var(--sol-2)]">quer ver antes de comprar?</p><h2 className="display text-4xl md:text-5xl">Experimente no Provador virtual.</h2><p className="mt-3 max-w-xl text-[var(--creme)]/75">Envie uma foto sua, escolha a estampa e veja você vestindo a peça.</p></div>
+        <Link href="/provador" className="sans inline-flex shrink-0 items-center gap-2 bg-[var(--creme)] px-6 py-3.5 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)] transition-opacity hover:opacity-85">Abrir provador <ArrowUpRight size={14} /></Link>
       </ScrollReveal>
     </div>
   </main>;
