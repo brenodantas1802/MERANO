@@ -58,7 +58,7 @@ export default function SobreMimPage() {
 
     <section className="grain relative overflow-hidden">
       <div className="mx-auto max-w-360 px-6 pb-16 pt-14 md:px-12 md:pb-24 md:pt-20">
-        <Link href="/conta" className="sans text-[10px] uppercase tracking-[.2em] text-[var(--terra)]">Minha conta</Link>
+        <p className="sans text-[10px] uppercase tracking-[.2em] text-[var(--terra)]">Seu perfil Merano</p>
         <div className="mt-6 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="display text-7xl md:text-9xl">Sobre <i>mim.</i></h1>

@@ -25,7 +25,7 @@ export function MeuFitForm() {
       <form onSubmit={(event) => event.preventDefault()} className="grid gap-6 md:grid-cols-2">
         {FIELDS.map(({ field, label }) => <div key={field} className="flex flex-col space-y-2"><Label htmlFor={field}>{label}</Label><Input id={field} inputMode="decimal" value={profile[field]} onChange={(event) => update(field, event.target.value.replace(/[^\d.,]/g, "").slice(0, 5))} /></div>)}
       </form>
-      <p className="sans mt-4 text-[11px] text-[var(--muted)]">Salvas neste navegador. Quer refinar com ombro, tronco e braço? <Link href="/conta/sobre-mim" className="underline underline-offset-4 hover:text-[var(--ink)]">Complete seu perfil em Sobre mim</Link>.</p>
+      <p className="sans mt-4 text-[11px] text-[var(--muted)]">Salvas neste navegador. Quer refinar com ombro, tronco e braço? <Link href="/sobre-mim" className="underline underline-offset-4 hover:text-[var(--ink)]">Complete seu perfil em Sobre mim</Link>.</p>
 
       {recommendation && (
         <div className="mt-10 flex items-center gap-6 border-y border-[var(--ink)] py-7">

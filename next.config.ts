@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async redirects() {
+    // "Sobre mim" used to live under the account page.
+    return [{ source: "/conta/sobre-mim", destination: "/sobre-mim", permanent: true }];
+  },
 };
 
 export default nextConfig;

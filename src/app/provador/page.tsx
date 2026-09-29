@@ -15,13 +15,12 @@ type GenerateResult = GenerateSuccess | { error: string };
 type People = { boxes: PersonBox[]; total: number };
 type Run = { status: "idle" } | { status: "loading" } | { status: "done"; result: GenerateResult };
 
-// Each photo the customer sends: the main one (any pose) and an optional one from the back.
-type SlotKey = "principal" | "costas";
+// The customer's photo and everything derived from it. Kept as a keyed slot so more photos can be added later.
+type SlotKey = "principal";
 type Slot = { photo: string | null; people: People | null; analyzing: boolean; target: number | null; run: Run };
 const EMPTY_SLOT: Slot = { photo: null, people: null, analyzing: false, target: null, run: { status: "idle" } };
-const SLOT_COPY: Record<SlotKey, { title: string; hint: string; view: string }> = {
-  principal: { title: "Sua foto", hint: "De frente, de lado ou de costas. Corpo inteiro ou da cintura pra cima.", view: "frente" },
-  costas: { title: "Foto de costas", hint: "Opcional: pra ver também a estampa do verso em você.", view: "costas" },
+const SLOT_COPY: Record<SlotKey, { title: string; hint: string }> = {
+  principal: { title: "Sua foto", hint: "De frente, de lado ou de costas. Corpo inteiro ou da cintura pra cima." },
 };
 
 // One step of the before/after viewer.
@@ -96,7 +95,7 @@ function ShirtPicker({ selected, onSelect, onClose }: { selected: Product | null
   return (
     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-4 rounded-[1.75rem] bg-[var(--creme)] p-5 shadow-[0_18px_40px_-28px_rgba(32,28,23,.5)]">
       <div className="mb-4 flex items-center justify-between">
-        <p className="script text-xl text-[var(--terra)]">qual estampa hoje?</p>
+        <p className="display text-2xl">Escolha a estampa</p>
         <button type="button" onClick={onClose} aria-label="Fechar" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[var(--ink)] hover:text-[var(--creme)]"><X size={16} /></button>
       </div>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
@@ -104,7 +103,7 @@ function ShirtPicker({ selected, onSelect, onClose }: { selected: Product | null
           <button key={product.id} type="button" onClick={() => onSelect(product)} className="group text-left">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={product.image} alt="" className={`aspect-[3/4] w-full rounded-xl bg-[var(--areia)] object-cover transition-all ${selected?.id === product.id ? "ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[var(--creme)]" : "group-hover:opacity-80"}`} />
-            <p className="mt-1.5 text-sm leading-tight">{product.name}</p>
+            <p className="sans mt-2 text-[10px] uppercase leading-snug tracking-[.1em]">{product.name}</p>
           </button>
         ))}
       </div>
@@ -112,7 +111,7 @@ function ShirtPicker({ selected, onSelect, onClose }: { selected: Product | null
   );
 }
 
-function PhotoDrop({ slot, slotKey, onFile, onClear }: { slot: Slot; slotKey: SlotKey; onFile: (file: File | null) => void; onClear?: () => void }) {
+function PhotoDrop({ slot, slotKey, onFile }: { slot: Slot; slotKey: SlotKey; onFile: (file: File | null) => void }) {
   const [dragging, setDragging] = useState(false);
   const copy = SLOT_COPY[slotKey];
   return (
@@ -120,21 +119,19 @@ function PhotoDrop({ slot, slotKey, onFile, onClear }: { slot: Slot; slotKey: Sl
       onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={(event) => { event.preventDefault(); setDragging(false); onFile(event.dataTransfer.files?.[0] ?? null); }}
-      className={`group relative flex aspect-[4/5] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] text-center transition-all ${slot.photo ? "bg-[var(--ink)]" : dragging ? "scale-[1.01] bg-[var(--sol-2)]/25" : "bg-[var(--areia)]/30 hover:bg-[var(--areia)]/45"}`}
+      className={`group relative flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] text-center transition-all ${slot.photo ? "bg-[var(--areia)]/30" : dragging ? "scale-[1.01] bg-[var(--sol-2)]/25" : "bg-[var(--areia)]/30 hover:bg-[var(--areia)]/45"}`}
     >
       <input type="file" accept="image/*" className="hidden" onChange={(event) => { onFile(event.target.files?.[0] ?? null); event.target.value = ""; }} />
       {slot.photo ? (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={slot.photo} alt={copy.title} className="absolute inset-0 h-full w-full object-cover" />
-          <span className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
-          <span className="sans absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--paper)]/90 px-4 py-1.5 text-[10px] uppercase tracking-[.12em] text-[var(--ink)]">Trocar foto</span>
-          {onClear && <button type="button" onClick={(event) => { event.preventDefault(); onClear(); }} aria-label="Remover foto de costas" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--paper)]/90 text-[var(--ink)]"><X size={14} /></button>}
+          <img src={slot.photo} alt={copy.title} className="absolute inset-0 h-full w-full object-contain" />
+                    <span className="sans absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--paper)]/90 px-4 py-1.5 text-[10px] uppercase tracking-[.12em] text-[var(--ink)]">Trocar foto</span>
           {slot.analyzing && <span className="sans absolute left-3 top-3 rounded-full bg-[var(--paper)]/90 px-3 py-1 text-[10px] text-[var(--ink)]">analisando…</span>}
         </>
       ) : (
         <span className="flex flex-col items-center px-5">
-          <Doodle name={slotKey === "principal" ? "sun" : "wave"} className="h-12 w-14 text-[var(--terra)]" />
+          <Doodle name="sun" className="h-12 w-14 text-[var(--terra)]" />
           <span className="display mt-3 text-2xl">{copy.title}</span>
           <span className="sans mt-2 text-[11px] leading-snug text-[var(--muted)]">{copy.hint}</span>
           <span className="script mt-3 -rotate-2 text-lg text-[var(--terra)]">toque ou arraste aqui</span>
@@ -198,7 +195,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
         {frames.map((item, thumb) => {
           const done = item.stage === "depois" && item.run.status === "done" && !("error" in item.run.result) ? item.run.result : null;
           return (
-            <button key={item.key} type="button" onClick={() => onIndex(thumb)} aria-label={`${item.stage === "antes" ? "Antes" : "Depois"}, ${SLOT_COPY[item.slot].view}`} aria-current={thumb === index} className={`relative h-24 w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-[var(--areia)]/40 transition-all md:h-[6.5rem] md:w-20 ${thumb === index ? "ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[var(--paper)]" : "opacity-60 hover:opacity-100"}`}>
+            <button key={item.key} type="button" onClick={() => onIndex(thumb)} aria-label={item.stage === "antes" ? "Foto original" : "Resultado"} aria-current={thumb === index} className={`relative h-24 w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-[var(--areia)]/40 transition-all md:h-[6.5rem] md:w-20 ${thumb === index ? "ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[var(--paper)]" : "opacity-60 hover:opacity-100"}`}>
               {item.stage === "antes" || done ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={done ? done.image : item.photo} alt="" className="h-full w-full object-cover" />
@@ -234,7 +231,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
             </motion.div>
           </AnimatePresence>
 
-          <span className="script pointer-events-none absolute left-4 top-4 -rotate-3 rounded-full bg-[var(--paper)]/90 px-4 py-1 text-xl text-[var(--terra)] shadow-sm">{frame.stage} · {SLOT_COPY[frame.slot].view}</span>
+          <span className="script pointer-events-none absolute left-4 top-4 -rotate-3 rounded-full bg-[var(--paper)]/90 px-4 py-1 text-xl text-[var(--terra)] shadow-sm">{frame.stage === "antes" ? "antes" : "depois"}</span>
           {frames.length > 1 && <>
             <button type="button" onClick={() => go(-1)} aria-label="Imagem anterior" className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-md transition-transform hover:scale-105"><ChevronLeft size={20} strokeWidth={1.5} /></button>
             <button type="button" onClick={() => go(1)} aria-label="Próxima imagem" className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-md transition-transform hover:scale-105"><ChevronRight size={20} strokeWidth={1.5} /></button>
@@ -263,10 +260,10 @@ function ProvadorContent() {
   });
   const [pickerOpen, setPickerOpen] = useState(false);
   const [error, setError] = useState("");
-  const [slots, setSlots] = useState<Record<SlotKey, Slot>>({ principal: EMPTY_SLOT, costas: EMPTY_SLOT });
+  const [slots, setSlots] = useState<Record<SlotKey, Slot>>({ principal: EMPTY_SLOT });
   // The viewer remembers which frame is showing by key, since frames come and go as photos are added.
   const [frameKey, setFrameKey] = useState<string | null>(null);
-  const versions = useRef<Record<SlotKey, number>>({ principal: 0, costas: 0 });
+  const versions = useRef<Record<SlotKey, number>>({ principal: 0 });
   const viewerRef = useRef<HTMLDivElement>(null);
 
   const patch = (key: SlotKey, changes: Partial<Slot>) => setSlots((current) => ({ ...current, [key]: { ...current[key], ...changes } }));
@@ -290,12 +287,6 @@ function ProvadorContent() {
     } finally {
       if (version === versions.current[key]) patch(key, { analyzing: false });
     }
-  }
-
-  function clearSlot(key: SlotKey) {
-    versions.current[key]++;
-    patch(key, EMPTY_SLOT);
-    setFrameKey(null);
   }
 
   const needsChoice = (slot: Slot) => !!slot.photo && !!slot.people && slot.people.boxes.length >= 2;
@@ -354,7 +345,7 @@ function ProvadorContent() {
           <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <h1 className="display text-6xl md:text-8xl">Vista a peça.<br /><i>Antes de comprar.</i></h1>
             <div className="grid max-w-md grid-cols-3 gap-5">
-              {([["branch", "Escolha a estampa"], ["sun", "Envie sua foto"], ["boat", "Compare o antes e depois"]] as const).map(([doodle, text], index) => <div key={text}><Doodle name={doodle} className="h-10 w-12 text-[var(--terra)]" delay={index * 0.25} /><p className="sans mt-2 text-[10px] uppercase tracking-[.12em] text-[var(--terra)]/70">0{index + 1}</p><p className="mt-0.5 leading-tight">{text}</p></div>)}
+              {([["branch", "Escolha a estampa"], ["sun", "Envie sua foto"], ["boat", "Compare antes e depois"]] as const).map(([doodle, text], index) => <div key={text}><Doodle name={doodle} className="h-10 w-12 text-[var(--terra)]" delay={index * 0.25} /><p className="sans mt-2 text-[10px] uppercase tracking-[.12em] text-[var(--terra)]/70">0{index + 1}</p><p className="mt-0.5 leading-tight">{text}</p></div>)}
             </div>
           </div>
         </div>
@@ -381,22 +372,18 @@ function ProvadorContent() {
           </section>
 
           <section className="mt-14">
-            <div className="mb-5 flex items-baseline gap-4"><span className="sans text-xs text-[var(--sol-1)]">02</span><h2 className="display text-3xl md:text-4xl">Suas fotos.</h2></div>
-            <div className="grid grid-cols-2 gap-4">
-              <PhotoDrop slot={slots.principal} slotKey="principal" onFile={(file) => void handleFile("principal", file)} />
-              <PhotoDrop slot={slots.costas} slotKey="costas" onFile={(file) => void handleFile("costas", file)} onClear={() => clearSlot("costas")} />
-            </div>
+            <div className="mb-5 flex items-baseline gap-4"><span className="sans text-xs text-[var(--sol-1)]">02</span><h2 className="display text-3xl md:text-4xl">Sua foto.</h2></div>
+            <PhotoDrop slot={slots.principal} slotKey="principal" onFile={(file) => void handleFile("principal", file)} />
             <ul className="sans mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-[var(--muted)]">
               <li>· Boa luz, sem filtro</li>
               <li>· Mais de uma pessoa? Você escolhe quem veste</li>
             </ul>
             {needsChoice(slots.principal) && <PersonChooser slot={slots.principal} label="sua foto" onChoose={(index) => { patch("principal", { target: index }); setError(""); }} />}
-            {needsChoice(slots.costas) && <PersonChooser slot={slots.costas} label="foto de costas" onChoose={(index) => { patch("costas", { target: index }); setError(""); }} />}
           </section>
 
           <section className="mt-14">
             <button type="submit" disabled={loading || analyzing} className="sans flex w-full items-center justify-between rounded-full bg-gradient-to-r from-[var(--sol-1)] to-[var(--sol-2)] px-7 py-5 text-[13px] font-semibold uppercase tracking-[.12em] text-[var(--origem)] shadow-[0_18px_40px_-20px_rgba(243,124,34,.8)] transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0">
-              <span>{loading ? "Vestindo você…" : analyzing ? "Analisando a foto…" : filledKeys.length > 1 ? "Gerar frente e costas" : "Gerar provador virtual"}</span>
+              <span>{loading ? "Vestindo você…" : analyzing ? "Analisando a foto…" : "Gerar provador virtual"}</span>
               <span aria-hidden>↗</span>
             </button>
             {error && <p role="alert" className="sans mt-4 w-fit -rotate-1 rounded-full bg-[#8a3a2c] px-4 py-2 text-xs text-white">{error}</p>}
