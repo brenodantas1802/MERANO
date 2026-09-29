@@ -274,7 +274,7 @@ function ProvadorContent() {
             <button
               type="submit"
               disabled={loading || analyzing}
-              className="sans flex w-full items-center justify-between bg-gradient-to-r from-[var(--sol-1)] to-[var(--sol-2)] px-6 py-4 text-[13px] font-semibold uppercase tracking-[.1em] text-[var(--origem)] transition-opacity disabled:cursor-wait disabled:opacity-60"
+              className="sans flex w-full items-center justify-between rounded-full bg-gradient-to-r from-[var(--sol-1)] to-[var(--sol-2)] px-6 py-4 text-[13px] font-semibold uppercase tracking-[.1em] text-[var(--origem)] transition-opacity disabled:cursor-wait disabled:opacity-60"
             >
               <span>{loading ? "Gerando provador virtual..." : analyzing ? "Analisando a foto..." : "Gerar provador virtual"}</span>
               <span aria-hidden>↗</span>

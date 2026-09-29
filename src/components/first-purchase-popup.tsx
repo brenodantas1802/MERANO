@@ -48,7 +48,7 @@ export function FirstPurchasePopup() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-md overflow-hidden bg-[var(--creme)] p-8 shadow-2xl md:p-10"
+            className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[var(--creme)] p-8 shadow-2xl md:p-10"
           >
             <button onClick={close} aria-label="Fechar" className="absolute right-4 top-4 text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><X size={18} strokeWidth={1.5} /></button>
             <div className="mb-6 h-1 w-12" style={{ background: "linear-gradient(to right, #F37C22, #FABD4B)" }} />
@@ -64,7 +64,7 @@ export function FirstPurchasePopup() {
                 <p className="mt-4 text-[var(--muted)]">Deixe seu e-mail e a gente envia o cupom. Sem spam, só as novidades da coleção.</p>
                 <form onSubmit={submit} className="sans mt-7 flex flex-col gap-3 sm:flex-row">
                   <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="seu@email.com" className="w-full border-b border-[var(--ink)] bg-transparent py-3 text-sm outline-none" />
-                  <button type="submit" className="shrink-0 bg-[var(--ink)] px-6 py-3 text-[11px] uppercase tracking-[.15em] text-[var(--creme)] transition-opacity hover:opacity-85">Quero o cupom</button>
+                  <button type="submit" className="shrink-0 rounded-full bg-[var(--ink)] px-6 py-3 text-[11px] uppercase tracking-[.15em] text-[var(--creme)] transition-opacity hover:opacity-85">Quero o cupom</button>
                 </form>
                 <button onClick={close} className="sans mt-5 text-[10px] uppercase tracking-[.14em] text-[var(--muted)] underline underline-offset-4">Agora não</button>
               </>

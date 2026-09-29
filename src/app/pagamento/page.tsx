@@ -41,14 +41,14 @@ function FakeQr() {
     if (!finder && seed / 233280 > 0.52) cells.push([x, y]);
   }
   const finder = (x: number, y: number) => <g key={`${x}-${y}`}><rect x={x} y={y} width="7" height="7" fill="currentColor" /><rect x={x + 1} y={y + 1} width="5" height="5" fill="#fff" /><rect x={x + 2} y={y + 2} width="3" height="3" fill="currentColor" /></g>;
-  return <svg viewBox={`-1 -1 ${size + 2} ${size + 2}`} className="h-44 w-44 bg-white p-2 text-[var(--ink)]" shapeRendering="crispEdges" aria-label="QR Code Pix">{cells.map(([x, y]) => <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="currentColor" />)}{finder(0, 0)}{finder(18, 0)}{finder(0, 18)}</svg>;
+  return <svg viewBox={`-1 -1 ${size + 2} ${size + 2}`} className="h-44 w-44 rounded-2xl bg-white p-2 text-[var(--ink)]" shapeRendering="crispEdges" aria-label="QR Code Pix">{cells.map(([x, y]) => <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="currentColor" />)}{finder(0, 0)}{finder(18, 0)}{finder(0, 18)}</svg>;
 }
 
 function Summary({ items, subtotal, shipping, discount, total }: { items: CartItem[]; subtotal: number; shipping: Shipping | null; discount: number; total: number }) {
-  return <aside className="h-fit border border-[var(--line)] bg-[var(--creme)] p-6 md:sticky md:top-28">
+  return <aside className="h-fit rounded-3xl bg-[var(--creme)] p-7 shadow-[0_20px_50px_-30px_rgba(32,28,23,.35)] md:sticky md:top-28">
     <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Resumo do pedido</p>
     <div className="space-y-4">{items.map((item) => <div key={item.id} className="flex gap-4">
-      <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-[var(--cream)]">{item.image && <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" />}<span className="sans absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center bg-[var(--ink)] px-1 text-[10px] text-[var(--creme)]">{item.quantity}</span></div>
+      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{item.image && <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" />}<span className="sans absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center bg-[var(--ink)] px-1 text-[10px] text-[var(--creme)]">{item.quantity}</span></div>
       <div className="flex flex-1 justify-between gap-3"><div><p className="leading-tight">{item.name}</p><p className="sans mt-1 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {item.color}</p></div><span className="sans text-sm">{formatPrice(item.price * item.quantity)}</span></div>
     </div>)}</div>
     <div className="sans mt-6 space-y-2 border-t border-[var(--line)] pt-5 text-sm">
@@ -146,7 +146,7 @@ export default function PaymentPage() {
           </div>
           {address.city && <p className="sans mt-4 text-xs text-[var(--muted)]">{address.city}</p>}
           <AnimatePresence>{cep.length === 9 && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-8 grid gap-3">
-            {SHIPPING.map((option) => <label key={option.id} className={`flex cursor-pointer items-center justify-between border px-5 py-4 transition-colors ${shippingId === option.id ? "border-[var(--ink)] bg-[var(--creme)]" : "border-[var(--line)]"}`}>
+            {SHIPPING.map((option) => <label key={option.id} className={`flex cursor-pointer items-center justify-between rounded-2xl border px-5 py-4 transition-colors ${shippingId === option.id ? "border-[var(--ink)] bg-[var(--creme)]" : "border-[var(--line)]"}`}>
               <span className="flex items-center gap-4"><input type="radio" name="frete" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} className="accent-[var(--ink)]" /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{option.label}</span><span className="text-sm text-[var(--muted)]">{option.days}</span></span></span>
               <span className="sans text-sm">{formatPrice(option.price)}</span>
             </label>)}
@@ -156,15 +156,15 @@ export default function PaymentPage() {
         <section>
           <h2 className="mb-6 flex items-baseline gap-4 text-2xl"><span className="sans text-xs text-[var(--sol-1)]">03</span>Pagamento</h2>
           <div role="radiogroup" aria-label="Forma de pagamento" className="grid grid-cols-2 gap-3">
-            {([["pix", "Pix", "5% de desconto", QrCode], ["cartao", "Cartão de crédito", "até 3x sem juros", CreditCard]] as const).map(([id, name, hint, Icon]) => <button key={id} type="button" role="radio" aria-checked={method === id} onClick={() => setMethod(id)} className={`flex items-center gap-3 border px-4 py-4 text-left transition-colors ${method === id ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--creme)]" : "border-[var(--line)] hover:border-[var(--ink)]"}`}><Icon size={20} strokeWidth={1.5} /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{name}</span><span className={`text-sm ${method === id ? "text-[var(--creme)]/70" : "text-[var(--muted)]"}`}>{hint}</span></span></button>)}
+            {([["pix", "Pix", "5% de desconto", QrCode], ["cartao", "Cartão de crédito", "até 3x sem juros", CreditCard]] as const).map(([id, name, hint, Icon]) => <button key={id} type="button" role="radio" aria-checked={method === id} onClick={() => setMethod(id)} className={`flex items-center gap-3 rounded-2xl border px-4 py-4 text-left transition-colors ${method === id ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--creme)]" : "border-[var(--line)] hover:border-[var(--ink)]"}`}><Icon size={20} strokeWidth={1.5} /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{name}</span><span className={`text-sm ${method === id ? "text-[var(--creme)]/70" : "text-[var(--muted)]"}`}>{hint}</span></span></button>)}
           </div>
 
-          {method === "pix" ? <div className="mt-8 flex flex-col items-start gap-6 border border-[var(--line)] p-6 md:flex-row md:items-center">
+          {method === "pix" ? <div className="mt-8 flex flex-col items-start gap-6 rounded-3xl bg-[var(--creme)] p-6 md:flex-row md:items-center">
             <FakeQr />
             <div>
               <p className="text-xl">Pague {formatPrice(total)} com Pix</p>
               <p className="mt-2 text-[var(--muted)]">Abra o app do seu banco, escaneie o código ou use o Pix copia e cola. A confirmação é instantânea.</p>
-              <button type="button" onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="sans mt-5 inline-flex items-center gap-2 border border-[var(--ink)] px-4 py-2.5 text-[10px] uppercase tracking-[.14em] hover:bg-[var(--ink)] hover:text-[var(--creme)]">{copied ? <><Check size={14} /> Código copiado</> : <><Copy size={14} /> Copiar código Pix</>}</button>
+              <button type="button" onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="sans mt-5 inline-flex items-center gap-2 rounded-full border border-[var(--ink)] px-5 py-2.5 text-[10px] uppercase tracking-[.14em] hover:bg-[var(--ink)] hover:text-[var(--creme)]">{copied ? <><Check size={14} /> Código copiado</> : <><Copy size={14} /> Copiar código Pix</>}</button>
             </div>
           </div> : <div className="mt-8 grid gap-8 md:grid-cols-[1fr_260px]">
             <div className="grid gap-6">
@@ -184,7 +184,7 @@ export default function PaymentPage() {
           </div>}
         </section>
 
-        <button type="submit" disabled={status === "processing"} className="flex w-full items-center justify-between bg-[var(--ink)] px-6 py-5 text-[var(--creme)] transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-70">
+        <button type="submit" disabled={status === "processing"} className="flex w-full items-center justify-between rounded-full bg-[var(--ink)] px-7 py-5 text-[var(--creme)] transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-70">
           <span className="sans text-[12px] uppercase tracking-[.15em]">{status === "processing" ? "Processando pagamento..." : method === "pix" ? `Já paguei · ${formatPrice(total)}` : `Pagar ${formatPrice(total)}`}</span>
           {status === "processing" ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--creme)] border-t-transparent" /> : <ArrowRight size={18} />}
         </button>

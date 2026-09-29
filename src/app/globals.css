@@ -39,7 +39,7 @@ body {
 .marquee { animation: marquee 38s linear infinite; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .marquee { animation: none; } }
-.display { letter-spacing: -0.035em; line-height: 0.95; font-weight: 400; font-variation-settings: "SOFT" 50, "WONK" 1; }
+.display { letter-spacing: -0.035em; line-height: 0.95; font-weight: 400; font-variation-settings: "SOFT" 30, "WONK" 0; }
 .display i, .display em { font-weight: 300; }
 .grain {
 	background-color: var(--cream);
