@@ -18,9 +18,17 @@ const LINKS = [
   { href: "/termos", label: "Termos" },
 ];
 
+// Pages whose own background is dark all the way down.
+const DARK_PAGES = ["/personalizar-estampa"];
+// Pages with the shallow-water background, which continues behind the waves.
+const RIPPLE_PAGES = ["/carrinho", "/categorias"];
+
 export function SiteFooter() {
-  if (usePathname().startsWith("/admin")) return null;
-  return <><SeaWaves into="#000" className="-mb-px" /><footer className="bg-black text-white">
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
+  // The waves sit between the page and the footer, so behind them goes the colour of the page above.
+  const above = DARK_PAGES.some((page) => pathname.startsWith(page)) ? "bg-[var(--terra-dark)]" : RIPPLE_PAGES.some((page) => pathname.startsWith(page)) ? "ripples-plain" : "bg-[var(--paper)]";
+  return <><SeaWaves into="#000" className={`-mb-px ${above}`} /><footer className="bg-black text-white">
     <div className="flex flex-col items-start justify-between gap-6 border-b border-white/15 px-6 pb-10 pt-14 md:flex-row md:items-end md:px-12">
       <p className="display max-w-2xl text-4xl md:text-6xl">Lugares simples,<br /><i>dias inesquecíveis.</i></p>
       <div className="flex items-center gap-4 text-[var(--sol-2)]"><Doodle name="boat" className="h-16 w-20" /><span className="script -rotate-3 text-2xl">feito no Brasil, sob demanda.</span></div>
