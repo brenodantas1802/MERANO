@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Download, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Doodle } from "@/components/doodle";
+import { SeaWaves } from "@/components/beach-art";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import type { PersonBox } from "@/lib/people";
 import { getProduct, products, type Product } from "@/lib/products";
@@ -349,7 +350,8 @@ function ProvadorContent() {
             </div>
           </div>
         </div>
-      </section>
+        <SeaWaves />
+    </section>
 
       <div className="mx-auto grid max-w-360 gap-14 px-6 pb-28 pt-14 md:grid-cols-[minmax(0,.95fr)_minmax(0,1.05fr)] md:gap-16 md:px-12 md:pt-20">
         <form onSubmit={handleSubmit}>

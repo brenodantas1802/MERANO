@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SocialButton } from "@/components/ui/social-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/animated-tabs";
+import { BeachArt } from "@/components/beach-art";
 
 export default function AccountPage() {
   const [done, setDone] = useState(false);
@@ -22,7 +23,7 @@ export default function AccountPage() {
       <SiteHeader />
       <div className="mx-auto max-w-md px-6 pb-24 pt-16">
         <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Área do cliente</p>
-        <h1 className="display text-7xl">Minha<br /><i>conta.</i></h1>
+        <div className="flex items-end justify-between gap-4"><h1 className="display text-7xl">Minha<br /><i>conta.</i></h1><BeachArt scene="boat" className="w-28 shrink-0 md:w-36" /></div>
 
         {done ? (
           <nav aria-label="Menu da conta" className="mt-12 space-y-3">

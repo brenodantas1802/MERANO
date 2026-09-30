@@ -6,6 +6,7 @@ import { MeuFitForm } from "@/components/meu-fit-form";
 import { SizeChart } from "@/components/size-chart";
 import { MeasureDiagram } from "@/components/measure-diagram";
 import { Doodle } from "@/components/doodle";
+import { SeaWaves } from "@/components/beach-art";
 
 const steps = [
   { title: "Busto", text: "Passe a fita ao redor da parte mais larga do peito, paralela ao chão, sem apertar." },
@@ -33,6 +34,7 @@ export default function MeuFitPage() {
           <Doodle name="sun" className="absolute -top-2 right-6 h-14 w-14 text-[var(--sol-1)]" delay={0.6} />
         </ScrollReveal>
       </div>
+      <SeaWaves />
     </section>
 
     <div className="mx-auto max-w-360 px-6 pb-28 pt-20 md:px-12">

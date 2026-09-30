@@ -13,6 +13,7 @@ import { measure, RANGES, useBodyProfile, type ProfileField } from "@/lib/body-p
 import { recommendSize } from "@/lib/size-recommendation";
 import { useOrders } from "@/lib/orders";
 import { formatPrice, SIZE_CHART, similarProducts } from "@/lib/products";
+import { SeaWaves } from "@/components/beach-art";
 
 type FieldSpec = { field: ProfileField; label: string; unit: string; hint: string };
 
@@ -72,6 +73,7 @@ export default function SobreMimPage() {
           </div>
         </div>
       </div>
+      <SeaWaves />
     </section>
 
     <section className="mx-auto grid max-w-360 gap-14 px-6 py-16 md:grid-cols-[1fr_minmax(0,1.05fr)] md:gap-20 md:px-12 md:py-24">

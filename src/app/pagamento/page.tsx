@@ -10,6 +10,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ProductCard } from "@/components/product-card";
 import { saveOrder } from "@/lib/orders";
 import { formatPrice, products, similarProducts } from "@/lib/products";
+import { BeachArt } from "@/components/beach-art";
 
 // Demo checkout for presentations: nothing here is sent anywhere or charged.
 
@@ -113,7 +114,7 @@ export default function PaymentPage() {
   if (status === "paid" && order) return <main><SiteHeader /><div className="mx-auto max-w-5xl px-6 py-24 md:px-12">
     <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 220, damping: 16 }} className="mb-10 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--moss)] text-white"><Check size={30} /></motion.div>
     <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Pedido {order.id} · {order.method === "pix" ? "Pix aprovado" : "Cartão aprovado"}</p>
-    <h1 className="display text-6xl md:text-8xl">Obrigado.<br /><i>Sua peça começa agora.</i></h1>
+    <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><h1 className="display text-6xl md:text-8xl">Obrigado.<br /><i>Sua peça começa agora.</i></h1><BeachArt scene="sunset" className="w-48 shrink-0 md:w-64" /></div>
     <p className="mt-8 max-w-lg text-2xl leading-snug">Recebemos {formatPrice(order.total)}. Sua camiseta entra na fila do ateliê hoje e você recebe o código de rastreio por e-mail assim que ela sair.</p>
     <div className="sans mt-12 grid gap-6 border-y border-[var(--line)] py-8 text-[11px] uppercase tracking-[.12em] md:grid-cols-3">
       <div><span className="text-[var(--sol-1)]">01 · Hoje</span><p className="mt-2 normal-case tracking-normal text-[var(--muted)]">Pedido confirmado</p></div>
@@ -131,7 +132,7 @@ export default function PaymentPage() {
 
   return <main><SiteHeader /><div className="mx-auto max-w-360 px-6 pb-24 pt-10 md:px-12">
     <Link href="/shop" className="sans mb-10 flex w-fit items-center gap-2 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Continuar comprando</Link>
-    <h1 className="display text-6xl md:text-8xl">Pagamento.</h1>
+    <div className="flex items-end gap-6"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><BeachArt scene="boat" className="w-24 shrink-0 pb-1 md:w-36" /></div>
     <form onSubmit={pay} className="mt-12 grid gap-12 md:grid-cols-[1fr_400px] md:gap-20">
       <div className="space-y-14">
         <section>
