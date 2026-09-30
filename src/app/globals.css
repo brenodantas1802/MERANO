@@ -77,3 +77,22 @@ body {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='48' viewBox='0 0 220 48'%3E%3Cpath d='M0 14 Q27.5 4 55 14 T110 14 T165 14 T220 14' fill='none' stroke='%234F97B3' stroke-opacity='0.13' stroke-width='1.4'/%3E%3Cpath d='M-55 38 Q-27.5 28 0 38 T55 38 T110 38 T165 38 T220 38 T275 38' fill='none' stroke='%23C7BAA7' stroke-opacity='0.35' stroke-width='1.2'/%3E%3C/svg%3E");
 	background-size: 220px 48px;
 }
+
+/* Shop hero (components/shop-hero-art.tsx) */
+.swing { animation: swing 5s ease-in-out infinite; transform-origin: 50% 12px; }
+.swing-slow { animation: swing-wide 6.5s ease-in-out infinite; transform-origin: top center; }
+.spin-slow { animation: spin-slow 28s linear infinite; }
+@keyframes swing { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+@keyframes swing-wide { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .swing, .swing-slow, .spin-slow { animation: none; } }
+
+/* Late-afternoon glow: soft sun-coloured light at the top of the page that melts into the paper. */
+.sunset-glow {
+	background-color: var(--paper);
+	background-image:
+		radial-gradient(ellipse 55% 60% at 88% -10%, rgba(250, 189, 75, 0.38), transparent 70%),
+		radial-gradient(ellipse 45% 50% at 8% 5%, rgba(243, 124, 34, 0.14), transparent 70%),
+		radial-gradient(ellipse 70% 40% at 50% 0%, rgba(199, 186, 167, 0.25), transparent 75%);
+	background-repeat: no-repeat;
+}

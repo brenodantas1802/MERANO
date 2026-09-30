@@ -11,7 +11,7 @@ export default function CategoriesPage() {
     count: products.filter((product) => product.category === category).length,
   }));
 
-  return <main className="ripples"><SiteHeader />
+  return <main className="sunset-glow"><SiteHeader />
     <div className="mx-auto max-w-360 px-6 pb-28 pt-8 md:px-12">
       <Link href="/" className="sans mb-16 flex items-center gap-2 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar para o início</Link>
       <ScrollReveal className="mb-16 border-b border-[var(--line)] pb-14"><p className="sans mb-4 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Navegue por categoria</p><h1 className="display text-6xl md:text-8xl">Categorias.</h1><p className="mt-6 max-w-md text-xl">A Merano está no início. Mais categorias chegam junto das próximas coleções.</p></ScrollReveal>

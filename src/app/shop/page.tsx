@@ -6,6 +6,7 @@ import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
+import { ShopHeroArt } from "@/components/shop-hero-art";
 import { collections, products } from "@/lib/products";
 
 function ShopContent() {
@@ -23,7 +24,7 @@ function ShopContent() {
   function pickCollection(id: string) { setSelectedCollection(id); setCategory("Todos"); setShowCollections(false); }
 
   return <div className="mx-auto max-w-360 px-6 py-16 md:px-12 md:py-24">
-    <div className="flex flex-col justify-between gap-8 border-b border-[var(--line)] pb-10 md:flex-row md:items-end"><div><p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Descoberta</p><h1 className="display text-7xl md:text-9xl">Shop.</h1><p className="mt-6 max-w-md text-xl">Peças com origem, imagem e espaço para o seu jeito.</p></div><label className="sans flex w-full items-center gap-3 border-b border-[var(--ink)] pb-3 text-[10px] uppercase tracking-[.14em] md:w-72"><Filter size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produtos" className="w-full bg-transparent outline-none" /></label></div>
+    <div className="flex flex-col justify-between gap-8 border-b border-[var(--line)] pb-10 md:flex-row md:items-end"><div><p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Descoberta</p><h1 className="display text-7xl md:text-9xl">Shop.</h1><p className="mt-6 max-w-md text-xl">Peças com origem, imagem e espaço para o seu jeito.</p></div><ShopHeroArt className="mx-auto shrink-0 md:mx-0 md:-mb-4" /><label className="sans flex w-full items-center gap-3 border-b border-[var(--ink)] pb-3 text-[10px] uppercase tracking-[.14em] md:w-72"><Filter size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produtos" className="w-full bg-transparent outline-none" /></label></div>
 
     <div className="flex flex-wrap items-center justify-between gap-4 py-6">
       <div className="flex flex-wrap gap-2">

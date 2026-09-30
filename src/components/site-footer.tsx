@@ -21,7 +21,7 @@ const LINKS = [
 // Pages whose own background is dark all the way down.
 const DARK_PAGES = ["/personalizar-estampa"];
 // Pages with the shallow-water background, which continues behind the waves.
-const RIPPLE_PAGES = ["/carrinho", "/categorias"];
+const RIPPLE_PAGES = ["/carrinho"];
 
 export function SiteFooter() {
   const pathname = usePathname();
