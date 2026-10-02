@@ -3,6 +3,7 @@
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "./cart-provider";
@@ -18,10 +19,10 @@ const NAV_LINKS = [
   { href: "/provador", label: "Provador" },
 ];
 const INLINE_LINKS = [
-  { href: "/shop", label: "Coleção" },
-  { href: "/a-marca", label: "A marca" },
+  { href: "/shop", label: "Shop" },
+  { href: "/a-marca", label: "Identidade" },
+  { href: "/meu-fit", label: "Merano Fit" },
   { href: "/provador", label: "Provador" },
-  { href: "/meu-fit", label: "Meu fit" },
 ];
 const EASE = [0.22, 1, 0.36, 1] as const;
 const ROUND = "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300";
@@ -31,6 +32,7 @@ const OUTLINE = `${ROUND} border border-[var(--ink)]/20 bg-[var(--paper)] text-[
 // On the home page it floats over the hero video (`overlay`); elsewhere it sticks to the top as the page scrolls under it.
 export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const { count, openDrawer } = useCart();
+  const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -69,20 +71,23 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
         <span className="wordmark text-[15px] font-light tracking-[.42em] md:text-[19px] md:tracking-[.5em]">MERANO</span>
       </Link>
 
-      <nav aria-label="Principal" className="hidden items-center gap-7 text-[12px] tracking-[.06em] text-[var(--ink)]/75 lg:flex">
-        {INLINE_LINKS.map((link) => <Link key={link.href} href={link.href} className="relative py-1 transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-[var(--ink)] after:transition-transform after:duration-300 hover:text-[var(--ink)] hover:after:scale-x-100">{link.label}</Link>)}
+      <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
+        {INLINE_LINKS.map((link) => {
+          const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+          return <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`rounded-full px-4 py-2 text-[15px] font-medium tracking-[.02em] transition-colors duration-300 ${active ? "bg-[var(--ink)] text-[var(--paper)]" : "text-[var(--ink)] hover:bg-[var(--ink)]/[.08]"}`}>{link.label}</Link>;
+        })}
       </nav>
 
       <div className="flex items-center gap-2">
-        <button type="button" onClick={toggleMenu} aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} className={OUTLINE}>
-          <motion.span animate={{ rotate: menuOpen ? 90 : 0 }} transition={{ duration: 0.3, ease: EASE }} className="flex">{menuOpen ? <X size={17} strokeWidth={1.6} /> : <Menu size={17} strokeWidth={1.6} />}</motion.span>
+        <button type="button" onClick={openDrawer} aria-label={`Abrir carrinho (${count} ${count === 1 ? "item" : "itens"})`} className={`${ROUND} relative border border-[var(--ink)]/15 bg-white text-[var(--ink)] shadow-[0_6px_16px_-10px_rgba(25,35,30,.5)] hover:-translate-y-0.5`}>
+          <ShoppingCart size={17} strokeWidth={1.6} />
+          {count > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--sol-1)] px-1 text-[10px] font-semibold text-white ring-2 ring-white">{count}</span>}
         </button>
         <button type="button" onClick={toggleSearch} aria-label={searchOpen ? "Fechar busca" : "Buscar produtos"} aria-expanded={searchOpen} className={OUTLINE}>
           {searchOpen ? <X size={17} strokeWidth={1.6} /> : <Search size={17} strokeWidth={1.6} />}
         </button>
-        <button type="button" onClick={openDrawer} aria-label={`Abrir carrinho (${count} ${count === 1 ? "item" : "itens"})`} className={`${ROUND} relative bg-[var(--ink)] text-[var(--paper)] shadow-[0_6px_16px_-8px_rgba(25,35,30,.6)] hover:-translate-y-0.5`}>
-          <ShoppingCart size={17} strokeWidth={1.6} />
-          {count > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--sol-1)] px-1 text-[10px] font-semibold text-white ring-2 ring-[var(--paper)]">{count}</span>}
+        <button type="button" onClick={toggleMenu} aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} className={`${ROUND} bg-[var(--ink)] text-[var(--paper)] shadow-[0_6px_16px_-8px_rgba(25,35,30,.6)] hover:bg-[var(--terra-dark)]`}>
+          <motion.span animate={{ rotate: menuOpen ? 90 : 0 }} transition={{ duration: 0.3, ease: EASE }} className="flex">{menuOpen ? <X size={17} strokeWidth={1.6} /> : <Menu size={17} strokeWidth={1.6} />}</motion.span>
         </button>
       </div>
     </div>
