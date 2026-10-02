@@ -152,7 +152,7 @@ export const products: Product[] = [
   {
     id: "terraco-ao-mar",
     name: "Terraço ao mar",
-    description: "Uma mesa posta, vinho aberto e o mar logo ali — o convite de \"mais dias assim, por favor\".",
+    description: "Uma mesa posta, vinho aberto e o mar logo ali — o convite pra ficar mais um pouco.",
     price: 189,
     note: "Estampa Terraço ao Mar",
     image: "/imagens/merano-assets/produtos/terraco-ao-mar-verso.jpg",

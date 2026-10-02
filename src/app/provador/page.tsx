@@ -3,9 +3,9 @@
 import { type FormEvent, Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronLeft, ChevronRight, Download, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, ImagePlus, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
-import { Doodle } from "@/components/doodle";
+import { BeforeAfter, HowItWorks, ShirtFan, TryOnSteps } from "@/components/try-on-visuals";
 import { SeaWaves } from "@/components/beach-art";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import type { PersonBox } from "@/lib/people";
@@ -104,7 +104,7 @@ function ShirtPicker({ selected, onSelect, onClose }: { selected: Product | null
           <button key={product.id} type="button" onClick={() => onSelect(product)} className="group text-left">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={product.image} alt="" className={`aspect-[3/4] w-full rounded-xl bg-[var(--areia)] object-cover transition-all ${selected?.id === product.id ? "ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[var(--creme)]" : "group-hover:opacity-80"}`} />
-            <p className="sans mt-2 text-[10px] uppercase leading-snug tracking-[.1em]">{product.name}</p>
+            <p className="mt-2 text-sm leading-snug">{product.name}</p>
           </button>
         ))}
       </div>
@@ -132,7 +132,7 @@ function PhotoDrop({ slot, slotKey, onFile }: { slot: Slot; slotKey: SlotKey; on
         </>
       ) : (
         <span className="flex flex-col items-center px-5">
-          <Doodle name="sun" className="h-12 w-14 text-[var(--terra)]" />
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--paper)] text-[var(--ink)] shadow-[0_12px_24px_-14px_rgba(32,28,23,.6)] transition-transform duration-500 group-hover:-translate-y-1"><ImagePlus size={22} strokeWidth={1.5} /></span>
           <span className="display mt-3 text-2xl">{copy.title}</span>
           <span className="sans mt-2 text-[11px] leading-snug text-[var(--muted)]">{copy.hint}</span>
           <span className="script mt-3 -rotate-2 text-lg text-[var(--terra)]">toque ou arraste aqui</span>
@@ -179,7 +179,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
           // eslint-disable-next-line @next/next/no-img-element
           <img src={product.image} alt={product.name} className="w-1/2 rotate-3 rounded-2xl bg-[var(--paper)] p-2 shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         ) : (
-          <Doodle name="boat" className="h-24 w-28 text-[var(--terra)]" />
+          <BeforeAfter className="aspect-[4/5] w-1/2 rounded-2xl shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         )}
         <p className="script mt-8 -rotate-2 text-3xl text-[var(--terra)]">o seu resultado aparece aqui</p>
         <p className="sans mt-3 max-w-xs text-[11px] leading-relaxed text-[var(--muted)]">Você vai poder comparar a foto original com a versão vestindo a Merano, lado a lado.</p>
@@ -342,12 +342,10 @@ function ProvadorContent() {
 
       <section className="grain">
         <div className="mx-auto max-w-360 px-6 pb-14 pt-14 md:px-12 md:pb-20 md:pt-20">
-          <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--terra)]">Provador virtual</p>
+          <p className="script mb-3 text-4xl text-[var(--sol-1)]">provador virtual</p>
           <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <h1 className="display text-6xl md:text-8xl">Vista a peça.<br /><i>Antes de comprar.</i></h1>
-            <div className="grid max-w-md grid-cols-3 gap-5">
-              {([["branch", "Escolha a estampa"], ["sun", "Envie sua foto"], ["boat", "Compare antes e depois"]] as const).map(([doodle, text], index) => <div key={text}><Doodle name={doodle} className="h-10 w-12 text-[var(--terra)]" delay={index * 0.25} /><p className="sans mt-2 text-[10px] uppercase tracking-[.12em] text-[var(--terra)]/70">0{index + 1}</p><p className="mt-0.5 leading-tight">{text}</p></div>)}
-            </div>
+            <TryOnSteps />
           </div>
         </div>
         <SeaWaves />
@@ -355,6 +353,7 @@ function ProvadorContent() {
 
       <div className="mx-auto grid max-w-360 gap-14 px-6 pb-28 pt-14 md:grid-cols-[minmax(0,.95fr)_minmax(0,1.05fr)] md:gap-16 md:px-12 md:pt-20">
         <form onSubmit={handleSubmit}>
+          <HowItWorks />
           <section>
             <div className="mb-5 flex items-baseline gap-4"><span className="sans text-xs text-[var(--sol-1)]">01</span><h2 className="display text-3xl md:text-4xl">A estampa.</h2></div>
             {selectedProduct ? (
@@ -365,9 +364,9 @@ function ProvadorContent() {
                 <button type="button" onClick={() => setPickerOpen((open) => !open)} className="sans shrink-0 rounded-full border border-[var(--ink)] px-4 py-2 text-[10px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]">{pickerOpen ? "Fechar" : "Trocar"}</button>
               </div>
             ) : (
-              <button type="button" onClick={() => setPickerOpen((open) => !open)} className="flex w-full items-center justify-between rounded-[1.75rem] bg-[var(--areia)]/30 px-6 py-6 text-left transition-colors hover:bg-[var(--areia)]/45">
+              <button type="button" onClick={() => setPickerOpen((open) => !open)} className="group flex w-full items-center justify-between rounded-[1.75rem] bg-[var(--areia)]/30 px-6 py-5 text-left transition-colors hover:bg-[var(--areia)]/45">
                 <span><span className="display block text-2xl">Escolher camiseta</span><span className="sans text-[11px] text-[var(--muted)]">{products.length} estampas da coleção</span></span>
-                <Doodle name="branch" className="h-10 w-12 text-[var(--terra)]" />
+                <ShirtFan size={52} />
               </button>
             )}
             <AnimatePresence>{pickerOpen && <ShirtPicker selected={selectedProduct} onSelect={(product) => { setSelectedProduct(product); setPickerOpen(false); setError(""); }} onClose={() => setPickerOpen(false)} />}</AnimatePresence>

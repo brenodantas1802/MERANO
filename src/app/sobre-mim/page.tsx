@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { BodyAvatar } from "@/components/body-avatar";
-import { Doodle } from "@/components/doodle";
 import { ProductCard } from "@/components/product-card";
 import { measure, RANGES, useBodyProfile, type ProfileField } from "@/lib/body-profile";
 import { recommendSize } from "@/lib/size-recommendation";
@@ -59,7 +58,7 @@ export default function SobreMimPage() {
 
     <section className="grain relative overflow-hidden">
       <div className="mx-auto max-w-360 px-6 pb-16 pt-14 md:px-12 md:pb-24 md:pt-20">
-        <p className="sans text-[10px] uppercase tracking-[.2em] text-[var(--terra)]">Seu perfil Merano</p>
+        <p className="script text-4xl text-[var(--sol-1)]">seu perfil merano</p>
         <div className="mt-6 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="display text-7xl md:text-9xl">Sobre <i>mim.</i></h1>
@@ -69,7 +68,6 @@ export default function SobreMimPage() {
             <p className="script text-2xl text-[var(--terra)]">seu perfil está</p>
             <p className="display text-5xl">{Math.round((filled / (ESSENTIALS.length + SPECIFICS.length)) * 100)}%</p>
             <p className="sans text-[10px] uppercase tracking-[.14em] text-[var(--muted)]">{filled} de {ESSENTIALS.length + SPECIFICS.length} medidas</p>
-            <Doodle name="sun" className="absolute -right-6 -top-6 h-12 w-12 text-[var(--sol-1)]" />
           </div>
         </div>
       </div>
@@ -103,7 +101,7 @@ export default function SobreMimPage() {
           {extras.length > 0 && <div className="mt-2 flex flex-wrap justify-center gap-2">{extras.map(([field, label, unit]) => <span key={field} className="sans rounded-full bg-[var(--paper)] px-3 py-1.5 text-[11px]">{label} <strong className="font-medium">{profile[field]} {unit}</strong></span>)}</div>}
         </div>
 
-        <div className="mt-6 flex items-center gap-6 rounded-[2rem] bg-[var(--terra-dark)] p-6 text-[var(--creme)] md:p-8">
+        <div className="mt-6 flex items-center gap-6 rounded-[2rem] bg-[var(--mar-fundo)] p-6 text-[var(--creme)] shadow-[0_24px_50px_-30px_rgba(15,61,68,.8)] md:p-8">
           {recommendation ? <>
             <span className="display flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--sol-1)] to-[var(--sol-2)] text-4xl text-[var(--terra-dark)]">{recommendation.size}</span>
             <div><p className="script text-2xl text-[var(--sol-2)]">nas camisetas Merano, você veste</p><p className="mt-1 text-lg leading-snug text-[var(--creme)]/85">{recommendation.reason} A gente já deixa marcado em cada peça.</p></div>

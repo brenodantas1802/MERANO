@@ -5,8 +5,8 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { MeuFitForm } from "@/components/meu-fit-form";
 import { SizeChart } from "@/components/size-chart";
 import { MeasureDiagram } from "@/components/measure-diagram";
-import { Doodle } from "@/components/doodle";
 import { SeaWaves } from "@/components/beach-art";
+import { Illustration } from "@/components/illustration";
 
 const steps = [
   { title: "Busto", text: "Passe a fita ao redor da parte mais larga do peito, paralela ao chão, sem apertar." },
@@ -22,16 +22,15 @@ export default function MeuFitPage() {
     <section className="grain relative overflow-hidden">
       <div className="mx-auto grid max-w-360 items-center gap-10 px-6 py-16 md:grid-cols-[1.1fr_.9fr] md:px-12 md:py-24">
         <ScrollReveal>
-          <p className="sans mb-6 text-[10px] uppercase tracking-[.2em] text-[var(--terra)]">Meu Merano Fit</p>
+          <p className="script mb-3 text-4xl text-[var(--sol-1)]">meu merano fit</p>
           <h1 className="display text-6xl md:text-8xl">Seu tamanho,<br /><i>sem achismo.</i></h1>
           <p className="mt-8 max-w-md text-xl leading-snug">Três medidas, uma fita métrica e dois minutos. A gente guarda e já deixa o seu tamanho marcado em cada peça da loja.</p>
           <p className="script mt-8 -rotate-2 text-3xl text-[var(--terra)]">pega a fita, a gente espera.</p>
         </ScrollReveal>
         <ScrollReveal delay={0.1} className="relative">
-          <div className="relative mx-auto aspect-square w-full max-w-md rounded-full bg-[var(--paper)]/70 p-6">
-            <MeasureDiagram className="h-full w-full" />
-          </div>
-          <Doodle name="sun" className="absolute -top-2 right-6 h-14 w-14 text-[var(--sol-1)]" delay={0.6} />
+          {/* Warm disc of light behind the shirt. */}
+          <div aria-hidden className="absolute left-1/2 top-[42%] -z-0 aspect-square w-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(250,189,75,.38)_0%,rgba(250,189,75,.12)_45%,rgba(250,189,75,0)_70%)]" />
+          <MeasureDiagram className="relative" />
         </ScrollReveal>
       </div>
       <SeaWaves />
@@ -54,7 +53,7 @@ export default function MeuFitPage() {
         </ScrollReveal>
       </div>
 
-      <ScrollReveal className="mt-24 border-t border-[var(--ink)]/30 pt-14"><div className="mb-8 flex items-end justify-between gap-6"><h2 className="display text-4xl md:text-5xl">Tabela de medidas.</h2><Doodle name="wave" className="hidden h-6 w-32 text-[var(--moss)] md:block" /></div><SizeChart /></ScrollReveal>
+      <ScrollReveal className="mt-24 border-t border-[var(--ink)]/30 pt-14"><div className="mb-8 flex items-end justify-between gap-6"><h2 className="display text-4xl md:text-5xl">Tabela de medidas.</h2><Illustration name="barco" className="hidden w-36 md:block" /></div><SizeChart /></ScrollReveal>
 
       <ScrollReveal delay={0.1} className="mt-24 flex flex-col items-start justify-between gap-8 bg-[var(--terra-dark)] p-8 text-[var(--creme)] md:flex-row md:items-center md:p-12">
         <div><p className="script mb-2 -rotate-1 text-2xl text-[var(--sol-2)]">quer ver antes de comprar?</p><h2 className="display text-4xl md:text-5xl">Experimente no Provador virtual.</h2><p className="mt-3 max-w-xl text-[var(--creme)]/75">Envie uma foto sua, escolha a estampa e veja você vestindo a peça.</p></div>

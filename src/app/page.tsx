@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { products } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
@@ -7,12 +6,11 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { HeroVideo } from "@/components/hero-video";
 import { HeroTextReveal } from "@/components/hero-text-reveal";
 import { PillLink } from "@/components/ui/pill-link";
-import { Doodle } from "@/components/doodle";
+import { Illustration } from "@/components/illustration";
 import { SeasonShirt } from "@/components/season-shirt";
 import { Lookbook } from "@/components/lookbook";
 import { RevealHeading } from "@/components/reveal-heading";
 
-const seasonShirt = products.find((product) => product.id === "verao-em-boa-companhia")!;
 
 export default function Home() {
   return <main>
@@ -30,10 +28,10 @@ export default function Home() {
       </div>
     </section>
 
-    <SeasonShirt product={seasonShirt} />
+    <SeasonShirt products={products} />
 
     <section id="colecao" className="mx-auto max-w-360 px-6 pb-12 pt-24 md:px-12 md:pb-16 md:pt-36">
-      <ScrollReveal className="mb-16 flex items-end justify-between"><div><div className="relative w-fit"><RevealHeading className="display text-5xl md:text-7xl" lines={["O começo", <i key="a">é agora.</i>]} /><Doodle name="sun" className="absolute -right-14 -top-6 h-12 w-12 text-[var(--sol-1)] md:-right-20 md:h-16 md:w-16" /><span className="script absolute -bottom-9 right-0 rotate-[-4deg] text-2xl text-[var(--terra)] md:-right-24 md:bottom-2">coleção 01</span></div></div><PillLink href="/shop" className="hidden md:inline-flex">Ver loja</PillLink></ScrollReveal>
+      <ScrollReveal className="mb-16 flex items-end justify-between"><div><div className="relative w-fit"><RevealHeading className="display text-5xl md:text-7xl" lines={["O começo", <i key="a">é agora.</i>]} /><Illustration name="laranjeira" className="absolute -right-20 -top-12 w-20 rotate-12 md:-right-36 md:-top-16 md:w-32" /><span className="script absolute -bottom-9 right-0 rotate-[-4deg] text-2xl text-[var(--terra)] md:-right-24 md:bottom-2">coleção 01</span></div></div><PillLink href="/shop" className="hidden md:inline-flex">Ver loja</PillLink></ScrollReveal>
       <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-10 md:gap-y-16">{products.slice(0, 6).map((product) => <ProductCard product={product} key={product.id} />)}</div>
       <div className="mt-12 flex justify-center"><PillLink href="/shop">Ver todas as peças</PillLink></div>
     </section>
@@ -42,11 +40,11 @@ export default function Home() {
 
     <section id="feito" className="grain grid gap-16 px-6 py-28 md:grid-cols-[1fr_1.15fr] md:gap-20 md:px-24 md:py-40">
       <ScrollReveal><RevealHeading className="display max-w-xl text-5xl md:text-7xl" lines={["Menos excesso.", <i key="p">Mais presença.</i>]} /><Image src="/imagens/merano-assets/etiqueta-linho.jpg" alt="Etiqueta de linho Merano" width={420} height={520} className="mt-10 h-56 w-full object-cover md:h-72" /></ScrollReveal>
-      <ScrollReveal className="max-w-xl self-end" delay={0.1}><p className="text-2xl leading-snug md:text-3xl">Cada peça começa depois que você escolhe. Assim, a gente produz apenas o que encontra um corpo para vestir.</p><div className="mt-16 grid grid-cols-3 gap-6 border-t border-[var(--ink)]/30 pt-6">{([["branch", "01", "Você escolhe"], ["sun", "02", "A gente produz"], ["boat", "03", "A peça encontra você"]] as const).map(([doodle, n, text], index) => <div key={n}><Doodle name={doodle} className="h-14 w-16 text-[var(--terra)]" delay={index * 0.25} /><p className="mt-3 text-lg leading-tight">{text}</p></div>)}</div></ScrollReveal>
+      <ScrollReveal className="max-w-xl self-end" delay={0.1}><p className="text-2xl leading-snug md:text-3xl">Cada peça começa depois que você escolhe. Assim, a gente produz apenas o que encontra um corpo para vestir.</p><div className="mt-16 grid grid-cols-3 items-end gap-6 border-t border-[var(--ink)]/30 pt-8">{([["laranjeira", "Você escolhe"], ["cafe", "A gente produz"], ["barco", "A peça encontra você"]] as const).map(([art, text], index) => <div key={text}><div className="flex h-28 items-end md:h-36"><Illustration name={art} delay={index * 0.2} className={{ laranjeira: "w-24 md:w-32", cafe: "w-20 md:w-28", barco: "w-full max-w-44" }[art]} /></div><p className="mt-4 text-lg leading-tight">{text}</p></div>)}</div></ScrollReveal>
     </section>
 
     <section id="marca" className="mx-auto grid max-w-360 gap-16 px-6 py-28 md:grid-cols-2 md:gap-20 md:px-24 md:py-40">
-      <ScrollReveal><div className="relative min-h-80 overflow-hidden"><Image src="/imagens/merano-assets/logo-relevo-papel.jpg" alt="Logo Merano em relevo sobre papel" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /></div><div className="mt-4 flex items-center justify-between gap-4"><span className="sans text-[10px] uppercase tracking-[.18em] text-[var(--muted)]">Nascida entre cidade e natureza</span><Doodle name="wave" className="h-5 w-28 text-[var(--moss)]" /></div></ScrollReveal>
+      <ScrollReveal><div className="relative min-h-80 overflow-hidden"><Image src="/imagens/merano-assets/logo-relevo-papel.jpg" alt="Logo Merano em relevo sobre papel" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /></div><div className="mt-5 flex items-center justify-between gap-4"><span className="script text-2xl text-[var(--terra)]">nascida entre cidade e natureza</span><Illustration name="barco" className="w-28 md:w-36" /></div></ScrollReveal>
       <ScrollReveal className="flex flex-col justify-between" delay={0.1}><div><p className="text-3xl leading-tight md:text-5xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p><p className="script mt-8 -rotate-2 text-3xl text-[var(--terra)]">good people, better places.</p></div><PillLink href="/a-marca" className="mt-10">Conhecer a marca</PillLink></ScrollReveal>
     </section>
 

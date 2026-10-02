@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { FaqAccordion } from "@/components/faq-accordion";
-import { Lens } from "@/components/ui/lens";
+import { ShirtChapters } from "@/components/shirt-chapters";
+import { PillLink } from "@/components/ui/pill-link";
 
 const steps = [
   { n: "01", title: "Você escolhe", text: "Você seleciona a estampa, a modelagem e a cor na página do produto. Nada é produzido antes disso." },
@@ -21,26 +22,13 @@ const faqs = [
 
 export default function BrandPage() {
   return <main><SiteHeader />
-    <article className="mx-auto max-w-360 px-6 pb-28 md:px-12">
+    <article className="mx-auto max-w-360 px-6 pb-16 md:px-12 md:pb-20">
       <Link href="/" className="sans mb-16 flex items-center gap-2 pt-8 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar para o início</Link>
 
-      <ScrollReveal><p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">A marca</p><h1 className="display max-w-4xl text-7xl md:text-9xl">Sobre a<br /><i>Merano.</i></h1><p className="mt-10 max-w-2xl text-2xl leading-snug md:text-3xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p></ScrollReveal>
-
-      <div className="mt-24 grid gap-16 md:grid-cols-2 md:gap-20">
-        <ScrollReveal><Lens zoomFactor={1.6} lensSize={160}><div className="relative aspect-[.9] w-full bg-[var(--cream)]"><Image src="/imagens/merano-assets/logo-relevo-papel.jpg" alt="Logo Merano em relevo sobre papel, detalhe ampliável" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /></div></Lens><p className="sans mt-4 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]">Passe o mouse para ampliar o relevo</p></ScrollReveal>
-        <ScrollReveal delay={0.1} className="flex flex-col justify-center gap-8">
-          <div><h2 className="text-3xl">Nascida entre cidade e natureza</h2><p className="mt-4 text-lg leading-relaxed text-[var(--muted)]">A Merano nasce do encontro entre corpo, território e tempo — da relação afetiva com a paisagem brasileira, sem pressa e sem excesso. Cada estampa carrega uma referência de lugar: o mar, a terra, os frutos, a gente.</p></div>
-          <div><h2 className="text-3xl">Produção consciente</h2><p className="mt-4 text-lg leading-relaxed text-[var(--muted)]">Produzimos sob demanda para evitar estoque parado e aproximar cada peça do corpo que vai recebê-la. Isso significa menos desperdício e mais intenção em cada etapa — do tecido ao acabamento.</p></div>
-        </ScrollReveal>
-      </div>
-
-      <ScrollReveal className="mt-24 grid gap-8 border-t border-[var(--line)] pt-14 sans text-sm uppercase tracking-[.1em] text-[var(--muted)] md:grid-cols-3">
-        <div className="border-l-2 border-[var(--areia)] pl-5"><p className="text-3xl display normal-case tracking-normal text-[var(--ink)]">01</p><p className="mt-2">Origem brasileira, sem filtros — paisagem, clima e afeto viram estampa.</p></div>
-        <div className="border-l-2 border-[var(--areia)] pl-5"><p className="text-3xl display normal-case tracking-normal text-[var(--ink)]">02</p><p className="mt-2">Sob demanda — cada peça começa a existir quando alguém a escolhe.</p></div>
-        <div className="border-l-2 border-[var(--areia)] pl-5"><p className="text-3xl display normal-case tracking-normal text-[var(--ink)]">03</p><p className="mt-2">Materiais de toque macio, pensados para durar e envelhecer bem.</p></div>
-      </ScrollReveal>
-
+      <ScrollReveal><p className="script text-4xl text-[var(--sol-1)]">quem a gente é</p><h1 className="display mt-2 max-w-4xl text-7xl md:text-9xl">Identidade<br /><i>Merano.</i></h1><p className="mt-10 max-w-2xl text-2xl leading-snug md:text-3xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p></ScrollReveal>
     </article>
+
+    <ShirtChapters />
 
     <ScrollReveal className="relative h-[70vh] min-h-[420px] overflow-hidden md:h-[85vh]">
       <Image src="/imagens/merano-assets/foto praia 1.jpg" alt="Corpo em movimento na praia, referência da Merano" fill sizes="100vw" className="object-cover" />
@@ -78,7 +66,7 @@ export default function BrandPage() {
 
       <ScrollReveal delay={0.1} className="mt-24 flex flex-col items-start gap-6 border-t border-[var(--line)] pt-14 md:flex-row md:items-center md:justify-between">
         <p className="max-w-xl text-2xl leading-snug">Pronta para escolher a sua peça?</p>
-        <Link href="/shop" className="sans flex w-fit items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.16em]">Ver coleção <ArrowUpRight size={14} /></Link>
+        <PillLink href="/shop">Ver coleção</PillLink>
       </ScrollReveal>
     </article>
   </main>;
