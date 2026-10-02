@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { href: "/shop", label: "Shop" },
   { href: "/categorias", label: "Categorias" },
   { href: "/meu-fit", label: "Meu Merano Fit" },
-  { href: "/sobre-mim", label: "Sobre mim" },
+  { href: "/meu-perfil", label: "Meu perfil" },
   { href: "/provador", label: "Provador" },
 ];
 const INLINE_LINKS = [

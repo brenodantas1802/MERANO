@@ -2,8 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async redirects() {
-    // "Sobre mim" used to live under the account page.
-    return [{ source: "/conta/sobre-mim", destination: "/sobre-mim", permanent: true }];
+    // The profile page was "Sobre mim", first under the account page and then at /sobre-mim.
+    return [
+      { source: "/conta/sobre-mim", destination: "/meu-perfil", permanent: true },
+      { source: "/sobre-mim", destination: "/meu-perfil", permanent: true },
+    ];
   },
 };
 
