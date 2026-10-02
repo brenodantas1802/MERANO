@@ -269,6 +269,15 @@ export function getProduct(id: string) {
   return products.find((product) => product.id === id);
 }
 
+// Cart and order entries keep the photo path from the day they were added, and photos get renamed;
+// prefer the catalog's current photo. Old entries without productId carry it in "<product>-<size>-<color>".
+export function currentImage(item: { id?: string; productId?: string; image?: string }) {
+  const { id = "" } = item;
+  const product = (item.productId && getProduct(item.productId))
+    || products.filter((candidate) => id === candidate.id || id.startsWith(`${candidate.id}-`)).sort((a, b) => b.id.length - a.id.length)[0];
+  return product ? product.image : item.image;
+}
+
 export type SizeRow = { size: string; largura: number; comprimento: number; ombro: number };
 
 export const SIZE_CHART: SizeRow[] = [

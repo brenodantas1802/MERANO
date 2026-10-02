@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, Minus, Plus, Trash2, X } from "lucide-react";
 import { useCart } from "./cart-provider";
-import { formatPrice } from "@/lib/products";
+import { currentImage, formatPrice } from "@/lib/products";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -35,9 +35,9 @@ export function CartDrawer() {
           <p className="text-3xl">Seu carrinho está esperando uma peça.</p>
           <Link href="/shop" onClick={closeDrawer} className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link>
         </div> : <>
-          <div className="flex-1 overflow-y-auto px-6">
+          <div data-lenis-prevent className="flex-1 overflow-y-auto px-6">
             {items.map((item) => <div key={item.id} className="flex gap-4 border-b border-[var(--line)] py-5">
-              <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{item.image && <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />}</div>
+              <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="80px" className="object-cover" />}</div>
               <div className="flex flex-1 flex-col justify-between">
                 <div className="flex justify-between gap-3"><div><h3 className="text-lg leading-tight">{item.name}</h3><p className="sans mt-1 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {item.color}</p></div><button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="self-start text-[var(--muted)] hover:text-[var(--ink)]"><Trash2 size={15} strokeWidth={1.5} /></button></div>
                 <div className="sans flex items-center justify-between text-[11px]">

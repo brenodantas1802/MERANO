@@ -12,7 +12,7 @@ import { ProductCard } from "@/components/product-card";
 import { measure, RANGES, useBodyProfile, type ProfileField } from "@/lib/body-profile";
 import { recommendSize } from "@/lib/size-recommendation";
 import { useOrders } from "@/lib/orders";
-import { formatPrice, SIZE_CHART, similarProducts } from "@/lib/products";
+import { currentImage, formatPrice, SIZE_CHART, similarProducts } from "@/lib/products";
 import { SeaWaves } from "@/components/beach-art";
 
 type FieldSpec = { field: ProfileField; label: string; unit: string; hint: string };
@@ -118,7 +118,7 @@ export default function SobreMimPage() {
           <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
             <div><h2 className="display text-4xl md:text-5xl">Suas peças.</h2><p className="mt-3 text-[var(--muted)]">O que você já escolheu na Merano.</p></div>
             <div className="flex flex-wrap gap-4">{orders.slice(0, 3).flatMap((order) => order.items.map((item) => <div key={`${order.id}-${item.productId}-${item.size}`} className="flex w-60 items-center gap-4 rounded-2xl bg-[var(--creme)] p-3">
-              <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]"><Image src={item.image} alt={item.name} fill sizes="56px" className="object-cover" /></div>
+              <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]"><Image src={currentImage(item) ?? item.image} alt={item.name} fill sizes="56px" className="object-cover" /></div>
               <div className="min-w-0"><p className="truncate leading-tight">{item.name}</p><p className="sans mt-1 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {order.id}</p><p className="sans text-xs">{formatPrice(item.price)}</p></div>
             </div>))}</div>
           </div>

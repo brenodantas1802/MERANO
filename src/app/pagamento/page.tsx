@@ -9,7 +9,7 @@ import { useCart, type CartItem } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
 import { ProductCard } from "@/components/product-card";
 import { saveOrder } from "@/lib/orders";
-import { formatPrice, products, similarProducts } from "@/lib/products";
+import { formatPrice, products, similarProducts, currentImage } from "@/lib/products";
 import { BeachArt } from "@/components/beach-art";
 
 // Demo checkout for presentations: nothing here is sent anywhere or charged.
@@ -51,7 +51,7 @@ function Summary({ items, subtotal, shipping, discount, total }: { items: CartIt
   return <aside className="h-fit rounded-3xl bg-[var(--creme)] p-7 shadow-[0_20px_50px_-30px_rgba(32,28,23,.35)] md:sticky md:top-28">
     <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Resumo do pedido</p>
     <div className="space-y-4">{items.map((item) => <div key={item.id} className="flex gap-4">
-      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{item.image && <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" />}<span className="sans absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center bg-[var(--ink)] px-1 text-[10px] text-[var(--creme)]">{item.quantity}</span></div>
+      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="64px" className="object-cover" />}<span className="sans absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center bg-[var(--ink)] px-1 text-[10px] text-[var(--creme)]">{item.quantity}</span></div>
       <div className="flex flex-1 justify-between gap-3"><div><p className="leading-tight">{item.name}</p><p className="sans mt-1 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {item.color}</p></div><span className="sans text-sm">{formatPrice(item.price * item.quantity)}</span></div>
     </div>)}</div>
     <div className="sans mt-6 space-y-2 border-t border-[var(--line)] pt-5 text-sm">

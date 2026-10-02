@@ -15,6 +15,10 @@
 	--terra: #4C2D1A;
 	--sol-1: #F37C22;
 	--sol-2: #FABD4B;
+	--mar: #2f7f8a;
+	--mar-fundo: #0f3d44;
+	--espuma: #d9e8e2;
+	--areia-clara: #f3e6d1;
 }
 
 * { box-sizing: border-box; }
@@ -34,6 +38,7 @@ body {
 	a { color: inherit; text-decoration: none; }
 }
 
+.wordmark { font-family: var(--font-wordmark), Arial, sans-serif; }
 .sans { font-family: var(--font-sans), Arial, Helvetica, sans-serif; }
 .script { font-family: var(--font-script), cursive; letter-spacing: 0; text-transform: none; line-height: 1.2; }
 .marquee { animation: marquee 38s linear infinite; }
@@ -41,11 +46,45 @@ body {
 @media (prefers-reduced-motion: reduce) { .marquee { animation: none; } }
 .display { letter-spacing: -0.035em; line-height: 0.95; font-weight: 400; font-variation-settings: "SOFT" 30, "WONK" 0; }
 .display i, .display em { font-weight: 300; }
+/* Sun-bleached sand running into shallow sea-glass, with a faint sand grain. */
 .grain {
-	background-color: var(--cream);
-	background-image: radial-gradient(rgba(25, 35, 30, .11) .7px, transparent .7px);
-	background-size: 7px 7px;
+	background-color: #f3e6d1;
+	background-image:
+		radial-gradient(rgba(76, 45, 26, .07) .7px, transparent .7px),
+		radial-gradient(120% 90% at 85% 0%, rgba(250, 189, 75, .22) 0%, rgba(250, 189, 75, 0) 55%),
+		linear-gradient(165deg, #f7ecdb 0%, #f1dfc4 48%, #d9e8e2 100%);
+	background-size: 7px 7px, auto, auto;
 }
+/* Season shirt section: warm paper with a soft pool of light behind the shirt. */
+.season-wash { background: radial-gradient(55% 60% at 27% 48%, #f8ead2 0%, rgba(248, 234, 210, 0) 72%), linear-gradient(180deg, var(--paper) 0%, #f4e9da 100%); }
+
+/* Product photo morph between a card and the product page (React <ViewTransition share="morph">). */
+::view-transition-group(.morph) { animation-duration: 520ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+::view-transition-image-pair(.morph) { animation-name: via-blur; }
+@keyframes via-blur { 35% { filter: blur(2px); } }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 260ms; }
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
+
+/* Hero key word: sunlit gold italic with a slow sheen; the drop shadow keeps it readable over bright surf. */
+.hero-accent {
+	display: inline-block;
+	font-style: italic;
+	font-weight: 420;
+	font-size: 1.1em;
+	letter-spacing: -0.03em;
+	font-variation-settings: "SOFT" 100, "WONK" 1;
+	background: linear-gradient(100deg, #fff1cf 0%, #fac35c 30%, #f39a3a 55%, #ffe6a8 80%, #fff1cf 100%);
+	background-size: 220% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	filter: drop-shadow(0 2px 22px rgba(4, 18, 24, .5));
+	animation: hero-sheen 7s ease-in-out infinite;
+	padding-right: .08em;
+}
+@keyframes hero-sheen { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@media (prefers-reduced-motion: reduce) { .hero-accent { animation: none; } }
+
 .hero-wash { background: linear-gradient(135deg, #d8ded3 0%, #e8e2d3 53%, #c8d0c2 100%); }
 .product-wash { background: linear-gradient(155deg, #d7dfd7 0%, #b9c3b5 54%, #e4d7c4 100%); }
 .product-wash-two { background: linear-gradient(155deg, #d9d0c6 0%, #b9a895 50%, #e1ddd2 100%); }
