@@ -68,7 +68,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
     <div className="sans mx-auto flex max-w-360 items-center justify-between gap-3 rounded-full border border-white/60 bg-[var(--paper)]/80 py-2 pl-4 pr-2 shadow-[0_18px_40px_-24px_rgba(6,24,30,.6)] backdrop-blur-xl md:pl-5">
       <Link href="/" aria-label="Merano - início" className="flex items-center gap-2.5 md:gap-3">
         <MeranoSymbol className="h-7 w-auto md:h-8" ink="#19231e" />
-        <span className="wordmark text-[15px] font-light tracking-[.42em] md:text-[19px] md:tracking-[.5em]">MERANO</span>
+        <Image src="/imagens/logo-nome-trimmed.png" alt="MERANO" width={560} height={66} priority className="h-auto w-[116px] md:w-[168px]" />
       </Link>
 
       <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
