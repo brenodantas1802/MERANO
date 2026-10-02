@@ -79,9 +79,9 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
       </nav>
 
       <div className="flex items-center gap-2">
-        <button type="button" onClick={openDrawer} aria-label={`Abrir carrinho (${count} ${count === 1 ? "item" : "itens"})`} className={`${ROUND} relative border border-[var(--ink)]/15 bg-white text-[var(--ink)] shadow-[0_6px_16px_-10px_rgba(25,35,30,.5)] hover:-translate-y-0.5`}>
+        <button type="button" onClick={openDrawer} aria-label={`Abrir carrinho (${count} ${count === 1 ? "item" : "itens"})`} className={`${OUTLINE} relative`}>
           <ShoppingCart size={17} strokeWidth={1.6} />
-          {count > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--sol-1)] px-1 text-[10px] font-semibold text-white ring-2 ring-white">{count}</span>}
+          {count > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--sol-1)] px-1 text-[10px] font-semibold text-white ring-2 ring-[var(--paper)]">{count}</span>}
         </button>
         <button type="button" onClick={toggleSearch} aria-label={searchOpen ? "Fechar busca" : "Buscar produtos"} aria-expanded={searchOpen} className={OUTLINE}>
           {searchOpen ? <X size={17} strokeWidth={1.6} /> : <Search size={17} strokeWidth={1.6} />}
