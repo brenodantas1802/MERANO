@@ -20,8 +20,11 @@ export function Illustration({ name, className = "", color = "var(--mar-fundo)",
   const label = decorative ? { "aria-hidden": true } : { role: "img", "aria-label": art.alt };
 
   if (art.ink) return <motion.span {...reveal} {...label} className={`block ${className}`} style={{ aspectRatio: `${art.width} / ${art.height}`, backgroundColor: color, WebkitMaskImage: `url(${art.src})`, maskImage: `url(${art.src})`, WebkitMaskSize: "contain", maskSize: "contain", WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat", WebkitMaskPosition: "center", maskPosition: "center" }} />;
-  return <motion.span {...reveal} {...label} className={`block ${className}`}>
-    {/* eslint-disable-next-line @next/next/no-img-element -- transparent cutout with its own colours */}
-    <img src={art.src} alt="" width={art.width} height={art.height} loading="lazy" className="h-auto w-full drop-shadow-[0_18px_20px_rgba(32,28,23,.18)]" />
-  </motion.span>;
+  // The shadow lives on the outer span: on the revealing (clip-path) element it would be cut to a square.
+  return <span {...label} className={`block drop-shadow-[0_14px_16px_rgba(32,28,23,.16)] ${className}`}>
+    <motion.span {...reveal} className="block">
+      {/* eslint-disable-next-line @next/next/no-img-element -- transparent cutout with its own colours */}
+      <img src={art.src} alt="" width={art.width} height={art.height} loading="lazy" className="h-auto w-full" />
+    </motion.span>
+  </span>;
 }

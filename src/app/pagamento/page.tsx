@@ -123,7 +123,7 @@ export default function PaymentPage() {
     </div>
     <Link href="/shop" className="sans mt-10 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Continuar explorando <ArrowRight size={14} /></Link>
     {similarProducts(order.productIds, 3).length > 0 && <section className="mt-20 border-t border-[var(--line)] pt-12">
-      <div className="mb-10 flex flex-wrap items-end gap-x-4 gap-y-1"><h2 className="display text-4xl md:text-5xl">Parecidas com o que você comprou.</h2><span className="script -rotate-2 pb-1 text-2xl text-[var(--sol-1)]">pra próxima</span></div>
+      <div className="mb-10 flex flex-wrap items-end gap-x-4 gap-y-1"><h2 className="display text-4xl md:text-5xl">Parecidas com o que você comprou.</h2><span className="serif-note pb-1 text-xl text-[var(--sol-1)]">pra próxima</span></div>
       <div className="grid gap-8 md:grid-cols-3 md:gap-x-10">{similarProducts(order.productIds, 3).map((product) => <ProductCard key={product.id} product={product} />)}</div>
     </section>}
   </div></main>;

@@ -31,7 +31,7 @@ export default function Home() {
     <SeasonShirt products={products} />
 
     <section id="colecao" className="mx-auto max-w-360 px-6 pb-12 pt-24 md:px-12 md:pb-16 md:pt-36">
-      <ScrollReveal className="mb-16 flex items-end justify-between"><div><div className="relative w-fit"><RevealHeading className="display text-5xl md:text-7xl" lines={["O começo", <i key="a">é agora.</i>]} /><Illustration name="laranjeira" className="absolute -right-20 -top-12 w-20 rotate-12 md:-right-36 md:-top-16 md:w-32" /><span className="script absolute -bottom-9 right-0 rotate-[-4deg] text-2xl text-[var(--terra)] md:-right-24 md:bottom-2">coleção 01</span></div></div><PillLink href="/shop" className="hidden md:inline-flex">Ver loja</PillLink></ScrollReveal>
+      <ScrollReveal className="mb-16 flex items-end justify-between"><div><div className="relative w-fit"><RevealHeading className="display text-5xl md:text-7xl" lines={["O começo", <i key="a">é agora.</i>]} /><Illustration name="laranjeira" className="absolute -right-20 -top-12 w-20 rotate-12 md:-right-36 md:-top-16 md:w-32" /><span className="serif-note absolute -bottom-9 right-0 text-xl text-[var(--terra)] md:-right-24 md:bottom-2">coleção 01</span></div></div><PillLink href="/shop" className="hidden md:inline-flex">Ver loja</PillLink></ScrollReveal>
       <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-10 md:gap-y-16">{products.slice(0, 6).map((product) => <ProductCard product={product} key={product.id} />)}</div>
       <div className="mt-12 flex justify-center"><PillLink href="/shop">Ver todas as peças</PillLink></div>
     </section>
@@ -44,8 +44,8 @@ export default function Home() {
     </section>
 
     <section id="marca" className="mx-auto grid max-w-360 gap-16 px-6 py-28 md:grid-cols-2 md:gap-20 md:px-24 md:py-40">
-      <ScrollReveal><div className="relative min-h-80 overflow-hidden"><Image src="/imagens/merano-assets/logo-relevo-papel.jpg" alt="Logo Merano em relevo sobre papel" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /></div><div className="mt-5 flex items-center justify-between gap-4"><span className="script text-2xl text-[var(--terra)]">nascida entre cidade e natureza</span><Illustration name="barco" className="w-28 md:w-36" /></div></ScrollReveal>
-      <ScrollReveal className="flex flex-col justify-between" delay={0.1}><div><p className="text-3xl leading-tight md:text-5xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p><p className="script mt-8 -rotate-2 text-3xl text-[var(--terra)]">good people, better places.</p></div><PillLink href="/a-marca" className="mt-10">Conhecer a marca</PillLink></ScrollReveal>
+      <ScrollReveal><div className="relative min-h-80 overflow-hidden"><Image src="/imagens/merano-assets/logo-relevo-papel.jpg" alt="Logo Merano em relevo sobre papel" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /></div><div className="mt-5 flex items-center justify-between gap-4"><span className="serif-note text-xl text-[var(--terra)]">nascida entre cidade e natureza</span><Illustration name="barco" className="w-28 md:w-36" /></div></ScrollReveal>
+      <ScrollReveal className="flex flex-col justify-between" delay={0.1}><div><p className="text-3xl leading-tight md:text-5xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p><p className="serif-note mt-8 text-2xl text-[var(--terra)]">good people, better places.</p></div><PillLink href="/sobre-nos" className="mt-10">Sobre nós</PillLink></ScrollReveal>
     </section>
 
   </main>;

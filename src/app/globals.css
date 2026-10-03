@@ -39,7 +39,8 @@ body {
 }
 
 .sans { font-family: var(--font-sans), Arial, Helvetica, sans-serif; }
-.script { font-family: var(--font-script), cursive; letter-spacing: 0; text-transform: none; line-height: 1.2; }
+/* Short asides and kickers: the serif in a soft italic (replaces the old handwritten script). */
+.serif-note { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; line-height: 1.2; text-transform: none; font-variation-settings: "SOFT" 100, "WONK" 0; }
 .marquee { animation: marquee 38s linear infinite; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .marquee { animation: none; } }

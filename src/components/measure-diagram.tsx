@@ -17,8 +17,10 @@ const LINES = {
 
 const draw = (delay: number) => ({ initial: { pathLength: 0, opacity: 0 }, whileInView: { pathLength: 1, opacity: 1 }, viewport: { once: true }, transition: { pathLength: { duration: 1.2, ease: "easeInOut" as const, delay }, opacity: { duration: 0.2, delay } } });
 
-export function MeasureDiagram({ className = "" }: { className?: string }) {
-  const [size, setSize] = useState("M");
+// Pass `size` to drive it from outside (it then shows no size buttons of its own).
+export function MeasureDiagram({ className = "", size: controlled }: { className?: string; size?: string }) {
+  const [picked, setSize] = useState("M");
+  const size = controlled ?? picked;
   const row = SIZE_CHART.find((item) => item.size === size) ?? SIZE_CHART[2];
   const values = { ombro: row.ombro, busto: row.largura, comprimento: row.comprimento };
   const { src, small, large } = FRONT_CUTOUT;
@@ -46,10 +48,10 @@ export function MeasureDiagram({ className = "" }: { className?: string }) {
           </motion.div>;
         })}
       </div>
-      <div className="mt-6 flex items-center justify-center gap-2" role="group" aria-label="Escolha um tamanho para ver as medidas">
+      {!controlled && <><div className="mt-6 flex items-center justify-center gap-2" role="group" aria-label="Escolha um tamanho para ver as medidas">
         {SIZE_CHART.map((item) => <button key={item.size} type="button" onClick={() => setSize(item.size)} aria-pressed={item.size === size} className={`sans h-11 w-11 rounded-full text-sm transition-colors duration-300 ${item.size === size ? "bg-[var(--ink)] text-[var(--paper)]" : "border border-[var(--ink)]/25 bg-[var(--paper)]/70 hover:border-[var(--ink)]"}`}>{item.size}</button>)}
       </div>
-      <p className="sans mt-3 text-center text-[13px] text-[var(--muted)]">Medidas da peça, com ela estendida — toque num tamanho.</p>
+      <p className="sans mt-3 text-center text-[13px] text-[var(--muted)]">Medidas da peça, com ela estendida — toque num tamanho.</p></>}
     </div>
   );
 }

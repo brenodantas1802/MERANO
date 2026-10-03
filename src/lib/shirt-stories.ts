@@ -1,5 +1,5 @@
 // Background-free renders of the shirts (AI-upscaled, cut out) and a line about each print, for the
-// home showcase and the Identidade page. `small`/`large` are the two widths saved under recortes/.
+// home showcase and the Sobre nós page. `small`/`large` are the two widths saved under recortes/.
 export type ShirtCutout = { src: string; small: number; large: number; ratio: number };
 export type ShirtStory = { id: string; title: string[]; print: string; cutout: ShirtCutout };
 

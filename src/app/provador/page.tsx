@@ -135,7 +135,7 @@ function PhotoDrop({ slot, slotKey, onFile }: { slot: Slot; slotKey: SlotKey; on
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--paper)] text-[var(--ink)] shadow-[0_12px_24px_-14px_rgba(32,28,23,.6)] transition-transform duration-500 group-hover:-translate-y-1"><ImagePlus size={22} strokeWidth={1.5} /></span>
           <span className="display mt-3 text-2xl">{copy.title}</span>
           <span className="sans mt-2 text-[11px] leading-snug text-[var(--muted)]">{copy.hint}</span>
-          <span className="script mt-3 -rotate-2 text-lg text-[var(--terra)]">toque ou arraste aqui</span>
+          <span className="serif-note mt-3 text-base text-[var(--terra)]">toque ou arraste aqui</span>
         </span>
       )}
     </label>
@@ -181,7 +181,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
         ) : (
           <BeforeAfter className="aspect-[4/5] w-1/2 rounded-2xl shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         )}
-        <p className="script mt-8 -rotate-2 text-3xl text-[var(--terra)]">o seu resultado aparece aqui</p>
+        <p className="serif-note mt-8 text-2xl text-[var(--terra)]">o seu resultado aparece aqui</p>
         <p className="sans mt-3 max-w-xs text-[11px] leading-relaxed text-[var(--muted)]">Você vai poder comparar a foto original com a versão vestindo a Merano, lado a lado.</p>
       </div>
     );
@@ -221,18 +221,18 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={frame.photo} alt="" className="absolute inset-0 h-full w-full object-contain opacity-25 blur-sm" />
                   <AnalyzingImage className="relative h-12 w-12 text-[var(--terra)]" />
-                  <p className="script relative -rotate-2 text-2xl text-[var(--terra)]">{frame.run.status === "loading" ? "vestindo você…" : "aperte gerar pra ver"}</p>
+                  <p className="serif-note relative text-xl text-[var(--terra)]">{frame.run.status === "loading" ? "vestindo você…" : "aperte gerar pra ver"}</p>
                 </div>
               ) : (
                 <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-                  <p className="script -rotate-2 text-2xl text-[#8a3a2c]">ops, não rolou</p>
+                  <p className="serif-note text-xl text-[#8a3a2c]">ops, não rolou</p>
                   <p className="sans mt-3 max-w-xs text-xs leading-relaxed text-[var(--muted)]">{result && "error" in result ? result.error : "Tente de novo em instantes."}</p>
                 </div>
               )}
             </motion.div>
           </AnimatePresence>
 
-          <span className="script pointer-events-none absolute left-4 top-4 -rotate-3 rounded-full bg-[var(--paper)]/90 px-4 py-1 text-xl text-[var(--terra)] shadow-sm">{frame.stage === "antes" ? "antes" : "depois"}</span>
+          <span className="serif-note pointer-events-none absolute left-4 top-4 -rotate-3 rounded-full bg-[var(--paper)]/90 px-4 py-1 text-lg text-[var(--terra)] shadow-sm">{frame.stage === "antes" ? "antes" : "depois"}</span>
           {frames.length > 1 && <>
             <button type="button" onClick={() => go(-1)} aria-label="Imagem anterior" className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-md transition-transform hover:scale-105"><ChevronLeft size={20} strokeWidth={1.5} /></button>
             <button type="button" onClick={() => go(1)} aria-label="Próxima imagem" className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-md transition-transform hover:scale-105"><ChevronRight size={20} strokeWidth={1.5} /></button>
@@ -342,7 +342,7 @@ function ProvadorContent() {
 
       <section className="grain">
         <div className="mx-auto max-w-360 px-6 pb-14 pt-14 md:px-12 md:pb-20 md:pt-20">
-          <p className="script mb-3 text-4xl text-[var(--sol-1)]">provador virtual</p>
+          <p className="serif-note mb-3 text-2xl text-[var(--sol-1)] md:text-3xl">provador virtual</p>
           <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <h1 className="display text-6xl md:text-8xl">Vista a peça.<br /><i>Antes de comprar.</i></h1>
             <TryOnSteps />

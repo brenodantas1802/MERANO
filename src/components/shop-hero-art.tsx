@@ -33,7 +33,7 @@ export function ShopHeroArt({ className = "" }: { className?: string }) {
       <svg width="2" height="54" className="mx-auto block"><line x1="1" y1="0" x2="1" y2="54" stroke="var(--terra)" strokeWidth="1.4" strokeDasharray="3 2" /></svg>
       <div className="-mt-1 w-[88px] rotate-6 rounded-md bg-[#EFE3CF] px-3 pb-3 pt-4 text-center shadow-[0_8px_18px_-10px_rgba(32,28,23,.5)]">
         <span className="mx-auto mb-2 block h-2 w-2 rounded-full border border-[var(--terra)]/60 bg-[var(--paper)]" />
-        <p className="script text-lg leading-none text-[var(--terra)]">Coleção 01</p>
+        <p className="serif-note text-base leading-none text-[var(--terra)]">Coleção 01</p>
         <p className="sans mt-1.5 text-[9px] uppercase tracking-[.16em] text-[var(--ink)]/70">{products.length} peças</p>
       </div>
     </div>

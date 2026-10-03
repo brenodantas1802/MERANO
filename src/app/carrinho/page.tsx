@@ -46,7 +46,7 @@ function CartContent() {
     </ul>
 
     <aside className="h-fit rounded-[2rem] bg-[var(--mar-fundo)] p-7 text-[var(--paper)] shadow-[0_30px_60px_-40px_rgba(15,61,68,.9)] md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)]">
-      <p className="script text-3xl text-[var(--sol-2)]">seu pedido</p>
+      <p className="serif-note text-2xl text-[var(--sol-2)]">seu pedido</p>
       <div className="mt-5 space-y-3 border-b border-white/15 pb-5 text-[15px]">
         <div className="flex justify-between"><span className="text-white/75">{count} {count === 1 ? "peça" : "peças"}</span><span>{formatPrice(total)}</span></div>
         <div className="flex justify-between"><span className="text-white/75">Frete</span><span className="text-white/75">calculado no próximo passo</span></div>
@@ -64,7 +64,7 @@ export default function CartPage() {
     <SiteHeader />
     <main className="season-wash min-h-[80svh]">
       <div className="mx-auto max-w-360 px-6 pb-24 pt-10 md:px-12 md:pt-14">
-        <p className="script text-4xl text-[var(--sol-1)]">sua seleção</p>
+        <p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">sua seleção</p>
         <h1 className="display mt-1 text-6xl md:text-8xl">Carrinho.</h1>
         <CartContent />
         <Link href="/shop" className="sans mt-12 flex w-fit items-center gap-2 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><ArrowLeft size={14} /> Continuar escolhendo</Link>

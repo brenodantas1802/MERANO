@@ -49,7 +49,7 @@ export function CartDrawer() {
           </div>
           <div className="m-4 rounded-2xl bg-[var(--creme)] px-5 py-5 shadow-[0_-1px_0_rgba(0,0,0,.04)]">
             <div className="flex items-baseline justify-between"><span className="text-lg text-[var(--muted)]">Subtotal</span><span className="display text-3xl">{formatPrice(total)}</span></div>
-            <p className="script mt-1 -rotate-1 text-lg text-[var(--terra)]">o frete a gente calcula no próximo passo</p>
+            <p className="serif-note mt-1 text-base text-[var(--terra)]">o frete a gente calcula no próximo passo</p>
             <Link href="/pagamento" onClick={closeDrawer} className="sans mt-5 block rounded-full bg-[var(--ink)] px-6 py-4 text-center text-[12px] uppercase tracking-[.16em] text-[var(--creme)] transition-transform hover:-translate-y-0.5">Finalizar compra</Link>
             <div className="sans mt-4 flex justify-between text-[10px] uppercase tracking-[.14em] text-[var(--muted)]"><button onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver carrinho completo</Link></div>
           </div>

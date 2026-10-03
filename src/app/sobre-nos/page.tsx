@@ -25,7 +25,7 @@ export default function BrandPage() {
     <article className="mx-auto max-w-360 px-6 pb-16 md:px-12 md:pb-20">
       <Link href="/" className="sans mb-16 flex items-center gap-2 pt-8 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar para o início</Link>
 
-      <ScrollReveal><p className="script text-4xl text-[var(--sol-1)]">quem a gente é</p><h1 className="display mt-2 max-w-4xl text-7xl md:text-9xl">Identidade<br /><i>Merano.</i></h1><p className="mt-10 max-w-2xl text-2xl leading-snug md:text-3xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p></ScrollReveal>
+      <ScrollReveal><p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">quem a gente é</p><h1 className="display mt-3 max-w-4xl text-7xl md:text-9xl">Sobre <i>nós.</i></h1><p className="mt-10 max-w-2xl text-2xl leading-snug md:text-3xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p></ScrollReveal>
     </article>
 
     <ShirtChapters />

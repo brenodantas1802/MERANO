@@ -11,16 +11,15 @@ import { MeranoSymbol } from "./merano-symbol";
 import { formatPrice, getProductPrice, products } from "@/lib/products";
 
 const NAV_LINKS = [
-  { href: "/a-marca", label: "A marca" },
+  { href: "/sobre-nos", label: "Sobre nós" },
   { href: "/shop", label: "Shop" },
   { href: "/categorias", label: "Categorias" },
-  { href: "/meu-fit", label: "Meu Merano Fit" },
-  { href: "/meu-perfil", label: "Meu perfil" },
+  { href: "/meu-fit", label: "Merano Fit" },
   { href: "/provador", label: "Provador" },
 ];
 const INLINE_LINKS = [
   { href: "/shop", label: "Shop" },
-  { href: "/a-marca", label: "Identidade" },
+  { href: "/categorias", label: "Categorias" },
   { href: "/meu-fit", label: "Merano Fit" },
   { href: "/provador", label: "Provador" },
 ];

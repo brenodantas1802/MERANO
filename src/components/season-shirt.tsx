@@ -90,7 +90,7 @@ export function SeasonShirt({ products }: { products: Product[] }) {
             <Chapter title="A estampa">{story.print}</Chapter>
             <Chapter title="O toque">{product.material}{color ? `, ${color}` : ""}, modelagem ampla do {product.fits[0]} ao {product.fits[product.fits.length - 1]}.</Chapter>
             <Chapter title="Feita pra você">Produzida depois do seu pedido, pronta em até 7 dias úteis. Sem excesso.</Chapter>
-            <Chapter title="A Merano">Brasileira, entre cidade e natureza. <Link href="/a-marca" className="border-b border-[var(--ink)]/50">Conheça a marca</Link>.</Chapter>
+            <Chapter title="A Merano">Brasileira, entre cidade e natureza. <Link href="/sobre-nos" className="border-b border-[var(--ink)]/50">Conheça a gente</Link>.</Chapter>
           </motion.div>
         </AnimatePresence>
       </div>
