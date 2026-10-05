@@ -3,45 +3,38 @@
 import { useId } from "react";
 import { motion } from "motion/react";
 import { measure, type BodyProfile } from "@/lib/body-profile";
+import { bodyModel, wearTee } from "@/lib/body-model";
 import type { SizeRow } from "@/lib/products";
-import { FRONT_CUTOUT } from "@/lib/shirt-stories";
 
-// A standing figure built from the customer's measurements, wearing the photo of our tee in the chosen size.
-// Everything is laid out in centimetres and drawn at S px per cm, so the tee's real width and length land on the
-// body where they would. The tee is a flat photo, so the body takes its pose from it: the neck rises out of the
-// collar and the arms leave through the sleeve openings, bending at the elbow toward the thighs.
+// A smooth anatomy-chart silhouette built from the customer's measurements, wearing our tee in the chosen size.
+// Body and tee come from the same model the size recommendation uses (src/lib/body-model.ts) and are laid out in
+// centimetres — x from the centre line, y down from the crown — so the shoulder seams, the width and the hem land
+// where they would on this body. The tee is drawn around the body: the neck rises out of the collar and the
+// forearms leave the sleeves.
 const W = 400;
 const H = 580;
 const CENTER = 160;
 const FLOOR = 552;
-const S = 2.62;
+const SCALE = 2.62; // px per cm: a taller body stands taller next to the ruler
+const MAX_FIGURE = 520; // px, for the very tall
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-type Pt = readonly [number, number] | readonly [number, number, 1]; // a third value marks a sharp corner
 type Vec = [number, number];
+type Pt = readonly [number, number] | readonly [number, number, 1]; // a third value marks a sharp corner
 
-// Landmarks on the 1200 × 1180 front cutout (FRONT_CUTOUT, small render).
-const TEE = {
-  cx: 607,
-  shoulderTop: 40, // where the collar meets the shoulder (the "high point" length is measured from)
-  hem: 1168,
-  chest: 790, // body width below the sleeves
-  collar: [[495, 40], [499, 84], [538, 121], [607, 136], [676, 121], [715, 84], [719, 40]] as Vec[], // inner edge of the front band
-  cuffs: { left: [[3, 545], [205, 668]] as Vec[], right: [[1195, 545], [1003, 668]] as Vec[] }, // outer corner → underarm
-  // Right edge of the silhouette by row, for placing the measurement callouts.
-  edge: [[40, 820], [120, 956], [200, 1010], [280, 1056], [360, 1099], [440, 1141], [520, 1183], [560, 1184], [600, 1115], [640, 1049], [680, 980], [800, 983], [1000, 991], [1168, 991]] as Vec[],
-};
-
-const f = (value: number) => value.toFixed(1);
+const f = (value: number) => value.toFixed(2);
 const add = (a: Vec, b: Vec): Vec => [a[0] + b[0], a[1] + b[1]];
 const sub = (a: Vec, b: Vec): Vec => [a[0] - b[0], a[1] - b[1]];
 const scale = (a: Vec, k: number): Vec => [a[0] * k, a[1] * k];
+const dot = (a: Vec, b: Vec) => a[0] * b[0] + a[1] * b[1];
 const unit = (a: Vec): Vec => scale(a, 1 / (Math.hypot(a[0], a[1]) || 1));
-const lerp = (a: Vec, b: Vec, t: number): Vec => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-const fromAngle = (angle: number): Vec => [Math.sin(angle), Math.cos(angle)]; // 0 points straight down
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+const lerp = (a: Vec, b: Vec, t: number): Vec => [mix(a[0], b[0], t), mix(a[1], b[1], t)];
+const sharp = (p: Vec): Pt => [p[0], p[1], 1];
+const flip = (p: Pt): Pt => (p[2] ? [-p[0], p[1], 1] : [-p[0], p[1]]);
 
-// Smooth curve through the points (Catmull-Rom as cubic Béziers); every call with the same number of points
-// yields the same commands, so motion can morph one body into another.
+// Smooth curve through the points (Catmull-Rom as cubic Béziers); every call with the same number of points yields
+// the same commands, so motion can morph one body into another.
 function curve(points: Pt[], closed = true) {
   const n = points.length;
   const at = (i: number) => points[closed ? (i + n) % n : clamp(i, 0, n - 1)];
@@ -56,210 +49,222 @@ function curve(points: Pt[], closed = true) {
 }
 
 // Right half (first and last points on the centre line) → the whole outline.
-const mirrored = (right: Pt[]): Pt[] => [...right, ...right.slice(1, -1).reverse().map(([x, y, sharp]) => (sharp ? [-x, y, 1] : [-x, y]) as Pt)];
+const mirrored = (right: Pt[]): Pt[] => [...right, ...right.slice(1, -1).reverse().map(flip)];
 
-function figureFor(profile: BodyProfile, size: SizeRow) {
-  const busto = measure(profile, "busto") ?? 96;
-  const cintura = measure(profile, "cintura") ?? busto * 0.86;
-  const quadril = measure(profile, "quadril") ?? busto * 1.02;
-  const ombro = measure(profile, "ombro") ?? busto * 0.47;
-  const altura = clamp(measure(profile, "altura") ?? 174, 148, 196);
-  const peso = measure(profile, "peso");
-  const build = peso ? clamp(1 + (peso / (altura / 100) ** 2 - 23) * 0.03, 0.86, 1.4) : 1;
-  const braco = measure(profile, "braco") ?? altura * 0.335;
-  const tronco = measure(profile, "tronco");
-  const entrepernas = measure(profile, "entrepernas");
-  const tall = altura / 175;
-
-  // Vertical landmarks, in cm from the crown.
-  const head = 23 * tall ** 0.45;
-  const hps = head + altura * 0.033; // where neck meets shoulder
-  const waistY = clamp(tronco ? hps + tronco : altura * 0.405, altura * 0.36, altura * 0.45);
-  const ankleY = altura * 0.955;
-  const crotchY = clamp(entrepernas ? ankleY - entrepernas : altura * 0.525, altura * 0.48, altura * 0.56);
-  const hipY = crotchY - altura * 0.04;
-  const kneeY = (crotchY + ankleY) / 2 - altura * 0.012;
-  const bustY = hps + altura * 0.075;
-
-  // Half widths of the body seen from the front (a torso section is roughly an ellipse ~70% as deep as wide).
-  const chestHalf = busto / (1.75 * Math.PI);
-  const waistHalf = cintura / (1.75 * Math.PI);
-  const hipHalf = quadril / (1.8 * Math.PI);
-  const shoulderHalf = ombro * 0.45;
-
-  // The tee: worn, it drapes to ~82% of its flat width; a tee smaller than the body is stretched over it.
-  const teeWidth = Math.max(size.largura * 0.82, chestHalf * 2 + 2, waistHalf * 2 + 2, hipHalf * 2 + 1.5);
-  const kx = teeWidth / TEE.chest;
-  const ky = size.comprimento / (TEE.hem - TEE.shoulderTop);
-  const teeTop = hps - 1.5 - TEE.shoulderTop * ky;
-  const img = ([ix, iy]: Vec): Vec => [(ix - TEE.cx) * kx, teeTop + iy * ky];
-
-  // Head, drawn on a 23 cm reference and stretched a little for a heavier build at the cheeks and jaw.
-  const hs = head / 23;
-  const jaw = (y: number) => 1 + (build - 1) * (y > 12 ? 0.18 + 0.3 * Math.min(1, (y - 12) / 9) : 0.12);
-  const hp = (x: number, y: number, sharp?: 1): Pt => (sharp ? [x * hs * jaw(y), y * hs, 1] : [x * hs * jaw(y), y * hs]);
-  const headPath = curve(mirrored([hp(0, 0), hp(3.7, 0.4), hp(6.1, 2.0), hp(7.3, 4.6), hp(7.7, 7.8), hp(7.55, 10.8), hp(7.25, 13.6), hp(6.85, 16.2), hp(6.0, 18.6), hp(4.6, 20.7), hp(2.3, 22.5), hp(0, 22.95)]));
-  const ear = (side: 1 | -1) => curve([hp(7.2 * side, 9.9), hp(8.55 * side, 9.4), hp(9.2 * side, 10.6), hp(9.05 * side, 12.9), hp(8.6 * side, 14.9), hp(7.7 * side, 16.0), hp(7.1 * side, 15.3)]);
-  const earFold = (side: 1 | -1) => curve([hp(7.9 * side, 10.6), hp(8.55 * side, 11.0), hp(8.5 * side, 13.2), hp(8.0 * side, 14.6)], false);
-  // A short textured crop, a little fuller on top and swept back.
-  const hair = curve([
-    hp(7.85, 11.3), hp(8.15, 8.2), hp(8.25, 5.0), hp(7.4, 1.6), hp(5.4, -0.9), hp(2.4, -2.3), hp(-1.2, -2.5), hp(-4.6, -1.7), hp(-7.0, 0.4), hp(-8.2, 3.6), hp(-8.25, 7.4), hp(-7.9, 11.3),
-    hp(-7.3, 11.4, 1), hp(-7.2, 8.6), hp(-6.75, 6.4), hp(-5.6, 5.5), hp(-3.6, 4.7), hp(-1.6, 4.3), hp(0.6, 4.25), hp(2.8, 4.45), hp(4.9, 4.95), hp(6.3, 5.9), hp(6.85, 7.0), hp(7.2, 8.6), hp(7.3, 11.4, 1),
-  ]);
-  const hairStrands = [
-    [hp(-5.2, 5.0), hp(-4.6, 2.4), hp(-2.8, -0.6)], [hp(-2.6, 4.4), hp(-1.6, 1.4), hp(0.6, -1.4)], [hp(0.2, 4.2), hp(1.4, 1.4), hp(3.6, -0.9)], [hp(2.8, 4.4), hp(4.2, 2.0), hp(6.0, 0.4)],
-    [hp(5.0, 5.0), hp(6.4, 3.4), hp(7.4, 2.2)], [hp(-6.9, 6.0), hp(-7.2, 3.6), hp(-6.0, 1.0)],
-  ].map((points) => curve(points, false));
-  // Features, crisp: tapered brows, almond eyes with iris and lid line, nose wings, lips.
-  const brows = ([-1, 1] as const).map((side) => curve([hp(1.05 * side, 10.25), hp(2.2 * side, 9.6), hp(3.5 * side, 9.45), hp(4.95 * side, 9.9), hp(3.5 * side, 9.82), hp(2.2 * side, 10.0)]));
-  const eyes = ([-1, 1] as const).map((side) => {
-    const c = 3.15 * side;
-    const shape = curve([hp(c - 1.45 * side, 11.55, 1), hp(c - 0.55 * side, 11.0), hp(c + 0.5 * side, 10.98), hp(c + 1.45 * side, 11.4, 1), hp(c + 0.5 * side, 11.82), hp(c - 0.55 * side, 11.85)]);
-    const lid = curve([hp(c - 1.5 * side, 11.5), hp(c - 0.55 * side, 10.93), hp(c + 0.5 * side, 10.92), hp(c + 1.55 * side, 11.42)], false);
-    const crease = curve([hp(c - 1.1 * side, 10.85), hp(c, 10.42), hp(c + 1.2 * side, 10.75)], false);
-    return { shape, lid, crease, iris: hp(c + 0.05 * side, 11.38) };
+// Rightmost point where a closed outline crosses the height y (on its control polygon), for the callout lines.
+function reachAt(points: Pt[], y: number) {
+  let reach = -Infinity;
+  points.forEach((a, i) => {
+    const b = points[(i + 1) % points.length];
+    if ((a[1] - y) * (b[1] - y) > 0 || a[1] === b[1]) return;
+    reach = Math.max(reach, a[0] + ((b[0] - a[0]) * (y - a[1])) / (b[1] - a[1]));
   });
-  const nose = ([-1, 1] as const).map((side) => curve([hp(1.45 * side, 16.15), hp(1.25 * side, 16.85), hp(0.55 * side, 16.95)], false));
-  const noseSide = curve([hp(0.65, 11.9), hp(0.95, 13.8), hp(1.35, 15.6)], false);
-  const upperLip = curve([hp(-1.95, 18.65, 1), hp(-0.8, 18.25), hp(0, 18.42), hp(0.8, 18.25), hp(1.95, 18.65, 1), hp(0.85, 18.78), hp(0, 18.84), hp(-0.85, 18.78)]);
-  const lowerLip = curve([hp(-1.8, 18.7, 1), hp(-0.85, 18.86), hp(0, 18.88), hp(0.85, 18.86), hp(1.8, 18.7, 1), hp(1.05, 19.5), hp(0, 19.7), hp(-1.05, 19.5)]);
-  const mouthLine = curve([hp(-1.95, 18.65), hp(-0.85, 18.8), hp(0, 18.86), hp(0.85, 18.8), hp(1.95, 18.65)], false);
+  return reach;
+}
 
-  // Neck, rising from inside the collar; the front collar band hides its base.
-  const neckHalf = 5.5 * build ** 0.5 * tall ** 0.3;
-  const neckPath = curve(mirrored([[0, head - 8], [neckHalf * 0.93, head - 8], [neckHalf * 0.97, head - 2], [neckHalf, head + 2.2], [neckHalf * 1.04, hps - 1.6], [neckHalf * 1.3, hps + 1.4], [neckHalf * 2.4, hps + 3.6], [neckHalf * 2.4, hps + 9, 1], [0, hps + 9, 1]]));
-  const collar = TEE.collar.map(img);
-  const [collarLeft, collarRight] = [collar[0], collar[collar.length - 1]];
-  const collarClip = curve([[collarLeft[0], -60, 1], [collarLeft[0], collarLeft[1], 1], ...collar.slice(1, -1), [collarRight[0], collarRight[1], 1], [collarRight[0], -60, 1]]);
+// Head outline on a 23.3 cm tall, 16 cm wide reference, crown to jaw, with the ear.
+const HEAD: Pt[] = [[0, 0], [2.9, 0.55], [5.3, 2.1], [7.0, 4.3], [7.85, 6.9], [8.1, 8.9], [8.0, 9.9, 1], [8.75, 9.6], [9.25, 10.6], [9.2, 12.8], [8.75, 14.6], [8.0, 15.5, 1], [7.85, 16.6], [7.35, 18.4], [6.55, 19.9]];
+// A relaxed hand seen from the front, palm toward the thigh, in cm for a 175 cm body: u runs wrist → fingertips
+// (18.6), v away from the body. Seen this way the wrist shows its thickness, the palm and the thumb in front of it
+// widen the hand, and the notch on the inner side is where the thumb tip parts from the index finger.
+const HAND: Pt[] = [[0.6, 2.0], [2.8, 2.25], [5.6, 2.6], [8.6, 2.7], [11.4, 2.4], [13.9, 1.85], [16.1, 1.05], [17.5, 0.25], [18.0, -0.45], [17.6, -1.05], [16.0, -1.5], [13.8, -1.75], [12.2, -1.75], [11.3, -1.45, 1], [10.9, -2.05], [10.1, -2.55], [8.5, -2.85], [6.2, -2.8], [3.8, -2.4], [1.8, -2.05], [0.4, -2.0]];
 
-  // Arms: from the shoulder joint through the sleeve opening to the elbow, then the forearm swings back toward the thigh.
-  const limb = build ** 0.75 * tall ** 0.6;
-  const upper = braco * 0.55;
-  const fore = braco * 0.45;
-  const handLength = altura * 0.106;
-  const arm = (side: 1 | -1) => {
-    const [outer, inner] = (side < 0 ? TEE.cuffs.left : TEE.cuffs.right).map(img);
-    const cuffMid = lerp(outer, inner, 0.42);
-    const joint: Vec = [side * (shoulderHalf - 1.5), hps + 4.5];
-    const along = unit(sub(cuffMid, joint));
-    const elbow = add(joint, scale(along, upper));
-    const upperAngle = Math.atan2(along[0], along[1]);
-    const foreAngle = upperAngle * 0.42;
-    const wrist = add(elbow, scale(fromAngle(foreAngle), fore));
-    const handAngle = foreAngle * 0.5;
-    // Outward normal of a direction (points away from the body on this side).
-    const outward = (direction: Vec): Vec => (direction[1] * side >= 0 ? [direction[1], -direction[0]] : [-direction[1], direction[0]]);
-    const foreDir = fromAngle(foreAngle);
-    const elbowNormal = unit(add(outward(along), outward(foreDir)));
-    const samples: [Vec, Vec, number, number][] = [
-      [joint, outward(along), 5.0, 4.6],
-      [lerp(joint, elbow, 0.5), outward(along), 4.7, 4.3],
-      [lerp(joint, elbow, 0.88), outward(along), 4.15, 3.8],
-      [elbow, elbowNormal, 4.05, 3.5],
-      [lerp(elbow, wrist, 0.24), outward(foreDir), 4.35, 3.7],
-      [lerp(elbow, wrist, 0.56), outward(foreDir), 3.55, 3.15],
-      [lerp(elbow, wrist, 0.86), outward(foreDir), 2.7, 2.45],
-      [wrist, outward(foreDir), 2.45, 2.3],
-    ];
-    const outline: Pt[] = [
-      add(joint, scale(along, -4.5)),
-      ...samples.map(([point, normal, out]) => add(point, scale(normal, out * limb))),
-      add(wrist, scale(foreDir, 1.2)),
-      ...[...samples].reverse().map(([point, normal, , inward]) => add(point, scale(normal, -inward * limb))),
-    ];
+function figureFor(profile: BodyProfile, row: SizeRow) {
+  const body = bodyModel(profile);
+  const tee = wearTee(body, row);
+  const { w, altura } = body;
+  const Y = (height: number) => altura - height;
+  const y = Object.fromEntries(Object.entries(body.y).map(([key, height]) => [key, Y(height)])) as typeof body.y;
+  const neck = w.neck / 2;
+  const sh = w.shoulders / 2;
+  const dl = Math.max(w.deltoids / 2, sh + 2);
+  const chest = w.chest / 2;
+  const waist = w.waist / 2;
+  const hip = w.hip / 2;
+  const torsoAt = (height: number) => (height < y.chest ? chest : height < y.waist ? mix(chest, waist, (height - y.chest) / (y.waist - y.chest)) : mix(waist, hip, clamp((height - y.waist) / (y.hip - y.waist), 0, 1)));
 
-    // Hand in its own frame: u runs from the wrist to the fingertips, v away from the body. Seen from the front the
-    // relaxed hand shows its thumb side, back of the hand outward, fingers curling in toward the thigh.
-    const handScale = tall ** 0.8 * build ** 0.25;
-    const u = fromAngle(handAngle);
-    const v = outward(u);
-    const hand = (uu: number, vv: number, sharp?: 1): Pt => {
-      const [x, y] = add(wrist, add(scale(u, uu * handScale * (handLength / 18.5)), scale(v, vv * handScale)));
-      return sharp ? [x, y, 1] : [x, y];
-    };
-    const palm = curve([
-      hand(-1.2, 2.5), hand(2.5, 2.75), hand(6.0, 2.85), hand(8.8, 2.6), hand(10.4, 2.25), hand(12.8, 1.95), hand(14.8, 1.5), hand(16.3, 0.85), hand(17.0, 0.05), hand(16.75, -0.6),
-      hand(16.15, -0.85, 1), hand(16.45, -1.45), hand(16.0, -2.2), hand(14.7, -2.6), hand(12.7, -2.8), hand(10.0, -3.15), hand(7.0, -3.2), hand(4.0, -2.95), hand(1.2, -2.5), hand(-1.2, -2.35),
-    ]);
-    const thumb = curve([hand(2.0, 1.3), hand(5.2, 0.9), hand(8.4, -0.1), hand(10.6, -1.1), hand(11.6, -1.9), hand(11.1, -2.6), hand(9.0, -2.65), hand(6.2, -2.35), hand(3.4, -1.75), hand(1.6, -0.9)]);
-    const thumbShadow = curve([hand(8.2, -0.4), hand(10.9, -1.6), hand(12.6, -2.3), hand(11.8, -2.9), hand(9.6, -2.8)]);
-    const knuckles = [curve([hand(13.2, -0.35), hand(14.8, -0.55), hand(16.15, -0.85)], false), curve([hand(13.9, 1.2), hand(15.6, 0.75), hand(16.85, 0.25)], false)];
-    const nail = curve([hand(10.3, -1.55), hand(11.15, -1.9), hand(10.9, -2.35), hand(10.1, -2.15)]);
+  // Head and neck.
+  const hx = w.head / 2 / 8.1;
+  const hy = body.head / 23.3;
+  const head = HEAD.map(([x, yy, corner]) => (corner ? [x * hx, yy * hy, 1] : [x * hx, yy * hy]) as Pt);
 
-    // Only what lies beyond the sleeve opening shows: everything on the shoulder's side of the cuff line is in the sleeve.
-    const cuffAlong = unit(sub(inner, outer));
-    let away: Vec = [-cuffAlong[1], cuffAlong[0]];
-    if (away[0] * (cuffMid[0] - joint[0]) + away[1] * (cuffMid[1] - joint[1]) < 0) away = scale(away, -1);
-    const clip = [add(outer, scale(cuffAlong, -60)), add(inner, scale(cuffAlong, 30)), add(add(inner, scale(cuffAlong, 30)), scale(away, 120)), add(add(outer, scale(cuffAlong, -60)), scale(away, 120))];
-    // A soft shadow where the arm comes out of the sleeve.
-    const shade = [lerp(outer, inner, 0.05), lerp(outer, inner, 0.82), add(lerp(outer, inner, 0.82), scale(away, 3.2)), add(lerp(outer, inner, 0.05), scale(away, 3.2))];
-    const reach = Math.max(...outline.map(([x]) => x * side)) * side;
-    return { path: curve(outline), palm, thumb, thumbShadow, knuckles, nail, clip, shade, reach, wristY: wrist[1] };
-  };
-
-  // Relaxed straight linen trousers, fuller with the hips and the build.
-  const legCenter = hipHalf * 0.5 + 1.2;
-  const hemHalf = 6.1 * build ** 0.35 * tall ** 0.3;
-  const kneeHalf = hemHalf * 1.2;
-  const hemY = ankleY + 0.6;
-  const waistOut = waistHalf + 1.2;
-  const hipOut = hipHalf + 1.8;
-  const trousers = curve(mirrored([
-    [0, waistY - 2, 1], [waistOut, waistY - 2, 1], [(waistOut + hipOut) / 2 + 0.3, (waistY + hipY) / 2], [hipOut, hipY], [hipOut - 0.4, crotchY + 6],
-    [legCenter + kneeHalf, kneeY], [legCenter + hemHalf + 0.1, hemY - 3], [legCenter + hemHalf + 0.15, hemY, 1], [legCenter + 0.4, hemY + 0.9], [legCenter - hemHalf + 0.5, hemY, 1],
-    [legCenter - hemHalf + 0.55, hemY - 3], [legCenter - kneeHalf + 0.9, kneeY], [1.9, crotchY + 7], [0.9, crotchY + 2.3], [0, crotchY + 1.8, 1],
-  ]));
-  const legShade = ([-1, 1] as const).map((side) => ({ x: side * legCenter - (hipOut - legCenter + 0.6), width: (hipOut - legCenter + 0.6) * 2, y: waistY - 2, height: hemY + 4 - waistY }));
-  const creases = ([-1, 1] as const).map((side) => curve([[side * (legCenter * 0.82), hipY + 3], [side * (legCenter * 0.95), kneeY], [side * (legCenter + 0.35), hemY + 0.8]], false));
-  const folds = ([-1, 1] as const).flatMap((side) => [
-    curve([[side * 1.6, crotchY + 2.5], [side * 4.2, crotchY - 0.6], [side * 7.6, crotchY - 2.2]], false),
-    curve([[side * (legCenter - hemHalf + 1.4), hemY - 2.6], [side * legCenter, hemY - 1.5], [side * (legCenter + hemHalf - 1.2), hemY - 2.8]], false),
+  // Legs: thighs together at the crotch, knees nearly touching, feet a little apart and turned out.
+  const kneeHalf = w.knee / 2;
+  const calfHalf = w.calf / 2;
+  const ankleHalf = w.ankle / 2;
+  const footHalf = w.foot / 2;
+  const kneeX = Math.max(kneeHalf + 0.7, hip * 0.46);
+  const ankleX = Math.max(hip * 0.6, kneeX + 1.5);
+  const calfY = mix(y.knee, y.ankle, 0.3);
+  const calfX = mix(kneeX, ankleX, 0.3);
+  const leg: Pt[] = [
+    [hip, y.hip], [hip + 0.2, y.crotch + 5], [mix(hip, kneeX + kneeHalf, 0.6) + 0.9, mix(y.crotch + 5, y.knee, 0.6)], [kneeX + kneeHalf + 0.3, y.knee - 3], [kneeX + kneeHalf - 0.3, y.knee + 2],
+    [calfX + calfHalf * 1.1, calfY - 1], [mix(calfX + calfHalf, ankleX + ankleHalf, 0.55), mix(calfY, y.ankle, 0.55)], [ankleX + ankleHalf + 0.15, y.ankle - 1.5], [ankleX + ankleHalf + 0.3, y.ankle + 0.6],
+    [ankleX + footHalf * 0.95 + 0.6, altura - 1.8], [ankleX + footHalf + 0.75, altura - 0.55], [ankleX + footHalf * 0.55 + 0.4, altura + 0.05], [ankleX - footHalf * 0.35, altura + 0.05], [ankleX - footHalf * 0.82, altura - 0.5], [ankleX - footHalf * 0.72, altura - 2],
+    [ankleX - ankleHalf - 0.2, y.ankle + 0.2], [ankleX - ankleHalf + 0.1, y.ankle - 4], [calfX - calfHalf * 1.0, calfY - 3], [kneeX - kneeHalf + 0.4, y.knee + 3], [kneeX - kneeHalf, y.knee - 2],
+    [kneeX - kneeHalf + 0.9, y.knee - 10], [0.45, y.crotch + 7], [0, y.crotch + 0.6, 1],
+  ];
+  const silhouette = mirrored([
+    ...head,
+    [neck * 1.02, body.head * 0.9, 1], [neck * 0.99, body.head + 1.5], [neck * 1.04, y.hps - 1.6],
+    [neck * 1.5, y.hps + 0.2], [mix(neck, sh, 0.5), y.hps + 1.7], [sh * 0.94, y.acromion - 0.4], [mix(sh, dl, 0.6), y.acromion + 0.8], [dl * 0.97, y.acromion + 4.4],
+    [chest + 0.9, y.axilla], [chest, y.chest + 1.5], [mix(chest, waist, 0.55), mix(y.chest, y.waist, 0.5)], [waist, y.waist], [mix(waist, hip, 0.7), mix(y.waist, y.hip, 0.5)],
+    ...leg,
   ]);
 
-  // Minimal white leather sneakers, toes turned slightly out.
-  const shoeScale = tall ** 0.8;
-  const shoe = (side: 1 | -1) => {
-    const cx = side * (legCenter + 0.6);
-    const p = (x: number, y: number, sharp?: 1): Pt => (sharp ? [cx + x * shoeScale, altura + y * shoeScale, 1] : [cx + x * shoeScale, altura + y * shoeScale]);
-    const o = side * 0.5; // toes turn out a touch
-    return {
-      upper: curve([p(-5.25 + o, -1.5, 1), p(-5.0 + o, -3.4), p(-4.2 + o * 0.5, -5.8), p(-3.5, -7.6, 1), p(3.5, -7.6, 1), p(4.2 + o * 0.5, -5.8), p(5.0 + o, -3.4), p(5.25 + o, -1.5, 1)]),
-      toe: curve([p(-4.5 + o, -1.6, 1), p(-3.4 + o, -3.7), p(o, -4.6), p(3.4 + o, -3.7), p(4.5 + o, -1.6, 1)]),
-      tongue: curve([p(-1.7 + o * 0.6, -4.2, 1), p(-1.9, -7.8, 1), p(1.9, -7.8, 1), p(1.7 + o * 0.6, -4.2, 1)]),
-      laces: [-6.9, -6.0, -5.1].map((y) => curve([p(-1.9 + o * 0.3, y), p(o * 0.3, y - 0.15), p(1.9 + o * 0.3, y)], false)),
-      sole: curve([p(-5.55 + o, -1.9, 1), p(5.55 + o, -1.9, 1), p(5.7 + o, -0.4), p(5.1 + o, 0, 1), p(-5.1 + o, 0, 1), p(-5.7 + o, -0.4)]),
-      contact: { cx: cx + o, cy: altura - 0.2, rx: 6.2 * shoeScale, ry: 1.0 },
-    };
-  };
+  // Arms hang a few degrees out, the forearm a little more (the carrying angle), opening further only when the elbow
+  // would touch the waist or the hand the hip.
+  const upperHalf = w.upperArm / 2;
+  const foreHalf = w.forearm / 2;
+  const wristHalf = w.wrist / 2;
+  const joint: Vec = [sh - 1.6, y.acromion + 3.4];
+  const drop1 = y.elbow - joint[1];
+  const a1 = Math.max((5 * Math.PI) / 180, Math.atan2(torsoAt(y.elbow) + upperHalf * 0.9 + 1.4 - joint[0], drop1));
+  const elbow: Vec = [joint[0] + Math.tan(a1) * drop1, y.elbow];
+  const drop2 = y.wrist - y.elbow;
+  const a2 = Math.max(a1 + (5 * Math.PI) / 180, Math.atan2(Math.max(hip, torsoAt(y.wrist)) + wristHalf + 2 - elbow[0], drop2));
+  const wrist: Vec = [elbow[0] + Math.tan(a2) * drop2, y.wrist];
+  const d1 = unit(sub(elbow, joint));
+  const d2 = unit(sub(wrist, elbow));
+  const n1: Vec = [d1[1], -d1[0]]; // outward
+  const n2: Vec = [d2[1], -d2[0]];
+  const nElbow = unit(add(n1, n2));
+  const upperLength = Math.hypot(...sub(elbow, joint));
+  const along1 = (s: number) => add(joint, scale(d1, s));
+  const at1 = (t: number) => lerp(joint, elbow, t);
+  const at2 = (t: number) => lerp(elbow, wrist, t);
+  const off = (p: Vec, n: Vec, k: number) => add(p, scale(n, k));
+  const handLength = altura * 0.108;
+  const a3 = a2 + (2 * Math.PI) / 180;
+  const u: Vec = [Math.sin(a3), Math.cos(a3)];
+  const v: Vec = [Math.cos(a3), -Math.sin(a3)];
+  const hand = HAND.map(([uu, vv, corner]) => {
+    const p = add(wrist, add(scale(u, (uu * handLength) / 18.6), scale(v, (vv * w.wrist) / 4.0)));
+    return corner ? sharp(p) : p;
+  });
+  const rightArm: Pt[] = [
+    [sh * 0.62, y.acromion - 1.6], [mix(sh, dl, 0.5), y.acromion - 0.1], [Math.max(dl, at1(0.12)[0] + upperHalf * 1.08), y.acromion + 4.2],
+    off(at1(0.5), n1, upperHalf), off(at1(0.86), n1, upperHalf * 0.86), off(elbow, nElbow, foreHalf * 0.86), off(at2(0.2), n2, foreHalf * 1.02), off(at2(0.6), n2, foreHalf * 0.78), off(wrist, n2, wristHalf),
+    ...hand,
+    off(wrist, n2, -wristHalf), off(at2(0.55), n2, -foreHalf * 0.8), off(at2(0.16), n2, -foreHalf * 0.96), off(elbow, nElbow, -foreHalf * 0.82), off(at1(0.55), n1, -upperHalf * 0.9),
+    [chest + 0.4, y.axilla + 1], [chest - 2.5, y.axilla - 4],
+  ];
 
-  // Where the silhouette ends on the right at a given height (for the callout lines).
-  const teeEdge = (y: number) => {
-    const iy = (y - teeTop) / ky;
-    const rows = TEE.edge;
-    if (iy < rows[0][0] || iy > rows[rows.length - 1][0]) return 0;
-    const index = rows.findIndex(([row]) => row >= iy);
-    const [a, b] = [rows[Math.max(0, index - 1)], rows[index]];
-    const x = a[1] + ((b[1] - a[1]) * (iy - a[0])) / ((b[0] - a[0]) || 1);
-    return (x - TEE.cx) * kx;
+  // The tee. Shoulder seams sit on the body's shoulder line at the chart's width: on top of the deltoid for a small
+  // size, falling down the arm as the size grows (the dropped shoulder of the cut).
+  const teeHalf = tee.width / 2;
+  const hemHalf = tee.hemWidth / 2;
+  const hemY = Y(tee.hem);
+  const collar = neck + 1.5; // half width of the neck opening
+  const surface = (x: number) => {
+    const [x0, x1] = [neck * 1.5, sh * 0.94];
+    if (x <= x0) return y.hps + 0.2;
+    if (x <= x1) return mix(y.hps + 0.2, y.acromion - 0.4, (x - x0) / (x1 - x0));
+    if (x <= dl) return y.acromion - 0.4 + (1 - Math.sqrt(1 - ((x - x1) / (dl - x1)) ** 2)) * 4.6;
+    return y.acromion + 4.2 + (x - dl) * 1.5;
   };
-  const right = arm(1);
-  const edgeAt = (y: number) => Math.max(teeEdge(y), y > waistY ? hipOut : 0, y > hps + 25 && y < right.wristY + handLength ? right.reach : 0);
+  const onShoulder = (x: number): Vec => [x, surface(x) - 0.6];
+  const seam = onShoulder(Math.min(tee.shoulder / 2, dl + 3));
+  const underarm: Vec = [Math.max(teeHalf, chest + 0.8), y.hps + tee.armhole];
+  // A tee side that would only peek out beside the arm as a sliver tucks behind it.
+  const tuck = (x: number, yy: number) => {
+    const edge = reachAt(rightArm, yy);
+    return x > edge - 1.6 && x < edge + 1.2 ? edge - 1.6 : x;
+  };
+  const side = (t: number): Pt => {
+    const yy = mix(underarm[1], hemY, t);
+    return [tuck(Math.max(mix(underarm[0], hemHalf, t), torsoAt(yy) + 1), yy), yy];
+  };
+  const hemCorner = tuck(hemHalf, hemY);
+  const panel = mirrored([
+    [0, y.hps + 0.9], [collar * 0.6, y.hps + 0.3], [collar, y.hps - 1.2, 1], [collar + 1.6, y.hps - 0.85],
+    ...[0.35, 0.62, 0.82, 0.94].map((t) => onShoulder(mix(collar + 1.6, seam[0], t))), sharp(seam),
+    [mix(seam[0], underarm[0], 0.5) + 0.8, mix(seam[1], underarm[1], 0.5)], underarm, side(0.4), side(0.8),
+    [hemCorner, hemY - 0.2, 1], [hemCorner * 0.55, hemY + 0.55], [0, hemY + 0.75],
+  ]);
 
+  // Sleeve: from the seam down the arm to the opening, loose around the arm, its inner edge folding into the armpit.
+  const s0 = dot(sub(seam, joint), d1);
+  const seamOffset = dot(sub(seam, joint), n1);
+  const hemAlong = Math.min(s0 + tee.sleeve.length * 0.96, upperLength + 4);
+  const opening = tee.sleeve.width / 2;
+  const cuff = along1(hemAlong);
+  const cuffOuter = off(cuff, n1, opening + 0.5);
+  const cuffInner = off(cuff, n1, -(opening - 0.5));
+  const armOuter = (s: number) => upperHalf * (s < upperLength * 0.5 ? 1 : mix(1, 0.86, clamp((s / upperLength - 0.5) / 0.36, 0, 1)));
+  const sleeveOuter = (t: number) => {
+    const s = mix(s0, hemAlong, t);
+    return off(along1(s), n1, Math.max(armOuter(s) + 0.6, mix(seamOffset, opening + 0.5, t)));
+  };
+  const armpitAlong = (y.axilla + 1.5 - joint[1]) / d1[1];
+  const armpit = off(along1(armpitAlong), n1, -(upperHalf * 0.9 + 0.3));
+  const sleeveInner = off(along1((hemAlong + armpitAlong) / 2), n1, -mix(opening - 0.5, upperHalf * 0.9 + 0.3, 0.5));
+  const armholeMid: Vec = [mix(seam[0], armpit[0], 0.5) - 0.6, mix(seam[1], armpit[1], 0.5)];
+  const rightSleeve: Pt[] = [sharp(seam), sleeveOuter(0.3), sleeveOuter(0.65), sharp(cuffOuter), off(cuff, d1, 0.3), sharp(cuffInner), sleeveInner, armpit, armholeMid];
+  // Only the arm below the sleeve opening is drawn; the sleeve covers the joint.
+  const cuffAway = add(cuff, scale(d1, -0.6));
+  const armClip = [off(cuffAway, n1, 25), off(cuffAway, n1, -25), add(off(cuffAway, n1, -25), scale(d1, 160)), add(off(cuffAway, n1, 25), scale(d1, 160))];
+
+  // Collar: a ribbed band dipping in front, the inside of the back band showing beside the neck.
+  const bandOuter: Pt[] = [[collar + 1.6, y.hps - 0.85, 1], [collar + 1.1, y.hps + 2.2], [neck, y.hps + 6.4], [neck * 0.55, y.hps + 8.3], [0, y.hps + 8.9]];
+  const bandInner: Pt[] = [[0, y.hps + 6.6], [neck * 0.55, y.hps + 6.0], [neck * 0.95, y.hps + 4.0], [collar - 0.1, y.hps + 0.5], [collar, y.hps - 1.2, 1]];
+  const band = [...bandOuter, ...bandOuter.slice(0, -1).reverse().map(flip), ...bandInner.slice(1).reverse().map(flip), ...bandInner];
+  const bandMiddle = bandOuter.map((p, i) => lerp([p[0], p[1]], [bandInner[4 - i][0], bandInner[4 - i][1]], 0.5));
+  const neckClip = curve([[-60, -60, 1], [60, -60, 1], [60, y.hps - 1.2, 1], ...bandMiddle.map((p, i) => (i === 0 ? sharp(p) : p)), ...bandMiddle.slice(0, -1).reverse().map((p, i, all) => flip(i === all.length - 1 ? sharp(p) : p)), [-60, y.hps - 1.2, 1]]);
+  const backBand = curve([[-collar, y.hps - 1.2, 1], [-collar * 0.6, y.hps + 0.3], [0, y.hps + 0.9], [collar * 0.6, y.hps + 0.3], [collar, y.hps - 1.2, 1], [collar - 0.1, y.hps + 2.5], [0, y.hps + 6.8], [-(collar - 0.1), y.hps + 2.5]]);
+  const neckFront = curve(mirrored([[0, body.head * 0.8], [neck * 1.02, body.head * 0.9, 1], [neck * 0.99, body.head + 1.5], [neck * 1.04, y.hps - 1.6], [neck * 1.06, y.hps + 4], [neck * 1.06, y.hps + 10, 1], [0, y.hps + 10, 1]]));
+  const ribs = Array.from({ length: 29 }, (_, i) => {
+    const t = i / 28;
+    const outerAt = (k: number) => { const fk = k * 8; const j = Math.min(7, Math.floor(fk)); const full = [...bandOuter, ...bandOuter.slice(0, -1).reverse().map(flip)]; return lerp([full[j][0], full[j][1]], [full[j + 1][0], full[j + 1][1]], fk - j); };
+    const innerAt = (k: number) => { const fk = k * 8; const j = Math.min(7, Math.floor(fk)); const full = [...bandInner.slice().reverse(), ...bandInner.slice(1).map(flip)]; return lerp([full[j][0], full[j][1]], [full[j + 1][0], full[j + 1][1]], fk - j); };
+    const [a, b] = [outerAt(t), innerAt(t)];
+    return `M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}`;
+  }).join("");
+
+  // Fabric: drag folds from the armpits, long drape lines when the tee falls loose, strain lines when it's tight.
+  const loose = clamp((tee.ease - 8) / 20, 0.04, 0.32);
+  const tight = clamp((8 - tee.ease) / 12, 0, 0.55);
+  const sides = [1, -1] as const;
+  const at = (s: 1 | -1, p: Vec): Vec => [p[0] * s, p[1]];
+  const folds = sides.flatMap((s) => [
+    curve([at(s, add(armpit, [-0.6, 0.8])), at(s, [mix(armpit[0], 0, 0.3), armpit[1] + 3.5]), at(s, [mix(armpit[0], 0, 0.5), armpit[1] + 8])], false),
+    curve([at(s, add(armpit, [-0.2, 2.6])), at(s, [mix(armpit[0], 0, 0.22), armpit[1] + 7]), at(s, [mix(armpit[0], 0, 0.36), armpit[1] + 12])], false),
+  ]);
+  const drapes = sides.flatMap((s) => [0.5, 0.8].map((k) => curve([at(s, [teeHalf * k, y.chest + 1]), at(s, [teeHalf * (k + 0.03), mix(y.chest, hemY, 0.55)]), at(s, [hemHalf * (k + 0.05), hemY - 0.6])], false)));
+  const strains = sides.flatMap((s) => [y.chest + 2, y.waist - 1].map((yy) => curve([at(s, [torsoAt(yy) + 0.4, yy - 2.5]), at(s, [torsoAt(yy) * 0.55, yy - 0.4]), at(s, [torsoAt(yy) * 0.12, yy + 0.4])], false)));
+  const hemStitch = curve([[-hemCorner + 0.5, hemY - 2.1], [-hemCorner * 0.55, hemY - 1.5], [0, hemY - 1.3], [hemCorner * 0.55, hemY - 1.5], [hemCorner - 0.5, hemY - 2.1]], false);
+  const cuffStitch = curve([off(lerp(cuffInner, cuffOuter, 0.05), d1, -1.7), off(cuff, d1, -1.45), off(lerp(cuffInner, cuffOuter, 0.95), d1, -1.7)], false);
+  const armholeSeam = curve([seam, armholeMid, armpit], false);
+
+  const right = { arm: rightArm, sleeve: rightSleeve };
+  const reach = (yy: number) => Math.max(reachAt(panel, yy), reachAt(right.sleeve, yy), reachAt(right.arm, yy), reachAt(silhouette, yy));
   return {
     altura,
-    tee: { x: -TEE.cx * kx, y: teeTop, width: 1200 * kx, height: 1180 * ky },
-    hemShadow: { x: -hipOut - 2, y: teeTop + TEE.hem * ky - 0.6, width: hipOut * 2 + 4, height: 2.6 },
-    head: { path: headPath, ears: [ear(-1), ear(1)], earFolds: [earFold(-1), earFold(1)], hair, hairStrands, brows, eyes, nose, noseSide, upperLip, lowerLip, mouthLine, scale: hs, chin: head },
-    neck: neckPath,
-    collarClip,
-    arms: [arm(-1), right],
-    trousers,
-    legShade,
-    creases,
+    silhouette: curve(silhouette),
+    arms: sides.map((s) => curve(s > 0 ? right.arm : right.arm.map(flip))),
+    armClips: sides.map((s) => `M${armClip.map((p) => `${f(p[0] * s)} ${f(p[1])}`).join(" L")} Z`),
+    cuffShade: sides.map((s) => curve([at(s, off(cuffInner, d1, -0.4)), at(s, off(cuffOuter, d1, -0.4)), at(s, off(cuffOuter, d1, 2.2)), at(s, off(cuffInner, d1, 2.2))].map(sharp))),
+    sleeves: sides.map((s) => curve(s > 0 ? right.sleeve : right.sleeve.map(flip))),
+    armholes: sides.map((s) => (s > 0 ? armholeSeam : curve([flip(seam), flip(armholeMid), flip(armpit)], false))),
+    cuffStitches: sides.map((s) => (s > 0 ? cuffStitch : curve([off(lerp(cuffInner, cuffOuter, 0.05), d1, -1.7), off(cuff, d1, -1.45), off(lerp(cuffInner, cuffOuter, 0.95), d1, -1.7)].map(flip), false))),
+    panel: curve(panel),
+    backBand,
+    band: curve(band),
+    bandShadow: curve([...bandOuter, ...bandOuter.slice(0, -1).reverse().map(flip)].map((p) => [p[0], p[1] + 0.6] as Pt), false),
+    ribs,
+    neckFront,
+    neckClip,
     folds,
-    shoes: [shoe(-1), shoe(1)],
-    ground: { rx: legCenter + 11, y: altura },
-    callouts: { busto: { y: bustY, edge: edgeAt(bustY) }, cintura: { y: waistY, edge: edgeAt(waistY) }, quadril: { y: hipY, edge: edgeAt(hipY) } },
+    drapes,
+    strains,
+    hemStitch,
+    loose,
+    tight,
+    hemShadow: { x: -hemCorner, y: hemY - 0.4, width: hemCorner * 2, height: 3 },
+    chestLight: { cx: -teeHalf * 0.22, cy: y.chest - 2, rx: teeHalf * 0.45, ry: 10 },
+    mark: { x: teeHalf * 0.5, y: y.hps + 13.5 },
+    ground: { cx: 0, cy: altura, rx: ankleX + footHalf + 6, ry: 1.8 },
+    callouts: { busto: { y: y.chest, edge: reach(y.chest) }, cintura: { y: y.waist, edge: reach(y.waist) }, quadril: { y: y.hip, edge: reach(y.hip) } },
   };
 }
 
@@ -268,109 +273,68 @@ const SPRING = { type: "spring", stiffness: 110, damping: 20 } as const;
 export function FitFigure({ profile, size, className = "" }: { profile: BodyProfile; size: SizeRow; className?: string }) {
   const id = useId().replace(/:/g, "");
   const figure = figureFor(profile, size);
+  const S = Math.min(SCALE, MAX_FIGURE / figure.altura);
   const top = FLOOR - figure.altura * S;
   // Everything below is drawn in cm: x from the body's centre line, y from the crown.
   const toPx = `translate(${CENTER} ${top}) scale(${S})`;
-  const hs = figure.head.scale;
   const value = (field: keyof BodyProfile) => measure(profile, field);
   const altura = value("altura");
   const ref = (name: string) => `url(#${id}-${name})`;
   const morph = (d: string) => ({ initial: false as const, animate: { d }, transition: SPRING });
-  const feature = (cx: number, cy: number, rx: number, ry: number) => ({ initial: false as const, animate: { cx: cx * hs, cy: cy * hs, rx: rx * hs, ry: ry * hs }, transition: SPRING });
 
   return <svg viewBox={`0 0 ${W} ${H}`} className={className} role="img" aria-label={`Figura com as suas medidas vestindo a camiseta Merano no tamanho ${size.size}`}>
     <defs>
-      <radialGradient id={`${id}-face`} cx="40%" cy="36%" r="75%"><stop offset="0" stopColor="#f2d3b4" /><stop offset=".5" stopColor="#dcb08b" /><stop offset="1" stopColor="#ad7a59" /></radialGradient>
-      <linearGradient id={`${id}-skin`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#c08c68" /><stop offset=".3" stopColor="#ecc8a5" /><stop offset=".65" stopColor="#d8aa85" /><stop offset="1" stopColor="#a5735a" /></linearGradient>
-      <linearGradient id={`${id}-neck`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#b5845f" /><stop offset=".35" stopColor="#dcb08b" /><stop offset=".7" stopColor="#c99a75" /><stop offset="1" stopColor="#966548" /></linearGradient>
-      <radialGradient id={`${id}-hair`} cx="34%" cy="18%" r="85%"><stop offset="0" stopColor="#6b4e3a" /><stop offset=".55" stopColor="#33251b" /><stop offset="1" stopColor="#1d140e" /></radialGradient>
-      <linearGradient id={`${id}-leg`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#5a4128" stopOpacity=".34" /><stop offset=".3" stopColor="#fff8ec" stopOpacity=".2" /><stop offset=".62" stopColor="#5a4128" stopOpacity="0" /><stop offset="1" stopColor="#5a4128" stopOpacity=".38" /></linearGradient>
-      <linearGradient id={`${id}-shoe`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffffff" /><stop offset="1" stopColor="#e2dccf" /></linearGradient>
-      <filter id={`${id}-soft`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation=".55" /></filter>
-      <filter id={`${id}-softer`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4" /></filter>
-      <filter id={`${id}-fine`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation=".18" /></filter>
-      <filter id={`${id}-shadow`} x="-30%" y="-20%" width="160%" height="140%"><feDropShadow dx="0" dy="2.2" stdDeviation="2.6" floodColor="#03161a" floodOpacity=".38" /></filter>
-      <clipPath id={`${id}-collar`}><motion.path {...morph(figure.collarClip)} /></clipPath>
-      <clipPath id={`${id}-head`}><motion.path {...morph(figure.head.path)} /></clipPath>
-      <clipPath id={`${id}-trousers`}><motion.path {...morph(figure.trousers)} /></clipPath>
-      {figure.head.eyes.map((eye, index) => <clipPath key={index} id={`${id}-eye-${index}`}><motion.path {...morph(eye.shape)} /></clipPath>)}
-      {figure.arms.map((arm, index) => <clipPath key={index} id={`${id}-sleeve-${index}`}><motion.path {...morph(`M${arm.clip.map(([x, y]) => `${f(x)} ${f(y)}`).join(" L")} Z`)} /></clipPath>)}
+      {/* The silhouette's sea-blue, deep at the head and lighter toward the feet, continuous across body and arms. */}
+      <linearGradient id={`${id}-body`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={figure.altura}><stop offset="0" stopColor="#3a6fb4" /><stop offset=".5" stopColor="#4d95c9" /><stop offset="1" stopColor="#7fd6f5" /></linearGradient>
+      <linearGradient id={`${id}-tee`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#cfc6b7" /><stop offset=".12" stopColor="#e2dbce" /><stop offset=".42" stopColor="#f2ede5" /><stop offset=".7" stopColor="#ebe5db" /><stop offset=".9" stopColor="#dcd4c7" /><stop offset="1" stopColor="#cbc1b2" /></linearGradient>
+      <linearGradient id={`${id}-tee-fall`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".22" /><stop offset=".45" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#5b4a34" stopOpacity=".1" /></linearGradient>
+      <linearGradient id={`${id}-sleeve`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#d2c9bb" /><stop offset=".4" stopColor="#ede7de" /><stop offset=".75" stopColor="#e6dfd4" /><stop offset="1" stopColor="#ccc2b3" /></linearGradient>
+      <filter id={`${id}-soft`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation=".45" /></filter>
+      <filter id={`${id}-softer`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.3" /></filter>
+      <filter id={`${id}-lift`} x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy=".5" stdDeviation=".7" floodColor="#2b2116" floodOpacity=".28" /></filter>
+      <filter id={`${id}-glow`} x="-30%" y="-10%" width="160%" height="120%"><feDropShadow dx="0" dy="1.2" stdDeviation="2.4" floodColor="#03161a" floodOpacity=".45" /></filter>
+      <clipPath id={`${id}-panel`}><motion.path {...morph(figure.panel)} /></clipPath>
+      <clipPath id={`${id}-neck`}><motion.path {...morph(figure.neckClip)} /></clipPath>
+      {figure.armClips.map((d, index) => <clipPath key={index} id={`${id}-arm-${index}`}><motion.path {...morph(d)} /></clipPath>)}
     </defs>
 
     <g transform={toPx}>
-      <motion.ellipse initial={false} animate={{ cx: 0, cy: figure.ground.y, rx: figure.ground.rx, ry: 2.2 }} transition={SPRING} fill="#000" fillOpacity={0.32} filter={ref("softer")} />
+      <motion.ellipse initial={false} animate={figure.ground} transition={SPRING} fill="#000" fillOpacity={0.35} filter={ref("softer")} />
 
-      {figure.shoes.map((shoe, index) => <motion.ellipse key={index} initial={false} animate={shoe.contact} transition={SPRING} fill="#000" fillOpacity={0.45} filter={ref("soft")} />)}
-      {/* Shoes, then the trousers over them */}
-      {figure.shoes.map((shoe, index) => <g key={index}>
-          <motion.path {...morph(shoe.sole)} fill="#e6dfd2" stroke="#b9ae9c" strokeWidth={0.2} />
-          <motion.path {...morph(shoe.upper)} fill={ref("shoe")} />
-          <motion.path {...morph(shoe.tongue)} fill="#ebe5da" />
-          {shoe.laces.map((d, lace) => <motion.path key={lace} {...morph(d)} fill="none" stroke="#bdb3a3" strokeWidth={0.32} strokeLinecap="round" />)}
-          <motion.path {...morph(shoe.toe)} fill="#ffffff" stroke="#d3cabb" strokeWidth={0.18} />
+      <g filter={ref("glow")}>
+        <motion.path {...morph(figure.silhouette)} fill={ref("body")} />
+        <motion.rect initial={false} animate={figure.hemShadow} transition={SPRING} fill="#0b2340" fillOpacity={0.35} filter={ref("softer")} />
+
+        {/* The tee's body, with the inside of the back band showing beside the neck */}
+        <motion.path {...morph(figure.panel)} fill={ref("tee")} />
+        <g clipPath={ref("panel")}>
+          <motion.path {...morph(figure.panel)} fill={ref("tee-fall")} />
+          <motion.ellipse initial={false} animate={figure.chestLight} transition={SPRING} fill="#fff" fillOpacity={0.28} filter={ref("softer")} />
+          {figure.drapes.map((d, index) => <motion.path key={index} initial={false} animate={{ d, strokeOpacity: figure.loose }} transition={SPRING} fill="none" stroke="#6f5e47" strokeWidth={0.9} strokeLinecap="round" filter={ref("soft")} />)}
+          {figure.folds.map((d, index) => <motion.path key={index} {...morph(d)} fill="none" stroke="#6f5e47" strokeOpacity={0.22} strokeWidth={0.75} strokeLinecap="round" filter={ref("soft")} />)}
+          {figure.strains.map((d, index) => <motion.path key={index} initial={false} animate={{ d, strokeOpacity: figure.tight }} transition={SPRING} fill="none" stroke="#6f5e47" strokeWidth={0.6} strokeLinecap="round" filter={ref("soft")} />)}
+          <motion.path {...morph(figure.hemStitch)} fill="none" stroke="#a69a87" strokeWidth={0.14} strokeDasharray=".55 .4" />
+          <motion.path {...morph(figure.bandShadow)} fill="none" stroke="#4a3b28" strokeOpacity={0.3} strokeWidth={0.9} filter={ref("soft")} />
+        </g>
+        <motion.path {...morph(figure.backBand)} fill="#b9ad9c" />
+
+        {/* Neck rising out of the collar */}
+        <g clipPath={ref("neck")}><motion.path {...morph(figure.neckFront)} fill={ref("body")} /></g>
+
+        {/* Forearms leaving the sleeves, then the sleeves over them */}
+        {figure.arms.map((d, index) => <g key={index} clipPath={ref(`arm-${index}`)} filter={ref("lift")}>
+          <motion.path {...morph(d)} fill={ref("body")} />
+          <motion.path {...morph(figure.cuffShade[index])} fill="#0b2340" fillOpacity={0.45} filter={ref("soft")} />
+        </g>)}
+        {figure.sleeves.map((d, index) => <g key={index} filter={ref("lift")}>
+          <motion.path {...morph(d)} fill={ref("sleeve")} />
+          <motion.path {...morph(figure.cuffStitches[index])} fill="none" stroke="#a69a87" strokeWidth={0.14} strokeDasharray=".55 .4" />
+          <motion.path {...morph(figure.armholes[index])} fill="none" stroke="#9c907c" strokeOpacity={0.55} strokeWidth={0.14} />
         </g>)}
 
-      <g filter={ref("shadow")}>
-        <motion.path {...morph(figure.trousers)} fill="#cdb692" />
-        <g clipPath={ref("trousers")}>
-          {figure.legShade.map((leg, index) => <motion.rect key={index} initial={false} animate={leg} transition={SPRING} fill={ref("leg")} />)}
-          {figure.creases.map((d, index) => <motion.path key={index} {...morph(d)} fill="none" stroke="#f3e8d4" strokeOpacity={0.35} strokeWidth={0.35} />)}
-          {figure.folds.map((d, index) => <motion.path key={index} {...morph(d)} fill="none" stroke="#7d6446" strokeOpacity={0.3} strokeWidth={0.45} strokeLinecap="round" filter={ref("soft")} />)}
-          <motion.rect initial={false} animate={figure.hemShadow} transition={SPRING} fill="#3b2a1a" fillOpacity={0.35} filter={ref("softer")} />
-        </g>
-
-        {/* The tee */}
-        <motion.image initial={false} animate={figure.tee} transition={SPRING} href={`${FRONT_CUTOUT.src}-${FRONT_CUTOUT.small}.webp`} preserveAspectRatio="none" />
-
-        {/* Neck coming out of the collar */}
-        <g clipPath={ref("collar")}>
-          <motion.path {...morph(figure.neck)} fill={ref("neck")} />
-          <motion.ellipse initial={false} animate={{ cx: 0, cy: figure.head.chin + 1.2 * hs, rx: 5.6 * hs, ry: 2.2 * hs }} transition={SPRING} fill="#6e4630" fillOpacity={0.45} filter={ref("softer")} />
-        </g>
-
-        {/* Arms leaving the sleeves */}
-        {figure.arms.map((arm, index) => <g key={index} clipPath={ref(`sleeve-${index}`)}>
-          <motion.path {...morph(arm.path)} fill={ref("skin")} />
-          <motion.path {...morph(`M${arm.shade.map(([x, y]) => `${f(x)} ${f(y)}`).join(" L")} Z`)} fill="#3d2a1d" fillOpacity={0.4} filter={ref("softer")} />
-          <motion.path {...morph(arm.palm)} fill={ref("skin")} />
-          {arm.knuckles.map((d, knuckle) => <motion.path key={knuckle} {...morph(d)} fill="none" stroke="#8c5f45" strokeOpacity={0.5} strokeWidth={0.26} strokeLinecap="round" />)}
-          <motion.path {...morph(arm.thumbShadow)} fill="#7a4f37" fillOpacity={0.35} filter={ref("fine")} />
-          <motion.path {...morph(arm.thumb)} fill={ref("skin")} />
-          <motion.path {...morph(arm.nail)} fill="#f3d9c2" fillOpacity={0.8} />
-        </g>)}
-
-        {/* Head */}
-        {figure.head.ears.map((d, index) => <motion.path key={index} {...morph(d)} fill="#cf9f7b" />)}
-        {figure.head.earFolds.map((d, index) => <motion.path key={index} {...morph(d)} fill="none" stroke="#9c6b4f" strokeOpacity={0.6} strokeWidth={0.4} strokeLinecap="round" />)}
-        <motion.path {...morph(figure.head.path)} fill={ref("face")} />
-        <g clipPath={ref("head")}>
-          {/* Soft modelling in light from the upper left: eye sockets, side of the face, under the lip. */}
-          <motion.ellipse {...feature(-3.15, 11.0, 2.3, 1.0)} fill="#7a4f37" fillOpacity={0.16} filter={ref("soft")} />
-          <motion.ellipse {...feature(3.15, 11.0, 2.3, 1.0)} fill="#7a4f37" fillOpacity={0.22} filter={ref("soft")} />
-          <motion.ellipse {...feature(6.7, 15.5, 2.4, 6.5)} fill="#7a4f37" fillOpacity={0.28} filter={ref("softer")} />
-          <motion.ellipse {...feature(-5.2, 15.0, 1.5, 1.2)} fill="#e39b82" fillOpacity={0.2} filter={ref("softer")} />
-          <motion.ellipse {...feature(5.2, 15.0, 1.5, 1.2)} fill="#e39b82" fillOpacity={0.14} filter={ref("softer")} />
-          <motion.ellipse {...feature(0, 20.3, 1.6, 0.45)} fill="#7a4f37" fillOpacity={0.22} filter={ref("soft")} />
-          <motion.ellipse {...feature(-0.2, 14.3, 0.45, 1.9)} fill="#fbe5cd" fillOpacity={0.45} filter={ref("soft")} />
-          <motion.path {...morph(figure.head.noseSide)} fill="none" stroke="#8a5a3f" strokeOpacity={0.35} strokeWidth={0.5 * hs} strokeLinecap="round" filter={ref("fine")} />
-        </g>
-        {figure.head.eyes.map((eye, index) => <g key={index}>
-          <motion.path {...morph(eye.crease)} fill="none" stroke="#8a5a3f" strokeOpacity={0.4} strokeWidth={0.18 * hs} strokeLinecap="round" />
-          <motion.path {...morph(eye.shape)} fill="#f1e6dc" />
-          <g clipPath={ref(`eye-${index}`)}>
-            <motion.circle initial={false} animate={{ cx: eye.iris[0], cy: eye.iris[1], r: 0.56 * hs }} transition={SPRING} fill="#4a3222" />
-            <motion.circle initial={false} animate={{ cx: eye.iris[0], cy: eye.iris[1], r: 0.25 * hs }} transition={SPRING} fill="#1a110b" />
-            <motion.circle initial={false} animate={{ cx: eye.iris[0] - 0.18 * hs, cy: eye.iris[1] - 0.2 * hs, r: 0.11 * hs }} transition={SPRING} fill="#fff" fillOpacity={0.85} />
-          </g>
-          <motion.path {...morph(eye.lid)} fill="none" stroke="#2a1b12" strokeWidth={0.26 * hs} strokeLinecap="round" />
-        </g>)}
-        {figure.head.brows.map((d, index) => <motion.path key={index} {...morph(d)} fill="#2c1f16" fillOpacity={0.85} />)}
-        {figure.head.nose.map((d, index) => <motion.path key={index} {...morph(d)} fill="none" stroke="#7a4b35" strokeOpacity={0.6} strokeWidth={0.22 * hs} strokeLinecap="round" />)}
-        <motion.path {...morph(figure.head.lowerLip)} fill="#c07c66" />
-        <motion.path {...morph(figure.head.upperLip)} fill="#a86452" />
-        <motion.path {...morph(figure.head.mouthLine)} fill="none" stroke="#6d3d2e" strokeOpacity={0.75} strokeWidth={0.16 * hs} strokeLinecap="round" />
-        <motion.path {...morph(figure.head.hair)} fill={ref("hair")} />
-        {figure.head.hairStrands.map((d, index) => <motion.path key={index} {...morph(d)} fill="none" stroke="#120b07" strokeOpacity={0.3} strokeWidth={0.32} strokeLinecap="round" filter={ref("fine")} />)}
+        <motion.path {...morph(figure.band)} fill="#e7e1d6" />
+        <motion.path {...morph(figure.ribs)} fill="none" stroke="#9d927f" strokeOpacity={0.28} strokeWidth={0.07} />
+        <motion.text initial={false} animate={figure.mark} transition={SPRING} textAnchor="middle" fontSize={1.25} letterSpacing={0.14} fill="#22201c" style={{ fontFamily: "var(--font-serif), Georgia, serif" }}>MERANO</motion.text>
       </g>
     </g>
 

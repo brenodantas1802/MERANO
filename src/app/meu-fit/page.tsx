@@ -12,10 +12,11 @@ import { SizeChart } from "@/components/size-chart";
 import { ProductCard } from "@/components/product-card";
 import { PillLink } from "@/components/ui/pill-link";
 import { ShirtFan } from "@/components/try-on-visuals";
-import { measure, RANGES, useBodyProfile, type BodyProfile, type ProfileField } from "@/lib/body-profile";
+import { measure, RANGES, useBodyProfile, type ProfileField } from "@/lib/body-profile";
 import { recommendSize } from "@/lib/size-recommendation";
+import { bodyModel, fitNote } from "@/lib/body-model";
 import { useOrders } from "@/lib/orders";
-import { currentImage, formatPrice, SIZE_CHART, similarProducts, type SizeRow } from "@/lib/products";
+import { currentImage, formatPrice, SIZE_CHART, similarProducts } from "@/lib/products";
 
 type FieldSpec = { field: ProfileField; label: string; unit: string; hint: string };
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -42,14 +43,6 @@ const STEPS = [
   { title: "Ombro a ombro", text: "Pelas costas, da ponta de um ombro até a ponta do outro." },
   { title: "Postura", text: "Em pé e relaxado, sem prender a respiração: a medida é do corpo em repouso." },
 ];
-
-// How the tee sits on the chest, from the ease between the garment's circumference and the body's.
-function fitNote(profile: BodyProfile, row: SizeRow) {
-  const busto = measure(profile, "busto");
-  if (!busto) return null;
-  const ease = row.largura * 2 - busto;
-  return ease < 8 ? "fica justa em você" : ease < 18 ? "cai como foi pensada" : "fica bem solta";
-}
 
 function MeasureCard({ spec, value, onChange }: { spec: FieldSpec; value: string; onChange: (value: string) => void }) {
   const [min, max] = RANGES[spec.field];
@@ -95,7 +88,8 @@ export default function MeranoFitPage() {
   const [previewSize, setPreviewSize] = useState<string | null>(null);
   const shownSize = SIZE_CHART.find((row) => row.size === (previewSize ?? recommendation?.size ?? "M")) ?? SIZE_CHART[2];
   const filled = ALL.filter(({ field }) => measure(profile, field)).length;
-  const note = fitNote(profile, shownSize);
+  // Same body the figure is drawn from; without a chest (measured or from height and weight) there's nothing to say.
+  const note = measure(profile, "busto") || (measure(profile, "altura") && measure(profile, "peso")) ? fitNote(bodyModel(profile), shownSize) : null;
 
   const boughtIds = [...new Set(orders.flatMap((order) => order.items.map((item) => item.productId)))];
   const suggestions = similarProducts(boughtIds, 3);
@@ -170,7 +164,7 @@ export default function MeranoFitPage() {
             {recommendation ? <>
               <span className="display flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--sol-1)] to-[var(--sol-2)] text-4xl text-[var(--terra-dark)]">{recommendation.size}</span>
               <div><p className="display text-2xl">Você veste {recommendation.size}.</p><p className="mt-1 text-[15px] leading-snug text-white/75">{recommendation.reason} A gente já deixa marcado em cada peça.</p></div>
-            </> : <div><p className="display text-2xl">Falta pouco.</p><p className="mt-1 text-[15px] leading-snug text-white/75">Preencha o busto (ou a cintura, o quadril ou os ombros) pra descobrir o seu tamanho.</p></div>}
+            </> : <div><p className="display text-2xl">Falta pouco.</p><p className="mt-1 text-[15px] leading-snug text-white/75">Preencha altura e peso pra uma estimativa, ou o busto pra acertar em cheio.</p></div>}
           </div>
         </div>
       </aside>
