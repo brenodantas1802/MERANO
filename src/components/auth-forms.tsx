@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type FormEvent, type InputHTMLAttributes } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +17,7 @@ function messageFor(error: { code?: string; message?: string }) {
     case "user_already_exists":
     case "email_exists": return "Já existe uma conta com esse e-mail. É só entrar com ele.";
     case "weak_password": return "Senha fraca: use pelo menos 8 caracteres, misturando letras e números.";
+    case "same_password": return "Escolha uma senha diferente da anterior.";
     case "email_address_invalid":
     case "validation_failed": return "Confira o e-mail digitado.";
     case "over_email_send_rate_limit":
@@ -81,8 +83,67 @@ export function SignInForm({ next }: { next?: string }) {
   return <form onSubmit={submit} className="space-y-4">
     <Field label="E-mail" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
     <PasswordField label="Senha" autoComplete="current-password" value={password} onChange={setPassword} />
+    <p className="-mt-2 text-right"><Link href="/conta/esqueci" className="text-[12px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Esqueci minha senha</Link></p>
     {error && <p role="alert" className={ALERT}>{error}</p>}
     <button type="submit" disabled={busy} className={SUBMIT}>{busy ? "Entrando…" : "Entrar"}</button>
+  </form>;
+}
+
+// Sends the link that lets the customer choose a new password. The answer is the same whether or not the e-mail
+// has an account, so the form never reveals who is a customer.
+export function ForgotPasswordForm() {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [sentTo, setSentTo] = useState("");
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    const { error } = await createClient().auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/auth/callback?next=/conta/nova-senha` });
+    setBusy(false);
+    if (error && error.code !== "user_not_found") return setError(messageFor(error));
+    setSentTo(email.trim());
+  }
+
+  if (sentTo) return <div className="space-y-2 text-center">
+    <p className="display text-2xl">Confira seu e-mail</p>
+    <p className="text-[15px] text-[var(--ink)]/80">Se existir uma conta com <strong>{sentTo}</strong>, enviamos um link para criar uma senha nova. Abra o e-mail neste aparelho.</p>
+  </div>;
+
+  return <form onSubmit={submit} className="space-y-4">
+    <Field label="E-mail" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+    {error && <p role="alert" className={ALERT}>{error}</p>}
+    <button type="submit" disabled={busy} className={SUBMIT}>{busy ? "Enviando…" : "Enviar link"}</button>
+  </form>;
+}
+
+// The new password, once the customer arrives from the link in that e-mail (which signs them in for this).
+export function NewPasswordForm() {
+  const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [again, setAgain] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    if (password !== again) return setError("As duas senhas não são iguais.");
+    setBusy(true);
+    const { error } = await createClient().auth.updateUser({ password });
+    setBusy(false);
+    if (error) return setError(messageFor(error));
+    router.push("/conta?senha=nova");
+    router.refresh();
+  }
+
+  return <form onSubmit={submit} className="space-y-4">
+    <PasswordField label="Nova senha" hint="Pelo menos 8 caracteres." autoComplete="new-password" value={password} onChange={setPassword} />
+    <PasswordField label="Repita a nova senha" autoComplete="new-password" value={again} onChange={setAgain} />
+    {error && <p role="alert" className={ALERT}>{error}</p>}
+    <button type="submit" disabled={busy} className={SUBMIT}>{busy ? "Salvando…" : "Salvar nova senha"}</button>
   </form>;
 }
 

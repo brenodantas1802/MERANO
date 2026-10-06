@@ -16,8 +16,8 @@ const MENU = [
   { href: "/provador", title: "Provador virtual", text: "Veja as estampas em você." },
 ];
 
-export default async function AccountPage({ searchParams }: { searchParams: Promise<{ next?: string; erro?: string }> }) {
-  const { next, erro } = await searchParams;
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ next?: string; erro?: string; senha?: string }> }) {
+  const { next, erro, senha } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const name = (user?.user_metadata.full_name ?? user?.user_metadata.name ?? "") as string;
@@ -32,6 +32,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <div className="px-6 pb-24 pt-12 md:pt-16">
         <div className="mx-auto w-full max-w-md">
           <h1 className="display text-center text-5xl md:text-6xl">Minha conta</h1>
+          {senha === "nova" && <p role="status" className="mt-6 rounded-xl bg-[var(--areia-clara)] px-4 py-3 text-center text-[14px]">Senha nova salva.</p>}
 
           {user ? <>
             <RememberAccount />
