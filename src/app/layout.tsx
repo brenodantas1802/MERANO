@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Jost } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart-provider";
 import { FirstPurchasePopup } from "@/components/first-purchase-popup";
@@ -7,8 +7,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { SmoothScroll } from "@/components/smooth-scroll";
 
-const serif = Fraunces({ subsets: ["latin"], style: ["normal", "italic"], axes: ["SOFT", "WONK", "opsz"], variable: "--font-serif", display: "swap" });
-const sans = Jost({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+// Barlow Condensed is the closest open font to the DIN Condensed look the owners picked; its regular-width sibling
+// carries the running text so long lines stay easy to read.
+const display = Barlow_Condensed({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-display", display: "swap" });
+const sans = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-sans", display: "swap" });
 
 export const metadata: Metadata = {
   title: "MERANO | Feito para quem entende exclusividade.",
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" data-scroll-behavior="smooth" className={`${serif.variable} ${sans.variable}`}>
+    <html lang="pt-BR" data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`}>
       <body><SmoothScroll /><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /></CartProvider></body>
     </html>
   );

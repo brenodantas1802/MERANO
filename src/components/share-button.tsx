@@ -4,7 +4,7 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { AnimatedIcon } from "@/components/ui/animated-icon";
 
-export function ShareButton({ title, className }: { title: string; className?: string }) {
+export function ShareButton({ title, className, iconOnly = false }: { title: string; className?: string; iconOnly?: boolean }) {
   const [copied, setCopied] = useState(false);
 
   async function share() {
@@ -27,9 +27,9 @@ export function ShareButton({ title, className }: { title: string; className?: s
   }
 
   return (
-    <button type="button" onClick={share} className={`sans flex items-center gap-2 text-[10px] uppercase tracking-[.12em] text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${className ?? ""}`}>
-      <AnimatedIcon icon={Send} variant="fly" size={14} />
-      {copied ? "Link copiado" : "Enviar para um amigo"}
+    <button type="button" onClick={share} aria-label={copied ? "Link copiado" : "Enviar para um amigo"} title={copied ? "Link copiado" : "Enviar para um amigo"} className={`sans flex items-center gap-2 text-[11px] uppercase tracking-[.12em] text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${className ?? ""}`}>
+      <AnimatedIcon icon={Send} variant="fly" size={iconOnly ? 16 : 14} />
+      {!iconOnly && (copied ? "Link copiado" : "Enviar para um amigo")}
     </button>
   );
 }

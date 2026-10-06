@@ -24,7 +24,7 @@ const SHIPPING: Shipping[] = [
 const PIX_DISCOUNT = 0.05;
 
 const field = "mt-2 block w-full border-b border-[var(--ink)]/40 bg-transparent py-2.5 text-base outline-none transition-colors focus:border-[var(--ink)]";
-const label = "sans block text-[10px] uppercase tracking-[.14em] text-[var(--muted)]";
+const label = "sans block text-[11px] uppercase tracking-[.14em] text-[var(--muted)]";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 const maskCep = (value: string) => onlyDigits(value).slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
@@ -49,10 +49,10 @@ function FakeQr() {
 
 function Summary({ items, subtotal, shipping, discount, total }: { items: CartItem[]; subtotal: number; shipping: Shipping | null; discount: number; total: number }) {
   return <aside className="h-fit rounded-3xl bg-[var(--creme)] p-7 shadow-[0_20px_50px_-30px_rgba(32,28,23,.35)] md:sticky md:top-28">
-    <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Resumo do pedido</p>
+    <p className="sans mb-5 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Resumo do pedido</p>
     <div className="space-y-4">{items.map((item) => <div key={item.id} className="flex gap-4">
-      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="64px" className="object-cover" />}<span className="sans absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center bg-[var(--ink)] px-1 text-[10px] text-[var(--creme)]">{item.quantity}</span></div>
-      <div className="flex flex-1 justify-between gap-3"><div><p className="leading-tight">{item.name}</p><p className="sans mt-1 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {item.color}</p></div><span className="sans text-sm">{formatPrice(item.price * item.quantity)}</span></div>
+      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="64px" className="object-cover" />}<span className="sans absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center bg-[var(--ink)] px-1 text-[11px] text-[var(--creme)]">{item.quantity}</span></div>
+      <div className="flex flex-1 justify-between gap-3"><div><p className="leading-tight">{item.name}</p><p className="sans mt-1 text-[11px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {item.color}</p></div><span className="sans text-sm">{formatPrice(item.price * item.quantity)}</span></div>
     </div>)}</div>
     <div className="sans mt-6 space-y-2 border-t border-[var(--line)] pt-5 text-sm">
       <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
@@ -113,7 +113,7 @@ export default function PaymentPage() {
 
   if (status === "paid" && order) return <main><SiteHeader /><div className="mx-auto max-w-5xl px-6 py-24 md:px-12">
     <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 220, damping: 16 }} className="mb-10 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--moss)] text-white"><Check size={30} /></motion.div>
-    <p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Pedido {order.id} · {order.method === "pix" ? "Pix aprovado" : "Cartão aprovado"}</p>
+    <p className="sans mb-5 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Pedido {order.id} · {order.method === "pix" ? "Pix aprovado" : "Cartão aprovado"}</p>
     <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><h1 className="display text-6xl md:text-8xl">Obrigado.<br /><i>Sua peça começa agora.</i></h1><Illustration name="laranjeira" className="w-36 shrink-0 md:w-52" /></div>
     <p className="mt-8 max-w-lg text-2xl leading-snug">Recebemos {formatPrice(order.total)}. Sua camiseta entra na fila do ateliê hoje e você recebe o código de rastreio por e-mail assim que ela sair.</p>
     <div className="sans mt-12 grid gap-6 border-y border-[var(--line)] py-8 text-[11px] uppercase tracking-[.12em] md:grid-cols-3">
@@ -123,7 +123,7 @@ export default function PaymentPage() {
     </div>
     <Link href="/shop" className="sans mt-10 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Continuar explorando <ArrowRight size={14} /></Link>
     {similarProducts(order.productIds, 3).length > 0 && <section className="mt-20 border-t border-[var(--line)] pt-12">
-      <div className="mb-10 flex flex-wrap items-end gap-x-4 gap-y-1"><h2 className="display text-4xl md:text-5xl">Parecidas com o que você comprou.</h2><span className="serif-note pb-1 text-xl text-[var(--sol-1)]">pra próxima</span></div>
+      <div className="mb-10 flex flex-wrap items-end gap-x-4 gap-y-1"><h2 className="display text-4xl md:text-5xl">Parecidas com o que você comprou.</h2></div>
       <div className="grid gap-8 md:grid-cols-3 md:gap-x-10">{similarProducts(order.productIds, 3).map((product) => <ProductCard key={product.id} product={product} />)}</div>
     </section>}
   </div></main>;
@@ -131,7 +131,7 @@ export default function PaymentPage() {
   if (items.length === 0) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><p className="mt-8 text-2xl">Seu carrinho está vazio.</p><Link href="/shop" className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link></div></main>;
 
   return <main><SiteHeader /><div className="mx-auto max-w-360 px-6 pb-24 pt-10 md:px-12">
-    <Link href="/shop" className="sans mb-10 flex w-fit items-center gap-2 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Continuar comprando</Link>
+    <Link href="/shop" className="sans mb-10 flex w-fit items-center gap-2 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Continuar comprando</Link>
     <div className="flex items-end gap-6"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><Illustration name="barco" className="hidden w-32 shrink-0 pb-1 sm:block md:w-48" /></div>
     <form onSubmit={pay} className="mt-12 grid gap-12 md:grid-cols-[1fr_400px] md:gap-20">
       <div className="space-y-14">
@@ -176,7 +176,7 @@ export default function PaymentPage() {
             <div>
               <p className="text-xl">Pague {formatPrice(total)} com Pix</p>
               <p className="mt-2 text-[var(--muted)]">Abra o app do seu banco, escaneie o código ou use o Pix copia e cola. A confirmação é instantânea.</p>
-              <button type="button" onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="sans mt-5 inline-flex items-center gap-2 rounded-full border border-[var(--ink)] px-5 py-2.5 text-[10px] uppercase tracking-[.14em] hover:bg-[var(--ink)] hover:text-[var(--creme)]">{copied ? <><Check size={14} /> Código copiado</> : <><Copy size={14} /> Copiar código Pix</>}</button>
+              <button type="button" onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="sans mt-5 inline-flex items-center gap-2 rounded-full border border-[var(--ink)] px-5 py-2.5 text-[11px] uppercase tracking-[.14em] hover:bg-[var(--ink)] hover:text-[var(--creme)]">{copied ? <><Check size={14} /> Código copiado</> : <><Copy size={14} /> Copiar código Pix</>}</button>
             </div>
           </div> : <div className="mt-8 grid gap-8 md:grid-cols-[1fr_260px]">
             <div className="grid gap-6">
@@ -189,9 +189,9 @@ export default function PaymentPage() {
               <label className={label}>Parcelas<select value={installments} onChange={(event) => setInstallments(Number(event.target.value))} className={field}>{[1, 2, 3].map((n) => <option key={n} value={n}>{n}x de {formatPrice(total / n)} sem juros</option>)}</select></label>
             </div>
             <div className="relative hidden aspect-[1.586] w-full overflow-hidden rounded-xl bg-gradient-to-br from-[var(--terra-dark)] via-[var(--terra)] to-[var(--sol-1)] p-5 text-[var(--creme)] shadow-xl md:flex md:flex-col md:justify-between">
-              <span className="sans text-[10px] uppercase tracking-[.3em]">Merano</span>
+              <span className="sans text-[11px] uppercase tracking-[.3em]">Merano</span>
               <span className="sans text-base tracking-[.12em]">{card.number || "•••• •••• •••• ••••"}</span>
-              <span className="sans flex justify-between text-[10px] uppercase tracking-[.12em]"><span className="truncate">{card.name || "Seu nome"}</span><span>{card.expiry || "MM/AA"}</span></span>
+              <span className="sans flex justify-between text-[11px] uppercase tracking-[.12em]"><span className="truncate">{card.name || "Seu nome"}</span><span>{card.expiry || "MM/AA"}</span></span>
             </div>
           </div>}
         </section>
@@ -200,7 +200,7 @@ export default function PaymentPage() {
           <span className="sans text-[12px] uppercase tracking-[.15em]">{status === "processing" ? "Processando pagamento..." : method === "pix" ? `Já paguei · ${formatPrice(total)}` : `Pagar ${formatPrice(total)}`}</span>
           {status === "processing" ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--creme)] border-t-transparent" /> : <ArrowRight size={18} />}
         </button>
-        <p className="sans -mt-10 text-[10px] uppercase tracking-[.12em] text-[var(--muted)]">Ambiente de demonstração · nenhum valor é cobrado</p>
+        <p className="sans -mt-10 text-[11px] uppercase tracking-[.12em] text-[var(--muted)]">Ambiente de demonstração · nenhum valor é cobrado</p>
       </div>
 
       <Summary items={items} subtotal={subtotal} shipping={shipping} discount={discount} total={total} />

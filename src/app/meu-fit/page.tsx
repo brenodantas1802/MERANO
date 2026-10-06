@@ -68,7 +68,7 @@ function ProgressRing({ filled, total }: { filled: number; total: number }) {
   const share = filled / total;
   return <div className="relative h-28 w-28 shrink-0 md:h-44 md:w-44">
     <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" aria-hidden>
-      <defs><linearGradient id="ring-sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f37c22" /><stop offset="1" stopColor="#fabd4b" /></linearGradient></defs>
+      <defs><linearGradient id="ring-sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1B2A41" /><stop offset="1" stopColor="#5d7aa6" /></linearGradient></defs>
       <circle cx="64" cy="64" r={radius} fill="none" stroke="var(--ink)" strokeOpacity={0.08} strokeWidth={7} />
       <motion.circle cx="64" cy="64" r={radius} fill="none" stroke="url(#ring-sun)" strokeWidth={7} strokeLinecap="round" strokeDasharray={length} initial={{ strokeDashoffset: length }} animate={{ strokeDashoffset: length * (1 - share) }} transition={{ duration: 1.1, ease: EASE }} />
     </svg>
@@ -99,9 +99,8 @@ export default function MeranoFitPage() {
 
     <section className="mx-auto flex max-w-360 flex-col gap-8 px-6 pb-8 pt-10 md:flex-row md:items-center md:justify-between md:px-12 md:pb-12 md:pt-14">
       <div>
-        <p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">seu tamanho, sem achismo</p>
-        <h1 className="display mt-2 text-7xl md:text-9xl">Merano <i>Fit.</i></h1>
-        <p className="mt-6 max-w-lg text-xl leading-snug text-[var(--ink)]/80">Suas medidas, uma vez só. A gente marca o tamanho certo em cada peça e mostra como ela cai em você.</p>
+        <h1 className="display text-6xl md:text-7xl">Merano Fit</h1>
+        <p className="mt-4 max-w-lg text-lg leading-snug text-[var(--ink)]/75">Suas medidas, uma vez só: a gente marca o seu tamanho em cada peça.</p>
       </div>
       <ProgressRing filled={filled} total={ALL.length} />
     </section>
@@ -128,9 +127,8 @@ export default function MeranoFitPage() {
       </div>
 
       <aside className="md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)] md:h-fit">
-        <div className="overflow-hidden rounded-[2.5rem] bg-[radial-gradient(90%_60%_at_40%_35%,#1d5a63_0%,#0f3d44_55%,#0a2a2f_100%)] text-[var(--paper)] shadow-[0_40px_80px_-50px_rgba(10,42,47,.9)]">
-          <div className="flex flex-wrap items-center justify-between gap-3 px-7 pt-7">
-            <p className="serif-note text-xl text-[var(--sol-2)] md:text-2xl">como a Merano cai em você</p>
+        <div className="overflow-hidden rounded-[2.5rem] bg-[radial-gradient(90%_60%_at_40%_35%,#2c4166_0%,#1b2a41_55%,#121c2c_100%)] text-[var(--paper)] shadow-[0_40px_80px_-50px_rgba(18,28,44,.9)]">
+          <div className="flex flex-wrap items-center justify-end gap-3 px-7 pt-7">
             <div className="sans flex rounded-full bg-white/[.08] p-1 text-[13px] ring-1 ring-white/10" role="tablist" aria-label="Ver no corpo ou só a peça">
               {([["corpo", "No corpo"], ["peca", "A peça"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`relative rounded-full px-4 py-1.5 transition-colors duration-300 ${view === key ? "text-[var(--ink)]" : "text-white/75 hover:text-white"}`}>
                 {view === key && <motion.span layoutId="fit-view" className="absolute inset-0 rounded-full bg-[var(--paper)]" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
@@ -152,17 +150,17 @@ export default function MeranoFitPage() {
               const active = row.size === shownSize.size;
               return <button key={row.size} type="button" onClick={() => setPreviewSize(row.size)} aria-pressed={active} className={`sans relative h-11 w-11 rounded-full text-sm transition-colors duration-300 ${active ? "bg-[var(--paper)] text-[var(--ink)]" : "border border-white/25 text-white/85 hover:border-white/70"}`}>
                 {row.size}
-                {recommendation?.size === row.size && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-[var(--sol-1)] ring-2 ring-[#0f3d44]" aria-label="tamanho recomendado" />}
+                {recommendation?.size === row.size && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-[var(--sol-2)] ring-2 ring-[#1b2a41]" aria-label="tamanho recomendado" />}
               </button>;
             })}
           </div>
-          <p className="sans pb-6 text-center text-[13px] text-white/60">
+          <p className="sans pb-6 text-center text-[13px] text-white/75">
             {view === "peca" ? `Peça estendida: ombro ${shownSize.ombro}, busto ${shownSize.largura} e comprimento ${shownSize.comprimento} cm.` : note ? `No ${shownSize.size}, a camiseta ${note}.` : `Toque num tamanho pra ver o caimento${recommendation ? " · o ponto laranja é o seu" : ""}.`}
           </p>
 
           <div className="m-3 mt-0 flex items-center gap-5 rounded-[2rem] bg-white/[.07] p-5 ring-1 ring-white/10 md:p-6">
             {recommendation ? <>
-              <span className="display flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--sol-1)] to-[var(--sol-2)] text-4xl text-[var(--terra-dark)]">{recommendation.size}</span>
+              <span className="display flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[var(--paper)] text-4xl text-[var(--ink)]">{recommendation.size}</span>
               <div><p className="display text-2xl">Você veste {recommendation.size}.</p><p className="mt-1 text-[15px] leading-snug text-white/75">{recommendation.reason} A gente já deixa marcado em cada peça.</p></div>
             </> : <div><p className="display text-2xl">Falta pouco.</p><p className="mt-1 text-[15px] leading-snug text-white/75">Preencha altura e peso pra uma estimativa, ou o busto pra acertar em cheio.</p></div>}
           </div>
@@ -206,7 +204,7 @@ export default function MeranoFitPage() {
             <div><h2 className="display text-3xl md:text-4xl">Suas <i>peças.</i></h2><p className="mt-2 text-[var(--ink)]/70">Depois do primeiro pedido, elas aparecem aqui com o tamanho que você levou.</p><PillLink href="/shop" className="mt-5">Ver a coleção</PillLink></div>
           </div>}
           <Link href="/provador" className={`group flex flex-col justify-between gap-6 rounded-[2rem] bg-[var(--terra-dark)] p-8 text-[var(--creme)] md:p-10 ${orders.length ? "md:col-span-2 md:flex-row md:items-center" : ""}`}>
-            <div><p className="serif-note text-xl text-[var(--sol-2)]">quer ver antes de comprar?</p><h2 className="display mt-1 text-3xl md:text-4xl">Experimente no Provador virtual.</h2><p className="mt-2 max-w-md text-[var(--creme)]/70">Envie uma foto sua, escolha a estampa e veja você vestindo a peça.</p></div>
+            <div><h2 className="display text-3xl md:text-4xl">Experimente no Provador virtual.</h2><p className="mt-2 max-w-md text-[var(--creme)]/70">Envie uma foto sua, escolha a estampa e veja você vestindo a peça.</p></div>
             <span className="sans inline-flex w-fit items-center gap-2 rounded-full bg-[var(--creme)] px-6 py-3.5 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)] transition-colors group-hover:bg-[var(--sol-2)]">Abrir provador</span>
           </Link>
         </div>

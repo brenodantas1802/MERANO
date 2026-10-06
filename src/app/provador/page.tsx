@@ -127,8 +127,8 @@ function PhotoDrop({ slot, slotKey, onFile }: { slot: Slot; slotKey: SlotKey; on
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={slot.photo} alt={copy.title} className="absolute inset-0 h-full w-full object-contain" />
-                    <span className="sans absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--paper)]/90 px-4 py-1.5 text-[10px] uppercase tracking-[.12em] text-[var(--ink)]">Trocar foto</span>
-          {slot.analyzing && <span className="sans absolute left-3 top-3 rounded-full bg-[var(--paper)]/90 px-3 py-1 text-[10px] text-[var(--ink)]">analisando…</span>}
+                    <span className="sans absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--paper)]/90 px-4 py-1.5 text-[11px] uppercase tracking-[.12em] text-[var(--ink)]">Trocar foto</span>
+          {slot.analyzing && <span className="sans absolute left-3 top-3 rounded-full bg-[var(--paper)]/90 px-3 py-1 text-[11px] text-[var(--ink)]">analisando…</span>}
         </>
       ) : (
         <span className="flex flex-col items-center px-5">
@@ -201,7 +201,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={done ? done.image : item.photo} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="flex h-full w-full items-center justify-center">{item.run.status === "loading" ? <AnalyzingImage className="h-6 w-6 text-[var(--terra)]" /> : <span className="sans text-[9px] uppercase text-[var(--muted)]">{item.run.status === "done" ? "erro" : "depois"}</span>}</span>
+                <span className="flex h-full w-full items-center justify-center">{item.run.status === "loading" ? <AnalyzingImage className="h-6 w-6 text-[var(--terra)]" /> : <span className="sans text-[10px] uppercase text-[var(--muted)]">{item.run.status === "done" ? "erro" : "depois"}</span>}</span>
               )}
               <span className="sans absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-1 pt-3 text-[8px] uppercase tracking-[.1em] text-white">{item.stage}</span>
             </button>
@@ -245,7 +245,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
               <p className="text-lg leading-tight">{product?.name}</p>
               <p className="sans mt-1 text-[11px] text-[var(--muted)]">Pose: {success.poseLabel.toLowerCase()} · vestimos {success.shown} · <span title="custo real da geração">{money(success.cost)}</span></p>
             </div>
-            <button type="button" onClick={() => void downloadImage(success.image, `merano-${success.productId}-${success.pose}`)} className="sans flex items-center gap-2 rounded-full border border-[var(--ink)] px-4 py-2 text-[10px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]"><Download size={13} /> Baixar foto</button>
+            <button type="button" onClick={() => void downloadImage(success.image, `merano-${success.productId}-${success.pose}`)} className="sans flex items-center gap-2 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]"><Download size={13} /> Baixar foto</button>
           </div>
         )}
       </div>
@@ -342,7 +342,6 @@ function ProvadorContent() {
 
       <section className="grain">
         <div className="mx-auto max-w-360 px-6 pb-14 pt-14 md:px-12 md:pb-20 md:pt-20">
-          <p className="serif-note mb-3 text-2xl text-[var(--sol-1)] md:text-3xl">provador virtual</p>
           <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <h1 className="display text-6xl md:text-8xl">Vista a peça.<br /><i>Antes de comprar.</i></h1>
             <TryOnSteps />
@@ -360,8 +359,8 @@ function ProvadorContent() {
               <div className="flex items-center gap-4 rounded-[1.75rem] bg-[var(--creme)] p-3 pr-5 shadow-[0_18px_40px_-30px_rgba(32,28,23,.55)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={selectedProduct.image} alt={selectedProduct.name} className="h-24 w-20 shrink-0 rounded-2xl bg-[var(--areia)] object-cover" />
-                <div className="min-w-0 flex-1"><p className="truncate text-2xl leading-tight">{selectedProduct.name}</p><p className="sans mt-1 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">{selectedProduct.note}</p></div>
-                <button type="button" onClick={() => setPickerOpen((open) => !open)} className="sans shrink-0 rounded-full border border-[var(--ink)] px-4 py-2 text-[10px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]">{pickerOpen ? "Fechar" : "Trocar"}</button>
+                <div className="min-w-0 flex-1"><p className="truncate text-2xl leading-tight">{selectedProduct.name}</p><p className="sans mt-1 text-[11px] uppercase tracking-[.1em] text-[var(--muted)]">{selectedProduct.note}</p></div>
+                <button type="button" onClick={() => setPickerOpen((open) => !open)} className="sans shrink-0 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]">{pickerOpen ? "Fechar" : "Trocar"}</button>
               </div>
             ) : (
               <button type="button" onClick={() => setPickerOpen((open) => !open)} className="group flex w-full items-center justify-between rounded-[1.75rem] bg-[var(--areia)]/30 px-6 py-5 text-left transition-colors hover:bg-[var(--areia)]/45">
@@ -383,7 +382,7 @@ function ProvadorContent() {
           </section>
 
           <section className="mt-14">
-            <button type="submit" disabled={loading || analyzing} className="sans flex w-full items-center justify-between rounded-full bg-gradient-to-r from-[var(--sol-1)] to-[var(--sol-2)] px-7 py-5 text-[13px] font-semibold uppercase tracking-[.12em] text-[var(--origem)] shadow-[0_18px_40px_-20px_rgba(243,124,34,.8)] transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0">
+            <button type="submit" disabled={loading || analyzing} className="btn-dive sans flex w-full items-center justify-between rounded-full px-7 py-5 text-[13px] font-semibold uppercase tracking-[.12em] text-white disabled:cursor-wait disabled:opacity-70">
               <span>{loading ? "Vestindo você…" : analyzing ? "Analisando a foto…" : "Gerar provador virtual"}</span>
               <span aria-hidden>↗</span>
             </button>

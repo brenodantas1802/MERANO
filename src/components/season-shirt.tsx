@@ -1,27 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { formatPrice, getProductPrice, type Product } from "@/lib/products";
+import { useEffect, useRef, useState } from "react";
+import type { Product } from "@/lib/products";
 import { SHIRT_STORIES, thumbOf } from "@/lib/shirt-stories";
-import { RevealHeading } from "@/components/reveal-heading";
 import { ShirtStage } from "@/components/shirt-stage";
 import { PillLink } from "@/components/ui/pill-link";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-function Chapter({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="border-t border-[var(--ink)]/15 pt-5">
-      <h3 className="display text-xl italic md:text-3xl">{title}</h3>
-      <div className="mt-2 text-[15px] leading-snug text-[var(--ink)]/75 md:text-lg">{children}</div>
-    </div>
-  );
-}
-
-// Showcase for the collection: the shirt holds its place on the left while its story sits on the right;
+// Showcase for the collection: the shirt holds its place on the left, its name on the right;
 // the row of thumbnails turns the shirt over to the next piece without leaving the section.
 export function SeasonShirt({ products }: { products: Product[] }) {
   const ref = useRef<HTMLElement>(null);
@@ -43,8 +32,6 @@ export function SeasonShirt({ products }: { products: Product[] }) {
     return () => window.clearTimeout(timer);
   }, [stories]);
 
-  const price = getProductPrice(product);
-  const color = product.colors[0]?.toLowerCase();
   const swap = reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE, delay: 0.12 } }, exit: { opacity: 0, y: -10, transition: { duration: 0.2 } } };
 
   return (
@@ -57,24 +44,19 @@ export function SeasonShirt({ products }: { products: Product[] }) {
         <div className="pb-12 pt-4 md:flex md:min-h-[78svh] md:flex-col md:justify-end md:pb-14 md:pt-0">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={story.id} {...swap}>
-              <RevealHeading className="display text-[clamp(3rem,6vw,6rem)]" lines={story.title.map((line, lineIndex) => (lineIndex === story.title.length - 1 && story.title.length > 1 ? <i key={line}>{line}</i> : line))} />
-              <p className="mt-6 max-w-md text-xl leading-snug text-[var(--ink)]/80 md:text-2xl">{product.description}</p>
-              <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-                <div><span className="display text-5xl md:text-6xl">{formatPrice(price)}</span><p className="sans mt-1 text-sm text-[var(--muted)]">ou 3x de {formatPrice(price / 3)} sem juros</p></div>
-                <PillLink href={`/produto/${product.id}`} variant="solid">Ver a peça</PillLink>
-              </div>
+              <h2 className="display text-3xl md:text-4xl">{product.name}</h2>
+              <div className="mt-6"><PillLink href={`/produto/${product.id}`} variant="solid">Ver a peça</PillLink></div>
             </motion.div>
           </AnimatePresence>
 
           <div className="mt-10">
-            <p className="sans text-[13px] text-[var(--muted)]">Gire a vitrine: {index + 1} de {stories.length} estampas</p>
-            <div className="mt-3 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--ink)]/20 bg-[var(--paper)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
               <div className="flex min-w-0 gap-2 overflow-x-auto py-1 [scrollbar-width:none]">
                 {stories.map((item, itemIndex) => {
                   const itemProduct = products.find((candidate) => candidate.id === item.id)!;
                   const active = itemIndex === index;
-                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 rounded-full bg-white/70 p-1.5 transition-all duration-300 ${active ? "scale-105 ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[#f6ead7]" : "opacity-70 hover:opacity-100"}`}>
+                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 rounded-full bg-white/70 p-1.5 transition-all duration-300 ${active ? "scale-105 ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[#f4f6f9]" : "opacity-70 hover:opacity-100"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element -- 200px thumbnails made for this row */}
                     <img src={thumbOf(item)} alt="" width={200} height={200} loading="lazy" className="h-full w-full object-contain" />
                   </button>;
@@ -84,15 +66,6 @@ export function SeasonShirt({ products }: { products: Product[] }) {
             </div>
           </div>
         </div>
-
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div key={story.id} {...swap} className="grid grid-cols-2 gap-x-5 gap-y-7 md:gap-x-10 md:gap-y-8">
-            <Chapter title="A estampa">{story.print}</Chapter>
-            <Chapter title="O toque">{product.material}{color ? `, ${color}` : ""}, modelagem ampla do {product.fits[0]} ao {product.fits[product.fits.length - 1]}.</Chapter>
-            <Chapter title="Feita pra você">Produzida depois do seu pedido, pronta em até 7 dias úteis. Sem excesso.</Chapter>
-            <Chapter title="A Merano">Brasileira, entre cidade e natureza. <Link href="/sobre-nos" className="border-b border-[var(--ink)]/50">Conheça a gente</Link>.</Chapter>
-          </motion.div>
-        </AnimatePresence>
       </div>
     </section>
   );

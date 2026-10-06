@@ -29,7 +29,7 @@ export function BeforeAfter({ className = "" }: { className?: string }) {
       <img src={MODEL} alt="" className="absolute inset-y-0 right-0 h-full w-[200%] max-w-none object-cover" />
     </span>
     <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-white shadow" />
-    <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[10px] text-[var(--ink)] shadow-md">↔</span>
+    <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[11px] text-[var(--ink)] shadow-md">↔</span>
   </span>;
 }
 
@@ -61,7 +61,7 @@ export function TryOnSteps() {
 export function HowItWorks() {
   const [open, setOpen] = useState(false);
   return <div className="mb-10">
-    <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="flex w-full items-center justify-between rounded-[1.75rem] bg-[var(--mar-fundo)] px-6 py-5 text-left text-[var(--paper)] transition-colors hover:bg-[#13474f]">
+    <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="flex w-full items-center justify-between rounded-[1.75rem] bg-[var(--mar-fundo)] px-6 py-5 text-left text-[var(--paper)]">
       <span><span className="display block text-2xl">Como funciona</span><span className="sans text-[12px] text-[var(--paper)]/70">3 passos, menos de um minuto</span></span>
       <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3, ease: EASE }} className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--paper)]/10"><ChevronDown size={18} strokeWidth={1.6} /></motion.span>
     </button>

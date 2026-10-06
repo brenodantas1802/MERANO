@@ -2,49 +2,49 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useMotionValue, useSpring } from "motion/react";
-import { ViewTransition, type PointerEvent } from "react";
+import { motion } from "motion/react";
+import { ViewTransition, useState, type MouseEvent } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/lib/products";
-import { formatPrice, getProductPrice } from "@/lib/products";
 import { QuickAdd } from "@/components/quick-add";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+// A tall photo with the piece's other views behind side arrows, and its name centred underneath (prices are shown on
+// the product page only).
 export function ProductCard({ product }: { product: Product }) {
   const discounted = product.salePrice && product.salePrice < product.price;
-  const second = product.gallery[1];
-  // Gentle tilt toward the pointer; touch devices skip it.
-  const rotateX = useSpring(useMotionValue(0), { stiffness: 160, damping: 20 });
-  const rotateY = useSpring(useMotionValue(0), { stiffness: 160, damping: 20 });
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    rotateY.set(((event.clientX - rect.left) / rect.width - 0.5) * 9);
-    rotateX.set(-((event.clientY - rect.top) / rect.height - 0.5) * 7);
+  const photos = product.gallery.length ? product.gallery : [product.image];
+  const [index, setIndex] = useState(0);
+  // The other views load only once the pointer reaches the card.
+  const [warm, setWarm] = useState(false);
+  const step = (event: MouseEvent, by: number) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIndex((current) => (current + by + photos.length) % photos.length);
   };
-  const onPointerLeave = () => { rotateX.set(0); rotateY.set(0); };
 
   return <motion.article
     className="group relative"
-    initial={{ opacity: 0, y: 28 }}
+    initial={{ opacity: 0, y: 24 }}
     whileInView={{ opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } }}
     viewport={{ once: true, margin: "-80px" }}
   >
     <Link href={`/produto/${product.id}`} aria-label={`Ver ${product.name}`} transitionTypes={["nav-forward"]}>
-      <div className="[perspective:1100px]" onPointerMove={onPointerMove} onPointerLeave={onPointerLeave}>
-        <motion.div style={{ rotateX, rotateY, transformStyle: "preserve-3d" }} className="relative">
-          <ViewTransition name={`produto-${product.id}`} share="morph" default="none">
-            <div className="relative aspect-[.82] overflow-hidden bg-[var(--cream)] shadow-[0_0_0_rgba(25,35,30,0)] transition-shadow duration-500 ease-out group-hover:shadow-[0_28px_50px_-20px_rgba(25,35,30,0.4)]">
-              <Image src={product.image} alt={product.name} fill sizes="(min-width: 768px) 33vw, 100vw" className={`object-cover transition-[opacity,transform] duration-700 ease-[cubic-bezier(.22,1,.36,1)] ${second ? "group-hover:scale-[1.03] group-hover:opacity-0" : "group-hover:scale-[1.04]"}`} />
-              {second && <Image src={second} alt={`${product.name}, segunda vista`} fill sizes="(min-width: 768px) 33vw, 100vw" className="scale-[1.06] object-cover opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-100 group-hover:opacity-100" />}
-              {/* Soft light that follows the tilt. */}
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_30%_0%,rgba(255,255,255,.28),transparent_55%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-              {discounted && <span className="sans absolute left-4 top-4 -rotate-6 rounded-full bg-[var(--sol-1)] px-3 py-1 text-[10px] uppercase tracking-[.12em] text-white shadow-sm">Oferta</span>}
+      <ViewTransition name={`produto-${product.id}`} share="morph" default="none">
+        <div onPointerEnter={() => setWarm(true)} className="relative aspect-[.82] overflow-hidden bg-[var(--cream)]/40">
+          {photos.map((src, photo) => (photo === index || warm) && <Image key={src} src={src} alt={photo ? `${product.name}, vista ${photo + 1}` : product.name} fill sizes="(min-width: 768px) 33vw, 50vw" className={`object-cover transition-opacity duration-500 ${photo === index ? "opacity-100" : "opacity-0"}`} />)}
+          {discounted && <span className="sans absolute left-4 top-4 rounded-full bg-[var(--sol-1)] px-3 py-1 text-[11px] uppercase tracking-[.12em] text-white">Oferta</span>}
+          {photos.length > 1 && <>
+            <button type="button" onClick={(event) => step(event, -1)} aria-label="Vista anterior" className="absolute inset-y-0 left-0 z-10 hidden w-12 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 md:flex"><ChevronLeft size={20} strokeWidth={1.3} /></button>
+            <button type="button" onClick={(event) => step(event, 1)} aria-label="Próxima vista" className="absolute inset-y-0 right-0 z-10 hidden w-12 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 md:flex"><ChevronRight size={20} strokeWidth={1.3} /></button>
+            <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden>
+              {photos.map((src, photo) => <span key={src} className={`h-px w-6 ${photo === index ? "bg-[var(--ink)]" : "bg-[var(--ink)]/25"}`} />)}
             </div>
-          </ViewTransition>
-        </motion.div>
-      </div>
-      <div className="flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:py-4"><h3 className="text-lg leading-tight md:text-xl">{product.name}</h3><div className="sans text-sm sm:text-right">{discounted && <del className="mr-2 text-[var(--muted)]">{formatPrice(product.price)}</del>}<strong>{formatPrice(getProductPrice(product))}</strong></div></div>
+          </>}
+        </div>
+      </ViewTransition>
+      <h3 className="truncate px-2 pb-5 pt-3 text-center text-[13px] font-semibold uppercase tracking-[.06em] text-[var(--ink)]">{product.name}</h3>
     </Link>
     <QuickAdd product={product} />
   </motion.article>;

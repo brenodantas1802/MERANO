@@ -46,15 +46,14 @@ function CartContent() {
     </ul>
 
     <aside className="h-fit rounded-[2rem] bg-[var(--mar-fundo)] p-7 text-[var(--paper)] shadow-[0_30px_60px_-40px_rgba(15,61,68,.9)] md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)]">
-      <p className="serif-note text-2xl text-[var(--sol-2)]">seu pedido</p>
       <div className="mt-5 space-y-3 border-b border-white/15 pb-5 text-[15px]">
         <div className="flex justify-between"><span className="text-white/75">{count} {count === 1 ? "peça" : "peças"}</span><span>{formatPrice(total)}</span></div>
         <div className="flex justify-between"><span className="text-white/75">Frete</span><span className="text-white/75">calculado no próximo passo</span></div>
       </div>
       <div className="mt-5 flex items-baseline justify-between"><span className="text-lg">Total</span><span className="display text-4xl">{formatPrice(total)}</span></div>
-      <p className="sans mt-1 text-right text-xs text-white/60">ou 3x de {formatPrice(total / 3)} sem juros</p>
+      <p className="sans mt-1 text-right text-xs text-white/75">ou 3x de {formatPrice(total / 3)} sem juros</p>
       <Link href="/pagamento" className="sans mt-7 block rounded-full bg-[var(--paper)] px-6 py-4 text-center text-[12px] font-medium uppercase tracking-[.16em] text-[var(--ink)] transition-colors hover:bg-[var(--sol-2)]">Finalizar compra</Link>
-      <p className="sans mt-4 text-center text-xs text-white/60">Produção sob demanda em até 7 dias úteis + envio</p>
+      <p className="sans mt-4 text-center text-xs text-white/75">Produção sob demanda em até 7 dias úteis + envio</p>
     </aside>
   </div>;
 }
@@ -64,7 +63,6 @@ export default function CartPage() {
     <SiteHeader />
     <main className="season-wash min-h-[80svh]">
       <div className="mx-auto max-w-360 px-6 pb-24 pt-10 md:px-12 md:pt-14">
-        <p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">sua seleção</p>
         <h1 className="display mt-1 text-6xl md:text-8xl">Carrinho.</h1>
         <CartContent />
         <Link href="/shop" className="sans mt-12 flex w-fit items-center gap-2 text-[13px] text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><ArrowLeft size={14} /> Continuar escolhendo</Link>

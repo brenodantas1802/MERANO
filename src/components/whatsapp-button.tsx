@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 const WHATSAPP_URL = `https://wa.me/5511986464056?text=${encodeURIComponent("Olá, Merano! Vim pelo site e queria tirar uma dúvida.")}`;
 export const INSTAGRAM_URL = "https://www.instagram.com/meranoclothing/";
 
-const TIP = "sans pointer-events-none absolute right-full mr-3 hidden -rotate-3 whitespace-nowrap rounded-full rounded-br-sm bg-[var(--ink)] px-4 py-2 text-[10px] uppercase tracking-[.12em] text-[var(--creme)] opacity-0 transition-opacity group-hover:opacity-100 md:block";
+const TIP = "sans pointer-events-none absolute right-full mr-3 hidden -rotate-3 whitespace-nowrap rounded-full rounded-br-sm bg-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] text-[var(--creme)] opacity-0 transition-opacity group-hover:opacity-100 md:block";
 
 // Floating contact buttons: Instagram stacked above WhatsApp in the bottom-right corner.
 export function WhatsAppButton() {

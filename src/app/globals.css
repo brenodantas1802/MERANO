@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
 :root {
-	--ink: #19231e;
-	--muted: #69736d;
-	--paper: #FCF5EB;
-	--cream: #C7BAA7;
+	/* Palette "Marinho" (2026-10-06): white ground, black text and buttons, navy accent. */
+	--ink: #111111;
+	--muted: #475569;
+	--paper: #FFFFFF;
+	--cream: #EDF0F4;
 	--moss: #536a57;
 	--clay: #b88768;
-	--line: #d8d8ce;
+	--line: #E1E6ED;
 	--origem: #000000;
-	--areia: #C7BAA7;
-	--creme: #FCF5EB;
-	--terra-dark: #201C17;
-	--terra: #4C2D1A;
-	--sol-1: #F37C22;
+	--areia: #E1E6ED;
+	--creme: #FFFFFF;
+	--terra-dark: #111111;
+	--terra: #1B2A41;
+	--sol-1: #1B2A41;
 	--sol-2: #FABD4B;
 	--mar: #2f7f8a;
-	--mar-fundo: #0f3d44;
+	--mar-fundo: #1B2A41;
 	--espuma: #d9e8e2;
-	--areia-clara: #f3e6d1;
+	--areia-clara: #F4F6F9;
 }
 
 * { box-sizing: border-box; }
@@ -27,8 +28,7 @@ body {
 	background: var(--paper);
 	color: var(--ink);
 	margin: 0;
-	font-family: var(--font-serif), Georgia, "Times New Roman", serif;
-	font-optical-sizing: auto;
+	font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 	-webkit-font-smoothing: antialiased;
 }
 /* Layered so Tailwind utilities (text size, color) on these elements can override the resets. */
@@ -39,24 +39,20 @@ body {
 }
 
 .sans { font-family: var(--font-sans), Arial, Helvetica, sans-serif; }
-/* Short asides and kickers: the serif in a soft italic (replaces the old handwritten script). */
-.serif-note { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; line-height: 1.2; text-transform: none; font-variation-settings: "SOFT" 100, "WONK" 0; }
+/* Short asides: plain, quiet text (kept for the few that still carry information). */
+.serif-note { font-family: var(--font-sans), Arial, sans-serif; font-style: normal; font-weight: 400; line-height: 1.3; text-transform: none; }
 .marquee { animation: marquee 38s linear infinite; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .marquee { animation: none; } }
-.display { letter-spacing: -0.035em; line-height: 0.95; font-weight: 400; font-variation-settings: "SOFT" 30, "WONK" 0; }
-.display i, .display em { font-weight: 300; }
+/* Titles, prices and labels: the condensed cut, set tight. */
+.display { font-family: var(--font-display), "Arial Narrow", sans-serif; letter-spacing: 0.005em; line-height: 0.95; font-weight: 500; }
+.display i, .display em { font-style: normal; font-weight: inherit; }
+/* Small uppercase labels and buttons, as on the product page. */
+.label { font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
 /* Sun-bleached sand running into shallow sea-glass, with a faint sand grain. */
-.grain {
-	background-color: #f3e6d1;
-	background-image:
-		radial-gradient(rgba(76, 45, 26, .07) .7px, transparent .7px),
-		radial-gradient(120% 90% at 85% 0%, rgba(250, 189, 75, .22) 0%, rgba(250, 189, 75, 0) 55%),
-		linear-gradient(165deg, #f7ecdb 0%, #f1dfc4 48%, #d9e8e2 100%);
-	background-size: 7px 7px, auto, auto;
-}
+.grain { background-color: var(--areia-clara); }
 /* Season shirt section: warm paper with a soft pool of light behind the shirt. */
-.season-wash { background: radial-gradient(55% 60% at 27% 48%, #f8ead2 0%, rgba(248, 234, 210, 0) 72%), linear-gradient(180deg, var(--paper) 0%, #f4e9da 100%); }
+.season-wash { background: radial-gradient(55% 60% at 27% 48%, #eef2f7 0%, rgba(238, 242, 247, 0) 72%), linear-gradient(180deg, var(--paper) 0%, var(--areia-clara) 100%); }
 
 /* Product photo morph between a card and the product page (React <ViewTransition share="morph">). */
 ::view-transition-group(.morph) { animation-duration: 520ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
@@ -68,11 +64,7 @@ body {
 /* Hero key word: sunlit gold italic with a slow sheen; the drop shadow keeps it readable over bright surf. */
 .hero-accent {
 	display: inline-block;
-	font-style: italic;
-	font-weight: 420;
-	font-size: 1.1em;
-	letter-spacing: -0.03em;
-	font-variation-settings: "SOFT" 100, "WONK" 1;
+	font-weight: 600;
 	background: linear-gradient(100deg, #fff1cf 0%, #fac35c 30%, #f39a3a 55%, #ffe6a8 80%, #fff1cf 100%);
 	background-size: 220% 100%;
 	-webkit-background-clip: text;
@@ -105,15 +97,15 @@ body {
 .ripples {
 	background-color: var(--paper);
 	background-image:
-		linear-gradient(to bottom, rgba(140, 197, 214, 0.22), rgba(252, 245, 235, 0) 520px),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='48' viewBox='0 0 220 48'%3E%3Cpath d='M0 14 Q27.5 4 55 14 T110 14 T165 14 T220 14' fill='none' stroke='%234F97B3' stroke-opacity='0.13' stroke-width='1.4'/%3E%3Cpath d='M-55 38 Q-27.5 28 0 38 T55 38 T110 38 T165 38 T220 38 T275 38' fill='none' stroke='%23C7BAA7' stroke-opacity='0.35' stroke-width='1.2'/%3E%3C/svg%3E");
+		linear-gradient(to bottom, rgba(140, 197, 214, 0.22), rgba(255, 255, 255, 0) 520px),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='48' viewBox='0 0 220 48'%3E%3Cpath d='M0 14 Q27.5 4 55 14 T110 14 T165 14 T220 14' fill='none' stroke='%234F97B3' stroke-opacity='0.13' stroke-width='1.4'/%3E%3Cpath d='M-55 38 Q-27.5 28 0 38 T55 38 T110 38 T165 38 T220 38 T275 38' fill='none' stroke='%239FB0C8' stroke-opacity='0.35' stroke-width='1.2'/%3E%3C/svg%3E");
 	background-size: auto, 220px 48px;
 	background-repeat: no-repeat, repeat;
 }
 /* Same ripples without the tint, for areas that continue a .ripples page (e.g. behind the footer waves). */
 .ripples-plain {
 	background-color: var(--paper);
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='48' viewBox='0 0 220 48'%3E%3Cpath d='M0 14 Q27.5 4 55 14 T110 14 T165 14 T220 14' fill='none' stroke='%234F97B3' stroke-opacity='0.13' stroke-width='1.4'/%3E%3Cpath d='M-55 38 Q-27.5 28 0 38 T55 38 T110 38 T165 38 T220 38 T275 38' fill='none' stroke='%23C7BAA7' stroke-opacity='0.35' stroke-width='1.2'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='48' viewBox='0 0 220 48'%3E%3Cpath d='M0 14 Q27.5 4 55 14 T110 14 T165 14 T220 14' fill='none' stroke='%234F97B3' stroke-opacity='0.13' stroke-width='1.4'/%3E%3Cpath d='M-55 38 Q-27.5 28 0 38 T55 38 T110 38 T165 38 T220 38 T275 38' fill='none' stroke='%239FB0C8' stroke-opacity='0.35' stroke-width='1.2'/%3E%3C/svg%3E");
 	background-size: 220px 48px;
 }
 
@@ -130,8 +122,18 @@ body {
 .sunset-glow {
 	background-color: var(--paper);
 	background-image:
-		radial-gradient(ellipse 55% 60% at 88% -10%, rgba(250, 189, 75, 0.38), transparent 70%),
-		radial-gradient(ellipse 45% 50% at 8% 5%, rgba(243, 124, 34, 0.14), transparent 70%),
-		radial-gradient(ellipse 70% 40% at 50% 0%, rgba(199, 186, 167, 0.25), transparent 75%);
+		radial-gradient(ellipse 55% 60% at 88% -10%, rgba(27, 42, 65, 0.07), transparent 70%),
+		radial-gradient(ellipse 70% 40% at 50% 0%, rgba(225, 230, 237, 0.6), transparent 75%);
 	background-repeat: no-repeat;
 }
+
+/* Product page: details on the left, the photo in the middle, buying on the right; stacked on phones. */
+.product-layout { display: grid; gap: 1.75rem; grid-template-columns: minmax(0, 1fr); grid-template-areas: "gallery" "head" "buy" "details"; }
+@media (min-width: 768px) {
+	.product-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr) minmax(0, 1fr); grid-template-rows: 1fr auto auto 1fr; column-gap: 3rem; row-gap: 0; grid-template-areas: ". gallery buy" "head gallery buy" "details gallery buy" ". gallery buy"; }
+}
+
+/* "Mergulho": on hover the button deepens from black into sea blue, like the sea getting deeper. */
+.btn-dive { background-color: #111111; background-image: linear-gradient(180deg, #111111 0%, #111111 34%, #1b2a41 64%, #2f5d93 100%); background-size: 100% 300%; background-position: 0 0; transition: background-position .9s cubic-bezier(.22, 1, .36, 1); }
+.btn-dive:hover:not(:disabled), .btn-dive:focus-visible { background-position: 0 100%; }
+@media (prefers-reduced-motion: reduce) { .btn-dive { transition: none; } }

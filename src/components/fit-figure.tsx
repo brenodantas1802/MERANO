@@ -334,7 +334,7 @@ export function FitFigure({ profile, size, className = "" }: { profile: BodyProf
 
         <motion.path {...morph(figure.band)} fill="#e7e1d6" />
         <motion.path {...morph(figure.ribs)} fill="none" stroke="#9d927f" strokeOpacity={0.28} strokeWidth={0.07} />
-        <motion.text initial={false} animate={figure.mark} transition={SPRING} textAnchor="middle" fontSize={1.25} letterSpacing={0.14} fill="#22201c" style={{ fontFamily: "var(--font-serif), Georgia, serif" }}>MERANO</motion.text>
+        <motion.text initial={false} animate={figure.mark} transition={SPRING} textAnchor="middle" fontSize={1.25} letterSpacing={0.14} fill="#22201c" style={{ fontFamily: "var(--font-display), sans-serif" }}>MERANO</motion.text>
       </g>
     </g>
 

@@ -32,7 +32,7 @@ export function QuickAdd({ product }: { product: Product }) {
     </button>
     <AnimatePresence>
       {open && <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.25 }} onClick={stop} className="pointer-events-auto absolute inset-x-3 bottom-3 z-10 rounded-2xl bg-[var(--paper)]/95 p-4 shadow-lg backdrop-blur">
-        <p className="serif-note text-lg text-[var(--terra)]">qual o seu tamanho?</p>
+        <p className="label text-[11px]">Tamanho</p>
         <div className="mt-2 flex flex-wrap gap-2">{product.fits.map((size) => <button key={size} type="button" onClick={(event) => add(event, size)} className={`sans h-10 w-10 rounded-full border text-xs transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)] ${size === recommended ? "border-[var(--sol-1)] text-[var(--sol-1)]" : "border-[var(--ink)]/30"}`}>{size}</button>)}</div>
       </motion.div>}
     </AnimatePresence>

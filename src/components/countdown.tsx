@@ -39,7 +39,7 @@ export function Countdown({ target }: { target: string }) {
       {units.map((unit) => (
         <div key={unit.label} className="border border-[var(--line)] px-3 py-6 text-center md:px-6 md:py-10">
           <span className="display block text-4xl tabular-nums md:text-6xl">{String(unit.value).padStart(2, "0")}</span>
-          <span className="sans mt-2 block text-[10px] uppercase tracking-[.15em] text-[var(--muted)]">{unit.label}</span>
+          <span className="sans mt-2 block text-[11px] uppercase tracking-[.15em] text-[var(--muted)]">{unit.label}</span>
         </div>
       ))}
     </div>

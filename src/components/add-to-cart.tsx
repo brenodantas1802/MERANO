@@ -35,7 +35,7 @@ export function AddToCart({ product }: { product: Product }) {
   return <div className="sans">
     <div className="mb-7 space-y-6">
       <div>
-        <div className="mb-3 flex items-center justify-between text-[10px] uppercase tracking-[.14em]"><span>Tamanho{size && <span className="text-[var(--muted)]"> · {size}</span>}</span><a href="#medidas" className="text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Tabela de medidas</a></div>
+        <div className="mb-3 flex items-center justify-between text-[11px] uppercase tracking-[.14em]"><span>Tamanho{size && <span className="text-[var(--muted)]"> · {size}</span>}</span><a href="#medidas" className="text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Tabela de medidas</a></div>
         <motion.div ref={sizesRef} key={shake} animate={shake ? { x: [0, -10, 10, -7, 7, -3, 0] } : undefined} transition={{ duration: 0.5 }} role="radiogroup" aria-label="Tamanho" className="flex flex-wrap gap-2">{product.fits.map((value) => <button key={value} type="button" role="radio" aria-checked={size === value} onClick={() => { setChosenSize(value); setMissingSize(false); }} className={`relative h-12 w-12 rounded-full border text-xs transition-colors ${size === value ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--creme)]" : "border-[var(--ink)]/25 hover:border-[var(--ink)]"}`}>{value}{value === recommended && <span aria-hidden className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[var(--paper)] bg-[var(--sol-1)]" />}</button>)}</motion.div>
         {recommendation ? <div className="mt-4 flex items-start gap-3 rounded-2xl bg-[var(--sol-2)]/15 px-4 py-3">
           <span aria-hidden className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--sol-1)]" />
@@ -44,7 +44,7 @@ export function AddToCart({ product }: { product: Product }) {
         
       </div>
       <div>
-        <p className="mb-3 text-[10px] uppercase tracking-[.14em]">Cor<span className="text-[var(--muted)]"> · {color}</span></p>
+        <p className="mb-3 text-[11px] uppercase tracking-[.14em]">Cor<span className="text-[var(--muted)]"> · {color}</span></p>
         <div role="radiogroup" aria-label="Cor" className="flex flex-wrap gap-2">{product.colors.map((value) => <button key={value} type="button" role="radio" aria-checked={color === value} onClick={() => setColor(value)} className={`h-10 rounded-full border px-5 text-[11px] uppercase tracking-[.08em] transition-colors ${color === value ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--creme)]" : "border-[var(--ink)]/25 hover:border-[var(--ink)]"}`}>{value}</button>)}</div>
       </div>
     </div>

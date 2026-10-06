@@ -23,7 +23,7 @@ export function SizeChart() {
           ))}
         </tbody>
       </table>
-      <p className="sans mt-3 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Medidas em centímetros, tiradas com a peça deitada e plana. Margem de 1 a 2 cm entre tamanhos.</p>
+      <p className="sans mt-3 text-[11px] uppercase tracking-[.1em] text-[var(--muted)]">Medidas em centímetros, tiradas com a peça deitada e plana. Margem de 1 a 2 cm entre tamanhos.</p>
     </div>
   );
 }

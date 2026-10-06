@@ -23,7 +23,7 @@ const faqs = [
 export default function BrandPage() {
   return <main><SiteHeader />
     <article className="mx-auto max-w-360 px-6 pb-16 md:px-12 md:pb-20">
-      <Link href="/" className="sans mb-16 flex items-center gap-2 pt-8 text-[10px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar para o início</Link>
+      <Link href="/" className="sans mb-16 flex items-center gap-2 pt-8 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar para o início</Link>
 
       <ScrollReveal><p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">quem a gente é</p><h1 className="display mt-3 max-w-4xl text-7xl md:text-9xl">Sobre <i>nós.</i></h1><p className="mt-10 max-w-2xl text-2xl leading-snug md:text-3xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p></ScrollReveal>
     </article>
@@ -34,7 +34,7 @@ export default function BrandPage() {
       <Image src="/imagens/merano-assets/foto praia 1.jpg" alt="Corpo em movimento na praia, referência da Merano" fill sizes="100vw" className="object-cover" />
       <div className="absolute inset-0 bg-black/30" />
       <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">
-        <p className="sans mb-4 text-[10px] uppercase tracking-[.2em]" style={{ color: "#FABD4B" }}>Origem</p>
+        <p className="sans mb-4 text-[11px] uppercase tracking-[.2em]" style={{ color: "#FABD4B" }}>Origem</p>
         <p className="display max-w-2xl text-4xl leading-tight md:text-6xl">O mesmo mar que inspira as estampas é o que guia o ritmo com que fazemos cada peça.</p>
       </div>
     </ScrollReveal>
@@ -47,19 +47,19 @@ export default function BrandPage() {
 
       <div id="sob-demanda" className="mt-28 border-t border-[var(--line)] pt-16">
         <div className="grid gap-16 md:grid-cols-[1fr_1.15fr] md:gap-20">
-          <ScrollReveal><p className="sans mb-5 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Feito sob demanda</p><h2 className="display max-w-xl text-5xl md:text-7xl">Menos excesso.<br /><i>Mais presença.</i></h2><Image src="/imagens/merano-assets/etiqueta-linho.jpg" alt="Etiqueta de linho Merano" width={420} height={520} className="mt-10 h-56 w-full object-cover md:h-72" /></ScrollReveal>
-          <ScrollReveal delay={0.1} className="self-end"><p className="text-2xl leading-snug md:text-3xl">Cada peça começa depois que você escolhe. Assim, a gente produz apenas o que encontra um corpo para vestir.</p><p className="sans mt-6 inline-block bg-[var(--areia)] px-4 py-2 text-[10px] uppercase tracking-[.14em] text-[var(--terra-dark)]">Prazo estimado: até 7 dias úteis de produção + envio</p></ScrollReveal>
+          <ScrollReveal><p className="sans mb-5 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Feito sob demanda</p><h2 className="display max-w-xl text-5xl md:text-7xl">Menos excesso.<br /><i>Mais presença.</i></h2><Image src="/imagens/merano-assets/etiqueta-linho.jpg" alt="Etiqueta de linho Merano" width={420} height={520} className="mt-10 h-56 w-full object-cover md:h-72" /></ScrollReveal>
+          <ScrollReveal delay={0.1} className="self-end"><p className="text-2xl leading-snug md:text-3xl">Cada peça começa depois que você escolhe. Assim, a gente produz apenas o que encontra um corpo para vestir.</p><p className="sans mt-6 inline-block bg-[var(--areia)] px-4 py-2 text-[11px] uppercase tracking-[.14em] text-[var(--terra-dark)]">Prazo estimado: até 7 dias úteis de produção + envio</p></ScrollReveal>
         </div>
 
         <div className="mt-24 border-t border-[var(--line)] pt-14">
-          <ScrollReveal><p className="sans mb-10 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Como funciona</p></ScrollReveal>
+          <ScrollReveal><p className="sans mb-10 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Como funciona</p></ScrollReveal>
           <div className="grid gap-10 md:grid-cols-3">
-            {steps.map((step, index) => <ScrollReveal key={step.n} delay={index * 0.1}><span className="display text-5xl text-[var(--areia)]">{step.n}</span><h3 className="mt-4 text-2xl">{step.title}</h3><p className="mt-3 text-lg leading-relaxed text-[var(--muted)]">{step.text}</p></ScrollReveal>)}
+            {steps.map((step, index) => <ScrollReveal key={step.n} delay={index * 0.1}><span className="display text-5xl text-[var(--muted)]">{step.n}</span><h3 className="mt-4 text-2xl">{step.title}</h3><p className="mt-3 text-lg leading-relaxed text-[var(--muted)]">{step.text}</p></ScrollReveal>)}
           </div>
         </div>
 
         <div className="mt-24 border-t border-[var(--line)] pt-14">
-          <ScrollReveal><p className="sans mb-10 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">Perguntas frequentes</p></ScrollReveal>
+          <ScrollReveal><p className="sans mb-10 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Perguntas frequentes</p></ScrollReveal>
           <ScrollReveal delay={0.05}><FaqAccordion items={faqs} /></ScrollReveal>
         </div>
       </div>

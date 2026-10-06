@@ -205,7 +205,7 @@ const CollisionMechanism = ({
           repeatDelay: beamOptions.repeatDelay || 0,
         }}
         className={cn(
-          "absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-[#F37C22] via-[#FABD4B] to-transparent",
+          "absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-[#1B2A41] via-[#FABD4B] to-transparent",
           beamOptions.className
         )}
       />
@@ -257,7 +257,7 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
             opacity: 0,
           }}
           transition={{ duration: span.duration, ease: "easeOut" }}
-          className="absolute h-1 w-1 rounded-full bg-gradient-to-b from-[#FABD4B] to-[#F37C22]"
+          className="absolute h-1 w-1 rounded-full bg-gradient-to-b from-[#FABD4B] to-[#1B2A41]"
         />
       ))}
     </div>

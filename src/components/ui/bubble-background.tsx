@@ -5,10 +5,10 @@ import { useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const BUBBLES = [
-  { color: "#F37C22", size: 420, top: "10%", left: "15%", duration: 14 },
+  { color: "#1B2A41", size: 420, top: "10%", left: "15%", duration: 14 },
   { color: "#FABD4B", size: 340, top: "55%", left: "70%", duration: 18 },
   { color: "#C7BAA7", size: 380, top: "70%", left: "10%", duration: 20 },
-  { color: "#F37C22", size: 260, top: "20%", left: "75%", duration: 16 },
+  { color: "#1B2A41", size: 260, top: "20%", left: "75%", duration: 16 },
 ];
 
 export function BubbleBackground({ interactive = false, className, children }: { interactive?: boolean; className?: string; children?: ReactNode }) {

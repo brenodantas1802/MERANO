@@ -39,7 +39,7 @@ export function CartDrawer() {
             {items.map((item) => <div key={item.id} className="flex gap-4 border-b border-[var(--line)] py-5">
               <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="80px" className="object-cover" />}</div>
               <div className="flex flex-1 flex-col justify-between">
-                <div className="flex justify-between gap-3"><div><h3 className="text-lg leading-tight">{item.name}</h3><p className="sans mt-1 text-[10px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {item.color}</p></div><button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="self-start text-[var(--muted)] hover:text-[var(--ink)]"><Trash2 size={15} strokeWidth={1.5} /></button></div>
+                <div className="flex justify-between gap-3"><div><h3 className="text-lg leading-tight">{item.name}</h3><p className="sans mt-1 text-[11px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size} · {item.color}</p></div><button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="self-start text-[var(--muted)] hover:text-[var(--ink)]"><Trash2 size={15} strokeWidth={1.5} /></button></div>
                 <div className="sans flex items-center justify-between text-[11px]">
                   <div className="flex items-center gap-3"><button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--ink)]/25 hover:bg-[var(--ink)] hover:text-[var(--creme)]"><Minus size={12} /></button><span className="w-4 text-center">{item.quantity}</span><button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--ink)]/25 hover:bg-[var(--ink)] hover:text-[var(--creme)]"><Plus size={12} /></button></div>
                   <span className="text-sm">{formatPrice(item.price * item.quantity)}</span>
@@ -49,9 +49,9 @@ export function CartDrawer() {
           </div>
           <div className="m-4 rounded-2xl bg-[var(--creme)] px-5 py-5 shadow-[0_-1px_0_rgba(0,0,0,.04)]">
             <div className="flex items-baseline justify-between"><span className="text-lg text-[var(--muted)]">Subtotal</span><span className="display text-3xl">{formatPrice(total)}</span></div>
-            <p className="serif-note mt-1 text-base text-[var(--terra)]">o frete a gente calcula no próximo passo</p>
+            <p className="mt-1 text-[12px] text-[var(--muted)]">Frete calculado no próximo passo.</p>
             <Link href="/pagamento" onClick={closeDrawer} className="sans mt-5 block rounded-full bg-[var(--ink)] px-6 py-4 text-center text-[12px] uppercase tracking-[.16em] text-[var(--creme)] transition-transform hover:-translate-y-0.5">Finalizar compra</Link>
-            <div className="sans mt-4 flex justify-between text-[10px] uppercase tracking-[.14em] text-[var(--muted)]"><button onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver carrinho completo</Link></div>
+            <div className="sans mt-4 flex justify-between text-[11px] uppercase tracking-[.14em] text-[var(--muted)]"><button onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver carrinho completo</Link></div>
           </div>
         </>}
       </motion.aside>
