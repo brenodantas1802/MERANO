@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isOwner } from "@/lib/owners";
+import { isOwnerSession } from "@/lib/owners";
 import { AdminDashboard } from "./dashboard";
 
 export const metadata: Metadata = { title: "Equipe · MERANO", robots: { index: false, follow: false } };
@@ -12,6 +12,7 @@ export default async function AdminPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/conta?next=/admin");
-  if (!user.email || !user.email_confirmed_at || !isOwner(user.email)) redirect("/conta");
+  const { data } = await supabase.auth.getClaims();
+  if (!user.email || !user.email_confirmed_at || !isOwnerSession(user.email, data?.claims.amr)) redirect("/conta");
   return <AdminDashboard email={user.email} />;
 }
