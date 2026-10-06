@@ -1,4 +1,4 @@
-import { measure, type BodyProfile } from "./body-profile";
+import { measure, type BodyProfile } from "./body-measure";
 import { AMPLE_EASE, bodyModel, HEM_ABOVE_CROTCH, wearTee } from "./body-model";
 import type { SizeRow } from "./products";
 

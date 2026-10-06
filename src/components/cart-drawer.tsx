@@ -35,7 +35,7 @@ export function CartDrawer() {
           <p className="text-3xl">Seu carrinho está esperando uma peça.</p>
           <Link href="/shop" onClick={closeDrawer} className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link>
         </div> : <>
-          <div data-lenis-prevent className="flex-1 overflow-y-auto px-6">
+          <div className="flex-1 overflow-y-auto px-6">
             {items.map((item) => <div key={item.id} className="flex gap-4 border-b border-[var(--line)] py-5">
               <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-[var(--cream)]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="80px" className="object-cover" />}</div>
               <div className="flex flex-1 flex-col justify-between">

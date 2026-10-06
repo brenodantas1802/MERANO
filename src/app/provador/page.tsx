@@ -1,6 +1,8 @@
 "use client";
 
 import { type FormEvent, Suspense, useRef, useState } from "react";
+import NextImage from "next/image";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Download, ImagePlus, X } from "lucide-react";
@@ -9,9 +11,11 @@ import { BeforeAfter, HowItWorks, ShirtFan, TryOnSteps } from "@/components/try-
 import { SeaWaves } from "@/components/beach-art";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import type { PersonBox } from "@/lib/people";
-import { getProduct, products, type Product } from "@/lib/products";
+import { getProduct, getSizeChart, products, SIZE_CHART, type Product } from "@/lib/products";
+import { measure, useBodyProfile } from "@/lib/body-profile";
+import { recommendSize } from "@/lib/size-recommendation";
 
-type GenerateSuccess = { image: string; cost: number; model: string; pose: string; poseLabel: string; shown: string; productId: string };
+type GenerateSuccess = { image: string; cost: number; model: string; pose: string; poseLabel: string; shown: string; productId: string; size?: string };
 type GenerateResult = GenerateSuccess | { error: string };
 type People = { boxes: PersonBox[]; total: number };
 type Run = { status: "idle" } | { status: "loading" } | { status: "done"; result: GenerateResult };
@@ -102,8 +106,7 @@ function ShirtPicker({ selected, onSelect, onClose }: { selected: Product | null
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {products.map((product) => (
           <button key={product.id} type="button" onClick={() => onSelect(product)} className="group text-left">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={product.image} alt="" className={`aspect-[3/4] w-full rounded-xl bg-[var(--areia)] object-cover transition-all ${selected?.id === product.id ? "ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[var(--creme)]" : "group-hover:opacity-80"}`} />
+            <NextImage src={product.image} alt="" width={240} height={320} sizes="(min-width: 640px) 120px, 30vw" className={`aspect-[3/4] w-full rounded-xl bg-[var(--areia)] object-cover transition-all ${selected?.id === product.id ? "ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[var(--creme)]" : "group-hover:opacity-80"}`} />
             <p className="mt-2 text-sm leading-snug">{product.name}</p>
           </button>
         ))}
@@ -176,8 +179,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
     return (
       <div className="relative flex aspect-[3/4] flex-col items-center justify-center overflow-hidden rounded-[2rem] bg-[var(--areia)]/30 p-8 text-center md:aspect-auto md:h-[min(70vh,760px)]">
         {product ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image} alt={product.name} className="w-1/2 rotate-3 rounded-2xl bg-[var(--paper)] p-2 shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
+          <NextImage src={product.image} alt={product.name} width={600} height={720} sizes="(min-width: 768px) 280px, 50vw" className="h-auto w-1/2 rotate-3 rounded-2xl bg-[var(--paper)] p-2 shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         ) : (
           <BeforeAfter className="aspect-[4/5] w-1/2 rounded-2xl shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         )}
@@ -242,7 +244,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
         {success && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[var(--creme)] px-5 py-4">
             <div>
-              <p className="text-lg leading-tight">{product?.name}</p>
+              <p className="text-lg leading-tight">{product?.name}{success.size ? ` · tamanho ${success.size}` : ""}</p>
               <p className="sans mt-1 text-[11px] text-[var(--muted)]">Pose: {success.poseLabel.toLowerCase()} · vestimos {success.shown} · <span title="custo real da geração">{money(success.cost)}</span></p>
             </div>
             <button type="button" onClick={() => void downloadImage(success.image, `merano-${success.productId}-${success.pose}`)} className="sans flex items-center gap-2 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]"><Download size={13} /> Baixar foto</button>
@@ -260,6 +262,12 @@ function ProvadorContent() {
     return (slug && getProduct(slug)) || null;
   });
   const [pickerOpen, setPickerOpen] = useState(false);
+  // The size to try on: the one Merano Fit recommends, until the customer picks another.
+  const { profile } = useBodyProfile();
+  const knowsBody = !!measure(profile, "altura") && (!!measure(profile, "busto") || !!measure(profile, "peso"));
+  const recommended = recommendSize(profile, selectedProduct ? getSizeChart(selectedProduct) : SIZE_CHART)?.size;
+  const [chosenSize, setChosenSize] = useState<string | null>(null);
+  const size = chosenSize ?? recommended ?? "M";
   const [error, setError] = useState("");
   const [slots, setSlots] = useState<Record<SlotKey, Slot>>({ principal: EMPTY_SLOT });
   // The viewer remembers which frame is showing by key, since frames come and go as photos are added.
@@ -304,7 +312,7 @@ function ProvadorContent() {
       const { people, photo } = slot;
       const box = people && people.total >= 2 ? (people.boxes.length === 1 ? people.boxes[0] : people.boxes[slot.target!]) : null;
       const target = box && people ? { box, total: people.total, order: people.boxes.indexOf(box) + 1, candidates: people.boxes.length, crop: await cropPerson(photo!, box) } : undefined;
-      const body = { personPhoto: photo, productId: product.id, target, aspectRatio: "3:4", resolution: "1K" };
+      const body = { personPhoto: photo, productId: product.id, target, size, profile: knowsBody ? profile : undefined, aspectRatio: "3:4", resolution: "1K" };
       const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Falha na geração.");
@@ -357,8 +365,7 @@ function ProvadorContent() {
             <div className="mb-5 flex items-baseline gap-4"><span className="sans text-xs text-[var(--sol-1)]">01</span><h2 className="display text-3xl md:text-4xl">A estampa.</h2></div>
             {selectedProduct ? (
               <div className="flex items-center gap-4 rounded-[1.75rem] bg-[var(--creme)] p-3 pr-5 shadow-[0_18px_40px_-30px_rgba(32,28,23,.55)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={selectedProduct.image} alt={selectedProduct.name} className="h-24 w-20 shrink-0 rounded-2xl bg-[var(--areia)] object-cover" />
+                <NextImage src={selectedProduct.image} alt={selectedProduct.name} width={160} height={192} sizes="80px" className="h-24 w-20 shrink-0 rounded-2xl bg-[var(--areia)] object-cover" />
                 <div className="min-w-0 flex-1"><p className="truncate text-2xl leading-tight">{selectedProduct.name}</p><p className="sans mt-1 text-[11px] uppercase tracking-[.1em] text-[var(--muted)]">{selectedProduct.note}</p></div>
                 <button type="button" onClick={() => setPickerOpen((open) => !open)} className="sans shrink-0 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]">{pickerOpen ? "Fechar" : "Trocar"}</button>
               </div>
@@ -379,6 +386,19 @@ function ProvadorContent() {
               <li>· Mais de uma pessoa? Você escolhe quem veste</li>
             </ul>
             {needsChoice(slots.principal) && <PersonChooser slot={slots.principal} label="sua foto" onChoose={(index) => { patch("principal", { target: index }); setError(""); }} />}
+          </section>
+
+          <section className="mt-14">
+            <div className="mb-5 flex items-baseline gap-4"><span className="sans text-xs text-[var(--sol-1)]">03</span><h2 className="display text-3xl md:text-4xl">O tamanho.</h2></div>
+            <div role="radiogroup" aria-label="Tamanho para provar" className="flex flex-wrap gap-2">
+              {(selectedProduct?.fits ?? SIZE_CHART.map((row) => row.size)).map((value) => <button key={value} type="button" role="radio" aria-checked={size === value} onClick={() => setChosenSize(value)} className={`sans relative h-12 w-12 rounded-full border text-sm transition-colors ${size === value ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--creme)]" : "border-[var(--ink)]/25 hover:border-[var(--ink)]"}`}>
+                {value}
+                {value === recommended && <span aria-hidden className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[var(--paper)] bg-[var(--sol-1)]" />}
+              </button>)}
+            </div>
+            <p className="sans mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{knowsBody
+              ? <>A peça é vestida no caimento real desse tamanho, com as suas medidas do Merano Fit{recommended ? <> · o ponto marca o seu tamanho ({recommended})</> : null}.</>
+              : <>Sem medidas salvas, o caimento é aproximado. <Link href="/meu-fit" className="underline underline-offset-2 hover:text-[var(--ink)]">Preencha o Merano Fit</Link> para ver o tamanho no seu corpo.</>}</p>
           </section>
 
           <section className="mt-14">

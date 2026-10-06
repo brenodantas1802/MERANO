@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { detectPose, POSE_LABELS, type Pose } from "@/lib/pose";
-import { getProduct } from "@/lib/products";
+import { getProduct, getSizeChart } from "@/lib/products";
+import { EMPTY_PROFILE, type BodyProfile } from "@/lib/body-measure";
+import { describeFit } from "@/lib/fit-description";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
 import { planTryOn, type ViewKey } from "@/lib/tryon";
 
@@ -33,6 +35,9 @@ const generateSchema = z.object({
       candidates: z.number().int().min(1).max(10).optional(),
     })
     .optional(),
+  // The size to try on, and the customer's Merano Fit measurements when they have them (strings, as typed).
+  size: z.enum(["PP", "P", "M", "G", "GG"]).optional(),
+  profile: z.record(z.string(), z.string().max(12)).optional(),
   aspectRatio: z.string().optional(),
   resolution: z.string().optional(),
 });
@@ -73,7 +78,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "OPENROUTER_API_KEY não configurada no servidor." }, { status: 500 });
   }
 
-  const { personPhoto, productId, target, aspectRatio, resolution } = parsed.data;
+  const { personPhoto, productId, target, size, profile, aspectRatio, resolution } = parsed.data;
   const product = getProduct(productId);
   if (!product) {
     return NextResponse.json({ error: "Camisa não encontrada." }, { status: 404 });
@@ -101,7 +106,10 @@ export async function POST(request: Request) {
     }
 
     const { pose } = detection;
-    const plan = planTryOn(product.views, pose, target && { box: target.box, total: target.total, order: target.order, candidates: target.candidates, withCrop: true });
+    const row = size ? getSizeChart(product).find((item) => item.size === size) : undefined;
+    const body: BodyProfile | null = profile ? { ...EMPTY_PROFILE, ...Object.fromEntries(Object.entries(profile).filter(([key]) => key in EMPTY_PROFILE)) } : null;
+    const fit = row ? describeFit(row, body) : undefined;
+    const plan = planTryOn(product.views, pose, target && { box: target.box, total: target.total, order: target.order, candidates: target.candidates, withCrop: true }, fit);
     const garments = new Map(await garmentImages);
 
     const response = await fetch("https://openrouter.ai/api/v1/images", {
@@ -134,6 +142,7 @@ export async function POST(request: Request) {
       usage: data?.usage || {},
       model: IMAGE_MODEL,
       pose,
+      size: row?.size,
       poseLabel: POSE_LABELS[pose],
       shown: shownSide(pose),
     });

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SeaWaves } from "./beach-art";
+import { INSTAGRAM_URL } from "./whatsapp-button";
 
 const LINKS = [
   { href: "/shop", label: "Loja" },
@@ -15,6 +16,7 @@ const LINKS = [
   { href: "/trocas", label: "Trocas" },
   { href: "/privacidade", label: "Privacidade" },
   { href: "/termos", label: "Termos" },
+  { href: INSTAGRAM_URL, label: "Instagram" },
 ];
 
 // Pages whose own background is dark all the way down.

@@ -66,16 +66,14 @@ body {
 	display: inline-block;
 	font-weight: 600;
 	background: linear-gradient(100deg, #fff1cf 0%, #fac35c 30%, #f39a3a 55%, #ffe6a8 80%, #fff1cf 100%);
-	background-size: 220% 100%;
+	background-size: 160% 100%;
+	background-position: 30% 50%;
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
 	filter: drop-shadow(0 2px 22px rgba(4, 18, 24, .5));
-	animation: hero-sheen 7s ease-in-out infinite;
 	padding-right: .08em;
 }
-@keyframes hero-sheen { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-@media (prefers-reduced-motion: reduce) { .hero-accent { animation: none; } }
 
 .hero-wash { background: linear-gradient(135deg, #d8ded3 0%, #e8e2d3 53%, #c8d0c2 100%); }
 .product-wash { background: linear-gradient(155deg, #d7dfd7 0%, #b9c3b5 54%, #e4d7c4 100%); }
@@ -137,3 +135,8 @@ body {
 .btn-dive { background-color: #111111; background-image: linear-gradient(180deg, #111111 0%, #111111 34%, #1b2a41 64%, #2f5d93 100%); background-size: 100% 300%; background-position: 0 0; transition: background-position .9s cubic-bezier(.22, 1, .36, 1); }
 .btn-dive:hover:not(:disabled), .btn-dive:focus-visible { background-position: 0 100%; }
 @media (prefers-reduced-motion: reduce) { .btn-dive { transition: none; } }
+
+/* Slow float for the showcase shirt, composited on the GPU. */
+.float-slow { animation: float-slow 7s ease-in-out infinite; will-change: transform; }
+@keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }

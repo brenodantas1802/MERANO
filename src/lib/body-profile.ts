@@ -2,24 +2,12 @@
 
 import { useSyncExternalStore } from "react";
 
+import { EMPTY_PROFILE, type BodyProfile, type ProfileField } from "./body-measure";
+
 // Client-side body profile until accounts and the database are wired up; mirrors the BodyProfile model in
-// prisma/schema.prisma so it can be synced to the customer's account later. Values stay as strings (form input).
-export type BodyProfile = {
-  altura: string;
-  peso: string;
-  busto: string;
-  cintura: string;
-  quadril: string;
-  ombro: string;
-  braco: string;
-  tronco: string;
-  entrepernas: string;
-  idade: string;
-};
-
-export type ProfileField = keyof BodyProfile;
-
-export const EMPTY_PROFILE: BodyProfile = { altura: "", peso: "", busto: "", cintura: "", quadril: "", ombro: "", braco: "", tronco: "", entrepernas: "", idade: "" };
+// prisma/schema.prisma so it can be synced to the customer's account later. The shape and the readers live in
+// body-measure.ts, shared with the server.
+export { EMPTY_PROFILE, measure, RANGES, type BodyProfile, type ProfileField } from "./body-measure";
 
 const STORAGE_KEY = "merano-body-profile";
 // Measurements saved by the first version of Meu Merano Fit, picked up so nobody has to type them again.
@@ -73,24 +61,3 @@ export function useBodyProfile() {
     hasAny: Object.values(profile).some(Boolean),
   };
 }
-
-// Parsed measurement in cm/kg, or null when empty or out of a plausible human range.
-export function measure(profile: BodyProfile, field: ProfileField): number | null {
-  const value = Number(String(profile[field]).replace(",", "."));
-  if (!Number.isFinite(value) || value <= 0) return null;
-  const [min, max] = RANGES[field];
-  return value >= min && value <= max ? value : null;
-}
-
-export const RANGES: Record<ProfileField, [number, number]> = {
-  altura: [100, 230],
-  peso: [30, 250],
-  busto: [60, 180],
-  cintura: [45, 180],
-  quadril: [60, 190],
-  ombro: [28, 65],
-  braco: [40, 90],
-  tronco: [30, 70],
-  entrepernas: [55, 110],
-  idade: [10, 110],
-};

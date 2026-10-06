@@ -28,8 +28,9 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
 
   return (
     <div onPointerMove={onPointerMove} onPointerLeave={onPointerLeave} className="flex h-full w-full items-center justify-center [perspective:1600px]">
-      <motion.div animate={reduce ? undefined : { y: [0, -12, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} className={`relative ${className}`}>
-        <motion.div style={{ rotateY, rotateX: tiltX, transformStyle: "preserve-3d" }} className="relative">
+      {/* The slow float is a CSS animation on its own layer, so it runs on the GPU without repainting the shirt. */}
+      <div className={`float-slow relative ${className}`}>
+        <motion.div style={{ rotateY, rotateX: tiltX, transformStyle: "preserve-3d" }} className="relative will-change-transform">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={story.id}
@@ -48,17 +49,18 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
                 height={Math.round(large * ratio)}
                 alt={alt}
                 fetchPriority={priority ? "high" : undefined}
+                decoding="async"
                 className="relative h-auto w-full drop-shadow-[0_45px_40px_rgba(32,28,23,.28)]"
               />
               {/* Light gliding over the cotton, clipped to the shirt's outline. */}
               <div className="pointer-events-none absolute inset-0 overflow-hidden mix-blend-soft-light" style={{ WebkitMaskImage: `url(${src}-${small}.webp)`, maskImage: `url(${src}-${small}.webp)`, WebkitMaskSize: "100% 100%", maskSize: "100% 100%" }}>
-                <motion.div style={{ x: sheenX }} className="absolute inset-y-0 -left-1/2 w-[200%] bg-[linear-gradient(105deg,transparent_38%,rgba(255,255,255,.5)_50%,transparent_62%)]" />
+                <motion.div style={{ x: sheenX }} className="absolute inset-y-0 -left-1/2 w-[200%] bg-[linear-gradient(105deg,transparent_38%,rgba(255,255,255,.5)_50%,transparent_62%)] will-change-transform" />
               </div>
             </motion.div>
           </AnimatePresence>
         </motion.div>
         <div className="mx-auto -mt-2 h-7 w-3/5 rounded-[50%] bg-[var(--terra-dark)]/25 blur-2xl" />
-      </motion.div>
+      </div>
     </div>
   );
 }

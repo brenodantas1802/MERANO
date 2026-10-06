@@ -44,7 +44,7 @@ export function ProductCard({ product }: { product: Product }) {
           </>}
         </div>
       </ViewTransition>
-      <h3 className="truncate px-2 pb-5 pt-3 text-center text-[13px] font-semibold uppercase tracking-[.06em] text-[var(--ink)]">{product.name}</h3>
+      <h3 className="line-clamp-2 px-2 pb-5 pt-3 text-center text-[13px] font-semibold uppercase leading-snug tracking-[.06em] text-[var(--ink)]">{product.name}</h3>
     </Link>
     <QuickAdd product={product} />
   </motion.article>;

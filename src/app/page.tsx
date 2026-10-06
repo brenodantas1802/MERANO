@@ -14,7 +14,7 @@ export default function Home() {
     <SiteHeader overlay />
 
     <section className="relative overflow-hidden px-7 py-10 text-white md:px-16 md:py-16">
-      <HeroVideo src="/imagens/merano-assets/banner-mar-4.mp4" poster="/imagens/merano-assets/banner-mar-4-poster.jpg" />
+      <HeroVideo src="/imagens/merano-assets/banner-mar-4.mp4" mobileSrc="/imagens/merano-assets/banner-mar-4-mobile.mp4" poster="/imagens/merano-assets/banner-mar-4-poster.jpg" />
       {/* Shade weighted to the side the headline sits on, so the type reads over bright surf without dimming the whole sea. */}
       <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(6,24,30,.62)_0%,rgba(6,24,30,.34)_42%,rgba(6,24,30,.08)_72%)]" />
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[rgba(6,24,30,.35)] to-transparent" />

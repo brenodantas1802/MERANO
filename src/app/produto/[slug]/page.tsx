@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
@@ -7,6 +6,7 @@ import { getProduct, getSizeChart, products, formatPrice, getProductPrice, simil
 import { SiteHeader } from "@/components/site-header";
 import { ProductGallery3D } from "@/components/product-gallery-3d";
 import { ProductBuy, type Colorway } from "@/components/product-buy";
+import { RelatedRow } from "@/components/related-row";
 
 export function generateStaticParams() { return products.map((product) => ({ slug: product.id })); }
 
@@ -73,15 +73,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   </main>
   {related.length > 0 && <section className="mt-8 px-6 pb-20 md:px-12">
     <h2 className="label text-[13px]">Você também pode gostar</h2>
-    {/* Phones swipe through them; wider screens show one row of four across the page. */}
-    <div className="-mx-6 mt-4 flex snap-x scroll-px-6 gap-3 overflow-x-auto px-6 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:auto-rows-[0] md:grid-cols-4 md:grid-rows-1 md:gap-x-4 md:gap-y-0 md:overflow-hidden md:px-0 md:pb-0">
-      {related.map((item) => <Link key={item.id} href={`/produto/${item.id}`} className="group w-[64vw] shrink-0 snap-start md:w-auto">
-        <div className="relative aspect-square overflow-hidden bg-[var(--cream)]/35">
-          <Image src={item.image} alt={item.name} fill sizes="(min-width: 768px) 25vw, 64vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
-        </div>
-        <p className="mt-2.5 truncate text-[14px] font-semibold uppercase tracking-[.04em]">{item.name}</p>
-      </Link>)}
-    </div>
+    <RelatedRow items={related.map((item) => ({ id: item.id, name: item.name, image: item.image }))} />
   </section>}
   </>;
 }

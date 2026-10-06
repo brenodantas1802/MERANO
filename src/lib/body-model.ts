@@ -1,4 +1,4 @@
-import { measure, type BodyProfile } from "./body-profile";
+import { measure, type BodyProfile } from "./body-measure";
 import type { SizeRow } from "./products";
 
 // The customer's body as the size recommendation and the Merano Fit figure both see it, so the size we suggest and

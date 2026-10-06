@@ -85,8 +85,10 @@ export function ProductGallery3D({ id, name, images, views }: { id: string; name
           </>}
         </div>
       </ViewTransition>
-      {frames.length > 1 && <div className="mt-4 flex justify-center gap-2">
-        {frames.map((frame, dot) => <button key={frame.src} type="button" onClick={() => setIndex(dot)} aria-label={`Ver ${frame.label.toLowerCase()}`} aria-current={dot === index} className={`h-1.5 rounded-full transition-all duration-300 ${dot === index ? "w-6 bg-[var(--ink)]" : "w-1.5 bg-[var(--ink)]/25 hover:bg-[var(--ink)]/50"}`} />)}
+      {frames.length > 1 && <div className="mt-2 flex justify-center">
+        {frames.map((frame, dot) => <button key={frame.src} type="button" onClick={() => setIndex(dot)} aria-label={`Ver ${frame.label.toLowerCase()}`} aria-current={dot === index} className="flex h-8 items-center px-1">
+          <span className={`block h-1.5 rounded-full transition-all duration-300 ${dot === index ? "w-6 bg-[var(--ink)]" : "w-1.5 bg-[var(--ink)]/25"}`} />
+        </button>)}
       </div>}
     </div>
   );

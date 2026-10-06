@@ -34,13 +34,26 @@ export function ShirtChapters() {
     return () => observer.disconnect();
   }, []);
 
+  // On larger screens, decode the other shirts ahead of time so a chapter change never waits on an image.
+  useEffect(() => {
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    const timer = window.setTimeout(() => CHAPTERS.slice(1).forEach((chapter) => {
+      const cutout = getShirtStory(chapter.id)?.cutout;
+      if (!cutout) return;
+      const image = new Image();
+      image.src = `${cutout.src}-${cutout.small}.webp`;
+      image.decode().catch(() => undefined);
+    }), 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const story = getShirtStory(CHAPTERS[active].id)!;
   const product = getProduct(story.id);
 
   return (
     <section ref={ref} className="season-wash relative md:grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)]">
       <div className="hidden md:sticky md:top-[var(--header-h,72px)] md:block md:h-[calc(100svh-var(--header-h,72px))] md:self-start md:p-10">
-        <ShirtStage story={story} turn={turn} sheen={scrollYProgress} sizes="44vw" alt={`Camiseta ${product?.name ?? ""}`} className="w-[min(42vw,44rem)]" />
+        <ShirtStage story={story} turn={turn} sheen={scrollYProgress} sizes="600px" alt={`Camiseta ${product?.name ?? ""}`} className="w-[min(42vw,44rem)]" />
       </div>
 
       <div className="px-6 py-16 md:px-0 md:py-[12svh] md:pr-20">
@@ -49,7 +62,7 @@ export function ShirtChapters() {
           const chapterProduct = getProduct(chapter.id);
           return <div key={chapter.id} ref={(element) => { chapterRefs.current[index] = element; }} data-index={index} className={`flex flex-col justify-center py-10 transition-opacity duration-500 md:min-h-[52svh] md:py-0 ${index === active ? "md:opacity-100" : "md:opacity-35"}`}>
             {/* eslint-disable-next-line @next/next/no-img-element -- phone-only render of the cutout */}
-            <img src={`${chapterStory.cutout.src}-${chapterStory.cutout.small}.webp`} alt={`Camiseta ${chapterProduct?.name ?? ""}`} width={chapterStory.cutout.small} height={Math.round(chapterStory.cutout.small * chapterStory.cutout.ratio)} loading="lazy" className="mx-auto mb-8 h-auto w-[78%] drop-shadow-[0_30px_30px_rgba(32,28,23,.25)] md:hidden" />
+            <img src={`${chapterStory.cutout.src}-${chapterStory.cutout.small}.webp`} alt={`Camiseta ${chapterProduct?.name ?? ""}`} width={chapterStory.cutout.small} height={Math.round(chapterStory.cutout.small * chapterStory.cutout.ratio)} loading="lazy" decoding="async" className="mx-auto mb-8 h-auto w-[78%] drop-shadow-[0_30px_30px_rgba(32,28,23,.25)] md:hidden" />
             <h2 className="display text-[clamp(2.6rem,4.6vw,4.6rem)]">{chapter.title[0]}<br /><i>{chapter.title[1]}</i></h2>
             <p className="mt-5 max-w-md text-lg leading-snug text-[var(--ink)]/75 md:text-xl">{chapter.text}</p>
             {chapterProduct && <Link href={`/produto/${chapterProduct.id}`} className="sans mt-6 w-fit border-b border-[var(--ink)]/40 pb-1 text-sm transition-colors hover:border-[var(--ink)]">Estampa {chapterProduct.name}</Link>}

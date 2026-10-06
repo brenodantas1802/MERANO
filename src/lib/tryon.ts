@@ -20,9 +20,10 @@ const VIEW_DESCRIPTIONS: Record<ViewKey, string> = {
   right: "a LATERAL DIREITA da camiseta (o lado direito de quem a veste)",
 };
 
-const PRESERVE_PERSON_PROMPT = `EDITAR A FOTO DA PESSOA, não criar uma pessoa nova. A imagem 1 é a foto-base e deve ser preservada: mantenha exatamente a mesma pessoa, rosto, identidade, expressão, tom de pele, cabelo, pose, ângulo do corpo, mãos, proporções corporais, enquadramento, câmera, iluminação e fundo. Faça somente uma troca virtual de roupa sobre a pessoa. Não substitua a pessoa, não mude a pose, não gire nem espelhe o corpo e não faça uma nova sessão de fotos.
+// With a size to show, the garment shots give the design only; the fit comes from the size section.
+const preservePersonPrompt = (sized: boolean) => `EDITAR A FOTO DA PESSOA, não criar uma pessoa nova. A imagem 1 é a foto-base e deve ser preservada: mantenha exatamente a mesma pessoa, rosto, identidade, expressão, tom de pele, cabelo, pose, ângulo do corpo, mãos, proporções corporais, enquadramento, câmera, iluminação e fundo. Faça somente uma troca virtual de roupa sobre a pessoa. Não substitua a pessoa, não mude a pose, não gire nem espelhe o corpo e não faça uma nova sessão de fotos.
 
-As demais imagens mostram a camiseta do produto, sem ninguém vestindo, cada uma de um ângulo. Use-as exclusivamente como referência exata da peça: modelo, corte, caimento, comprimento, gola, mangas, costuras, textura, material, cores, etiquetas e todos os detalhes visuais. Reproduza textos e logotipos exatamente como estão, letra por letra. Não invente logotipos, textos, estampas ou detalhes que não estejam nessas imagens.
+As demais imagens mostram a camiseta do produto, sem ninguém vestindo, cada uma de um ângulo. Use-as exclusivamente como referência exata da peça: ${sized ? "modelo, gola, mangas, costuras, textura, material, cores, etiquetas e todos os detalhes visuais. O tamanho e o caimento no corpo NÃO vêm dessas fotos: seguem a seção TAMANHO E CAIMENTO abaixo." : "modelo, corte, caimento, comprimento, gola, mangas, costuras, textura, material, cores, etiquetas e todos os detalhes visuais."} Reproduza textos e logotipos exatamente como estão, letra por letra. Não invente logotipos, textos, estampas ou detalhes que não estejam nessas imagens.
 
 Resultado: uma edição fotográfica realista da imagem 1, com a camiseta trocada e todo o restante praticamente idêntico. Preserve a anatomia e evite mãos extras, membros deformados, rosto alterado, pessoa diferente, roupa genérica, estampa inventada ou fundo modificado.`;
 
@@ -74,7 +75,8 @@ function orientationInstruction(pose: Pose, has: (key: ViewKey) => boolean, imag
   return `A pessoa da imagem 1 está de LADO, em perfil de 90°, voltada para a ${faces} da imagem: o peito dela fica do lado ${faces} da imagem e as COSTAS dela ficam do lado ${behind} da imagem.${sideRef} A estampa das costas (imagem ${imageOf("back")}) só pode aparecer como uma faixa estreita na borda traseira do tronco, do lado ${behind} da imagem, cortada pelo ângulo, e NUNCA no lado do peito nem na manga. ${chestRule} Não vire a pessoa para a câmera.`;
 }
 
-export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject): TryOnPlan {
+// `fit` is the size-and-fit paragraph (lib/fit-description.ts); without it the shirt keeps the catalog's fit.
+export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject, fit?: string): TryOnPlan {
   let keys = wantedViews(pose).filter((key) => views[key]);
   // The garment's plain colour/cut/fabric still has to come from somewhere when the catalog has no front shot.
   if (!views.front && !keys.includes("back")) keys = [...keys, "back"];
@@ -90,6 +92,6 @@ export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject): Try
 
   return {
     views: keys,
-    prompt: `${PRESERVE_PERSON_PROMPT}\n\n${subject ? `${subjectInstruction({ ...subject, cropImage })}\n\n` : ""}${imageList}\n\n${orientationInstruction(pose, has, imageOf)}`,
+    prompt: `${preservePersonPrompt(!!fit)}\n\n${subject ? `${subjectInstruction({ ...subject, cropImage })}\n\n` : ""}${imageList}\n\n${orientationInstruction(pose, has, imageOf)}${fit ? `\n\n${fit}` : ""}`,
   };
 }

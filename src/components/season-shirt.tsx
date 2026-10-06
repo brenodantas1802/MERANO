@@ -27,7 +27,8 @@ export function SeasonShirt({ products }: { products: Product[] }) {
   // On larger screens, warm the other shirts' images a moment after load so switching is instant.
   useEffect(() => {
     if (!window.matchMedia("(min-width: 768px)").matches) return;
-    const warm = () => stories.slice(1).forEach((item) => { const image = new Image(); image.src = `${item.cutout.src}-${item.cutout.small}.webp`; });
+    // decode() prepares each image off the main thread, so switching doesn't stall on decoding.
+    const warm = () => stories.slice(1).forEach((item) => { const image = new Image(); image.src = `${item.cutout.src}-${item.cutout.small}.webp`; image.decode().catch(() => undefined); });
     const timer = window.setTimeout(warm, 2500);
     return () => window.clearTimeout(timer);
   }, [stories]);
@@ -37,7 +38,7 @@ export function SeasonShirt({ products }: { products: Product[] }) {
   return (
     <section ref={ref} className="season-wash relative grid grid-cols-[minmax(0,1fr)] md:grid-cols-[1.1fr_.9fr]">
       <div className="px-6 pb-4 pt-16 md:sticky md:top-[var(--header-h,72px)] md:h-[calc(100svh-var(--header-h,72px))] md:self-start md:p-10">
-        <ShirtStage story={story} turn={scrollTurn} sheen={scrollYProgress} priority sizes="(min-width: 768px) 44vw, 88vw" alt={`Camiseta ${product.name}, verso`} className="w-[min(88vw,30rem)] md:w-[min(44vw,46rem)]" />
+        <ShirtStage story={story} turn={scrollTurn} sheen={scrollYProgress} priority sizes="(min-width: 768px) 600px, 88vw" alt={`Camiseta ${product.name}, verso`} className="w-[min(88vw,30rem)] md:w-[min(44vw,46rem)]" />
       </div>
 
       <div className="px-6 pb-20 md:px-0 md:pb-[14svh] md:pr-20">
