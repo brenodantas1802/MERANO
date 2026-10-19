@@ -13,6 +13,8 @@ export function RelatedRow({ items }: { items: RelatedItem[] }) {
   const track = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; left: number } | null>(null);
   const [bar, setBar] = useState({ width: 1, left: 0 });
+  // While the thumb is held, the row stops snapping to each piece; otherwise every move snapped back and the drag jumped.
+  const [free, setFree] = useState(false);
 
   // Thumb size is the share of the row in view; its position follows the scroll.
   useEffect(() => {
@@ -43,6 +45,7 @@ export function RelatedRow({ items }: { items: RelatedItem[] }) {
     // Pressing on the thumb starts a drag; pressing elsewhere on the bar jumps there.
     if (position >= bar.left && position <= bar.left + bar.width) {
       drag.current = { x: event.clientX, left: bar.left };
+      setFree(true);
       event.currentTarget.setPointerCapture(event.pointerId);
     } else {
       scrollToRatio(Math.min(1, Math.max(0, (position - bar.width / 2) / (1 - bar.width))), true);
@@ -54,10 +57,10 @@ export function RelatedRow({ items }: { items: RelatedItem[] }) {
     const left = drag.current.left + (event.clientX - drag.current.x) / rect.width;
     scrollToRatio(Math.min(1, Math.max(0, left / (1 - bar.width))), false);
   };
-  const endDrag = () => { drag.current = null; };
+  const endDrag = () => { drag.current = null; setFree(false); };
 
   return <>
-    <div ref={row} id="related" className="-mx-6 mt-4 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 [scrollbar-width:none] md:mx-0 md:gap-4 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+    <div ref={row} id="related" className={`-mx-6 mt-4 flex ${free ? "snap-none" : "snap-x snap-mandatory"} scroll-px-6 gap-3 overflow-x-auto px-6 [scrollbar-width:none] md:mx-0 md:gap-4 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden`}>
       {items.map((item) => <Link key={item.id} href={`/produto/${item.id}`} className="group w-[64vw] shrink-0 snap-start md:w-[calc((100%-3rem)/4)]">
         <div className="relative aspect-square overflow-hidden bg-[var(--cream)]/35">
           <Image src={item.image} alt={item.name} fill sizes="(min-width: 768px) 25vw, 64vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />

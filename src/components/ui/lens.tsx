@@ -35,7 +35,10 @@ export const Lens: React.FC<LensProps> = ({
 
   const [mousePosition, setMousePosition] = useState({ x: 100, y: 100 });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Only a mouse brings the lens up; a finger tapping or swiping the photo leaves it alone.
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    if (!isHovering) setIsHovering(true);
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -46,11 +49,11 @@ export const Lens: React.FC<LensProps> = ({
     <div
       ref={containerRef}
       className="relative overflow-hidden rounded-lg z-20"
-      onMouseEnter={() => {
-        setIsHovering(true);
+      onPointerEnter={(e) => {
+        if (e.pointerType === "mouse") setIsHovering(true);
       }}
-      onMouseLeave={() => setIsHovering(false)}
-      onMouseMove={handleMouseMove}
+      onPointerLeave={() => setIsHovering(false)}
+      onPointerMove={handlePointerMove}
     >
       {children}
 

@@ -1,15 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState, ViewTransition, type PointerEvent } from "react";
-import { animate, motion, useMotionValue } from "motion/react";
+import { useRef, useState, useSyncExternalStore, ViewTransition, type PointerEvent } from "react";
+import { animate, motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Lens } from "@/components/ui/lens";
 import type { ShirtViews } from "@/lib/products";
 
 const GALLERY_LABELS = ["Verso", "Frente", "Lado esquerdo", "Lado direito"];
-// Pixels of horizontal drag per quarter turn.
-const STEP = 80;
+// A slow drag turns the photo past this share of its width; a flick turns it past this speed (px/ms).
+const SWIPE_SHARE = 0.2;
+const FLICK_SPEED = 0.4;
+const SLIDE = { duration: 0.35, ease: [0.32, 0.72, 0, 1] } as const;
 
 type Frame = { src: string; label: string };
 
@@ -26,35 +28,84 @@ function framesFor(images: string[], views?: ShirtViews): Frame[] {
   return images.map((src, index) => ({ src, label: GALLERY_LABELS[index] ?? `Vista ${index + 1}` }));
 }
 
-// One viewer for every angle: drag (or the arrows and dots) turns the piece, and the magnifier works on whichever side is showing.
+// While the page is pinched in, one finger pans around the photo instead of turning it.
+const subscribeViewport = (onChange: () => void) => {
+  window.visualViewport?.addEventListener("resize", onChange);
+  return () => window.visualViewport?.removeEventListener("resize", onChange);
+};
+const pinchedIn = () => (window.visualViewport?.scale ?? 1) > 1.01;
+
+// Each photo sits beside the current one at its distance around the loop, so every move is the same sideways slide, wrapping included.
+function Slide({ frame, alt, order, count, position }: { frame: Frame; alt: string; order: number; count: number; position: MotionValue<number> }) {
+  const x = useTransform(position, (current) => {
+    let slot = (((order - current) % count) + count) % count;
+    if (slot >= count / 2) slot -= count;
+    return `${slot * 100}%`;
+  });
+  return (
+    <motion.div style={{ x }} className="absolute inset-0">
+      <Image src={frame.src} alt={alt} fill draggable={false} loading="eager" sizes="(min-width: 768px) 55vw, 100vw" className="object-cover" />
+    </motion.div>
+  );
+}
+
+// One viewer for every angle: a swipe, the arrows and the dots all slide to the next photo, pinch-zoom is the browser's, and the magnifier follows the mouse.
 export function ProductGallery3D({ id, name, images, views }: { id: string; name: string; images: string[]; views?: ShirtViews }) {
   const frames = framesFor(images, views);
-  const turntable = frames.length === 4 && Boolean(views?.front && views.left && views.right);
+  const count = frames.length;
   const [index, setIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const tilt = useMotionValue(0);
-  const drag = useRef<{ x: number; start: number } | null>(null);
-  const wrap = (value: number) => (value + frames.length) % frames.length;
-  const go = (step: number) => setIndex((current) => wrap(current + step));
+  const zoomed = useSyncExternalStore(subscribeViewport, pinchedIn, () => false);
+  const position = useMotionValue(0);
+  const target = useRef(0);
+  const slide = useRef<ReturnType<typeof animate> | null>(null);
+  const drag = useRef<{ id: number; x: number; from: number; width: number; time: number; moved: boolean } | null>(null);
+  const wrap = (value: number) => ((value % count) + count) % count;
+
+  const slideTo = (next: number) => {
+    target.current = next;
+    setIndex(wrap(next));
+    slide.current?.stop();
+    slide.current = animate(position, next, SLIDE);
+  };
+  const go = (step: number) => slideTo(target.current + step);
+  const show = (dot: number) => {
+    let step = dot - wrap(target.current);
+    if (step > count / 2) step -= count;
+    if (step < -count / 2) step += count;
+    slideTo(target.current + step);
+  };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (!turntable) return;
-    drag.current = { x: event.clientX, start: index };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (count < 2 || zoomed || !event.isPrimary || event.button !== 0) return;
+    drag.current = { id: event.pointerId, x: event.clientX, from: 0, width: event.currentTarget.offsetWidth, time: event.timeStamp, moved: false };
   };
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!drag.current) return;
-    const offset = (event.clientX - drag.current.x) / STEP;
-    if (!dragging && Math.abs(offset) > 0.1) setDragging(true);
-    const steps = Math.round(offset);
-    setIndex(wrap(drag.current.start - steps));
-    tilt.set((offset - steps) * 34);
+    const current = drag.current;
+    if (!current || event.pointerId !== current.id) return;
+    if (!current.moved) {
+      if (Math.abs(event.clientX - current.x) < 6) return;
+      // A tap does nothing; only a real sideways drag takes hold of the photo, from wherever it is.
+      slide.current?.stop();
+      Object.assign(current, { moved: true, from: position.get() });
+      setDragging(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    position.set(current.from - (event.clientX - current.x) / current.width);
   };
-  const endDrag = () => {
+  const endDrag = (event: PointerEvent<HTMLDivElement>, cancelled = false) => {
+    const current = drag.current;
+    if (!current || event.pointerId !== current.id) return;
     drag.current = null;
+    if (!current.moved) return;
     setDragging(false);
-    animate(tilt, 0, { type: "spring", stiffness: 260, damping: 22 });
+    const moved = position.get() - current.from;
+    const distance = Math.abs(moved) * current.width;
+    const flick = distance > 24 && distance / Math.max(event.timeStamp - current.time, 1) > FLICK_SPEED;
+    let next = Math.round(position.get());
+    if (!cancelled && next === Math.round(current.from) && (Math.abs(moved) > SWIPE_SHARE || flick)) next += Math.sign(moved);
+    slideTo(next);
   };
 
   return (
@@ -64,29 +115,27 @@ export function ProductGallery3D({ id, name, images, views }: { id: string; name
           <div
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            style={{ touchAction: turntable ? "pan-y" : undefined }}
-            className={turntable ? (dragging ? "cursor-grabbing select-none" : "cursor-grab") : undefined}
+            onPointerUp={(event) => endDrag(event)}
+            onPointerCancel={(event) => endDrag(event, true)}
+            style={{ touchAction: count > 1 && !zoomed ? "pan-y pinch-zoom" : undefined }}
+            className={count > 1 ? (dragging ? "cursor-grabbing select-none" : "cursor-grab") : undefined}
           >
             <Lens zoomFactor={2} lensSize={190} hovering={hovering && !dragging} setHovering={setHovering}>
-              <div className="relative aspect-[.9] w-full bg-[var(--paper)] [perspective:1400px]">
-                <motion.div style={{ rotateY: tilt }} className="absolute inset-0">
-                  {frames.map((frame, frameIndex) => (
-                    <Image key={frame.src} src={frame.src} alt={`${name}, ${frame.label.toLowerCase()}`} fill draggable={false} loading="eager" sizes="(min-width: 768px) 55vw, 100vw" className={`object-cover ${frameIndex === index ? "opacity-100" : "opacity-0"}`} />
-                  ))}
-                </motion.div>
+              <div className="relative aspect-[.9] w-full overflow-hidden bg-[var(--paper)]">
+                {frames.map((frame, order) => (
+                  <Slide key={frame.src} frame={frame} alt={`${name}, ${frame.label.toLowerCase()}`} order={order} count={count} position={position} />
+                ))}
               </div>
             </Lens>
           </div>
-          {frames.length > 1 && <>
+          {count > 1 && <>
             <button type="button" onClick={() => go(-1)} aria-label="Vista anterior" className="absolute left-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-[0_2px_10px_rgba(25,35,30,.15)] transition-transform hover:scale-105"><ChevronLeft size={16} strokeWidth={1.5} /></button>
             <button type="button" onClick={() => go(1)} aria-label="Próxima vista" className="absolute right-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-[0_2px_10px_rgba(25,35,30,.15)] transition-transform hover:scale-105"><ChevronRight size={16} strokeWidth={1.5} /></button>
           </>}
         </div>
       </ViewTransition>
-      {frames.length > 1 && <div className="mt-2 flex justify-center">
-        {frames.map((frame, dot) => <button key={frame.src} type="button" onClick={() => setIndex(dot)} aria-label={`Ver ${frame.label.toLowerCase()}`} aria-current={dot === index} className="flex h-8 items-center px-1">
+      {count > 1 && <div className="mt-2 flex justify-center">
+        {frames.map((frame, dot) => <button key={frame.src} type="button" onClick={() => show(dot)} aria-label={`Ver ${frame.label.toLowerCase()}`} aria-current={dot === index} className="flex h-8 items-center px-1">
           <span className={`block h-1.5 rounded-full transition-all duration-300 ${dot === index ? "w-6 bg-[var(--ink)]" : "w-1.5 bg-[var(--ink)]/25"}`} />
         </button>)}
       </div>}

@@ -30,6 +30,11 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
     <div onPointerMove={onPointerMove} onPointerLeave={onPointerLeave} className="flex h-full w-full items-center justify-center [perspective:1600px]">
       {/* The slow float is a CSS animation on its own layer, so it runs on the GPU without repainting the shirt. */}
       <div className={`float-slow relative ${className}`}>
+        {/* The shadow is the shirt's own outline, blurred once and kept flat under the turning shirt. As a filter inside the
+            3D layer it came out square on iPhones and was redrawn on every scroll frame. */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 translate-y-[45px] opacity-[.28] blur-[20px]" style={{ aspectRatio: `1 / ${ratio}` }}>
+          <div className="h-full w-full bg-[rgb(32,28,23)]" style={{ WebkitMaskImage: `url(${src}-${small}.webp)`, maskImage: `url(${src}-${small}.webp)`, WebkitMaskSize: "100% 100%", maskSize: "100% 100%" }} />
+        </div>
         <motion.div style={{ rotateY, rotateX: tiltX, transformStyle: "preserve-3d" }} className="relative will-change-transform">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -50,10 +55,11 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
                 alt={alt}
                 fetchPriority={priority ? "high" : undefined}
                 decoding="async"
-                className="relative h-auto w-full drop-shadow-[0_45px_40px_rgba(32,28,23,.28)]"
+                className="relative h-auto w-full"
               />
-              {/* Light gliding over the cotton, clipped to the shirt's outline. */}
-              <div className="pointer-events-none absolute inset-0 overflow-hidden mix-blend-soft-light" style={{ WebkitMaskImage: `url(${src}-${small}.webp)`, maskImage: `url(${src}-${small}.webp)`, WebkitMaskSize: "100% 100%", maskSize: "100% 100%" }}>
+              {/* Light gliding over the cotton, clipped to the shirt's outline (mouse screens only: on phones the blend inside
+                  the 3D layer is costly and adds nothing to a scroll). */}
+              <div className="pointer-events-none absolute inset-0 overflow-hidden mix-blend-soft-light [@media(hover:none)]:hidden" style={{ WebkitMaskImage: `url(${src}-${small}.webp)`, maskImage: `url(${src}-${small}.webp)`, WebkitMaskSize: "100% 100%", maskSize: "100% 100%" }}>
                 <motion.div style={{ x: sheenX }} className="absolute inset-y-0 -left-1/2 w-[200%] bg-[linear-gradient(105deg,transparent_38%,rgba(255,255,255,.5)_50%,transparent_62%)] will-change-transform" />
               </div>
             </motion.div>

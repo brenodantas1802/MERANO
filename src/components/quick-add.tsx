@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ShoppingBag, X } from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import { useCart } from "./cart-provider";
 import { useSizeRecommendation } from "@/lib/use-size-recommendation";
 import { getProductPrice, type Product } from "@/lib/products";
@@ -25,10 +25,11 @@ export function QuickAdd({ product }: { product: Product }) {
     openDrawer();
   }
 
-  // Sits over the card photo (same aspect ratio) so the picker lines up with it.
-  return <div className="pointer-events-none absolute inset-x-0 top-0 aspect-[.82]">
-    <button type="button" onClick={(event) => { stop(event); setOpen((value) => !value); }} aria-label={`Adicionar ${product.name} ao carrinho`} aria-expanded={open} className="pointer-events-auto absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--creme)]/90 shadow-sm transition-all hover:bg-[var(--ink)] hover:text-[var(--creme)] md:opacity-0 md:group-hover:opacity-100">
-      {open ? <X size={16} strokeWidth={1.5} /> : <ShoppingBag size={16} strokeWidth={1.5} />}
+  // Sits over the card photo (same aspect ratio) so the picker lines up with it. Computers only, on hover: on a phone
+  // it covered every shirt, and the product page already has "Comprar" and the cart button.
+  return <div className="pointer-events-none absolute inset-x-0 top-0 hidden aspect-[.82] md:block">
+    <button type="button" onClick={(event) => { stop(event); setOpen((value) => !value); }} aria-label={`Adicionar ${product.name} ao carrinho`} aria-expanded={open} className="pointer-events-auto absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--creme)]/90 opacity-0 shadow-sm transition-all hover:bg-[var(--ink)] hover:text-[var(--creme)] focus-visible:opacity-100 group-hover:opacity-100">
+      {open ? <X size={16} strokeWidth={1.5} /> : <ShoppingCart size={16} strokeWidth={1.5} />}
     </button>
     <AnimatePresence>
       {open && <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.25 }} onClick={stop} className="pointer-events-auto absolute inset-x-3 bottom-3 z-10 rounded-2xl bg-[var(--paper)]/95 p-4 shadow-lg backdrop-blur">

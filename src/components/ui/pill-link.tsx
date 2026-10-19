@@ -9,7 +9,8 @@ const BASE = "group/pill relative inline-flex w-fit items-center justify-center 
 const VARIANTS: Record<Variant, { root: string; fill: string; label: string }> = {
   outline: { root: "border border-[var(--ink)] text-[var(--ink)]", fill: "bg-[var(--ink)]", label: "group-hover/pill:text-[var(--paper)]" },
   solid: { root: "bg-[var(--ink)] text-[var(--paper)]", fill: "bg-[var(--sol-1)]", label: "" },
-  glass: { root: "border border-white/45 bg-white/[.14] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.35)] backdrop-blur-md", fill: "bg-white", label: "group-hover/pill:text-[var(--ink)]" },
+  // No backdrop blur: over the hero video it would be recomputed for every video frame, which made Safari stutter.
+  glass: { root: "border border-white/50 bg-white/[.16] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.35)]", fill: "bg-white", label: "group-hover/pill:text-[var(--ink)]" },
 };
 
 export function PillLink({ href, children, variant = "outline", className = "" }: { href: string; children: ReactNode; variant?: Variant; className?: string }) {
