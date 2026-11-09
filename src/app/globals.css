@@ -1,25 +1,29 @@
 @import "tailwindcss";
 
 :root {
-	/* Palette "Marinho" (2026-10-06): white ground, black text and buttons, navy accent. */
-	--ink: #111111;
-	--muted: #475569;
-	--paper: #FFFFFF;
-	--cream: #EDF0F4;
+	/* Palette "Salão" (2026-11-09): Ermos-clean layout in the owners' new colours — felt wine, brushed brass,
+	   walnut, cream paper and cotton black. The previous "Marinho" values are in git history. */
+	--vinho: #551E2B;
+	--latao: #BA9654;
+	--nogueira: #71452F;
+	--ink: #141110;
+	--muted: #6E6259;
+	--paper: #F6F1E8;
+	--cream: #EFE7DA;
 	--moss: #536a57;
 	--clay: #b88768;
-	--line: #E1E6ED;
+	--line: #E3D9C9;
 	--origem: #000000;
-	--areia: #E1E6ED;
-	--creme: #FFFFFF;
-	--terra-dark: #111111;
-	--terra: #1B2A41;
-	--sol-1: #1B2A41;
-	--sol-2: #FABD4B;
+	--areia: #E3D9C9;
+	--creme: #F6F1E8;
+	--terra-dark: #141110;
+	--terra: #551E2B;
+	--sol-1: #551E2B;
+	--sol-2: #BA9654;
 	--mar: #2f7f8a;
-	--mar-fundo: #1B2A41;
+	--mar-fundo: #551E2B;
 	--espuma: #d9e8e2;
-	--areia-clara: #F4F6F9;
+	--areia-clara: #F1EADF;
 }
 
 * { box-sizing: border-box; }
@@ -52,7 +56,7 @@ body {
 /* Sun-bleached sand running into shallow sea-glass, with a faint sand grain. */
 .grain { background-color: var(--areia-clara); }
 /* Season shirt section: warm paper with a soft pool of light behind the shirt. */
-.season-wash { background: radial-gradient(55% 60% at 27% 48%, #eef2f7 0%, rgba(238, 242, 247, 0) 72%), linear-gradient(180deg, var(--paper) 0%, var(--areia-clara) 100%); }
+.season-wash { background: radial-gradient(55% 60% at 27% 48%, #FBF7F0 0%, rgba(251, 247, 240, 0) 72%), linear-gradient(180deg, var(--paper) 0%, var(--areia-clara) 100%); }
 
 /* Product photo morph between a card and the product page (React <ViewTransition share="morph">). */
 ::view-transition-group(.morph) { animation-duration: 520ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
@@ -65,7 +69,7 @@ body {
 .hero-accent {
 	display: inline-block;
 	font-weight: 600;
-	background: linear-gradient(100deg, #fff1cf 0%, #fac35c 30%, #f39a3a 55%, #ffe6a8 80%, #fff1cf 100%);
+	background: linear-gradient(100deg, #f3e3bf 0%, #d4b06a 30%, #ba9654 55%, #ead39d 80%, #f3e3bf 100%);
 	background-size: 160% 100%;
 	background-position: 30% 50%;
 	-webkit-background-clip: text;
@@ -120,8 +124,8 @@ body {
 .sunset-glow {
 	background-color: var(--paper);
 	background-image:
-		radial-gradient(ellipse 55% 60% at 88% -10%, rgba(27, 42, 65, 0.07), transparent 70%),
-		radial-gradient(ellipse 70% 40% at 50% 0%, rgba(225, 230, 237, 0.6), transparent 75%);
+		radial-gradient(ellipse 55% 60% at 88% -10%, rgba(85, 30, 43, 0.07), transparent 70%),
+		radial-gradient(ellipse 70% 40% at 50% 0%, rgba(227, 217, 201, 0.6), transparent 75%);
 	background-repeat: no-repeat;
 }
 
@@ -171,14 +175,14 @@ body {
 }
 html { -webkit-tap-highlight-color: transparent; }
 .glass {
-	background: rgba(255, 255, 255, .64);
+	background: rgba(246, 241, 232, .66);
 	-webkit-backdrop-filter: blur(26px) saturate(1.7);
 	backdrop-filter: blur(26px) saturate(1.7);
 	border: 1px solid rgba(255, 255, 255, .6);
 	box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 18px 50px rgba(15, 18, 24, .16);
 }
 /* Cards inside a glass panel: a lighter frosted tile. */
-.glass-tile { background: rgba(255, 255, 255, .58); border: 1px solid rgba(255, 255, 255, .7); }
+.glass-tile { background: rgba(251, 248, 242, .62); border: 1px solid rgba(255, 255, 255, .65); }
 .glass-dark {
 	background: rgba(17, 17, 17, .72);
 	-webkit-backdrop-filter: blur(22px) saturate(1.4);
@@ -187,7 +191,7 @@ html { -webkit-tap-highlight-color: transparent; }
 	box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
 }
 @media (prefers-reduced-transparency: reduce) {
-	.glass, .glass-tile { background: rgba(255, 255, 255, .97); -webkit-backdrop-filter: none; backdrop-filter: none; }
+	.glass, .glass-tile { background: rgba(246, 241, 232, .98); -webkit-backdrop-filter: none; backdrop-filter: none; }
 	.glass-dark { background: #111; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 /* Instant feedback under the finger. */
@@ -201,3 +205,8 @@ html { -webkit-tap-highlight-color: transparent; }
 .ticker { animation: ticker 32s linear infinite; }
 @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .ticker { animation: none; } .press:active { transform: none; } }
+
+/* Brass hairline and numbered section labels ("01 / Mais desejadas"), from the Salão palette. */
+.rule-latao { height: 1px; background: linear-gradient(90deg, var(--latao), rgba(186, 150, 84, 0)); }
+.secao { font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: .22em; font-size: 13px; color: var(--vinho); }
+.secao b { color: var(--latao); font-weight: 500; margin-right: .6em; }

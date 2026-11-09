@@ -102,9 +102,9 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const outline = clear ? OUTLINE_CLEAR : OUTLINE;
 
   return <header ref={headerRef} data-clear={clear || undefined} className={`${overlay ? "fixed inset-x-0" : "sticky"} top-0 z-50 text-[var(--ink)]`}>
-    <Link href="/personalizar-estampa" className="block h-8 overflow-hidden bg-[#111] text-white" aria-label="Crie a sua estampa no Personalizador">
+    <Link href="/personalizar-estampa" className="block h-8 overflow-hidden bg-[var(--vinho)] text-[var(--creme)]" aria-label="Crie a sua estampa no Personalizador">
       <div className="ticker flex h-8 w-max items-center whitespace-nowrap text-[11px] font-medium uppercase tracking-[.14em]" aria-hidden>
-        {Array.from({ length: 2 }).map((_, copy) => <span key={copy} className="flex">{TICKER.map((frase) => <span key={frase} className="flex items-center"><span className="px-5">{frase}</span><span className="text-white/40">•</span></span>)}</span>)}
+        {Array.from({ length: 2 }).map((_, copy) => <span key={copy} className="flex">{TICKER.map((frase) => <span key={frase} className="flex items-center"><span className="px-5">{frase}</span><span className="text-[var(--latao)]">◆</span></span>)}</span>)}
       </div>
     </Link>
     <div className={`sans grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b px-3 transition-colors duration-300 md:px-6 ${clear ? "border-transparent bg-transparent" : "border-[var(--line)] bg-[var(--paper)]"}`}>

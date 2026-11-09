@@ -70,7 +70,7 @@ export function FavoriteButton({ productId, name, className }: { productId: stri
           transition={{ duration: 0.2 }}
           className="block"
         >
-          <Heart size={16} strokeWidth={1.5} fill={isFavorite ? "#1B2A41" : "none"} stroke={isFavorite ? "#1B2A41" : "currentColor"} />
+          <Heart size={16} strokeWidth={1.5} fill={isFavorite ? "#551E2B" : "none"} stroke={isFavorite ? "#551E2B" : "currentColor"} />
         </motion.span>
       </AnimatePresence>
     </motion.button>

@@ -68,7 +68,7 @@ function ProgressRing({ filled, total }: { filled: number; total: number }) {
   const share = filled / total;
   return <div className="relative h-28 w-28 shrink-0 md:h-44 md:w-44">
     <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" aria-hidden>
-      <defs><linearGradient id="ring-sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1B2A41" /><stop offset="1" stopColor="#5d7aa6" /></linearGradient></defs>
+      <defs><linearGradient id="ring-sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#551E2B" /><stop offset="1" stopColor="#5d7aa6" /></linearGradient></defs>
       <circle cx="64" cy="64" r={radius} fill="none" stroke="var(--ink)" strokeOpacity={0.08} strokeWidth={7} />
       <motion.circle cx="64" cy="64" r={radius} fill="none" stroke="url(#ring-sun)" strokeWidth={7} strokeLinecap="round" strokeDasharray={length} initial={{ strokeDashoffset: length }} animate={{ strokeDashoffset: length * (1 - share) }} transition={{ duration: 1.1, ease: EASE }} />
     </svg>

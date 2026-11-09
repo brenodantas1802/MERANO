@@ -22,7 +22,7 @@ function SizePills({ fits, size, recommended, onPick, small = false }: { fits: s
   return <div role="radiogroup" aria-label="Tamanho" className={`flex gap-2 ${small ? "flex-nowrap" : "flex-wrap"}`}>
     {fits.map((value) => {
       const active = size === value;
-      return <button key={value} type="button" role="radio" aria-checked={active} onClick={() => onPick(value)} className={`press relative rounded-full text-[13px] font-medium ${small ? "h-9 min-w-9 px-2.5" : "h-11 min-w-11 px-3"} ${active ? "bg-[var(--ink)] text-[var(--creme)]" : "text-[var(--ink)] shadow-[inset_0_0_0_1px_rgba(17,17,17,.18)] hover:shadow-[inset_0_0_0_1px_rgba(17,17,17,.6)]"}`}>
+      return <button key={value} type="button" role="radio" aria-checked={active} onClick={() => onPick(value)} className={`press relative rounded-full text-[13px] font-medium ${small ? "h-9 min-w-9 px-2.5" : "h-11 min-w-11 px-3"} ${active ? "bg-[var(--vinho)] text-[var(--creme)]" : "text-[var(--ink)] shadow-[inset_0_0_0_1px_rgba(17,17,17,.18)] hover:shadow-[inset_0_0_0_1px_rgba(17,17,17,.6)]"}`}>
         {value}
         {value === recommended && <span aria-hidden className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--paper)] bg-[var(--sol-1)]" />}
       </button>;
@@ -101,10 +101,10 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
     {missing > 0 && !size && <p role="alert" className="mt-2 text-[12px] text-[#8a3a2c]">Escolha um tamanho.</p>}
 
     <div ref={buyRef} className="mt-5 space-y-2.5">
-      <button type="button" onClick={addToBag} aria-live="polite" className={`press label flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-[12px] text-[var(--creme)] ${state === "adding" ? "bg-[var(--ink)]/70" : "bg-[var(--ink)]"}`}>
+      <button type="button" onClick={addToBag} aria-live="polite" className={`press label flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-[12px] text-[var(--creme)] ${state === "adding" ? "bg-[var(--vinho)]/75" : "bg-[var(--vinho)]"}`}>
         {state === "added" && <Check size={15} />}{label}
       </button>
-      <button type="button" onClick={() => put() && router.push("/pagamento")} className="press label h-[52px] w-full rounded-full text-[12px] shadow-[inset_0_0_0_1px_rgba(17,17,17,.85)] hover:bg-[var(--ink)] hover:text-[var(--creme)]">Comprar agora</button>
+      <button type="button" onClick={() => put() && router.push("/pagamento")} className="press label h-[52px] w-full rounded-full text-[12px] shadow-[inset_0_0_0_1px_rgba(85,30,43,.85)] text-[var(--vinho)] hover:bg-[var(--vinho)] hover:text-[var(--creme)]">Comprar agora</button>
     </div>
 
     <div className="mt-4 flex items-center justify-between text-[13px] text-[var(--muted)]">
@@ -120,9 +120,9 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
           <SizePills fits={product.fits} size={size} recommended={recommended} onPick={pick} small />
         </div>
       </div>
-      <button type="button" tabIndex={barOn ? 0 : -1} onClick={addToBag} className={`press label flex h-[52px] w-full items-center justify-between rounded-[22px] px-5 text-[12px] text-[var(--creme)] shadow-[0_12px_30px_rgba(0,0,0,.25)] ${missing && !size ? "bg-[#8a3a2c]" : state === "adding" ? "bg-[#111]/75" : "bg-[#111]"}`}>
+      <button type="button" tabIndex={barOn ? 0 : -1} onClick={addToBag} className={`press label flex h-[52px] w-full items-center justify-between rounded-[22px] px-5 text-[12px] text-[var(--creme)] shadow-[0_12px_30px_rgba(0,0,0,.25)] ${missing && !size ? "bg-[#8a3a2c]" : state === "adding" ? "bg-[var(--vinho)]/80" : "bg-[var(--vinho)]"}`}>
         <span className="flex items-center gap-2">{state === "added" && <Check size={15} />}{missing && !size ? "Escolha o tamanho" : label}</span>
-        <span className="tabular-nums">{price}</span>
+        <span className="tabular-nums text-[var(--latao)]">{price}</span>
       </button>
     </div>
   </div>;

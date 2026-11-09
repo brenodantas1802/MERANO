@@ -34,7 +34,7 @@ export default function BrandPage() {
       <Image src="/imagens/merano-assets/foto praia 1.jpg" alt="Corpo em movimento na praia, referência da Meranno" fill sizes="100vw" className="object-cover" />
       <div className="absolute inset-0 bg-black/30" />
       <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">
-        <p className="sans mb-4 text-[11px] uppercase tracking-[.2em]" style={{ color: "#FABD4B" }}>Origem</p>
+        <p className="sans mb-4 text-[11px] uppercase tracking-[.2em]" style={{ color: "#BA9654" }}>Origem</p>
         <p className="display max-w-2xl text-4xl leading-tight md:text-6xl">O mesmo mar que inspira as estampas é o que guia o ritmo com que fazemos cada peça.</p>
       </div>
     </ScrollReveal>

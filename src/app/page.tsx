@@ -19,8 +19,8 @@ export default function Home() {
     <section className="relative overflow-hidden px-7 py-10 text-white md:px-16 md:py-16">
       <HeroVideo src="/imagens/merano-assets/banner-mar-4.mp4" mobileSrc="/imagens/merano-assets/banner-mar-4-mobile.mp4" poster="/imagens/merano-assets/banner-mar-4-poster.jpg" />
       {/* Shade weighted to the side the headline sits on, so the type reads over bright surf without dimming the whole sea. */}
-      <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(6,24,30,.62)_0%,rgba(6,24,30,.34)_42%,rgba(6,24,30,.08)_72%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[rgba(6,24,30,.35)] to-transparent" />
+      <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(36,10,16,.66)_0%,rgba(36,10,16,.36)_42%,rgba(36,10,16,.1)_72%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[rgba(36,10,16,.4)] to-transparent" />
       <div className="relative z-10 flex min-h-screen flex-col justify-center">
         <div className="max-w-3xl"><HeroTextReveal className="display max-w-3xl text-[clamp(2.8rem,7vw,6.4rem)] [text-shadow:0_2px_36px_rgba(4,18,24,.35)]" lines={["Feito para", "quem entende de", <span key="excl" className="hero-accent">exclusividade.</span>]} /></div>
         <div className="mt-10"><PillLink href="#colecao" variant="glass">Ver coleção</PillLink></div>
@@ -29,7 +29,7 @@ export default function Home() {
 
     <div className="pt-8 md:pt-12"><ThemeCircles /></div>
 
-    <ProductShelf titulo="Mais desejadas" verTudo="/shop" products={products.slice(0, 8)} />
+    <ProductShelf numero="01" titulo="Mais desejadas" verTudo="/shop" products={products.slice(0, 8)} />
 
     <SeasonShirt products={products} />
 
@@ -37,17 +37,17 @@ export default function Home() {
     <section className="px-1 pt-12 md:pt-16">
       <Link href="/personalizar-estampa" className="group relative block aspect-[4/5] overflow-hidden md:aspect-[21/9]">
         <Image src="/imagens/merano-assets/lookbook/modelo-preta-vermelha.webp" alt="" fill sizes="100vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(85,30,43,.85)] via-[rgba(85,30,43,.15)] to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-12">
-          <p className="label text-[12px] text-white/80">Novo · Personalizador</p>
+          <p className="label text-[12px] text-[var(--latao)]">Novo · Personalizador</p>
           <h2 className="display mt-2 text-[clamp(2.6rem,9vw,5.5rem)]">A sua estampa.</h2>
-          <span className="press mt-5 inline-flex h-11 items-center rounded-full bg-white px-6 text-[13px] font-medium text-[var(--ink)]">Criar agora</span>
+          <span className="press mt-5 inline-flex h-11 items-center rounded-full bg-[var(--creme)] px-6 text-[13px] font-medium text-[var(--vinho)]">Criar agora</span>
         </div>
       </Link>
     </section>
 
     <section id="colecao" className="pb-12 pt-14 md:pb-16 md:pt-20">
-      <div className="mb-6 flex items-end justify-between px-6 md:px-12"><h2 className="label text-[13px]">Coleção 01</h2><Link href="/shop" className="label text-[12px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Ver tudo</Link></div>
+      <div className="mb-6 flex items-end justify-between px-6 md:px-12"><h2 className="secao"><b>02 /</b>Coleção 01</h2><Link href="/shop" className="label text-[12px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Ver tudo</Link></div>
       <div className="grid grid-cols-2 gap-1 px-1 md:grid-cols-3">{products.slice(0, 6).map((product) => <ProductCard product={product} key={product.id} />)}</div>
     </section>
 

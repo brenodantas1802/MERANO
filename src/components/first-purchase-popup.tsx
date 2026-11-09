@@ -51,7 +51,7 @@ export function FirstPurchasePopup() {
             className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[var(--creme)] p-8 shadow-2xl md:p-10"
           >
             <button onClick={close} aria-label="Fechar" className="absolute right-4 top-4 text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><X size={18} strokeWidth={1.5} /></button>
-            <div className="mb-6 h-1 w-12" style={{ background: "linear-gradient(to right, #1B2A41, #FABD4B)" }} />
+            <div className="mb-6 h-1 w-12" style={{ background: "linear-gradient(to right, #551E2B, #BA9654)" }} />
             {sent ? (
               <div>
                 <h2 className="display text-4xl">Combinado.</h2>

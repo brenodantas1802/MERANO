@@ -41,13 +41,13 @@ export function CartDrawer() {
 
         {items.length === 0 ? <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
           <p className="display text-4xl">Seu carrinho está esperando uma peça.</p>
-          <Link href="/shop" onClick={closeDrawer} className="press label mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3.5 text-[12px] text-[var(--creme)]">Ver coleção <ArrowRight size={14} /></Link>
+          <Link href="/shop" onClick={closeDrawer} className="press label mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--vinho)] px-6 py-3.5 text-[12px] text-[var(--creme)]">Ver coleção <ArrowRight size={14} /></Link>
         </div> : <>
           <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 pb-3">
             <div className="glass-tile rounded-[20px] px-4 py-3.5 text-center">
               {FRETE_GRATIS_ACIMA ? <>
                 <p className="label text-[11px]">{falta > 0 ? `Faltam ${formatPrice(falta)} para o frete grátis` : "Frete grátis liberado"}</p>
-                <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-black/10"><motion.div className="h-full rounded-full bg-[var(--ink)]" initial={false} animate={{ width: `${Math.min(100, (total / FRETE_GRATIS_ACIMA) * 100)}%` }} transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }} /></div>
+                <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-black/10"><motion.div className="h-full rounded-full bg-[var(--latao)]" initial={false} animate={{ width: `${Math.min(100, (total / FRETE_GRATIS_ACIMA) * 100)}%` }} transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }} /></div>
               </> : <p className="label text-[11px]">Feito sob demanda · produção em até 7 dias úteis</p>}
             </div>
 
@@ -73,7 +73,7 @@ export function CartDrawer() {
             </AnimatePresence>
 
             {sugestoes.length > 0 && <div className="glass-tile rounded-[20px] py-3.5">
-              <p className="label px-4 text-[11px] text-[var(--muted)]">Combina com</p>
+              <p className="secao px-4 text-[11px]">Combina com</p>
               <div className="shelf mt-2.5 auto-cols-[42%] gap-2.5 px-4 scroll-px-4">
                 {sugestoes.map((product) => <Link key={product.id} href={`/produto/${product.id}`} onClick={closeDrawer} className="press block">
                   <span className="relative block aspect-[.82] overflow-hidden rounded-[14px] bg-white/70"><Image src={product.image} alt={product.name} fill sizes="160px" className="object-cover" /></span>
@@ -86,7 +86,7 @@ export function CartDrawer() {
 
           <div className="border-t border-white/60 bg-white/40 px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-3.5">
             <div className="flex items-baseline justify-between px-1"><span className="text-[14px] text-[var(--muted)]">Subtotal</span><span className="text-[17px] font-semibold tabular-nums">{formatPrice(total)}</span></div>
-            <Link href="/pagamento" onClick={closeDrawer} className="press label mt-3 flex h-[52px] items-center justify-between rounded-full bg-[var(--ink)] px-6 text-[12px] text-[var(--creme)]">
+            <Link href="/pagamento" onClick={closeDrawer} className="press label mt-3 flex h-[52px] items-center justify-between rounded-full bg-[var(--vinho)] px-6 text-[12px] text-[var(--creme)]">
               <span>Finalizar compra</span><ArrowRight size={16} />
             </Link>
             <div className="mt-2.5 flex justify-between px-1 text-[12px] text-[var(--muted)]"><button onClick={closeDrawer} className="press underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver carrinho</Link></div>
