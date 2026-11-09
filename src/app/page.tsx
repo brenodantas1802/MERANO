@@ -19,7 +19,7 @@ export default function Home() {
       <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(6,24,30,.62)_0%,rgba(6,24,30,.34)_42%,rgba(6,24,30,.08)_72%)]" />
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[rgba(6,24,30,.35)] to-transparent" />
       <div className="relative z-10 flex min-h-screen flex-col justify-center">
-        <div className="max-w-3xl"><HeroTextReveal className="display max-w-3xl text-[clamp(2.8rem,7vw,6.4rem)] [text-shadow:0_2px_36px_rgba(4,18,24,.35)]" lines={["Feito para", "quem entende", <span key="excl" className="hero-accent">exclusividade.</span>]} /></div>
+        <div className="max-w-3xl"><HeroTextReveal className="display max-w-3xl text-[clamp(2.8rem,7vw,6.4rem)] [text-shadow:0_2px_36px_rgba(4,18,24,.35)]" lines={["Feito para", "quem entende de", <span key="excl" className="hero-accent">exclusividade.</span>]} /></div>
         <div className="mt-10"><PillLink href="#colecao" variant="glass">Ver coleção</PillLink></div>
       </div>
     </section>

@@ -12,7 +12,7 @@ const display = Barlow_Condensed({ subsets: ["latin"], weight: ["400", "500", "6
 const sans = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "MERANNO | Feito para quem entende exclusividade.",
+  title: "MERANNO | Feito para quem entende de exclusividade.",
   description: "Moda brasileira feita sob demanda.",
 };
 
