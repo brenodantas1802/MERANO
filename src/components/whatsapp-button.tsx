@@ -10,14 +10,14 @@ const TIP = "sans pointer-events-none absolute right-full mr-3 hidden -rotate-3 
 // On phones these pages need the bottom corner for their own buttons and fields.
 const BUSY_ON_PHONES = ["/produto", "/carrinho", "/pagamento", "/checkout", "/conta", "/meu-fit", "/provador"];
 
-// Floating contact buttons in the bottom-right corner: Instagram above WhatsApp on computers; on phones only a
-// smaller WhatsApp (Instagram is in the menu and the footer), and none on pages busy with a form or the buy button.
+// Floating contact buttons in the bottom-right corner: Instagram above WhatsApp, on phones and computers; none on phone
+// pages busy with a form or the buy bar.
 export function WhatsAppButton() {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
   const busy = BUSY_ON_PHONES.some((page) => pathname.startsWith(page));
   return <div className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 z-[80] flex-col items-center gap-3 md:bottom-8 md:right-8 md:flex ${busy ? "hidden" : "flex"}`}>
-    <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Seguir a Meranno no Instagram (@meranoclothing)" className="group relative hidden h-12 w-12 md:flex items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285AEB_90%)] text-white shadow-[0_10px_30px_-8px_rgba(0,0,0,.45)] transition-transform hover:scale-105">
+    <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Seguir a Meranno no Instagram (@meranoclothing)" className="group relative flex h-11 w-11 items-center justify-center rounded-full md:h-12 md:w-12 bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285AEB_90%)] text-white shadow-[0_10px_30px_-8px_rgba(0,0,0,.45)] transition-transform hover:scale-105">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" aria-hidden><rect x="3" y="3" width="18" height="18" rx="5.2" /><circle cx="12" cy="12" r="4.1" /><circle cx="17.4" cy="6.6" r="1.05" fill="currentColor" stroke="none" /></svg>
       <span className={TIP}>@meranoclothing</span>
     </a>
