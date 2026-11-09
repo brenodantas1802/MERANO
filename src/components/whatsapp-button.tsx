@@ -14,7 +14,8 @@ const BUSY_ON_PHONES = ["/produto", "/carrinho", "/pagamento", "/checkout", "/co
 // pages busy with a form or the buy bar.
 export function WhatsAppButton() {
   const pathname = usePathname();
-  if (pathname.startsWith("/admin")) return null;
+  // The Personalizador fills the whole screen with its own buttons (chat, cart, review), on phones and computers.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/personalizar-estampa")) return null;
   const busy = BUSY_ON_PHONES.some((page) => pathname.startsWith(page));
   return <div className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-4 z-[80] flex-col items-center gap-3 md:bottom-8 md:right-8 md:flex ${busy ? "hidden" : "flex"}`}>
     <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Seguir a Meranno no Instagram (@meranoclothing)" className="group relative flex h-11 w-11 items-center justify-center rounded-full md:h-12 md:w-12 bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285AEB_90%)] text-white shadow-[0_10px_30px_-8px_rgba(0,0,0,.45)] transition-transform hover:scale-105">
