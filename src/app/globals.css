@@ -140,3 +140,24 @@ body {
 .float-slow { animation: float-slow 7s ease-in-out infinite; will-change: transform; }
 @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }
+
+/* Personalizador MERANNO (/personalizar-estampa): colours sampled from the owners' prototype. */
+.pz-tema {
+	--pz-vinho: #541E2B;
+	--pz-creme: #F5F1E8;
+	--pz-cartao: #FAF7F0;
+	--pz-campo: #FBF8F3;
+	--pz-areia: #EEE6D9;
+	--pz-foto: #E9E5DE;
+	--pz-linha: #E3DED5;
+	--pz-borda: #D6CBB6;
+	--pz-ouro: #D6AE8B;
+	--pz-tinta: #3C2326;
+	--pz-suave: #7F766F;
+	--pz-apagado: #9A938D;
+	font-family: var(--font-manrope), Arial, Helvetica, sans-serif;
+}
+.pz-serif { font-family: var(--font-cormorant-garamond), "Cormorant Garamond", Georgia, serif; font-weight: 500; }
+.pz-rotulo { font-family: var(--font-cormorant-garamond), Georgia, serif; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--pz-suave); }
+.pz-palco { background: radial-gradient(70% 60% at 50% 42%, #662837 0%, #5C2130 48%, #4C1A26 100%); }
+.pz-listras { background: repeating-linear-gradient(135deg, var(--pz-cartao) 0 8px, #EFE8DE 8px 9px); }
