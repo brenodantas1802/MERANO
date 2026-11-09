@@ -17,11 +17,12 @@ type Camada = "casa" | "esboco" | "arte";
 // One side of the tee on the wine stage, with its own zoom. The drawing scales by height so both sides fit any screen.
 function Vista({ titulo, children, extra, rodape, className = "" }: { titulo: string; children: React.ReactNode; extra?: React.ReactNode; rodape?: React.ReactNode; className?: string }) {
   const [zoom, setZoom] = useState(100);
-  const botao = "hidden rounded p-1.5 hover:bg-white/10 sm:block";
+  const botao = "hidden rounded p-1.5 text-[var(--pz-creme)]/85 hover:bg-white/10 hover:text-[var(--pz-creme)] sm:block";
+  const canto = "pointer-events-none absolute h-[22px] w-[22px] border-[var(--pz-ouro)]/70";
   return <div className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${className}`}>
-    <div className="absolute inset-x-3 top-3 z-10 flex items-center justify-between gap-2 text-[var(--pz-creme)] md:inset-x-6 md:top-4">
-      <span className="pz-serif text-xl italic md:text-2xl">{titulo}</span>
-      <div className="flex items-center gap-1 text-xs">
+    <div className="absolute inset-x-3 top-3 z-10 flex items-center justify-between gap-2 text-[var(--pz-creme)] md:inset-x-6 md:top-[18px]">
+      <span className="pz-serif text-[22px] italic md:text-[26px]">{titulo}</span>
+      <div className="flex items-center gap-1 text-[13px]">
         {extra}
         <button type="button" aria-label={`Diminuir ${titulo}`} onClick={() => setZoom((z) => Math.max(60, z - 20))} className={botao}><Minus size={14} /></button>
         <span className="hidden w-10 text-center tabular-nums sm:block">{zoom}%</span>
@@ -29,10 +30,10 @@ function Vista({ titulo, children, extra, rodape, className = "" }: { titulo: st
         <button type="button" aria-label={`Ajustar ${titulo}`} onClick={() => setZoom(100)} className={botao}><Maximize2 size={14} /></button>
       </div>
     </div>
-    <span className="pointer-events-none absolute left-3 top-12 h-5 w-5 border-l border-t border-[var(--pz-creme)]/50 md:left-6 md:top-14 md:h-6 md:w-6" />
-    <span className="pointer-events-none absolute right-3 top-12 h-5 w-5 border-r border-t border-[var(--pz-creme)]/50 md:right-6 md:top-14 md:h-6 md:w-6" />
-    <span className="pointer-events-none absolute bottom-3 left-3 h-5 w-5 border-b border-l border-[var(--pz-creme)]/50 md:left-6 md:h-6 md:w-6" />
-    <span className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 border-b border-r border-[var(--pz-creme)]/50 md:right-6 md:h-6 md:w-6" />
+    <span className={`${canto} left-3 top-12 border-l border-t md:left-6 md:top-[58px]`} />
+    <span className={`${canto} right-3 top-12 border-r border-t md:right-6 md:top-[58px]`} />
+    <span className={`${canto} bottom-3 left-3 border-b border-l md:bottom-5 md:left-6`} />
+    <span className={`${canto} bottom-3 right-3 border-b border-r md:bottom-5 md:right-6`} />
     <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto px-4 pb-9 pt-12 md:px-8 md:pt-14">
       <div className={`flex items-center justify-center [&>svg]:h-full [&>svg]:w-auto ${zoom <= 100 ? "max-w-full [&>svg]:max-w-full" : "[&>svg]:max-w-none"}`} style={{ height: `${zoom}%` }}>{children}</div>
     </div>
@@ -153,14 +154,13 @@ export default function PersonalizadorPage() {
 
   return <main className="pz-tema min-h-screen bg-[var(--pz-creme)] text-[var(--pz-tinta)]">
     <SiteHeader />
-    <div className="flex items-center justify-between border-b border-[var(--pz-linha)] px-4 py-3 md:px-8">
-      <span className="text-[12px] text-[var(--pz-suave)]">Personalizador</span>
-      <span className="pz-serif text-xl tracking-[.45em] md:text-2xl">{BRAND_WORD}</span>
-      <span className="pz-serif hidden text-base italic text-[var(--pz-suave)] md:block">Pra quem entende de exclusividade</span>
-      <span className="md:hidden" />
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-[var(--pz-linha)] px-5 py-4 md:px-8 md:py-[26px]">
+      <span className="text-[13px] text-[var(--pz-suave)] md:text-[15px]">Personalizador</span>
+      <span className="pz-serif pl-[.45em] text-[22px] tracking-[.45em] text-[var(--pz-tinta)] md:text-[30px]">{BRAND_WORD}</span>
+      <span className="pz-serif hidden justify-self-end text-[18px] italic text-[#5B4C47] md:block">Pra quem entende de exclusividade</span>
     </div>
 
-    <div className="lg:grid lg:h-[calc(100dvh-64px-53px)] lg:grid-cols-[minmax(300px,340px)_1fr_minmax(340px,410px)]">
+    <div className="lg:grid lg:h-[calc(100dvh-64px-83px)] lg:grid-cols-[minmax(300px,360px)_1fr_minmax(360px,414px)]">
       {/* Chat — left on desktop */}
       <aside className="hidden min-h-0 border-r border-[var(--pz-linha)] lg:block">
         <ChatCriacao mensagens={mensagens} sugestoes={sugestoes} carregando={conversando} erro={erroChat} pronto={pronto} referenciasPendentes={pendentes.length} onEnviar={enviar} onRecomecar={recomecar} onRevisar={() => setConfirmando(true)} />
@@ -168,7 +168,7 @@ export default function PersonalizadorPage() {
 
       {/* The tee: back on top (where the creation goes), front below */}
       <section ref={palco} className="pz-palco scroll-mt-16 grid h-[52dvh] min-h-[340px] grid-cols-2 lg:h-auto lg:min-h-0 lg:grid-cols-1 lg:grid-rows-2" aria-label="Prévia da camiseta">
-        <Vista titulo="Verso" extra={seletorCamada} rodape={rodapeVerso} className="border-r border-[var(--pz-creme)]/15 lg:border-b lg:border-r-0">
+        <Vista titulo="Verso" extra={seletorCamada} rodape={rodapeVerso} className="border-r border-[var(--pz-creme)]/20 lg:border-b lg:border-r-0">
           <Camiseta lado="verso" modelagem={painel.modelagem} corMalha={malha} fonte={painel.fonte} corEscrita={painel.corEscrita} arte={arteVerso} textoVerso={ficha.texto} carregando={gerando} />
         </Vista>
         <Vista titulo="Frente">
@@ -178,7 +178,7 @@ export default function PersonalizadorPage() {
 
       {/* Mobile: chat and panel share the space under the tee */}
       <div className="sticky top-16 z-20 flex border-b border-[var(--pz-linha)] bg-[var(--pz-creme)] lg:hidden">
-        {(["criacao", "peca"] as const).map((t) => <button key={t} type="button" onClick={() => setAba(t)} aria-pressed={aba === t} className={`flex-1 py-3 text-sm ${aba === t ? "border-b-2 border-[var(--pz-vinho)] text-[var(--pz-vinho)]" : "text-[var(--pz-suave)]"}`}>{t === "criacao" ? "Criação" : "Sua peça"}</button>)}
+        {(["criacao", "peca"] as const).map((t) => <button key={t} type="button" onClick={() => setAba(t)} aria-pressed={aba === t} className={`pz-serif flex-1 py-3 text-[19px] ${aba === t ? "border-b-[1.5px] border-[var(--pz-vinho)] text-[var(--pz-vinho)]" : "text-[var(--pz-suave)]"}`}>{t === "criacao" ? "Criação" : "Sua peça"}</button>)}
       </div>
       <div className={`h-[75dvh] lg:hidden ${aba === "criacao" ? "block" : "hidden"}`}>
         <ChatCriacao mensagens={mensagens} sugestoes={sugestoes} carregando={conversando} erro={erroChat} pronto={pronto} referenciasPendentes={pendentes.length} onEnviar={enviar} onRecomecar={recomecar} onRevisar={() => setConfirmando(true)} onVerPeca={verPeca} />

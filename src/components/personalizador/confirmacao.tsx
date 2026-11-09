@@ -31,7 +31,7 @@ export function Confirmacao({ ficha, painel, referencias, restantes, gerando, on
   const casa = painel.estampaCasa ? estampaCasaDe(painel.estampaCasa) : undefined;
   const prompt = planEstampa(rascunho, painel, { referencias: rascunho.usarReferencias ? referencias : 0, estampaCasa: !!casa });
   const coresPaleta = painel.paleta.slice(1);
-  const campo = "w-full rounded-md border border-[var(--pz-linha)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--pz-vinho)]";
+  const campo = "w-full rounded-[12px] border border-[var(--pz-borda)] bg-[var(--pz-campo)] px-3 py-2 text-sm outline-none focus:border-[var(--pz-vinho)]";
   const rotulo = "mb-1 block text-[11px] uppercase tracking-[.16em] text-[var(--pz-suave)]";
 
   return <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/55 p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="pz-confirmar-titulo" onClick={onFechar}>
@@ -45,7 +45,7 @@ export function Confirmacao({ ficha, painel, referencias, restantes, gerando, on
       </div>
 
       <div className="space-y-5 px-5 py-5 sm:px-7">
-        <div className="grid grid-cols-2 gap-3 rounded-md bg-[var(--pz-creme-2)] p-4 text-sm sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 rounded-md bg-[var(--pz-cartao)] p-4 text-sm sm:grid-cols-4">
           <div><span className={rotulo}>Modelagem</span>{MODELAGENS.find((m) => m.id === painel.modelagem)?.nome}</div>
           <div><span className={rotulo}>Malha</span><span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border border-black/10" style={{ background: painel.paleta[0] }} />{nomeDaCor(painel.paleta[0])}</span></div>
           <div><span className={rotulo}>Frente</span><span style={{ fontFamily: fonteDe(painel.fonte).css }}>{escritaDe(painel.fonte)}</span></div>
@@ -88,8 +88,8 @@ export function Confirmacao({ ficha, painel, referencias, restantes, gerando, on
       <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-[var(--pz-linha)] bg-[var(--pz-creme)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
         <p className="text-xs text-[var(--pz-suave)]">{restantes > 0 ? `Você ainda pode criar ${restantes} versão(ões) nesta sessão.` : "Você usou as criações desta sessão."}</p>
         <div className="flex gap-2">
-          <button type="button" onClick={onFechar} className="flex-1 border border-[var(--pz-linha)] px-4 py-3 text-sm sm:flex-none">Voltar ao chat</button>
-          <button type="button" disabled={gerando || restantes <= 0 || (!rascunho.ideia.trim() && !rascunho.elementos.length)} onClick={() => onConfirmar(rascunho)} className="flex flex-1 items-center justify-center gap-2 bg-[var(--pz-vinho)] px-5 py-3 text-sm text-[var(--pz-creme)] disabled:opacity-40 sm:flex-none"><Sparkles size={16} /> {gerando ? "Criando…" : "Criar estampa"}</button>
+          <button type="button" onClick={onFechar} className="flex-1 rounded-full border border-[var(--pz-borda)] px-5 py-3 text-sm font-medium sm:flex-none">Voltar ao chat</button>
+          <button type="button" disabled={gerando || restantes <= 0 || (!rascunho.ideia.trim() && !rascunho.elementos.length)} onClick={() => onConfirmar(rascunho)} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[var(--pz-vinho)] px-6 py-3 text-sm font-semibold text-[var(--pz-creme)] disabled:opacity-40 sm:flex-none"><Sparkles size={16} /> {gerando ? "Criando…" : "Criar estampa"}</button>
         </div>
       </div>
     </div>

@@ -141,17 +141,23 @@ body {
 @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }
 
-/* Personalizador MERANNO (/personalizar-estampa): cream paper, wine stage, old-gold details. */
+/* Personalizador MERANNO (/personalizar-estampa): colours sampled from the owners' prototype. */
 .pz-tema {
-	--pz-vinho: #5B1E2B;
-	--pz-vinho-escuro: #3E121C;
-	--pz-creme: #F4EFE6;
-	--pz-creme-2: #EFE8DC;
-	--pz-linha: #E2D8C8;
-	--pz-tinta: #2A1A1D;
-	--pz-suave: #7A6A63;
-	--pz-ouro: #B08A4E;
+	--pz-vinho: #541E2B;
+	--pz-creme: #F5F1E8;
+	--pz-cartao: #FAF7F0;
+	--pz-campo: #FBF8F3;
+	--pz-areia: #EEE6D9;
+	--pz-foto: #E9E5DE;
+	--pz-linha: #E3DED5;
+	--pz-borda: #D6CBB6;
+	--pz-ouro: #D6AE8B;
+	--pz-tinta: #3C2326;
+	--pz-suave: #7F766F;
+	--pz-apagado: #9A938D;
+	font-family: var(--font-manrope), Arial, Helvetica, sans-serif;
 }
-.pz-serif { font-family: var(--font-cormorant), Georgia, "Times New Roman", serif; font-weight: 500; }
-.pz-palco { background: radial-gradient(60% 55% at 50% 45%, #7a2a3a 0%, #5B1E2B 55%, #3E121C 100%); }
-.pz-listras { background: repeating-linear-gradient(135deg, transparent 0 7px, rgba(42, 26, 29, .06) 7px 8px); }
+.pz-serif { font-family: var(--font-cormorant-garamond), "Cormorant Garamond", Georgia, serif; font-weight: 500; }
+.pz-rotulo { font-family: var(--font-cormorant-garamond), Georgia, serif; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--pz-suave); }
+.pz-palco { background: radial-gradient(70% 60% at 50% 42%, #662837 0%, #5C2130 48%, #4C1A26 100%); }
+.pz-listras { background: repeating-linear-gradient(135deg, var(--pz-cartao) 0 8px, #EFE8DE 8px 9px); }

@@ -3,40 +3,19 @@
 import { useId } from "react";
 import { type EstampaCasaId, type FonteId, type Modelagem, escritaDe, estampaCasaDe, fonteDe } from "@/lib/estampa";
 
-// Flat drawing of the tee, by fit. All numbers live in a 400 × 460 box; x is mirrored around 200.
-const CORTES: Record<Modelagem, { ombro: number; ombroY: number; manga: [number, number]; punho: [number, number]; axila: number; axilaY: number; barra: number }> = {
-  regular: { ombro: 92, ombroY: 58, manga: [150, 150], punho: [118, 176], axila: 104, axilaY: 150, barra: 420 },
-  oversized: { ombro: 120, ombroY: 70, manga: [176, 196], punho: [134, 218], axila: 124, axilaY: 178, barra: 432 },
-  boxy: { ombro: 112, ombroY: 64, manga: [166, 168], punho: [130, 192], axila: 120, axilaY: 162, barra: 382 },
+// The tee from the MERANNO prototype: a photo of the black tee (front and back), cut out of the prototype, plus a
+// grey shading map of it. Any other colour is that colour under the shading ("overlay" blend), so folds and collar stay.
+const FOTO = {
+  frente: { foto: "/imagens/personalizador/camiseta-frente.png", sombra: "/imagens/personalizador/camiseta-frente-sombra.png" },
+  verso: { foto: "/imagens/personalizador/camiseta-verso.png", sombra: "/imagens/personalizador/camiseta-verso-sombra.png" },
 };
 
-function contorno(m: Modelagem, lado: "frente" | "verso") {
-  const c = CORTES[m];
-  const gola = lado === "frente" ? 30 : 10;
-  const L = (dx: number) => 200 - dx;
-  const R = (dx: number) => 200 + dx;
-  return [
-    `M ${L(38)} 40`,
-    `Q 200 ${40 + gola * 2} ${R(38)} 40`,
-    `L ${R(c.ombro)} ${c.ombroY}`,
-    `L ${R(c.manga[0])} ${c.manga[1]}`,
-    `L ${R(c.punho[0])} ${c.punho[1]}`,
-    `L ${R(c.axila)} ${c.axilaY}`,
-    `L ${R(c.axila + 2)} ${c.barra}`,
-    `Q 200 ${c.barra + 6} ${L(c.axila + 2)} ${c.barra}`,
-    `L ${L(c.axila)} ${c.axilaY}`,
-    `L ${L(c.punho[0])} ${c.punho[1]}`,
-    `L ${L(c.manga[0])} ${c.manga[1]}`,
-    `L ${L(c.ombro)} ${c.ombroY}`,
-    "Z",
-  ].join(" ");
-}
+// The photo is one fit; the others stretch it the way they sit (wider and dropped, or wider and shorter).
+const ESCALA: Record<Modelagem, [number, number]> = { regular: [1, 1], oversized: [1.1, 1.04], boxy: [1.08, 0.9] };
 
-// Light shirts get dark stitching and shading; dark ones the opposite.
 function luminancia(hex: string) {
   const n = parseInt(hex.slice(1), 16);
-  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
 }
 
 export type ArteVerso =
@@ -54,78 +33,71 @@ type Props = {
   arte?: ArteVerso;
   textoVerso?: string;
   carregando?: boolean;
+  semEscrita?: boolean;
   className?: string;
 };
 
-export function Camiseta({ lado, modelagem, corMalha, fonte, corEscrita, arte = null, textoVerso = "", carregando = false, className = "" }: Props) {
-  const id = useId().replace(/:/g, "");
-  const c = CORTES[modelagem];
-  const clara = luminancia(corMalha) > 0.6;
-  const costura = clara ? "rgba(0,0,0,.18)" : "rgba(255,255,255,.14)";
-  const f = fonteDe(fonte);
+// Print areas, in the 400 × 400 box the photo fills. Measured on the photo: the body runs from 21% to 78% of the width.
+const AREA = { x: 120, y: 70, w: 160, h: 212 };
 
-  // Back print area: centred under the collar, sized by the body width so a boxy or oversized tee carries it the same way.
-  const largura = c.axila * 1.12;
-  const altura = largura * (4 / 3);
-  const topo = 96;
-  const x = 200 - largura / 2;
+export function Camiseta({ lado, modelagem, corMalha, fonte, corEscrita, arte = null, textoVerso = "", carregando = false, semEscrita = false, className = "" }: Props) {
+  const id = useId().replace(/:/g, "");
+  const [sx, sy] = ESCALA[modelagem];
+  const preta = luminancia(corMalha) < 0.06;
+  const clara = luminancia(corMalha) > 0.6;
+  const f = fonteDe(fonte);
   const casa = arte?.tipo === "casa" ? estampaCasaDe(arte.id) : undefined;
   const esboco = arte?.tipo === "esboco" ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(arte.svg.includes("xmlns=") ? arte.svg : arte.svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"'))}` : undefined;
+  const { x, y, w, h } = AREA;
+  const contorno = clara ? "rgba(42,26,29,.22)" : "rgba(245,241,232,.22)";
 
   return (
-    <svg viewBox="0 0 400 460" className={className} role="img" aria-label={lado === "frente" ? "Frente da camiseta" : "Verso da camiseta"}>
+    <svg viewBox="-40 -16 480 476" className={className} role="img" aria-label={lado === "frente" ? "Frente da camiseta" : "Verso da camiseta"}>
       <defs>
-        <clipPath id={`corpo-${id}`}><path d={contorno(modelagem, lado)} /></clipPath>
-        <linearGradient id={`luz-${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity={clara ? 0.0 : 0.08} />
-          <stop offset=".55" stopColor="#000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000" stopOpacity={clara ? 0.1 : 0.28} />
-        </linearGradient>
+        <filter id={`tingir-${id}`} x="0" y="0" width="1" height="1" colorInterpolationFilters="sRGB">
+          <feFlood floodColor={corMalha} result="cor" />
+          <feComposite in="cor" in2="SourceAlpha" operator="in" result="base" />
+          <feBlend in="SourceGraphic" in2="base" mode="overlay" />
+        </filter>
         {casa?.tinta && (
-          <mask id={`tinta-${id}`} maskUnits="userSpaceOnUse" x={x} y={topo} width={largura} height={altura}>
-            <image href={casa.src} x={x} y={topo} width={largura} height={altura} preserveAspectRatio="xMidYMid meet" />
+          <mask id={`tinta-${id}`} maskUnits="userSpaceOnUse" x={x} y={y} width={w} height={h}>
+            <image href={casa.src} x={x} y={y} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
           </mask>
         )}
       </defs>
 
-      <g style={{ filter: "drop-shadow(0 18px 22px rgba(0,0,0,.35))" }}>
-        <path d={contorno(modelagem, lado)} fill={corMalha} />
+      <g transform={`translate(200 200) scale(${sx} ${sy}) translate(-200 -200)`}>
+        <g style={{ filter: "drop-shadow(0 14px 18px rgba(20,4,10,.45))" }}>
+          {preta
+            ? <image href={FOTO[lado].foto} x="0" y="0" width="400" height="400" preserveAspectRatio="xMidYMid meet" />
+            : <image href={FOTO[lado].sombra} x="0" y="0" width="400" height="400" preserveAspectRatio="xMidYMid meet" filter={`url(#tingir-${id})`} />}
+        </g>
       </g>
 
-      <g clipPath={`url(#corpo-${id})`}>
-        {lado === "frente" ? (
-          <text x="200" y="128" textAnchor="middle" fill={corEscrita} style={{ fontFamily: f.css, fontSize: f.caixa === "livre" ? 26 : 17, letterSpacing: `${f.espaco}em` }}>
-            {escritaDe(fonte)}
-          </text>
-        ) : (
-          <>
-            {arte?.tipo === "arte" && <image href={arte.src} x={x} y={topo} width={largura} height={altura} preserveAspectRatio="xMidYMid meet" />}
-            {esboco && <image href={esboco} x={x} y={topo} width={largura} height={altura} preserveAspectRatio="xMidYMid meet" opacity={0.92} />}
-            {casa && (casa.tinta
-              ? <rect x={x} y={topo} width={largura} height={altura} fill={arte?.tipo === "casa" ? arte.cor : corEscrita} mask={`url(#tinta-${id})`} />
-              : <image href={casa.src} x={x} y={topo} width={largura} height={altura} preserveAspectRatio="xMidYMid meet" />)}
-            {!arte && !carregando && (
-              <rect x={x} y={topo} width={largura} height={altura} fill="none" stroke={costura} strokeWidth="1.2" strokeDasharray="5 6" rx="4" />
-            )}
-            {carregando && (
-              <rect x={x} y={topo} width={largura} height={altura} rx="4" fill={clara ? "rgba(0,0,0,.08)" : "rgba(255,255,255,.1)"}>
-                <animate attributeName="opacity" values=".35;1;.35" dur="1.6s" repeatCount="indefinite" />
-              </rect>
-            )}
-            {textoVerso && (
-              <text x="200" y={topo + altura + 26} textAnchor="middle" fill={corEscrita} style={{ fontFamily: f.css, fontSize: f.caixa === "livre" ? 22 : 15, letterSpacing: `${Math.max(0.04, f.espaco / 2)}em` }}>
-                {f.caixa === "alta" ? textoVerso.toUpperCase() : textoVerso}
-              </text>
-            )}
-          </>
-        )}
-        <rect x="0" y="0" width="400" height="460" fill={`url(#luz-${id})`} />
-        {/* Hem and cuff stitching */}
-        <path d={`M ${200 - c.axila} ${c.barra - 12} Q 200 ${c.barra - 6} ${200 + c.axila} ${c.barra - 12}`} stroke={costura} strokeWidth="1" fill="none" strokeDasharray="3 3" />
-      </g>
-
-      {/* Collar band */}
-      <path d={`M ${162} 40 Q 200 ${lado === "frente" ? 100 : 60} ${238} 40`} fill="none" stroke={costura} strokeWidth="5" strokeLinecap="round" />
+      {lado === "frente" ? (
+        !semEscrita && <text x="200" y={f.caixa === "livre" ? 104 : 98} textAnchor="middle" fill={corEscrita} style={{ fontFamily: f.css, fontSize: f.caixa === "livre" ? 24 : 15, letterSpacing: `${f.espaco}em` }}>
+          {escritaDe(fonte)}
+        </text>
+      ) : (
+        <>
+          {arte?.tipo === "arte" && <image href={arte.src} x={x} y={y} width={w} height={h} preserveAspectRatio="xMidYMid meet" />}
+          {esboco && <image href={esboco} x={x} y={y} width={w} height={h} preserveAspectRatio="xMidYMid meet" opacity={0.94} />}
+          {casa && (casa.tinta
+            ? <rect x={x} y={y} width={w} height={h} fill={arte?.tipo === "casa" ? arte.cor : corEscrita} mask={`url(#tinta-${id})`} />
+            : <image href={casa.src} x={x} y={y} width={w} height={h} preserveAspectRatio="xMidYMid meet" />)}
+          {!arte && !carregando && <rect x={x} y={y} width={w} height={h} fill="none" stroke={contorno} strokeWidth="1" strokeDasharray="4 5" />}
+          {carregando && (
+            <rect x={x} y={y} width={w} height={h} fill={clara ? "rgba(0,0,0,.07)" : "rgba(255,255,255,.08)"}>
+              <animate attributeName="opacity" values=".35;1;.35" dur="1.6s" repeatCount="indefinite" />
+            </rect>
+          )}
+          {textoVerso && (
+            <text x="200" y={y + h + 24} textAnchor="middle" fill={corEscrita} style={{ fontFamily: f.css, fontSize: f.caixa === "livre" ? 20 : 13, letterSpacing: `${Math.max(0.04, f.espaco / 2)}em` }}>
+              {f.caixa === "alta" ? textoVerso.toUpperCase() : textoVerso}
+            </text>
+          )}
+        </>
+      )}
     </svg>
   );
 }
