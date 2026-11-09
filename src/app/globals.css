@@ -140,3 +140,18 @@ body {
 .float-slow { animation: float-slow 7s ease-in-out infinite; will-change: transform; }
 @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }
+
+/* Personalizador MERANNO (/personalizar-estampa): cream paper, wine stage, old-gold details. */
+.pz-tema {
+	--pz-vinho: #5B1E2B;
+	--pz-vinho-escuro: #3E121C;
+	--pz-creme: #F4EFE6;
+	--pz-creme-2: #EFE8DC;
+	--pz-linha: #E2D8C8;
+	--pz-tinta: #2A1A1D;
+	--pz-suave: #7A6A63;
+	--pz-ouro: #B08A4E;
+}
+.pz-serif { font-family: var(--font-cormorant), Georgia, "Times New Roman", serif; font-weight: 500; }
+.pz-palco { background: radial-gradient(60% 55% at 50% 45%, #7a2a3a 0%, #5B1E2B 55%, #3E121C 100%); }
+.pz-listras { background: repeating-linear-gradient(135deg, transparent 0 7px, rgba(42, 26, 29, .06) 7px 8px); }

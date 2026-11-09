@@ -20,7 +20,7 @@ const LINKS = [
 ];
 
 // Pages whose own background is dark all the way down.
-const DARK_PAGES = ["/personalizar-estampa"];
+const DARK_PAGES: string[] = [];
 // Pages with the shallow-water background, which continues behind the waves.
 const RIPPLE_PAGES = ["/carrinho"];
 

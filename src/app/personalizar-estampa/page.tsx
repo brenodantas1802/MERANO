@@ -1,49 +1,194 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { Download, Maximize2, Minus, Plus } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
-import { ScrollReveal } from "@/components/scroll-reveal";
-import { Countdown } from "@/components/countdown";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+import { Camiseta, type ArteVerso } from "@/components/personalizador/camiseta";
+import { ChatCriacao, SUGESTOES_INICIAIS, type Mensagem } from "@/components/personalizador/chat";
+import { Confirmacao } from "@/components/personalizador/confirmacao";
+import { PainelPeca, type Referencia } from "@/components/personalizador/painel";
+import { BRAND_WORD, FICHA_VAZIA, PAINEL_PADRAO, type Ficha, type Painel } from "@/lib/estampa";
 
-const LAUNCH_DATE = "2026-11-22T00:00:00";
+// Generations a customer can start in one visit. The server's rate limit is the real guard; this keeps the page honest.
+const CRIACOES_POR_SESSAO = 3;
 
-export default function CustomPrintPage() {
-  const [email, setEmail] = useState("");
-  const [notified, setNotified] = useState(false);
+type Camada = "casa" | "esboco" | "arte";
 
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    window.localStorage.setItem("merano-notify-personalizar", email);
-    setNotified(true);
+// One side of the tee on the wine stage, with its own zoom. The drawing scales by height so both sides fit any screen.
+function Vista({ titulo, children, extra, rodape, className = "" }: { titulo: string; children: React.ReactNode; extra?: React.ReactNode; rodape?: React.ReactNode; className?: string }) {
+  const [zoom, setZoom] = useState(100);
+  const botao = "hidden rounded p-1.5 hover:bg-white/10 sm:block";
+  return <div className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${className}`}>
+    <div className="absolute inset-x-3 top-3 z-10 flex items-center justify-between gap-2 text-[var(--pz-creme)] md:inset-x-6 md:top-4">
+      <span className="pz-serif text-xl italic md:text-2xl">{titulo}</span>
+      <div className="flex items-center gap-1 text-xs">
+        {extra}
+        <button type="button" aria-label={`Diminuir ${titulo}`} onClick={() => setZoom((z) => Math.max(60, z - 20))} className={botao}><Minus size={14} /></button>
+        <span className="hidden w-10 text-center tabular-nums sm:block">{zoom}%</span>
+        <button type="button" aria-label={`Aumentar ${titulo}`} onClick={() => setZoom((z) => Math.min(220, z + 20))} className={botao}><Plus size={14} /></button>
+        <button type="button" aria-label={`Ajustar ${titulo}`} onClick={() => setZoom(100)} className={botao}><Maximize2 size={14} /></button>
+      </div>
+    </div>
+    <span className="pointer-events-none absolute left-3 top-12 h-5 w-5 border-l border-t border-[var(--pz-creme)]/50 md:left-6 md:top-14 md:h-6 md:w-6" />
+    <span className="pointer-events-none absolute right-3 top-12 h-5 w-5 border-r border-t border-[var(--pz-creme)]/50 md:right-6 md:top-14 md:h-6 md:w-6" />
+    <span className="pointer-events-none absolute bottom-3 left-3 h-5 w-5 border-b border-l border-[var(--pz-creme)]/50 md:left-6 md:h-6 md:w-6" />
+    <span className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 border-b border-r border-[var(--pz-creme)]/50 md:right-6 md:h-6 md:w-6" />
+    <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto px-4 pb-9 pt-12 md:px-8 md:pt-14">
+      <div className={`flex items-center justify-center [&>svg]:h-full [&>svg]:w-auto ${zoom <= 100 ? "max-w-full [&>svg]:max-w-full" : "[&>svg]:max-w-none"}`} style={{ height: `${zoom}%` }}>{children}</div>
+    </div>
+    {rodape && <div className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex flex-col items-center gap-1 px-3 text-center [&>*]:pointer-events-auto">{rodape}</div>}
+  </div>;
+}
+
+export default function PersonalizadorPage() {
+  const [painel, setPainel] = useState<Painel>(PAINEL_PADRAO);
+  const [referencias, setReferencias] = useState<Referencia[]>([]);
+  const [mensagens, setMensagens] = useState<Mensagem[]>([]);
+  const [ficha, setFicha] = useState<Ficha>(FICHA_VAZIA);
+  const [sugestoes, setSugestoes] = useState<string[]>(SUGESTOES_INICIAIS);
+  const [pronto, setPronto] = useState(false);
+  const [esboco, setEsboco] = useState("");
+  const [arte, setArte] = useState("");
+  const [camada, setCamada] = useState<Camada | null>(null);
+  const [conversando, setConversando] = useState(false);
+  const [erroChat, setErroChat] = useState("");
+  const [confirmando, setConfirmando] = useState(false);
+  const [gerando, setGerando] = useState(false);
+  const [erroArte, setErroArte] = useState("");
+  const [criacoes, setCriacoes] = useState(0);
+  const [aba, setAba] = useState<"criacao" | "peca">("criacao");
+
+  const palco = useRef<HTMLElement>(null);
+  const verPeca = () => palco.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const pendentes = referencias.filter((r) => !r.enviada);
+  const malha = painel.paleta[0];
+
+  // What the back shows: the newest layer the customer has, unless they picked another one.
+  const disponiveis: Camada[] = [...(painel.estampaCasa ? ["casa" as const] : []), ...(esboco ? ["esboco" as const] : []), ...(arte ? ["arte" as const] : [])];
+  const ativa = camada && disponiveis.includes(camada) ? camada : disponiveis[disponiveis.length - 1] ?? null;
+  const arteVerso: ArteVerso = ativa === "arte" ? { tipo: "arte", src: arte } : ativa === "esboco" ? { tipo: "esboco", svg: esboco } : ativa === "casa" && painel.estampaCasa ? { tipo: "casa", id: painel.estampaCasa, cor: painel.paleta[1] ?? painel.corEscrita } : null;
+
+  function mudarPainel(novo: Painel) {
+    if (novo.estampaCasa && novo.estampaCasa !== painel.estampaCasa) setCamada("casa");
+    setPainel(novo);
   }
 
-  return <main className="min-h-screen bg-[var(--terra-dark)] text-[var(--creme)]">
+  async function enviar(texto: string) {
+    const anexos = pendentes;
+    const nova: Mensagem = { papel: "cliente", texto: anexos.length ? `${texto}\n(Anexei ${anexos.length} imagem(ns) de referência.)` : texto };
+    const historico = [...mensagens, nova];
+    setMensagens(historico);
+    setErroChat("");
+    setConversando(true);
+    try {
+      const response = await fetch("/api/estampa/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mensagens: historico, painel, ficha, referencias: anexos.map((r) => r.url), totalReferencias: referencias.length }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Não consegui responder agora.");
+      setMensagens([...historico, { papel: "assistente", texto: data.resposta }]);
+      setFicha(data.ficha);
+      setSugestoes(data.sugestoes ?? []);
+      setPronto(!!data.pronto);
+      if (data.esboco) { setEsboco(data.esboco); setCamada("esboco"); }
+      if (anexos.length) setReferencias((atual) => atual.map((r) => (anexos.some((a) => a.id === r.id) ? { ...r, enviada: true } : r)));
+    } catch (error) {
+      setErroChat(error instanceof Error ? error.message : "Não consegui responder agora.");
+      // The message stays in the box's history only if it was answered; otherwise the customer can resend it.
+      setMensagens(mensagens);
+    } finally {
+      setConversando(false);
+    }
+  }
+
+  function recomecar() {
+    setMensagens([]);
+    setFicha(FICHA_VAZIA);
+    setSugestoes(SUGESTOES_INICIAIS);
+    setPronto(false);
+    setEsboco("");
+    setErroChat("");
+    setReferencias((atual) => atual.map((r) => ({ ...r, enviada: false })));
+  }
+
+  const fechar = useCallback(() => setConfirmando(false), []);
+
+  async function criar(fichaFinal: Ficha) {
+    setFicha(fichaFinal);
+    setGerando(true);
+    setErroArte("");
+    setConfirmando(false);
+    setCriacoes((n) => n + 1);
+    try {
+      const response = await fetch("/api/estampa/gerar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ painel, ficha: fichaFinal, referencias: fichaFinal.usarReferencias ? referencias.map((r) => r.url) : [] }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Falha ao criar a estampa.");
+      setArte(data.imagem);
+      setCamada("arte");
+      if (window.matchMedia("(max-width: 1023px)").matches) verPeca();
+    } catch (error) {
+      setErroArte(error instanceof Error ? error.message : "Falha ao criar a estampa.");
+    } finally {
+      setGerando(false);
+    }
+  }
+
+  const seletorCamada = disponiveis.length > 1 && <div className="mr-1 flex overflow-hidden rounded-full border border-[var(--pz-creme)]/40">
+    {disponiveis.map((c) => <button key={c} type="button" onClick={() => setCamada(c)} aria-pressed={ativa === c} className={`px-2.5 py-1 text-[11px] ${ativa === c ? "bg-[var(--pz-creme)] text-[var(--pz-vinho)]" : "hover:bg-white/10"}`}>{c === "casa" ? "Casa" : c === "esboco" ? "Esboço" : "Arte"}</button>)}
+  </div>;
+
+  const aviso = "rounded-full bg-black/35 px-3 py-1 text-[11px] text-[var(--pz-creme)]";
+  const rodapeVerso = (gerando || erroArte || ativa === "esboco" || (ativa === "arte" && arte)) && <>
+    {gerando && <span className={aviso}>Criando a sua estampa… leva até um minuto</span>}
+    {!gerando && erroArte && <span className={`${aviso} max-w-xs rounded-md`}>{erroArte}</span>}
+    {!gerando && ativa === "esboco" && <span className={aviso}>Esboço rápido · a arte final é criada depois</span>}
+    {!gerando && ativa === "arte" && arte && <a href={arte} download="estampa-meranno.png" className={`${aviso} inline-flex items-center gap-1.5 hover:bg-black/50`}><Download size={12} /> Baixar arte</a>}
+  </>;
+
+  return <main className="pz-tema min-h-screen bg-[var(--pz-creme)] text-[var(--pz-tinta)]">
     <SiteHeader />
-    <BackgroundBeamsWithCollision className="h-auto min-h-[calc(100vh-5rem)] py-16">
-      <div className="mx-auto max-w-3xl px-6 text-center md:px-12">
-        <Link href="/" className="sans mb-16 inline-flex items-center gap-2 text-[11px] uppercase tracking-[.15em] text-[var(--creme)]/70"><ArrowLeft size={14} /> Voltar para o início</Link>
-        <ScrollReveal>
-          <p className="sans mb-5 text-[11px] uppercase tracking-[.2em]" style={{ color: "#FABD4B" }}>Em breve</p>
-          <h1 className="display relative z-20 text-6xl md:text-8xl">Personalizar<br /><i>estampa.</i></h1>
-          <p className="relative z-20 mx-auto mt-8 max-w-xl text-xl leading-snug text-[var(--creme)]/85">Estamos construindo uma forma de você criar a sua própria estampa, do jeito que só a Merano poderia entregar.</p>
-        </ScrollReveal>
+    <div className="flex items-center justify-between border-b border-[var(--pz-linha)] px-4 py-3 md:px-8">
+      <span className="text-[12px] text-[var(--pz-suave)]">Personalizador</span>
+      <span className="pz-serif text-xl tracking-[.45em] md:text-2xl">{BRAND_WORD}</span>
+      <span className="pz-serif hidden text-base italic text-[var(--pz-suave)] md:block">Pra quem entende de exclusividade</span>
+      <span className="md:hidden" />
+    </div>
 
-        <ScrollReveal delay={0.1} className="relative z-20 mx-auto mt-16 max-w-xl"><Countdown target={LAUNCH_DATE} /></ScrollReveal>
+    <div className="lg:grid lg:h-[calc(100dvh-64px-53px)] lg:grid-cols-[minmax(300px,340px)_1fr_minmax(340px,410px)]">
+      {/* Chat — left on desktop */}
+      <aside className="hidden min-h-0 border-r border-[var(--pz-linha)] lg:block">
+        <ChatCriacao mensagens={mensagens} sugestoes={sugestoes} carregando={conversando} erro={erroChat} pronto={pronto} referenciasPendentes={pendentes.length} onEnviar={enviar} onRecomecar={recomecar} onRevisar={() => setConfirmando(true)} />
+      </aside>
 
-        <ScrollReveal delay={0.15} className="relative z-20 mx-auto mt-16 max-w-sm">
-          {notified ? (
-            <p className="text-lg">Combinado — avisamos você assim que abrir.</p>
-          ) : (
-            <form onSubmit={submit} className="sans flex flex-col gap-3 sm:flex-row">
-              <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="seu@email.com" className="w-full border-b border-[var(--creme)]/40 bg-transparent py-3 text-sm text-[var(--creme)] outline-none placeholder:text-[var(--creme)]/70" />
-              <button type="submit" className="shrink-0 bg-[var(--creme)] px-6 py-3 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)] transition-opacity hover:opacity-85">Avise-me</button>
-            </form>
-          )}
-        </ScrollReveal>
+      {/* The tee: back on top (where the creation goes), front below */}
+      <section ref={palco} className="pz-palco scroll-mt-16 grid h-[52dvh] min-h-[340px] grid-cols-2 lg:h-auto lg:min-h-0 lg:grid-cols-1 lg:grid-rows-2" aria-label="Prévia da camiseta">
+        <Vista titulo="Verso" extra={seletorCamada} rodape={rodapeVerso} className="border-r border-[var(--pz-creme)]/15 lg:border-b lg:border-r-0">
+          <Camiseta lado="verso" modelagem={painel.modelagem} corMalha={malha} fonte={painel.fonte} corEscrita={painel.corEscrita} arte={arteVerso} textoVerso={ficha.texto} carregando={gerando} />
+        </Vista>
+        <Vista titulo="Frente">
+          <Camiseta lado="frente" modelagem={painel.modelagem} corMalha={malha} fonte={painel.fonte} corEscrita={painel.corEscrita} />
+        </Vista>
+      </section>
+
+      {/* Mobile: chat and panel share the space under the tee */}
+      <div className="sticky top-16 z-20 flex border-b border-[var(--pz-linha)] bg-[var(--pz-creme)] lg:hidden">
+        {(["criacao", "peca"] as const).map((t) => <button key={t} type="button" onClick={() => setAba(t)} aria-pressed={aba === t} className={`flex-1 py-3 text-sm ${aba === t ? "border-b-2 border-[var(--pz-vinho)] text-[var(--pz-vinho)]" : "text-[var(--pz-suave)]"}`}>{t === "criacao" ? "Criação" : "Sua peça"}</button>)}
       </div>
-    </BackgroundBeamsWithCollision>
+      <div className={`h-[75dvh] lg:hidden ${aba === "criacao" ? "block" : "hidden"}`}>
+        <ChatCriacao mensagens={mensagens} sugestoes={sugestoes} carregando={conversando} erro={erroChat} pronto={pronto} referenciasPendentes={pendentes.length} onEnviar={enviar} onRecomecar={recomecar} onRevisar={() => setConfirmando(true)} onVerPeca={verPeca} />
+      </div>
+
+      <aside className={`min-h-0 overflow-y-auto border-l border-[var(--pz-linha)] lg:block ${aba === "peca" ? "block" : "hidden"}`}>
+        <PainelPeca painel={painel} onChange={mudarPainel} onReset={() => { setPainel(PAINEL_PADRAO); setCamada(null); }} referencias={referencias} onReferencias={setReferencias} />
+      </aside>
+    </div>
+
+    {confirmando && <Confirmacao ficha={ficha} painel={painel} referencias={referencias.length} restantes={CRIACOES_POR_SESSAO - criacoes} gerando={gerando} onFechar={fechar} onConfirmar={criar} />}
   </main>;
 }
