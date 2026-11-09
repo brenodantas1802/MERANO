@@ -8,7 +8,7 @@ import { ChatCriacao, SUGESTOES_INICIAIS, type Mensagem } from "@/components/per
 import { Confirmacao } from "@/components/personalizador/confirmacao";
 import { Finalizar } from "@/components/personalizador/finalizar";
 import { PainelPeca, type Referencia } from "@/components/personalizador/painel";
-import { BRAND_WORD, FICHA_VAZIA, PAINEL_PADRAO, type Ficha, type Painel } from "@/lib/estampa";
+import { FICHA_VAZIA, PAINEL_PADRAO, type Ficha, type Painel } from "@/lib/estampa";
 
 // Generations a customer can start in one visit. The server's rate limit is the real guard; this keeps the page honest.
 const CRIACOES_POR_SESSAO = 3;
@@ -155,20 +155,19 @@ export default function PersonalizadorPage() {
 
   return <main className="pz-tema min-h-screen bg-[var(--pz-creme)] text-[var(--pz-tinta)]">
     <SiteHeader />
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-[var(--pz-linha)] px-5 py-4 md:px-8 md:py-[26px]">
+    <div className="flex items-center justify-between gap-4 border-b border-[var(--pz-linha)] px-5 py-3 md:px-8 md:py-4">
       <span className="text-[13px] text-[var(--pz-suave)] md:text-[15px]">Personalizador</span>
-      <span className="pz-serif pl-[.45em] text-[22px] tracking-[.45em] text-[var(--pz-tinta)] md:text-[30px]">{BRAND_WORD}</span>
       <span className="pz-serif hidden justify-self-end text-[18px] italic text-[#5B4C47] md:block">Pra quem entende de exclusividade</span>
     </div>
 
-    <div className="lg:grid lg:h-[calc(100dvh-var(--header-h,96px)-83px)] lg:grid-cols-[minmax(300px,360px)_1fr_minmax(360px,414px)]">
+    <div className="lg:grid lg:h-[calc(100dvh-var(--header-h,64px)-57px)] lg:grid-cols-[minmax(300px,360px)_1fr_minmax(360px,414px)]">
       {/* Chat — left on desktop */}
       <aside className="hidden min-h-0 border-r border-[var(--pz-linha)] lg:block">
         <ChatCriacao mensagens={mensagens} sugestoes={sugestoes} carregando={conversando} erro={erroChat} pronto={pronto} referenciasPendentes={pendentes.length} onEnviar={enviar} onRecomecar={recomecar} onRevisar={() => setConfirmando(true)} />
       </aside>
 
       {/* The tee: back on top (where the creation goes), front below */}
-      <section ref={palco} className="pz-palco scroll-mt-[var(--header-h,96px)] grid h-[52dvh] min-h-[340px] grid-cols-2 lg:h-auto lg:min-h-0 lg:grid-cols-1 lg:grid-rows-2" aria-label="Prévia da camiseta">
+      <section ref={palco} className="pz-palco scroll-mt-[var(--header-h,64px)] grid h-[52dvh] min-h-[340px] grid-cols-2 lg:h-auto lg:min-h-0 lg:grid-cols-1 lg:grid-rows-2" aria-label="Prévia da camiseta">
         <Vista titulo="Verso" extra={seletorCamada} rodape={rodapeVerso} className="border-r border-[var(--pz-creme)]/20 lg:border-b lg:border-r-0">
           <Camiseta lado="verso" modelagem={painel.modelagem} corMalha={malha} fonte={painel.fonte} corEscrita={painel.corEscrita} arte={arteVerso} textoVerso={ficha.texto} carregando={gerando} />
         </Vista>
@@ -181,7 +180,7 @@ export default function PersonalizadorPage() {
       {arte && <Finalizar painel={painel} ficha={ficha} arte={arte} referencias={referencias.length} className="lg:hidden" />}
 
       {/* Mobile: chat and panel share the space under the tee */}
-      <div className="sticky top-[var(--header-h,96px)] z-20 flex border-b border-[var(--pz-linha)] bg-[var(--pz-creme)] lg:hidden">
+      <div className="sticky top-[var(--header-h,64px)] z-20 flex border-b border-[var(--pz-linha)] bg-[var(--pz-creme)] lg:hidden">
         {(["criacao", "peca"] as const).map((t) => <button key={t} type="button" onClick={() => setAba(t)} aria-pressed={aba === t} className={`pz-serif flex-1 py-3 text-[19px] ${aba === t ? "border-b-[1.5px] border-[var(--pz-vinho)] text-[var(--pz-vinho)]" : "text-[var(--pz-suave)]"}`}>{t === "criacao" ? "Criação" : "Sua peça"}</button>)}
       </div>
       <div className={`h-[75dvh] lg:hidden ${aba === "criacao" ? "block" : "hidden"}`}>

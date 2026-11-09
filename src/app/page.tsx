@@ -2,32 +2,22 @@ import Link from "next/link";
 import { products } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
-import { HeroVideo } from "@/components/hero-video";
-import { HeroTextReveal } from "@/components/hero-text-reveal";
-import { PillLink } from "@/components/ui/pill-link";
+import { HeroTopo } from "@/components/hero-topo";
+import { TOPOS, TOPO_PADRAO, type Topo } from "@/lib/topo";
 import { SeasonShirt } from "@/components/season-shirt";
 import { Lookbook } from "@/components/lookbook";
-import { ThemeCircles } from "@/components/theme-circles";
 import { ProductShelf } from "@/components/product-shelf";
 import Image from "next/image";
 
 
-export default function Home() {
+// ?topo=feltro|lookbook|vitrine shows a candidate top section (see components/hero-topo.tsx).
+export default async function Home({ searchParams }: PageProps<"/">) {
+  const pedido = (await searchParams).topo;
+  const topo: Topo = TOPOS.includes(pedido as Topo) ? (pedido as Topo) : TOPO_PADRAO;
   return <main>
     <SiteHeader overlay />
 
-    <section className="relative overflow-hidden px-7 py-10 text-white md:px-16 md:py-16">
-      <HeroVideo src="/imagens/merano-assets/banner-mar-4.mp4" mobileSrc="/imagens/merano-assets/banner-mar-4-mobile.mp4" poster="/imagens/merano-assets/banner-mar-4-poster.jpg" />
-      {/* Shade weighted to the side the headline sits on, so the type reads over bright surf without dimming the whole sea. */}
-      <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(36,10,16,.66)_0%,rgba(36,10,16,.36)_42%,rgba(36,10,16,.1)_72%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[rgba(36,10,16,.4)] to-transparent" />
-      <div className="relative z-10 flex min-h-screen flex-col justify-center">
-        <div className="max-w-3xl"><HeroTextReveal className="display max-w-3xl text-[clamp(2.8rem,7vw,6.4rem)] [text-shadow:0_2px_36px_rgba(4,18,24,.35)]" lines={["Feito para", "quem entende de", <span key="excl" className="hero-accent">exclusividade.</span>]} /></div>
-        <div className="mt-10"><PillLink href="#colecao" variant="glass">Ver coleção</PillLink></div>
-      </div>
-    </section>
-
-    <div className="pt-8 md:pt-12"><ThemeCircles /></div>
+    <HeroTopo topo={topo} />
 
     <ProductShelf numero="01" titulo="Mais desejadas" verTudo="/shop" products={products.slice(0, 8)} />
 

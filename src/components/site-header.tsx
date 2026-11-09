@@ -34,8 +34,6 @@ function AccountIcon() {
   </svg>;
 }
 const EASE = [0.22, 1, 0.36, 1] as const;
-// The running strip above the header (all true today: see the Personalizador and Meranno Fit pages).
-const TICKER = ["Crie a sua estampa no Personalizador", "Feito sob demanda", "Descubra o seu tamanho no Meranno Fit", "Prove a peça no provador virtual"];
 const ROUND = "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300";
 const OUTLINE = `${ROUND} border border-[var(--ink)]/20 bg-[var(--paper)] text-[var(--ink)] hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)]`;
 // Over the home video, before scrolling: the same buttons in white.
@@ -102,11 +100,6 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const outline = clear ? OUTLINE_CLEAR : OUTLINE;
 
   return <header ref={headerRef} data-clear={clear || undefined} className={`${overlay ? "fixed inset-x-0" : "sticky"} top-0 z-50 text-[var(--ink)]`}>
-    <Link href="/personalizar-estampa" className="block h-8 overflow-hidden bg-[var(--vinho)] text-[var(--creme)]" aria-label="Crie a sua estampa no Personalizador">
-      <div className="ticker flex h-8 w-max items-center whitespace-nowrap text-[11px] font-medium uppercase tracking-[.14em]" aria-hidden>
-        {Array.from({ length: 2 }).map((_, copy) => <span key={copy} className="flex">{TICKER.map((frase) => <span key={frase} className="flex items-center"><span className="px-5">{frase}</span><span className="text-[var(--latao)]">◆</span></span>)}</span>)}
-      </div>
-    </Link>
     <div className={`sans grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b px-3 transition-colors duration-300 md:px-6 ${clear ? "border-transparent bg-transparent" : "border-[var(--line)] bg-[var(--paper)]"}`}>
       <div className="flex items-center">
         <button type="button" onClick={toggleMenu} aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} className={outline}>
