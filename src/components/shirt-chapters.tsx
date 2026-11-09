@@ -9,12 +9,12 @@ import { ShirtStage } from "@/components/shirt-stage";
 
 // The brand told in chapters, each one worn by a shirt from the collection.
 const CHAPTERS = [
-  { id: "rastro-no-lago", title: ["Nascida entre", "cidade e natureza."], text: "A Merano nasce do encontro entre corpo, território e tempo — da relação afetiva com a paisagem brasileira, sem pressa e sem excesso." },
+  { id: "rastro-no-lago", title: ["Nascida entre", "cidade e natureza."], text: "A Meranno nasce do encontro entre corpo, território e tempo — da relação afetiva com a paisagem brasileira, sem pressa e sem excesso." },
   { id: "terraco-ao-mar", title: ["Boa mesa,", "boa companhia."], text: "Cada estampa guarda um lugar onde a vida acontece devagar: uma mesa posta, a conversa que se estende, o mar no fim da rua." },
   { id: "match-point", title: ["O jogo,", "com elegância."], text: "A quadra, a torcida, o ponto decisivo — o lado esportivo do verão, vestido com a calma de quem joga pelo prazer." },
   { id: "who-cares", title: ["O tempo", "é seu."], text: "Produzimos sob demanda, no ritmo de cada peça. Nada de estoque parado, nada de pressa: a peça segue até você quando fica pronta." },
   { id: "mares-tranquilos", title: ["A simplicidade", "das boas coisas."], text: "Um barco, um mar em silêncio. Menos coisas, escolhidas com mais intenção — e feitas para durar." },
-  { id: "cafe", title: ["A cidade", "também é casa."], text: "O café da esquina, a calçada, o fim de tarde na rua: a Merano vive entre a cidade e a natureza." },
+  { id: "cafe", title: ["A cidade", "também é casa."], text: "O café da esquina, a calçada, o fim de tarde na rua: a Meranno vive entre a cidade e a natureza." },
 ];
 
 // Desktop: the shirt holds its place on the left and turns into the next one as each chapter reaches the middle of the screen.

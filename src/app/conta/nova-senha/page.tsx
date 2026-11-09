@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { NewPasswordForm } from "@/components/auth-forms";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Nova senha · MERANO" };
+export const metadata: Metadata = { title: "Nova senha · MERANNO" };
 
 // Reached from the password e-mail: the link signs the customer in, and here they choose the new password.
 export default async function NewPasswordPage() {

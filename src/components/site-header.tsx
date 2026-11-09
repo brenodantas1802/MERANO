@@ -14,7 +14,7 @@ const NAV_LINKS = [
   { href: "/sobre-nos", label: "Sobre nós" },
   { href: "/shop", label: "Shop" },
   { href: "/categorias", label: "Categorias" },
-  { href: "/meu-fit", label: "Merano Fit" },
+  { href: "/meu-fit", label: "Meranno Fit" },
   { href: "/provador", label: "Provador" },
 ];
 
@@ -31,7 +31,7 @@ const OUTLINE = `${ROUND} border border-[var(--ink)]/20 bg-[var(--paper)] text-[
 // Over the home video, before scrolling: the same buttons in white.
 const OUTLINE_CLEAR = `${ROUND} border border-white/60 text-white hover:bg-white hover:text-[var(--ink)]`;
 
-// Full-width header: menu on the left, the Merano mark in the middle, search, cart and account on the right.
+// Full-width header: menu on the left, the Meranno mark in the middle, search, cart and account on the right.
 // On the home page it lies clear over the hero video (`overlay`) and turns solid once the page scrolls; elsewhere it is
 // solid and sticks to the top.
 export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
@@ -87,9 +87,9 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
         </button>
       </div>
 
-      <Link href="/" aria-label="Merano - início" className="flex items-center gap-2.5 md:gap-3">
+      <Link href="/" aria-label="Meranno - início" className="flex items-center gap-2.5 md:gap-3">
         <MeranoSymbol className="h-6 w-auto min-[400px]:h-7 md:h-8" ink={clear ? "#ffffff" : "#111111"} />
-        <Image src="/imagens/logo-nome-trimmed.png" alt="MERANO" width={560} height={66} priority className={`h-auto w-[92px] min-[400px]:w-[104px] transition-[filter] duration-300 md:w-[160px] ${clear ? "brightness-0 invert" : ""}`} />
+        <Image src="/imagens/logo-nome-trimmed.png" alt="MERANNO" width={655} height={66} priority className={`h-auto w-[108px] min-[400px]:w-[122px] transition-[filter] duration-300 md:w-[187px] ${clear ? "brightness-0 invert" : ""}`} />
       </Link>
 
       <div className="flex items-center justify-end gap-1.5 md:gap-2">

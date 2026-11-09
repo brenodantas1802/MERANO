@@ -35,7 +35,7 @@ const generateSchema = z.object({
       candidates: z.number().int().min(1).max(10).optional(),
     })
     .optional(),
-  // The size to try on, and the customer's Merano Fit measurements when they have them (strings, as typed).
+  // The size to try on, and the customer's Meranno Fit measurements when they have them (strings, as typed).
   size: z.enum(["PP", "P", "M", "G", "GG"]).optional(),
   profile: z.record(z.string(), z.string().max(12)).optional(),
   aspectRatio: z.string().optional(),
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "X-OpenRouter-Title": "Provador MERANO",
+        "X-OpenRouter-Title": "Provador MERANNO",
       },
       body: JSON.stringify({
         model: IMAGE_MODEL,

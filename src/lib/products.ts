@@ -29,7 +29,7 @@ export type Product = {
 export type Collection = { id: string; name: string; tagline: string; image: string };
 
 export const collections: Collection[] = [
-  { id: "colecao-01", name: "Coleção 01", tagline: "Sol, terra e a primeira coleção da Merano", image: "/imagens/merano-assets/banner-paisagem.jpg" },
+  { id: "colecao-01", name: "Coleção 01", tagline: "Sol, terra e a primeira coleção da Meranno", image: "/imagens/merano-assets/banner-paisagem.jpg" },
 ];
 
 const GENERIC_FRONT = "/imagens/merano-assets/camiseta GERAL MERANO FRENTE.jpeg";

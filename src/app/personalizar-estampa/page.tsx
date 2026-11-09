@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Camiseta, type ArteVerso } from "@/components/personalizador/camiseta";
 import { ChatCriacao, SUGESTOES_INICIAIS, type Mensagem } from "@/components/personalizador/chat";
 import { Confirmacao } from "@/components/personalizador/confirmacao";
+import { Finalizar } from "@/components/personalizador/finalizar";
 import { PainelPeca, type Referencia } from "@/components/personalizador/painel";
 import { BRAND_WORD, FICHA_VAZIA, PAINEL_PADRAO, type Ficha, type Painel } from "@/lib/estampa";
 
@@ -176,6 +177,9 @@ export default function PersonalizadorPage() {
         </Vista>
       </section>
 
+      {/* Mobile: once there is art, buying sits right under the tee */}
+      {arte && <Finalizar painel={painel} ficha={ficha} arte={arte} referencias={referencias.length} className="lg:hidden" />}
+
       {/* Mobile: chat and panel share the space under the tee */}
       <div className="sticky top-16 z-20 flex border-b border-[var(--pz-linha)] bg-[var(--pz-creme)] lg:hidden">
         {(["criacao", "peca"] as const).map((t) => <button key={t} type="button" onClick={() => setAba(t)} aria-pressed={aba === t} className={`pz-serif flex-1 py-3 text-[19px] ${aba === t ? "border-b-[1.5px] border-[var(--pz-vinho)] text-[var(--pz-vinho)]" : "text-[var(--pz-suave)]"}`}>{t === "criacao" ? "Criação" : "Sua peça"}</button>)}
@@ -184,8 +188,11 @@ export default function PersonalizadorPage() {
         <ChatCriacao mensagens={mensagens} sugestoes={sugestoes} carregando={conversando} erro={erroChat} pronto={pronto} referenciasPendentes={pendentes.length} onEnviar={enviar} onRecomecar={recomecar} onRevisar={() => setConfirmando(true)} onVerPeca={verPeca} />
       </div>
 
-      <aside className={`min-h-0 overflow-y-auto border-l border-[var(--pz-linha)] lg:block ${aba === "peca" ? "block" : "hidden"}`}>
-        <PainelPeca painel={painel} onChange={mudarPainel} onReset={() => { setPainel(PAINEL_PADRAO); setCamada(null); }} referencias={referencias} onReferencias={setReferencias} />
+      <aside className={`min-h-0 flex-col border-l border-[var(--pz-linha)] lg:flex ${aba === "peca" ? "flex" : "hidden"}`}>
+        <div className="min-h-0 flex-1 lg:overflow-y-auto">
+          <PainelPeca painel={painel} onChange={mudarPainel} onReset={() => { setPainel(PAINEL_PADRAO); setCamada(null); }} referencias={referencias} onReferencias={setReferencias} />
+        </div>
+        <Finalizar painel={painel} ficha={ficha} arte={arte} referencias={referencias.length} className="hidden lg:block" />
       </aside>
     </div>
 

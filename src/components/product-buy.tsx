@@ -16,7 +16,7 @@ const SWATCH: Record<string, string> = { Preto: "#1c1c1a", "Azul marinho": "#1f2
 export type Colorway = { id: string; color: string };
 
 // The buying column of the product page: colour (other colourways are their own pages), size and the cart button.
-// The size the customer's Merano Fit profile points to comes preselected.
+// The size the customer's Meranno Fit profile points to comes preselected.
 export function ProductBuy({ product, colorways }: { product: Product; colorways: Colorway[] }) {
   const { recommendation } = useSizeRecommendation(product);
   const recommended = recommendation && product.fits.includes(recommendation.size) ? recommendation.size : null;

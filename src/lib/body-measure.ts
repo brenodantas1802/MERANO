@@ -1,5 +1,5 @@
 // The body profile's shape and how its fields are read, with no browser code, so the server (the try-on route) and
-// the client (Merano Fit, the size recommendation) share them. Values stay as strings, as typed in the form.
+// the client (Meranno Fit, the size recommendation) share them. Values stay as strings, as typed in the form.
 export type BodyProfile = {
   altura: string;
   peso: string;

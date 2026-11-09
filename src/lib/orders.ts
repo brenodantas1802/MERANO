@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 // Demo order history kept in the browser until orders are stored in the database (Order/OrderItem models).
-export type OrderItemRecord = { productId: string; name: string; size: string; color: string; price: number; quantity: number; image: string };
+export type OrderItemRecord = { productId: string; criacaoId?: string; name: string; size: string; color: string; price: number; quantity: number; image: string };
 export type OrderRecord = { id: string; date: string; total: number; items: OrderItemRecord[] };
 
 const STORAGE_KEY = "merano-orders";

@@ -184,7 +184,7 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
           <BeforeAfter className="aspect-[4/5] w-1/2 rounded-2xl shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         )}
         <p className="serif-note mt-8 text-2xl text-[var(--terra)]">o seu resultado aparece aqui</p>
-        <p className="sans mt-3 max-w-xs text-[11px] leading-relaxed text-[var(--muted)]">Você vai poder comparar a foto original com a versão vestindo a Merano, lado a lado.</p>
+        <p className="sans mt-3 max-w-xs text-[11px] leading-relaxed text-[var(--muted)]">Você vai poder comparar a foto original com a versão vestindo a Meranno, lado a lado.</p>
       </div>
     );
   }
@@ -262,7 +262,7 @@ function ProvadorContent() {
     return (slug && getProduct(slug)) || null;
   });
   const [pickerOpen, setPickerOpen] = useState(false);
-  // The size to try on: the one Merano Fit recommends, until the customer picks another.
+  // The size to try on: the one Meranno Fit recommends, until the customer picks another.
   const { profile } = useBodyProfile();
   const knowsBody = !!measure(profile, "altura") && (!!measure(profile, "busto") || !!measure(profile, "peso"));
   const recommended = recommendSize(profile, selectedProduct ? getSizeChart(selectedProduct) : SIZE_CHART)?.size;
@@ -397,8 +397,8 @@ function ProvadorContent() {
               </button>)}
             </div>
             <p className="sans mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{knowsBody
-              ? <>A peça é vestida no caimento real desse tamanho, com as suas medidas do Merano Fit{recommended ? <> · o ponto marca o seu tamanho ({recommended})</> : null}.</>
-              : <>Sem medidas salvas, o caimento é aproximado. <Link href="/meu-fit" className="underline underline-offset-2 hover:text-[var(--ink)]">Preencha o Merano Fit</Link> para ver o tamanho no seu corpo.</>}</p>
+              ? <>A peça é vestida no caimento real desse tamanho, com as suas medidas do Meranno Fit{recommended ? <> · o ponto marca o seu tamanho ({recommended})</> : null}.</>
+              : <>Sem medidas salvas, o caimento é aproximado. <Link href="/meu-fit" className="underline underline-offset-2 hover:text-[var(--ink)]">Preencha o Meranno Fit</Link> para ver o tamanho no seu corpo.</>}</p>
           </section>
 
           <section className="mt-14">

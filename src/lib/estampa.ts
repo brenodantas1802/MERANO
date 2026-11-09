@@ -48,6 +48,11 @@ export const ESTAMPAS_CASA: { id: EstampaCasaId; nome: string; src: string; larg
 ];
 export const estampaCasaDe = (id: string) => ESTAMPAS_CASA.find((estampa) => estampa.id === id);
 
+// Price of a personalised tee, the same as the catalogue tees for now (owners to confirm).
+export const PRECO_PERSONALIZADA = 189;
+export const TAMANHOS = ["PP", "P", "M", "G", "GG"] as const;
+export type Tamanho = (typeof TAMANHOS)[number];
+
 export const MAX_PALETA = 5; // the shirt colour plus up to four print colours
 export const MAX_REFERENCIAS = 3;
 

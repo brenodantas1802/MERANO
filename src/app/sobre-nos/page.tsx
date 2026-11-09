@@ -31,7 +31,7 @@ export default function BrandPage() {
     <ShirtChapters />
 
     <ScrollReveal className="relative h-[70vh] min-h-[420px] overflow-hidden md:h-[85vh]">
-      <Image src="/imagens/merano-assets/foto praia 1.jpg" alt="Corpo em movimento na praia, referência da Merano" fill sizes="100vw" className="object-cover" />
+      <Image src="/imagens/merano-assets/foto praia 1.jpg" alt="Corpo em movimento na praia, referência da Meranno" fill sizes="100vw" className="object-cover" />
       <div className="absolute inset-0 bg-black/30" />
       <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">
         <p className="sans mb-4 text-[11px] uppercase tracking-[.2em]" style={{ color: "#FABD4B" }}>Origem</p>
@@ -41,13 +41,13 @@ export default function BrandPage() {
 
     <article className="mx-auto max-w-360 px-6 pb-28 pt-24 md:px-12">
       <div className="grid gap-16 md:grid-cols-2 md:gap-20">
-        <ScrollReveal className="relative aspect-[.9] w-full overflow-hidden"><Image src="/imagens/merano-assets/foto praia 2.jpg" alt="Praia brasileira, referência de paisagem para a Merano" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /></ScrollReveal>
+        <ScrollReveal className="relative aspect-[.9] w-full overflow-hidden"><Image src="/imagens/merano-assets/foto praia 2.jpg" alt="Praia brasileira, referência de paisagem para a Meranno" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" /></ScrollReveal>
         <ScrollReveal delay={0.1} className="flex flex-col justify-center gap-4"><h2 className="text-3xl">Um Brasil sem filtro.</h2><p className="text-lg leading-relaxed text-[var(--muted)]">Não buscamos um Brasil de cartão-postal — buscamos o Brasil que se vive: a maresia, a terra vermelha, a luz baixa do fim de tarde. É esse Brasil que vira estampa, tecido e corte.</p></ScrollReveal>
       </div>
 
       <div id="sob-demanda" className="mt-28 border-t border-[var(--line)] pt-16">
         <div className="grid gap-16 md:grid-cols-[1fr_1.15fr] md:gap-20">
-          <ScrollReveal><p className="sans mb-5 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Feito sob demanda</p><h2 className="display max-w-xl text-5xl md:text-7xl">Menos excesso.<br /><i>Mais presença.</i></h2><Image src="/imagens/merano-assets/etiqueta-linho.jpg" alt="Etiqueta de linho Merano" width={420} height={520} className="mt-10 h-56 w-full object-cover md:h-72" /></ScrollReveal>
+          <ScrollReveal><p className="sans mb-5 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Feito sob demanda</p><h2 className="display max-w-xl text-5xl md:text-7xl">Menos excesso.<br /><i>Mais presença.</i></h2><Image src="/imagens/merano-assets/etiqueta-linho.jpg" alt="Etiqueta de linho Meranno" width={420} height={520} className="mt-10 h-56 w-full object-cover md:h-72" /></ScrollReveal>
           <ScrollReveal delay={0.1} className="self-end"><p className="text-2xl leading-snug md:text-3xl">Cada peça começa depois que você escolhe. Assim, a gente produz apenas o que encontra um corpo para vestir.</p><p className="sans mt-6 inline-block bg-[var(--areia)] px-4 py-2 text-[11px] uppercase tracking-[.14em] text-[var(--terra-dark)]">Prazo estimado: até 7 dias úteis de produção + envio</p></ScrollReveal>
         </div>
 

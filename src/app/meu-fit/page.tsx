@@ -99,7 +99,7 @@ export default function MeranoFitPage() {
 
     <section className="mx-auto flex max-w-360 flex-col gap-8 px-6 pb-8 pt-10 md:flex-row md:items-center md:justify-between md:px-12 md:pb-12 md:pt-14">
       <div>
-        <h1 className="display text-6xl md:text-7xl">Merano Fit</h1>
+        <h1 className="display text-6xl md:text-7xl">Meranno Fit</h1>
         <p className="mt-4 max-w-lg text-lg leading-snug text-[var(--ink)]/75">Suas medidas, uma vez só: a gente marca o seu tamanho em cada peça.</p>
       </div>
       <ProgressRing filled={filled} total={ALL.length} />

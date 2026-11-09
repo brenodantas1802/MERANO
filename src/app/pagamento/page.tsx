@@ -95,14 +95,28 @@ export default function PaymentPage() {
     }
   }
 
-  function pay(event: React.FormEvent) {
+  function pay(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = new FormData(event.currentTarget);
     setStatus("processing");
-    setTimeout(() => {
+    setTimeout(async () => {
       const id = `MR-${Math.floor(1000 + Math.random() * 9000)}`;
       // Older cart entries have no productId: recover it from the "<product>-<size>-<color>" id.
       const productIdOf = (item: CartItem) => item.productId ?? products.find((product) => item.id.startsWith(`${product.id}-`))?.id ?? item.id;
-      const records = items.map((item) => ({ productId: productIdOf(item), name: item.name, size: item.size, color: item.color, price: item.price, quantity: item.quantity, image: item.image }));
+      const records = items.map((item) => ({ productId: productIdOf(item), criacaoId: item.criacaoId, name: item.name, size: item.size, color: item.color, price: item.price, quantity: item.quantity, image: item.image }));
+      // Custom pieces from the Personalizador: their stored art is marked as ordered, with who to contact.
+      const criacoes = items.flatMap((item) => (item.criacaoId ? [item.criacaoId] : []));
+      if (criacoes.length) {
+        try {
+          await fetch("/api/estampa/pedido", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: criacoes, pedido: id, cliente: { nome: String(form.get("nome") ?? ""), email: String(form.get("email") ?? ""), celular: phone, cep, cidade: address.city } }),
+          });
+        } catch {
+          // The art is already stored; the team can still match it to the order by hand.
+        }
+      }
       saveOrder({ id, date: new Date().toISOString(), total, items: records });
       setOrder({ id, total, method, productIds: [...new Set(records.map((record) => record.productId))] });
       clear();
@@ -138,8 +152,8 @@ export default function PaymentPage() {
         <section>
           <h2 className="mb-6 flex items-baseline gap-4 text-2xl"><span className="sans text-xs text-[var(--sol-1)]">01</span>Seus dados</h2>
           <div className="grid gap-6 md:grid-cols-2">
-            <label className={`${label} md:col-span-2`}>Nome completo<input required autoComplete="name" className={field} /></label>
-            <label className={label}>E-mail<input required type="email" autoComplete="email" className={field} /></label>
+            <label className={`${label} md:col-span-2`}>Nome completo<input required name="nome" autoComplete="name" className={field} /></label>
+            <label className={label}>E-mail<input required name="email" type="email" autoComplete="email" className={field} /></label>
             <label className={label}>Celular<input required inputMode="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} placeholder="(11) 90000-0000" className={field} /></label>
             <label className={label}>CPF<input required inputMode="numeric" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} placeholder="000.000.000-00" className={field} /></label>
           </div>
@@ -189,7 +203,7 @@ export default function PaymentPage() {
               <label className={label}>Parcelas<select value={installments} onChange={(event) => setInstallments(Number(event.target.value))} className={field}>{[1, 2, 3].map((n) => <option key={n} value={n}>{n}x de {formatPrice(total / n)} sem juros</option>)}</select></label>
             </div>
             <div className="relative hidden aspect-[1.586] w-full overflow-hidden rounded-xl bg-gradient-to-br from-[var(--terra-dark)] via-[var(--terra)] to-[var(--sol-1)] p-5 text-[var(--creme)] shadow-xl md:flex md:flex-col md:justify-between">
-              <span className="sans text-[11px] uppercase tracking-[.3em]">Merano</span>
+              <span className="sans text-[11px] uppercase tracking-[.3em]">Meranno</span>
               <span className="sans text-base tracking-[.12em]">{card.number || "•••• •••• •••• ••••"}</span>
               <span className="sans flex justify-between text-[11px] uppercase tracking-[.12em]"><span className="truncate">{card.name || "Seu nome"}</span><span>{card.expiry || "MM/AA"}</span></span>
             </div>
