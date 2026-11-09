@@ -7,6 +7,9 @@ import { HeroTextReveal } from "@/components/hero-text-reveal";
 import { PillLink } from "@/components/ui/pill-link";
 import { SeasonShirt } from "@/components/season-shirt";
 import { Lookbook } from "@/components/lookbook";
+import { ThemeCircles } from "@/components/theme-circles";
+import { ProductShelf } from "@/components/product-shelf";
+import Image from "next/image";
 
 
 export default function Home() {
@@ -24,7 +27,24 @@ export default function Home() {
       </div>
     </section>
 
+    <div className="pt-8 md:pt-12"><ThemeCircles /></div>
+
+    <ProductShelf titulo="Mais desejadas" verTudo="/shop" products={products.slice(0, 8)} />
+
     <SeasonShirt products={products} />
+
+    {/* Editorial banner: the Personalizador */}
+    <section className="px-1 pt-12 md:pt-16">
+      <Link href="/personalizar-estampa" className="group relative block aspect-[4/5] overflow-hidden md:aspect-[21/9]">
+        <Image src="/imagens/merano-assets/lookbook/modelo-preta-vermelha.webp" alt="" fill sizes="100vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-12">
+          <p className="label text-[12px] text-white/80">Novo · Personalizador</p>
+          <h2 className="display mt-2 text-[clamp(2.6rem,9vw,5.5rem)]">A sua estampa.</h2>
+          <span className="press mt-5 inline-flex h-11 items-center rounded-full bg-white px-6 text-[13px] font-medium text-[var(--ink)]">Criar agora</span>
+        </div>
+      </Link>
+    </section>
 
     <section id="colecao" className="pb-12 pt-14 md:pb-16 md:pt-20">
       <div className="mb-6 flex items-end justify-between px-6 md:px-12"><h2 className="label text-[13px]">Coleção 01</h2><Link href="/shop" className="label text-[12px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Ver tudo</Link></div>

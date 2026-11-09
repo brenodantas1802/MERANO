@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ShoppingCart } from "lucide-react";
+import { Check } from "lucide-react";
 import { useCart } from "./cart-provider";
 import { ShareButton } from "./share-button";
 import { useSizeRecommendation } from "@/lib/use-size-recommendation";
@@ -12,84 +12,118 @@ import { formatPrice, getProductPrice, type Product } from "@/lib/products";
 
 // Swatch colours for the colour names used in the catalog.
 const SWATCH: Record<string, string> = { Preto: "#1c1c1a", "Azul marinho": "#1f2b45", Natural: "#e9e2d4" };
+// Long enough to read "Adicionando…", short enough to feel instant.
+const ADD_FEEDBACK_MS = 380;
 
 export type Colorway = { id: string; color: string };
+type State = "idle" | "adding" | "added";
 
-// The buying column of the product page: colour (other colourways are their own pages), size and the cart button.
-// The size the customer's Meranno Fit profile points to comes preselected.
+function SizePills({ fits, size, recommended, onPick, small = false }: { fits: string[]; size: string | null; recommended: string | null; onPick: (value: string) => void; small?: boolean }) {
+  return <div role="radiogroup" aria-label="Tamanho" className={`flex gap-2 ${small ? "flex-nowrap" : "flex-wrap"}`}>
+    {fits.map((value) => {
+      const active = size === value;
+      return <button key={value} type="button" role="radio" aria-checked={active} onClick={() => onPick(value)} className={`press relative rounded-full text-[13px] font-medium ${small ? "h-9 min-w-9 px-2.5" : "h-11 min-w-11 px-3"} ${active ? "bg-[var(--ink)] text-[var(--creme)]" : "text-[var(--ink)] shadow-[inset_0_0_0_1px_rgba(17,17,17,.18)] hover:shadow-[inset_0_0_0_1px_rgba(17,17,17,.6)]"}`}>
+        {value}
+        {value === recommended && <span aria-hidden className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--paper)] bg-[var(--sol-1)]" />}
+      </button>;
+    })}
+  </div>;
+}
+
+// The buying column of the product page: colour (other colourways are their own pages), size pills and the buttons.
+// On phones a frosted bar with size and "Adicionar ao carrinho" floats at the bottom whenever the main button is off screen.
 export function ProductBuy({ product, colorways }: { product: Product; colorways: Colorway[] }) {
   const { recommendation } = useSizeRecommendation(product);
   const recommended = recommendation && product.fits.includes(recommendation.size) ? recommendation.size : null;
   const [chosen, setChosen] = useState<string | null>(null);
   const [missing, setMissing] = useState(0);
+  const [state, setState] = useState<State>("idle");
   const { addItem, openDrawer } = useCart();
   const router = useRouter();
   const size = chosen ?? recommended;
   const color = product.colors[0];
+  const price = formatPrice(getProductPrice(product));
   const buyRef = useRef<HTMLDivElement>(null);
-  const sizeRef = useRef<HTMLLabelElement>(null);
-  // On phones, once the buy button has scrolled up out of view, a slim bar keeps "Comprar" at hand.
   const [barOn, setBarOn] = useState(false);
+
   useEffect(() => {
     const element = buyRef.current;
     if (!element) return;
-    const observer = new IntersectionObserver(([entry]) => setBarOn(!entry.isIntersecting && entry.boundingClientRect.top < 0));
+    const observer = new IntersectionObserver(([entry]) => setBarOn(!entry.isIntersecting));
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
 
-  // Both buttons need a size; "Comprar" goes straight to payment, the cart icon keeps shopping.
-  function add() {
+  function put() {
     if (!size) {
       setMissing((count) => count + 1);
-      sizeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return false;
     }
     addItem({ id: `${product.id}-${size}-${color}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Ampla", color, image: product.image });
     return true;
   }
 
+  // The button answers at once ("Adicionando…"), then the bag slides in with the piece already there.
+  function addToBag() {
+    if (state !== "idle" || !put()) return;
+    setState("adding");
+    window.setTimeout(() => {
+      setState("added");
+      openDrawer();
+      window.setTimeout(() => setState("idle"), 1400);
+    }, ADD_FEEDBACK_MS);
+  }
+
+  const label = state === "adding" ? "Adicionando…" : state === "added" ? "Adicionado" : "Adicionar ao carrinho";
+  const pick = (value: string) => { setChosen(value); setMissing(0); };
+
   return <div className="w-full">
     <p className="text-[13px]">Cor: {color}</p>
     <div className="mt-3 flex gap-2">
       {colorways.map((way) => {
         const active = way.id === product.id;
-        const swatch = <span className="block h-9 w-9 border border-[var(--ink)]/15" style={{ background: SWATCH[way.color] ?? "#ccc" }} />;
+        const swatch = <span className="block h-8 w-8 rounded-full border border-[var(--ink)]/15" style={{ background: SWATCH[way.color] ?? "#ccc" }} />;
         return active
-          ? <span key={way.id} aria-label={`${way.color}, cor atual`} className="p-0.5 ring-1 ring-[var(--ink)]">{swatch}</span>
-          : <Link key={way.id} href={`/produto/${way.id}`} aria-label={`Ver em ${way.color}`} className="p-0.5 ring-1 ring-transparent transition-shadow hover:ring-[var(--ink)]/40">{swatch}</Link>;
+          ? <span key={way.id} aria-label={`${way.color}, cor atual`} className="rounded-full p-0.5 ring-1 ring-[var(--ink)]">{swatch}</span>
+          : <Link key={way.id} href={`/produto/${way.id}`} aria-label={`Ver em ${way.color}`} className="press rounded-full p-0.5 ring-1 ring-transparent hover:ring-[var(--ink)]/40">{swatch}</Link>;
       })}
     </div>
 
-    <motion.label ref={sizeRef} key={missing} animate={missing ? { x: [0, -8, 8, -5, 5, 0] } : undefined} transition={{ duration: 0.4 }} className="relative mt-6 block">
-      <span className="sr-only">Tamanho</span>
-      <select value={size ?? ""} onChange={(event) => setChosen(event.target.value)} className={`label h-12 w-full cursor-pointer appearance-none border bg-white/70 px-4 text-[12px] outline-none transition-colors focus:border-[var(--ink)] ${missing && !size ? "border-[#8a3a2c]" : "border-[var(--ink)]/20"}`}>
-        <option value="" disabled>Selecione o tamanho</option>
-        {product.fits.map((value) => <option key={value} value={value}>{value}{value === recommended ? " · seu tamanho" : ""}</option>)}
-      </select>
-      <ChevronDown size={16} strokeWidth={1.5} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
-    </motion.label>
+    <div className="mt-6 flex items-baseline justify-between text-[13px]">
+      <span>Tamanho{size ? <span className="text-[var(--muted)]"> · {size}</span> : null}</span>
+      {recommended
+        ? <Link href="/meu-fit" className="flex items-center gap-1.5 text-[var(--muted)] hover:text-[var(--ink)]"><span aria-hidden className="h-2 w-2 rounded-full bg-[var(--sol-1)]" />Seu tamanho: {recommended}</Link>
+        : <Link href="/meu-fit" className="text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Descubra seu tamanho</Link>}
+    </div>
+    <motion.div key={missing} animate={missing ? { x: [0, -8, 8, -5, 5, 0] } : undefined} transition={{ duration: 0.35 }} className="mt-3">
+      <SizePills fits={product.fits} size={size} recommended={recommended} onPick={pick} />
+    </motion.div>
     {missing > 0 && !size && <p role="alert" className="mt-2 text-[12px] text-[#8a3a2c]">Escolha um tamanho.</p>}
 
-    <div ref={buyRef}><button type="button" onClick={() => add() && router.push("/pagamento")} className="label mt-3 h-12 w-full bg-[var(--ink)] text-[13px] text-[var(--creme)]">Comprar</button></div>
-
-    <div className="mt-2 flex items-center justify-between text-[13px] text-[var(--muted)] [&>a]:py-2">
-      {recommended
-        ? <Link href="/meu-fit" className="flex items-center gap-2 hover:text-[var(--ink)]"><span aria-hidden className="h-2 w-2 rounded-full bg-[var(--sol-1)]" />Seu tamanho: {recommended}</Link>
-        : <Link href="/meu-fit" className="underline underline-offset-4 hover:text-[var(--ink)]">Descubra seu tamanho</Link>}
-      <Link href={`/provador?produto=${product.id}`} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver em você</Link>
+    <div ref={buyRef} className="mt-5 space-y-2.5">
+      <button type="button" onClick={addToBag} aria-live="polite" className={`press label flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-[12px] text-[var(--creme)] ${state === "adding" ? "bg-[var(--ink)]/70" : "bg-[var(--ink)]"}`}>
+        {state === "added" && <Check size={15} />}{label}
+      </button>
+      <button type="button" onClick={() => put() && router.push("/pagamento")} className="press label h-[52px] w-full rounded-full text-[12px] shadow-[inset_0_0_0_1px_rgba(17,17,17,.85)] hover:bg-[var(--ink)] hover:text-[var(--creme)]">Comprar agora</button>
     </div>
-    <div className="mt-5 flex items-center gap-6 border-t border-[var(--ink)]/10 pt-4">
-      <button type="button" onClick={() => add() && openDrawer()} aria-label="Adicionar ao carrinho" title="Adicionar ao carrinho" className="-m-2.5 p-2.5 transition-opacity hover:opacity-70"><ShoppingCart size={18} strokeWidth={1.6} /></button>
+
+    <div className="mt-4 flex items-center justify-between text-[13px] text-[var(--muted)]">
+      <Link href={`/provador?produto=${product.id}`} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver em você</Link>
       <ShareButton title={product.name} iconOnly className="-m-2.5 p-2.5 text-[var(--ink)]" />
     </div>
 
-    <div aria-hidden={!barOn} className={`fixed inset-x-0 bottom-0 z-[70] flex items-center gap-3 border-t border-[var(--line)] bg-[var(--paper)] px-4 pb-[calc(.75rem+env(safe-area-inset-bottom,0px))] pt-3 transition-transform duration-300 md:hidden ${barOn ? "translate-y-0" : "translate-y-full"}`}>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold uppercase tracking-[.04em]">{product.name}</p>
-        <p className="text-[13px] text-[var(--muted)]">{formatPrice(getProductPrice(product))}{size ? ` · ${size}` : ""}</p>
+    {/* Phones: the floating buy bar */}
+    <div aria-hidden={!barOn} className={`fixed inset-x-2 bottom-[calc(.5rem+env(safe-area-inset-bottom,0px))] z-[70] space-y-2 transition-[transform,opacity] duration-[280ms] ease-[cubic-bezier(.2,.8,.2,1)] md:hidden ${barOn ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-[130%] opacity-0"}`}>
+      <div className="glass flex items-center gap-3 rounded-[22px] px-3.5 py-2.5">
+        <span className="shrink-0 text-[13px] text-[var(--muted)]">Tamanho</span>
+        <div className="shelf auto-cols-max gap-1.5">
+          <SizePills fits={product.fits} size={size} recommended={recommended} onPick={pick} small />
+        </div>
       </div>
-      <button type="button" tabIndex={barOn ? 0 : -1} onClick={() => add() && router.push("/pagamento")} className="label h-11 shrink-0 bg-[var(--ink)] px-7 text-[13px] text-[var(--creme)]">Comprar</button>
+      <button type="button" tabIndex={barOn ? 0 : -1} onClick={addToBag} className={`press label flex h-[52px] w-full items-center justify-between rounded-[22px] px-5 text-[12px] text-[var(--creme)] shadow-[0_12px_30px_rgba(0,0,0,.25)] ${missing && !size ? "bg-[#8a3a2c]" : state === "adding" ? "bg-[#111]/75" : "bg-[#111]"}`}>
+        <span className="flex items-center gap-2">{state === "added" && <Check size={15} />}{missing && !size ? "Escolha o tamanho" : label}</span>
+        <span className="tabular-nums">{price}</span>
+      </button>
     </div>
   </div>;
 }

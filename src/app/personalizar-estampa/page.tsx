@@ -161,14 +161,14 @@ export default function PersonalizadorPage() {
       <span className="pz-serif hidden justify-self-end text-[18px] italic text-[#5B4C47] md:block">Pra quem entende de exclusividade</span>
     </div>
 
-    <div className="lg:grid lg:h-[calc(100dvh-64px-83px)] lg:grid-cols-[minmax(300px,360px)_1fr_minmax(360px,414px)]">
+    <div className="lg:grid lg:h-[calc(100dvh-var(--header-h,96px)-83px)] lg:grid-cols-[minmax(300px,360px)_1fr_minmax(360px,414px)]">
       {/* Chat — left on desktop */}
       <aside className="hidden min-h-0 border-r border-[var(--pz-linha)] lg:block">
         <ChatCriacao mensagens={mensagens} sugestoes={sugestoes} carregando={conversando} erro={erroChat} pronto={pronto} referenciasPendentes={pendentes.length} onEnviar={enviar} onRecomecar={recomecar} onRevisar={() => setConfirmando(true)} />
       </aside>
 
       {/* The tee: back on top (where the creation goes), front below */}
-      <section ref={palco} className="pz-palco scroll-mt-16 grid h-[52dvh] min-h-[340px] grid-cols-2 lg:h-auto lg:min-h-0 lg:grid-cols-1 lg:grid-rows-2" aria-label="Prévia da camiseta">
+      <section ref={palco} className="pz-palco scroll-mt-[var(--header-h,96px)] grid h-[52dvh] min-h-[340px] grid-cols-2 lg:h-auto lg:min-h-0 lg:grid-cols-1 lg:grid-rows-2" aria-label="Prévia da camiseta">
         <Vista titulo="Verso" extra={seletorCamada} rodape={rodapeVerso} className="border-r border-[var(--pz-creme)]/20 lg:border-b lg:border-r-0">
           <Camiseta lado="verso" modelagem={painel.modelagem} corMalha={malha} fonte={painel.fonte} corEscrita={painel.corEscrita} arte={arteVerso} textoVerso={ficha.texto} carregando={gerando} />
         </Vista>
@@ -181,7 +181,7 @@ export default function PersonalizadorPage() {
       {arte && <Finalizar painel={painel} ficha={ficha} arte={arte} referencias={referencias.length} className="lg:hidden" />}
 
       {/* Mobile: chat and panel share the space under the tee */}
-      <div className="sticky top-16 z-20 flex border-b border-[var(--pz-linha)] bg-[var(--pz-creme)] lg:hidden">
+      <div className="sticky top-[var(--header-h,96px)] z-20 flex border-b border-[var(--pz-linha)] bg-[var(--pz-creme)] lg:hidden">
         {(["criacao", "peca"] as const).map((t) => <button key={t} type="button" onClick={() => setAba(t)} aria-pressed={aba === t} className={`pz-serif flex-1 py-3 text-[19px] ${aba === t ? "border-b-[1.5px] border-[var(--pz-vinho)] text-[var(--pz-vinho)]" : "text-[var(--pz-suave)]"}`}>{t === "criacao" ? "Criação" : "Sua peça"}</button>)}
       </div>
       <div className={`h-[75dvh] lg:hidden ${aba === "criacao" ? "block" : "hidden"}`}>

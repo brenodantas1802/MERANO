@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
 
   </main>
-  {related.length > 0 && <section className="mt-8 px-6 pb-20 md:px-12">
+  {related.length > 0 && <section className="mt-8 px-6 pb-40 md:px-12 md:pb-20">
     <h2 className="label text-[13px]">Você também pode gostar</h2>
     <RelatedRow items={related.map((item) => ({ id: item.id, name: item.name, image: item.image }))} />
   </section>}

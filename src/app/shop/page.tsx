@@ -8,16 +8,20 @@ import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
 import { collections, products } from "@/lib/products";
 
+const TEMAS_NOME: Record<string, string> = { mar: "Mar", frase: "Frases", esporte: "Esporte", fruta: "Frutas", minimal: "Minimal", urbano: "Cidade" };
+
 function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("categoria") ?? "Todos";
+  // ?tema=<tag> comes from the theme circles on the home page.
+  const [tema, setTema] = useState(searchParams.get("tema"));
   const [category, setCategory] = useState(initialCategory);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
   const [showCollections, setShowCollections] = useState(false);
   const [sort, setSort] = useState("featured");
   const [query, setQuery] = useState("");
   const categories = useMemo(() => ["Todos", ...Array.from(new Set(products.map((product) => product.category)))], []);
-  const filtered = useMemo(() => products.filter((product) => (category === "Todos" || product.category === category) && (!selectedCollection || product.collection === selectedCollection) && `${product.name} ${product.note}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "price-low" ? a.price - b.price : sort === "price-high" ? b.price - a.price : sort === "name" ? a.name.localeCompare(b.name) : 0), [category, selectedCollection, query, sort]);
+  const filtered = useMemo(() => products.filter((product) => (category === "Todos" || product.category === category) && (!selectedCollection || product.collection === selectedCollection) && (!tema || product.tags.includes(tema)) && `${product.name} ${product.note}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "price-low" ? a.price - b.price : sort === "price-high" ? b.price - a.price : sort === "name" ? a.name.localeCompare(b.name) : 0), [category, selectedCollection, query, sort, tema]);
 
   function pickCategory(value: string) { setCategory(value); setSelectedCollection(null); setShowCollections(false); }
   function pickCollection(id: string) { setSelectedCollection(id); setCategory("Todos"); setShowCollections(false); }
@@ -28,6 +32,7 @@ function ShopContent() {
     <div className="flex flex-wrap items-center justify-between gap-4 py-6">
       <div className="flex flex-wrap gap-2">
         {categories.map((value) => <button key={value} onClick={() => pickCategory(value)} className={`sans px-4 py-2 text-[11px] uppercase tracking-[.12em] ${!showCollections && category === value && !selectedCollection ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>{value}</button>)}
+        {tema && <button onClick={() => setTema(null)} className="sans flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">{TEMAS_NOME[tema] ?? tema} ✕</button>}
         <button onClick={() => setShowCollections(true)} className={`sans px-4 py-2 text-[11px] uppercase tracking-[.12em] ${showCollections ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>Coleções</button>
       </div>
       {!showCollections && <label className="sans flex items-center gap-2 text-[11px] uppercase tracking-[.12em]"><SlidersHorizontal size={14} /><select value={sort} onChange={(event) => setSort(event.target.value)} className="bg-transparent outline-none"><option value="featured">Em destaque</option><option value="price-low">Menor preço</option><option value="price-high">Maior preço</option><option value="name">Nome</option></select></label>}
