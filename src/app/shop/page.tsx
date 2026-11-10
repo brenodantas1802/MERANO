@@ -27,15 +27,15 @@ function ShopContent() {
   function pickCollection(id: string) { setSelectedCollection(id); setCategory("Todos"); setShowCollections(false); }
 
   return <><div className="mx-auto max-w-360 px-6 pb-6 pt-10 md:px-12 md:pt-14">
-    <div className="flex flex-col justify-between gap-6 border-b border-[var(--line)] pb-6 md:flex-row md:items-end"><h1 className="display text-5xl md:text-6xl">Shop</h1><label className="sans flex w-full items-center gap-3 border-b border-[var(--ink)] pb-3 text-[11px] uppercase tracking-[.14em] md:w-72"><Filter size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produtos" className="w-full bg-transparent outline-none" /></label></div>
+    <div className="flex flex-col justify-between gap-6 border-b border-[var(--line)] pb-6 md:flex-row md:items-end"><h1 className="display text-5xl md:text-6xl">Shop</h1><label className="sans flex min-h-11 w-full items-center gap-3 border-b border-[var(--ink)] text-[11px] uppercase tracking-[.14em] md:w-72"><Filter size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produtos" className="h-11 w-full bg-transparent outline-none" /></label></div>
 
     <div className="flex flex-wrap items-center justify-between gap-4 py-6">
       <div className="flex flex-wrap gap-2">
-        {categories.map((value) => <button key={value} onClick={() => pickCategory(value)} className={`sans px-4 py-2 text-[11px] uppercase tracking-[.12em] ${!showCollections && category === value && !selectedCollection ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>{value}</button>)}
+        {categories.map((value) => <button key={value} onClick={() => pickCategory(value)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${!showCollections && category === value && !selectedCollection ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>{value}</button>)}
         {tema && <button onClick={() => setTema(null)} className="sans flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">{TEMAS_NOME[tema] ?? tema} ✕</button>}
-        <button onClick={() => setShowCollections(true)} className={`sans px-4 py-2 text-[11px] uppercase tracking-[.12em] ${showCollections ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>Coleções</button>
+        <button onClick={() => setShowCollections(true)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${showCollections ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>Coleções</button>
       </div>
-      {!showCollections && <label className="sans flex items-center gap-2 text-[11px] uppercase tracking-[.12em]"><SlidersHorizontal size={14} /><select value={sort} onChange={(event) => setSort(event.target.value)} className="bg-transparent outline-none"><option value="featured">Em destaque</option><option value="price-low">Menor preço</option><option value="price-high">Maior preço</option><option value="name">Nome</option></select></label>}
+      {!showCollections && <label className="sans flex items-center gap-2 text-[11px] uppercase tracking-[.12em]"><SlidersHorizontal size={14} /><select value={sort} onChange={(event) => setSort(event.target.value)} className="h-11 bg-transparent outline-none"><option value="featured">Em destaque</option><option value="price-low">Menor preço</option><option value="price-high">Maior preço</option><option value="name">Nome</option></select></label>}
     </div>
 
     {showCollections ? (

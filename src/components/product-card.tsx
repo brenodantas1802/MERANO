@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: Product }) {
       </ViewTransition>
       <h3 className="line-clamp-2 px-2 pb-5 pt-3 text-center text-[13px] font-semibold uppercase leading-snug tracking-[.06em] text-[var(--ink)]">{product.name}</h3>
     </Link>
-    <FavoriteButton productId={product.id} name={product.name} className="press glass absolute right-2.5 top-2.5 z-20 flex h-9 w-9 items-center justify-center rounded-full shadow-none" />
+    <FavoriteButton productId={product.id} name={product.name} className="press toque glass absolute right-2.5 top-2.5 z-20 flex h-9 w-9 items-center justify-center rounded-full shadow-none" />
     <QuickAdd product={product} />
   </motion.article>;
 }

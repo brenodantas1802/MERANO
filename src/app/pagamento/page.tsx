@@ -142,10 +142,10 @@ export default function PaymentPage() {
     </section>}
   </div></main>;
 
-  if (items.length === 0) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><p className="mt-8 text-2xl">Seu carrinho está vazio.</p><Link href="/shop" className="sans mt-8 inline-flex items-center gap-2 border-b border-[var(--ink)] pb-2 text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link></div></main>;
+  if (items.length === 0) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><p className="mt-8 text-2xl">Seu carrinho está vazio.</p><Link href="/shop" className="sans mt-8 inline-flex min-h-11 items-center gap-2 border-b border-[var(--ink)] text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link></div></main>;
 
   return <main><SiteHeader /><div className="mx-auto max-w-360 px-6 pb-24 pt-10 md:px-12">
-    <Link href="/shop" className="sans mb-10 flex w-fit items-center gap-2 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Continuar comprando</Link>
+    <Link href="/shop" className="sans mb-10 flex min-h-11 w-fit items-center gap-2 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Continuar comprando</Link>
     <div className="flex items-end gap-6"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><Illustration name="barco" className="hidden w-32 shrink-0 pb-1 sm:block md:w-48" /></div>
     <form onSubmit={pay} className="mt-12 grid gap-12 md:grid-cols-[1fr_400px] md:gap-20">
       <div className="space-y-14">
@@ -190,7 +190,7 @@ export default function PaymentPage() {
             <div>
               <p className="text-xl">Pague {formatPrice(total)} com Pix</p>
               <p className="mt-2 text-[var(--muted)]">Abra o app do seu banco, escaneie o código ou use o Pix copia e cola. A confirmação é instantânea.</p>
-              <button type="button" onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="sans mt-5 inline-flex items-center gap-2 rounded-full border border-[var(--ink)] px-5 py-2.5 text-[11px] uppercase tracking-[.14em] hover:bg-[var(--ink)] hover:text-[var(--creme)]">{copied ? <><Check size={14} /> Código copiado</> : <><Copy size={14} /> Copiar código Pix</>}</button>
+              <button type="button" onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="sans mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--ink)] px-5 text-[11px] uppercase tracking-[.14em] hover:bg-[var(--ink)] hover:text-[var(--creme)]">{copied ? <><Check size={14} /> Código copiado</> : <><Copy size={14} /> Copiar código Pix</>}</button>
             </div>
           </div> : <div className="mt-8 grid gap-8 md:grid-cols-[1fr_260px]">
             <div className="grid gap-6">

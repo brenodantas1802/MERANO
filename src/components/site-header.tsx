@@ -107,7 +107,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
         </button>
       </div>
 
-      <Link href="/" aria-label="Meranno - início" className="flex items-center gap-2.5 md:gap-3">
+      <Link href="/" aria-label="Meranno - início" className="flex min-h-11 items-center gap-2.5 md:gap-3">
         <MeranoSymbol className="h-6 w-auto min-[400px]:h-7 md:h-8" ink={clear ? "#ffffff" : "#111111"} />
         <Image src="/imagens/logo-nome-trimmed.png" alt="MERANNO" width={655} height={66} priority className={`h-auto w-[108px] min-[400px]:w-[122px] transition-[filter] duration-300 md:w-[187px] ${clear ? "brightness-0 invert" : ""}`} />
       </Link>
@@ -155,7 +155,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
             </motion.div>)}
           </div>
           <div className="mx-6 mt-3 border-t border-black/10 pt-3">
-            {NAV_LINKS.filter((link) => !MENU_PRINCIPAL.some((item) => item.href === link.href)).map((link) => <Link key={link.href} onClick={() => setMenuOpen(false)} href={link.href} className="press flex items-center justify-between py-2.5 text-[15px]">{link.label}<span aria-hidden className="text-black/30">›</span></Link>)}
+            {NAV_LINKS.filter((link) => !MENU_PRINCIPAL.some((item) => item.href === link.href)).map((link) => <Link key={link.href} onClick={() => setMenuOpen(false)} href={link.href} className="press flex min-h-11 items-center justify-between text-[15px]">{link.label}<span aria-hidden className="text-black/30">›</span></Link>)}
           </div>
           <div className="px-6 pb-6 pt-4">
             <p className="label text-[11px] text-[var(--muted)]">Mais desejadas</p>

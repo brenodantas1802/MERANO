@@ -55,7 +55,7 @@ function MeasureCard({ spec, value, onChange }: { spec: FieldSpec; value: string
       <span className={`flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300 ${filled && !outOfRange ? "scale-100 bg-[var(--sol-1)] text-white" : "scale-75 bg-[var(--ink)]/10 text-transparent"}`}><Check size={13} strokeWidth={2.4} /></span>
     </span>
     <span className="mt-2 flex items-baseline gap-2">
-      <input inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value.replace(/[^\d.,]/g, "").slice(0, 5))} placeholder="—" aria-label={`${spec.label} em ${spec.unit}`} className="display w-full min-w-0 bg-transparent text-4xl outline-none placeholder:text-[var(--ink)]/20 md:text-5xl" />
+      <input inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value.replace(/[^\d.,]/g, "").slice(0, 5))} placeholder="—" aria-label={`${spec.label} em ${spec.unit}`} className="display min-h-11 w-full min-w-0 bg-transparent text-4xl outline-none placeholder:text-[var(--ink)]/20 md:text-5xl" />
       <span className="sans shrink-0 text-sm text-[var(--muted)]">{spec.unit}</span>
     </span>
     <span className={`sans mt-2 block text-[11px] leading-snug md:text-[12px] ${outOfRange ? "text-[#8a3a2c]" : "text-[var(--muted)]"}`}>{outOfRange ? `Confere? Esperávamos entre ${min} e ${max} ${spec.unit}.` : spec.hint}</span>
@@ -109,7 +109,7 @@ export default function MeranoFitPage() {
       <div>
         <div className="flex items-end justify-between gap-4">
           <h2 className="display text-4xl md:text-5xl">Suas medidas.</h2>
-          <a href="#como-medir" className="sans pb-1 text-sm text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Como medir</a>
+          <a href="#como-medir" className="sans inline-flex min-h-11 items-center text-sm text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Como medir</a>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3">{ESSENTIALS.map((spec) => <MeasureCard key={spec.field} spec={spec} value={profile[spec.field]} onChange={(value) => update(spec.field, value)} />)}</div>
 
@@ -130,7 +130,7 @@ export default function MeranoFitPage() {
         <div className="overflow-hidden rounded-[2.5rem] bg-[radial-gradient(90%_60%_at_40%_35%,#2c4166_0%,#1b2a41_55%,#121c2c_100%)] text-[var(--paper)] shadow-[0_40px_80px_-50px_rgba(18,28,44,.9)]">
           <div className="flex flex-wrap items-center justify-end gap-3 px-7 pt-7">
             <div className="sans flex rounded-full bg-white/[.08] p-1 text-[13px] ring-1 ring-white/10" role="tablist" aria-label="Ver no corpo ou só a peça">
-              {([["corpo", "No corpo"], ["peca", "A peça"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`relative rounded-full px-4 py-1.5 transition-colors duration-300 ${view === key ? "text-[var(--ink)]" : "text-white/75 hover:text-white"}`}>
+              {([["corpo", "No corpo"], ["peca", "A peça"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`relative min-h-11 rounded-full px-4 transition-colors duration-300 ${view === key ? "text-[var(--ink)]" : "text-white/75 hover:text-white"}`}>
                 {view === key && <motion.span layoutId="fit-view" className="absolute inset-0 rounded-full bg-[var(--paper)]" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
                 <span className="relative">{label}</span>
               </button>)}

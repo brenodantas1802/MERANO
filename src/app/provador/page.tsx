@@ -101,7 +101,7 @@ function ShirtPicker({ selected, onSelect, onClose }: { selected: Product | null
     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-4 rounded-[1.75rem] bg-[var(--creme)] p-5 shadow-[0_18px_40px_-28px_rgba(32,28,23,.5)]">
       <div className="mb-4 flex items-center justify-between">
         <p className="display text-2xl">Escolha a estampa</p>
-        <button type="button" onClick={onClose} aria-label="Fechar" className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[var(--ink)] hover:text-[var(--creme)]"><X size={16} /></button>
+        <button type="button" onClick={onClose} aria-label="Fechar" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-[var(--ink)] hover:text-[var(--creme)]"><X size={16} /></button>
       </div>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {products.map((product) => (

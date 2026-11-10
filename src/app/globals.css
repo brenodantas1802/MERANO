@@ -221,14 +221,13 @@ html { -webkit-tap-highlight-color: transparent; }
 	background-size: auto, auto, 160px 160px;
 }
 
-/* Home top options "as" / "naipes" / "mar-vinho" (components/hero-topo.tsx). */
+/* Home top: the giant ace (components/hero-topo.tsx). */
 .as-traco { stroke-dasharray: 1; stroke-dashoffset: 0; animation: tracar 2.4s cubic-bezier(.6,0,.2,1) both; }
 @keyframes tracar { from { stroke-dashoffset: 1; } }
 .as-gigante { filter: drop-shadow(0 0 30px rgba(186, 150, 84, .18)); }
-.ondas-latao { animation: deriva 7s ease-in-out infinite alternate; }
-@keyframes deriva { to { transform: translateX(-6%); } }
-.boia { animation: boiar 3.6s ease-in-out infinite alternate; }
-@keyframes boiar { to { transform: translateY(30%) rotate(8deg); } }
-.mar-vinho video { filter: grayscale(1) contrast(1.1) brightness(1.25); }
-.mar-vinho::after { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, #9a4456 0%, #7a2a3b 45%, #c9a26a 100%); mix-blend-mode: multiply; }
-@media (prefers-reduced-motion: reduce) { .as-traco, .ondas-latao, .boia { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .as-traco { animation: none; } }
+
+/* Tap area of at least 44 × 44 px around small controls, without changing how they look (docs/PESQUISA-UX.md §1).
+   The element must be positioned: .toque makes it relative unless it is already absolute/fixed. */
+.toque:not(.absolute):not(.fixed) { position: relative; }
+.toque::after { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }

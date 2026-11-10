@@ -63,7 +63,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
               <Link href={next ? `/conta/criar?next=${encodeURIComponent(next)}` : "/conta/criar"} className="label mt-3 flex h-12 w-full items-center justify-center border border-[var(--ink)] text-[13px] transition-colors hover:bg-[var(--areia-clara)]">Criar conta</Link>
             </div>
             <Link href="/meu-fit" className="mt-6 flex items-center justify-between rounded-2xl border border-[var(--ink)]/15 px-6 py-5 transition-colors hover:bg-[var(--areia-clara)]"><span className="text-lg">Salve suas medidas no Meranno Fit</span><span className="text-xl">→</span></Link>
-            <Link href="/carrinho" className="sans mt-8 block text-center text-[13px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Continuar como visitante no checkout</Link>
+            <Link href="/carrinho" className="sans mt-8 flex min-h-11 items-center justify-center text-center text-[13px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Continuar como visitante no checkout</Link>
           </>}
         </div>
       </div>

@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/product-card";
 // same 4px seam as the collection grid, so the shirts keep their usual proportions.
 export function ProductShelf({ numero, titulo, verTudo, products }: { numero?: string; titulo: string; verTudo?: string; products: Product[] }) {
   return <section className="pt-10 md:pt-14">
-    <div className="mb-1 flex items-end justify-between px-6 md:px-12"><h2 className="secao">{numero && <b>{numero} /</b>}{titulo}</h2>{verTudo && <Link href={verTudo} className="label text-[12px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Ver tudo</Link>}</div>
+    <div className="mb-1 flex items-end justify-between px-6 md:px-12"><h2 className="secao">{numero && <b>{numero} /</b>}{titulo}</h2>{verTudo && <Link href={verTudo} className="label inline-flex min-h-11 items-center text-[12px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Ver tudo</Link>}</div>
     <div className="rule-latao mx-6 mb-4 w-16 md:mx-12" />
     <div className="shelf auto-cols-[calc((100%-4px)/2)] gap-1 px-1 scroll-px-1 md:auto-cols-[calc((100%-8px)/3)]">
       {products.map((product) => <ProductCard key={product.id} product={product} />)}

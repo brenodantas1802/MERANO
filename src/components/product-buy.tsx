@@ -85,15 +85,15 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
         const swatch = <span className="block h-8 w-8 rounded-full border border-[var(--ink)]/15" style={{ background: SWATCH[way.color] ?? "#ccc" }} />;
         return active
           ? <span key={way.id} aria-label={`${way.color}, cor atual`} className="rounded-full p-0.5 ring-1 ring-[var(--ink)]">{swatch}</span>
-          : <Link key={way.id} href={`/produto/${way.id}`} aria-label={`Ver em ${way.color}`} className="press rounded-full p-0.5 ring-1 ring-transparent hover:ring-[var(--ink)]/40">{swatch}</Link>;
+          : <Link key={way.id} href={`/produto/${way.id}`} aria-label={`Ver em ${way.color}`} className="press toque rounded-full p-0.5 ring-1 ring-transparent hover:ring-[var(--ink)]/40">{swatch}</Link>;
       })}
     </div>
 
     <div className="mt-6 flex items-baseline justify-between text-[13px]">
       <span>Tamanho{size ? <span className="text-[var(--muted)]"> · {size}</span> : null}</span>
       {recommended
-        ? <Link href="/meu-fit" className="flex items-center gap-1.5 text-[var(--muted)] hover:text-[var(--ink)]"><span aria-hidden className="h-2 w-2 rounded-full bg-[var(--sol-1)]" />Seu tamanho: {recommended}</Link>
-        : <Link href="/meu-fit" className="text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Descubra seu tamanho</Link>}
+        ? <Link href="/meu-fit" className="flex min-h-11 items-center gap-1.5 text-[var(--muted)] hover:text-[var(--ink)]"><span aria-hidden className="h-2 w-2 rounded-full bg-[var(--sol-1)]" />Seu tamanho: {recommended}</Link>
+        : <Link href="/meu-fit" className="inline-flex min-h-11 items-center text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Descubra seu tamanho</Link>}
     </div>
     <motion.div key={missing} animate={missing ? { x: [0, -8, 8, -5, 5, 0] } : undefined} transition={{ duration: 0.35 }} className="mt-3">
       <SizePills fits={product.fits} size={size} recommended={recommended} onPick={pick} />
@@ -108,8 +108,8 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
     </div>
 
     <div className="mt-4 flex items-center justify-between text-[13px] text-[var(--muted)]">
-      <Link href={`/provador?produto=${product.id}`} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver em você</Link>
-      <ShareButton title={product.name} iconOnly className="-m-2.5 p-2.5 text-[var(--ink)]" />
+      <Link href={`/provador?produto=${product.id}`} className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-[var(--ink)]">Ver em você</Link>
+      <ShareButton title={product.name} iconOnly className="toque -m-2.5 p-2.5 text-[var(--ink)]" />
     </div>
 
     {/* Phones: the floating buy bar */}

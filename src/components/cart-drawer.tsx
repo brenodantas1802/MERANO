@@ -89,7 +89,7 @@ export function CartDrawer() {
             <Link href="/pagamento" onClick={closeDrawer} className="press label mt-3 flex h-[52px] items-center justify-between rounded-full bg-[var(--vinho)] px-6 text-[12px] text-[var(--creme)]">
               <span>Finalizar compra</span><ArrowRight size={16} />
             </Link>
-            <div className="mt-2.5 flex justify-between px-1 text-[12px] text-[var(--muted)]"><button onClick={closeDrawer} className="press underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="underline underline-offset-4 hover:text-[var(--ink)]">Ver carrinho</Link></div>
+            <div className="mt-1 flex justify-between px-1 text-[12px] text-[var(--muted)]"><button onClick={closeDrawer} className="press inline-flex min-h-11 items-center underline underline-offset-4 hover:text-[var(--ink)]">Continuar comprando</button><Link href="/carrinho" onClick={closeDrawer} className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-[var(--ink)]">Ver carrinho</Link></div>
           </div>
         </>}
       </motion.aside>

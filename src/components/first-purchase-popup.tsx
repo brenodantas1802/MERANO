@@ -50,7 +50,7 @@ export function FirstPurchasePopup() {
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[var(--creme)] p-8 shadow-2xl md:p-10"
           >
-            <button onClick={close} aria-label="Fechar" className="absolute right-4 top-4 text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><X size={18} strokeWidth={1.5} /></button>
+            <button onClick={close} aria-label="Fechar" className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><X size={18} strokeWidth={1.5} /></button>
             <div className="mb-6 h-1 w-12" style={{ background: "linear-gradient(to right, #551E2B, #BA9654)" }} />
             {sent ? (
               <div>
@@ -63,10 +63,10 @@ export function FirstPurchasePopup() {
                 <h2 className="display text-4xl leading-none md:text-5xl">10% na sua<br />primeira compra.</h2>
                 <p className="mt-4 text-[var(--muted)]">Deixe seu e-mail e a gente envia o cupom. Sem spam, só as novidades da coleção.</p>
                 <form onSubmit={submit} className="sans mt-7 flex flex-col gap-3 sm:flex-row">
-                  <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="seu@email.com" className="w-full border-b border-[var(--ink)] bg-transparent py-3 text-sm outline-none" />
-                  <button type="submit" className="shrink-0 rounded-full bg-[var(--ink)] px-6 py-3 text-[11px] uppercase tracking-[.15em] text-[var(--creme)] transition-opacity hover:opacity-85">Quero o cupom</button>
+                  <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="seu@email.com" className="h-11 w-full border-b border-[var(--ink)] bg-transparent text-sm outline-none" />
+                  <button type="submit" className="min-h-11 shrink-0 rounded-full bg-[var(--ink)] px-6 text-[11px] uppercase tracking-[.15em] text-[var(--creme)] transition-opacity hover:opacity-85">Quero o cupom</button>
                 </form>
-                <button onClick={close} className="sans mt-5 text-[11px] uppercase tracking-[.14em] text-[var(--muted)] underline underline-offset-4">Agora não</button>
+                <button onClick={close} className="sans mt-3 min-h-11 text-[11px] uppercase tracking-[.14em] text-[var(--muted)] underline underline-offset-4">Agora não</button>
               </>
             )}
           </motion.div>

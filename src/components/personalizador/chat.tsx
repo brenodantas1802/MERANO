@@ -59,11 +59,11 @@ export function ChatCriacao({ mensagens, sugestoes, carregando, erro, pronto, re
     <div className="space-y-3 px-6 pb-6 pt-3">
       {pronto && <button type="button" onClick={onRevisar} className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--pz-vinho)] px-4 py-3 text-[14px] font-semibold text-[var(--pz-creme)] transition-opacity hover:opacity-90"><Sparkles size={16} strokeWidth={1.8} /> Revisar e criar a estampa</button>}
       {!carregando && sugestoes.length > 0 && <div className="flex flex-col items-start gap-2">
-        {sugestoes.map((s) => <button key={s} type="button" onClick={() => enviar(undefined, s)} className="rounded-full border border-[var(--pz-borda)] px-[14px] py-[7px] text-left text-[13.5px] font-medium text-[var(--pz-tinta)] transition-colors hover:bg-[var(--pz-cartao)]">{s}</button>)}
+        {sugestoes.map((s) => <button key={s} type="button" onClick={() => enviar(undefined, s)} className="min-h-11 rounded-full border border-[var(--pz-borda)] px-[14px] py-2 text-left text-[13.5px] font-medium text-[var(--pz-tinta)] transition-colors hover:bg-[var(--pz-cartao)]">{s}</button>)}
       </div>}
       {referenciasPendentes > 0 && <p className="text-xs text-[var(--pz-suave)]">{referenciasPendentes} referência(s) seguem com a próxima mensagem.</p>}
       <form onSubmit={enviar} className="flex items-center gap-2 rounded-[20px] border border-[var(--pz-borda)] bg-[var(--pz-campo)] py-1.5 pl-4 pr-1.5 focus-within:border-[var(--pz-vinho)]/60">
-        <input value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={1200} placeholder="Conte a ideia da sua estampa…" aria-label="Mensagem" className="min-w-0 flex-1 bg-transparent py-2 text-[15px] text-[var(--pz-tinta)] outline-none placeholder:text-[var(--pz-apagado)]" />
+        <input value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={1200} placeholder="Conte a ideia da sua estampa…" aria-label="Mensagem" className="h-11 min-w-0 flex-1 bg-transparent text-[15px] text-[var(--pz-tinta)] outline-none placeholder:text-[var(--pz-apagado)]" />
         <button type="submit" disabled={carregando || !texto.trim()} aria-label="Enviar" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--pz-vinho)] text-white transition-opacity disabled:cursor-default"><ArrowUp size={17} strokeWidth={2} /></button>
       </form>
     </div>

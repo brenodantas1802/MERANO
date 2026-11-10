@@ -65,7 +65,7 @@ export function ShirtChapters() {
             <img src={`${chapterStory.cutout.src}-${chapterStory.cutout.small}.webp`} alt={`Camiseta ${chapterProduct?.name ?? ""}`} width={chapterStory.cutout.small} height={Math.round(chapterStory.cutout.small * chapterStory.cutout.ratio)} loading="lazy" decoding="async" className="mx-auto mb-8 h-auto w-[78%] drop-shadow-[0_30px_30px_rgba(32,28,23,.25)] md:hidden" />
             <h2 className="display text-[clamp(2.6rem,4.6vw,4.6rem)]">{chapter.title[0]}<br /><i>{chapter.title[1]}</i></h2>
             <p className="mt-5 max-w-md text-lg leading-snug text-[var(--ink)]/75 md:text-xl">{chapter.text}</p>
-            {chapterProduct && <Link href={`/produto/${chapterProduct.id}`} className="sans mt-6 w-fit border-b border-[var(--ink)]/40 pb-1 text-sm transition-colors hover:border-[var(--ink)]">Estampa {chapterProduct.name}</Link>}
+            {chapterProduct && <Link href={`/produto/${chapterProduct.id}`} className="sans mt-6 inline-flex min-h-11 w-fit items-center border-b border-[var(--ink)]/40 text-sm transition-colors hover:border-[var(--ink)]">Estampa {chapterProduct.name}</Link>}
           </div>;
         })}
       </div>

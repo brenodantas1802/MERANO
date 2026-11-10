@@ -99,7 +99,7 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
   return <div className="text-[var(--pz-tinta)]">
     <div className="flex items-center justify-between border-b border-[var(--pz-linha)] px-6 py-6">
       <h2 className="pz-serif text-[32px] leading-none">Sua peça</h2>
-      <button type="button" onClick={onReset} className="inline-flex items-center gap-2 text-[14px] font-medium text-[var(--pz-tinta)] hover:text-[var(--pz-vinho)]"><RotateCcw size={14} strokeWidth={1.8} /> Restaurar padrões</button>
+      <button type="button" onClick={onReset} className="inline-flex min-h-11 items-center gap-2 text-[14px] font-medium text-[var(--pz-tinta)] hover:text-[var(--pz-vinho)]"><RotateCcw size={14} strokeWidth={1.8} /> Restaurar padrões</button>
     </div>
 
     <Secao titulo="Modelagem">
@@ -119,7 +119,7 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
       <div className="mt-3.5 flex flex-wrap gap-[9px]">
         {CORES_MALHA.map((cor) => {
           const ativo = cor.hex.toLowerCase() === malha.toLowerCase();
-          return <button key={cor.hex} type="button" title={cor.nome} aria-label={`Malha ${cor.nome}`} aria-pressed={ativo} onClick={() => trocarMalha(cor.hex)} className={`h-9 w-9 rounded-full transition-transform hover:scale-105 ${ativo ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : "shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)]"}`} style={{ background: cor.hex }} />;
+          return <button key={cor.hex} type="button" title={cor.nome} aria-label={`Malha ${cor.nome}`} aria-pressed={ativo} onClick={() => trocarMalha(cor.hex)} className={`toque h-9 w-9 rounded-full transition-transform hover:scale-105 ${ativo ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : "shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)]"}`} style={{ background: cor.hex }} />;
         })}
       </div>
     </Secao>
@@ -141,7 +141,7 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
       </div>
       <div className="mt-2.5 grid" style={{ gridTemplateColumns: `repeat(${colunas}, minmax(0, 1fr))` }}>
         {painel.paleta.map((cor, index) => <div key={`${cor}-${index}-lixo`} className="flex justify-center">
-          <button type="button" disabled={index === 0} title={index === 0 ? "A malha muda em Cores disponíveis" : undefined} aria-label={`Remover ${nomeDaCor(cor)}`} onClick={() => removerCor(index)} className="rounded p-1 text-[var(--pz-suave)] hover:text-[var(--pz-vinho)] disabled:cursor-default disabled:opacity-40 disabled:hover:text-[var(--pz-suave)]"><Trash2 size={15} strokeWidth={1.6} /></button>
+          <button type="button" disabled={index === 0} title={index === 0 ? "A malha muda em Cores disponíveis" : undefined} aria-label={`Remover ${nomeDaCor(cor)}`} onClick={() => removerCor(index)} className="toque rounded p-1 text-[var(--pz-suave)] hover:text-[var(--pz-vinho)] disabled:cursor-default disabled:opacity-40 disabled:hover:text-[var(--pz-suave)]"><Trash2 size={15} strokeWidth={1.6} /></button>
         </div>)}
       </div>
     </Secao>
@@ -158,7 +158,7 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
       <div className="mt-4 flex items-center justify-between">
         <span className="pz-rotulo">Cor da escrita</span>
         <div className="flex gap-[9px]">
-          {painel.paleta.slice(1).map((cor) => <button key={cor} type="button" title={nomeDaCor(cor)} aria-label={`Escrita em ${nomeDaCor(cor)}`} aria-pressed={painel.corEscrita === cor} onClick={() => set({ corEscrita: cor })} className={`h-9 w-9 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)] ${painel.corEscrita === cor ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : ""}`} style={{ background: cor }} />)}
+          {painel.paleta.slice(1).map((cor) => <button key={cor} type="button" title={nomeDaCor(cor)} aria-label={`Escrita em ${nomeDaCor(cor)}`} aria-pressed={painel.corEscrita === cor} onClick={() => set({ corEscrita: cor })} className={`toque h-9 w-9 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)] ${painel.corEscrita === cor ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : ""}`} style={{ background: cor }} />)}
         </div>
       </div>
     </Secao>
@@ -170,7 +170,7 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
             <Camiseta lado="verso" modelagem="regular" corMalha={malha} fonte={painel.fonte} corEscrita={painel.corEscrita} arte={{ tipo: "casa", id: casa.id, cor: painel.paleta[1] ?? painel.corEscrita }} className="h-full w-auto max-w-full" />
           </div>
           <p className="pz-serif mt-1 text-[24px] leading-tight">{casa.nome}</p>
-          <button type="button" onClick={() => set({ estampaCasa: usando ? null : casa.id })} className="mt-1 inline-flex items-center gap-1.5 text-[13px] text-[var(--pz-creme)]/85 hover:text-[var(--pz-creme)]">
+          <button type="button" onClick={() => set({ estampaCasa: usando ? null : casa.id })} className="mt-1 inline-flex min-h-11 items-center gap-1.5 text-[13px] text-[var(--pz-creme)]/85 hover:text-[var(--pz-creme)]">
             <Pointer size={14} strokeWidth={1.6} /> {usando ? "Usando esta estampa · remover" : "Usar esta estampa"}
           </button>
         </div>
