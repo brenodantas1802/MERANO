@@ -44,6 +44,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </div>
 
       <div className="[grid-area:head]">
+        {product.lancamento && <p className="secao mb-1 text-[11px]">Lançamento</p>}
         <h1 className="text-[15px] font-medium">{product.name}</h1>
         <p className="mt-1 text-[15px]">{product.salePrice && <del className="mr-2 text-[var(--muted)]">{formatPrice(product.price)}</del>}{formatPrice(price)}</p>
       </div>

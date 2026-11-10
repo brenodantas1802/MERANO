@@ -21,7 +21,7 @@ function Manchete() {
   return <div className="relative z-10 flex min-h-[88svh] flex-col justify-end pb-14 pt-24 md:min-h-screen md:justify-center md:pb-0">
     <div className="rule-latao mb-6 w-20" />
     <HeroTextReveal className="display max-w-3xl text-[clamp(2.9rem,8.5vw,6.8rem)]" lines={MANCHETE} />
-    <div className="mt-9 flex flex-wrap gap-3"><PillLink href="#colecao" variant="glass">Ver coleção</PillLink><PillLink href="/personalizar-estampa" variant="glass">Criar a minha</PillLink></div>
+    <div className="mt-9 flex flex-wrap gap-3"><PillLink href="#lancamento" variant="glass">Ver lançamento</PillLink><PillLink href="/personalizar-estampa" variant="glass">Criar a minha</PillLink></div>
   </div>;
 }
 

@@ -36,6 +36,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div onPointerEnter={() => setWarm(true)} className="relative aspect-[.82] overflow-hidden bg-[var(--cream)]/40">
           {photos.map((src, photo) => (photo === index || warm) && <Image key={src} src={src} alt={photo ? `${product.name}, vista ${photo + 1}` : product.name} fill sizes="(min-width: 768px) 33vw, 50vw" className={`object-cover transition-opacity duration-500 ${photo === index ? "opacity-100" : "opacity-0"}`} />)}
           <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-col items-start gap-1.5">
+            {product.lancamento && <span className="rounded-full bg-[var(--vinho)] px-2.5 py-1 text-[11px] font-medium text-[var(--creme)]">Lançamento</span>}
             {discounted && <span className="rounded-full bg-[var(--vinho)] px-2.5 py-1 text-[11px] font-medium text-[var(--creme)]">Oferta</span>}
             <span className="glass rounded-full px-2.5 py-1 text-[11px] font-medium shadow-none">{product.colors[0]}</span>
           </div>

@@ -11,7 +11,7 @@ import { useSizeRecommendation } from "@/lib/use-size-recommendation";
 import { formatPrice, getProductPrice, type Product } from "@/lib/products";
 
 // Swatch colours for the colour names used in the catalog.
-const SWATCH: Record<string, string> = { Preto: "#1c1c1a", "Azul marinho": "#1f2b45", Natural: "#e9e2d4" };
+const SWATCH: Record<string, string> = { Preto: "#1c1c1a", "Azul marinho": "#1f2b45", Natural: "#e9e2d4", Branco: "#f4f3ee" };
 // Long enough to read "Adicionando…", short enough to feel instant.
 const ADD_FEEDBACK_MS = 380;
 

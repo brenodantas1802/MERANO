@@ -15,7 +15,7 @@ export default function Home() {
 
     <HeroTopo />
 
-    <ProductShelf numero="01" titulo="Mais desejadas" verTudo="/shop" products={products.slice(0, 8)} />
+    <ProductShelf id="lancamento" numero="01" titulo="Lançamento" verTudo="/shop" products={products.filter((product) => product.lancamento)} />
 
     <SeasonShirt products={products} />
 

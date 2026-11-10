@@ -158,9 +158,9 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
             {NAV_LINKS.filter((link) => !MENU_PRINCIPAL.some((item) => item.href === link.href)).map((link) => <Link key={link.href} onClick={() => setMenuOpen(false)} href={link.href} className="press flex min-h-11 items-center justify-between text-[15px]">{link.label}<span aria-hidden className="text-black/30">›</span></Link>)}
           </div>
           <div className="px-6 pb-6 pt-4">
-            <p className="label text-[11px] text-[var(--muted)]">Mais desejadas</p>
+            <p className="label text-[11px] text-[var(--muted)]">Lançamento</p>
             <div className="mt-3 flex flex-col items-start gap-2">
-              {products.slice(0, 3).map((product) => <Link key={product.id} href={`/produto/${product.id}`} onClick={() => setMenuOpen(false)} className="press glass-tile flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-4 text-[13px]">
+              {products.filter((product, index, all) => product.lancamento && all.findIndex((other) => other.name.split(" · ")[0] === product.name.split(" · ")[0]) === index).map((product) => <Link key={product.id} href={`/produto/${product.id}`} onClick={() => setMenuOpen(false)} className="press glass-tile flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-4 text-[13px]">
                 <span className="relative h-8 w-8 overflow-hidden rounded-full bg-white"><Image src={product.image} alt="" fill sizes="32px" className="object-cover" /></span>{product.name}
               </Link>)}
             </div>
