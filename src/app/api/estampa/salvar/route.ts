@@ -14,6 +14,8 @@ const salvarSchema = z.object({
   ficha: fichaSchema,
   tamanho: z.enum(["PP", "P", "M", "G", "GG"]),
   referencias: z.number().int().min(0).max(3),
+  // Name for the "Criado por você" card, stored with the ficha.
+  assinatura: z.string().trim().max(24).optional(),
   arte: z.string().regex(/^data:image\/(png|jpeg|webp);base64,/, "Arte inválida.").max(MAX_ARTE_CHARS, "Arte grande demais."),
 });
 
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
   const supabase = createPublicClient();
   if (!supabase) return NextResponse.json({ error: "Supabase não configurado no servidor." }, { status: 500 });
 
-  const { painel, ficha, tamanho, referencias, arte } = parsed.data;
+  const { painel, ficha, tamanho, referencias, arte, assinatura } = parsed.data;
   const tipo = arte.slice(11, arte.indexOf(";")) as keyof typeof EXTENSAO;
   const caminho = `${crypto.randomUUID()}.${EXTENSAO[tipo]}`;
   const prompt = planEstampa(ficha, painel, { referencias: ficha.usarReferencias ? referencias : 0, estampaCasa: !!(painel.estampaCasa && estampaCasaDe(painel.estampaCasa)) });
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não consegui guardar a arte agora. Tente de novo." }, { status: 502 });
   }
 
-  const { data: id, error } = await supabase.rpc("registrar_criacao", { p_painel: painel, p_ficha: ficha, p_prompt: prompt, p_arte_path: caminho, p_tamanho: tamanho });
+  const { data: id, error } = await supabase.rpc("registrar_criacao", { p_painel: painel, p_ficha: assinatura ? { ...ficha, assinatura } : ficha, p_prompt: prompt, p_arte_path: caminho, p_tamanho: tamanho });
   if (error || typeof id !== "string") {
     console.error("registrar_criacao failed:", error?.message);
     return NextResponse.json({ error: "Não consegui registrar a criação agora. Tente de novo." }, { status: 502 });

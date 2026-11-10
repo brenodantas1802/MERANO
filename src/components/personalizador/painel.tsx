@@ -119,7 +119,7 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
       <div className="mt-3.5 flex flex-wrap gap-[9px]">
         {CORES_MALHA.map((cor) => {
           const ativo = cor.hex.toLowerCase() === malha.toLowerCase();
-          return <button key={cor.hex} type="button" title={cor.nome} aria-label={`Malha ${cor.nome}`} aria-pressed={ativo} onClick={() => trocarMalha(cor.hex)} className={`h-[30px] w-[30px] rounded-full transition-transform hover:scale-105 ${ativo ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : "shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)]"}`} style={{ background: cor.hex }} />;
+          return <button key={cor.hex} type="button" title={cor.nome} aria-label={`Malha ${cor.nome}`} aria-pressed={ativo} onClick={() => trocarMalha(cor.hex)} className={`h-9 w-9 rounded-full transition-transform hover:scale-105 ${ativo ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : "shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)]"}`} style={{ background: cor.hex }} />;
         })}
       </div>
     </Secao>
@@ -158,7 +158,7 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
       <div className="mt-4 flex items-center justify-between">
         <span className="pz-rotulo">Cor da escrita</span>
         <div className="flex gap-[9px]">
-          {painel.paleta.slice(1).map((cor) => <button key={cor} type="button" title={nomeDaCor(cor)} aria-label={`Escrita em ${nomeDaCor(cor)}`} aria-pressed={painel.corEscrita === cor} onClick={() => set({ corEscrita: cor })} className={`h-6 w-6 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)] ${painel.corEscrita === cor ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : ""}`} style={{ background: cor }} />)}
+          {painel.paleta.slice(1).map((cor) => <button key={cor} type="button" title={nomeDaCor(cor)} aria-label={`Escrita em ${nomeDaCor(cor)}`} aria-pressed={painel.corEscrita === cor} onClick={() => set({ corEscrita: cor })} className={`h-9 w-9 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)] ${painel.corEscrita === cor ? "ring-[1.5px] ring-[var(--pz-vinho)] ring-offset-2 ring-offset-[var(--pz-creme)]" : ""}`} style={{ background: cor }} />)}
         </div>
       </div>
     </Secao>
@@ -174,8 +174,8 @@ export function PainelPeca({ painel, onChange, onReset, referencias, onReferenci
             <Pointer size={14} strokeWidth={1.6} /> {usando ? "Usando esta estampa · remover" : "Usar esta estampa"}
           </button>
         </div>
-        <button type="button" aria-label="Estampa anterior" onClick={() => setCasaIndex((i) => (i - 1 + ESTAMPAS_CASA.length) % ESTAMPAS_CASA.length)} className="absolute left-0 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--pz-ouro)] bg-[var(--pz-creme)] text-[var(--pz-tinta)] hover:bg-white"><ChevronLeft size={17} strokeWidth={1.6} /></button>
-        <button type="button" aria-label="Próxima estampa" onClick={() => setCasaIndex((i) => (i + 1) % ESTAMPAS_CASA.length)} className="absolute right-0 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--pz-ouro)] bg-[var(--pz-creme)] text-[var(--pz-tinta)] hover:bg-white"><ChevronRight size={17} strokeWidth={1.6} /></button>
+        <button type="button" aria-label="Estampa anterior" onClick={() => setCasaIndex((i) => (i - 1 + ESTAMPAS_CASA.length) % ESTAMPAS_CASA.length)} className="absolute left-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--pz-ouro)] bg-[var(--pz-creme)] text-[var(--pz-tinta)] hover:bg-white"><ChevronLeft size={17} strokeWidth={1.6} /></button>
+        <button type="button" aria-label="Próxima estampa" onClick={() => setCasaIndex((i) => (i + 1) % ESTAMPAS_CASA.length)} className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--pz-ouro)] bg-[var(--pz-creme)] text-[var(--pz-tinta)] hover:bg-white"><ChevronRight size={17} strokeWidth={1.6} /></button>
       </div>
     </Secao>
 

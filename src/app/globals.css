@@ -220,3 +220,15 @@ html { -webkit-tap-highlight-color: transparent; }
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 	background-size: auto, auto, 160px 160px;
 }
+
+/* Home top options "as" / "naipes" / "mar-vinho" (components/hero-topo.tsx). */
+.as-traco { stroke-dasharray: 1; stroke-dashoffset: 0; animation: tracar 2.4s cubic-bezier(.6,0,.2,1) both; }
+@keyframes tracar { from { stroke-dashoffset: 1; } }
+.as-gigante { filter: drop-shadow(0 0 30px rgba(186, 150, 84, .18)); }
+.ondas-latao { animation: deriva 7s ease-in-out infinite alternate; }
+@keyframes deriva { to { transform: translateX(-6%); } }
+.boia { animation: boiar 3.6s ease-in-out infinite alternate; }
+@keyframes boiar { to { transform: translateY(30%) rotate(8deg); } }
+.mar-vinho video { filter: grayscale(1) contrast(1.1) brightness(1.25); }
+.mar-vinho::after { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, #9a4456 0%, #7a2a3b 45%, #c9a26a 100%); mix-blend-mode: multiply; }
+@media (prefers-reduced-motion: reduce) { .as-traco, .ondas-latao, .boia { animation: none; } }

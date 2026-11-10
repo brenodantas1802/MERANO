@@ -22,7 +22,7 @@ function SizePills({ fits, size, recommended, onPick, small = false }: { fits: s
   return <div role="radiogroup" aria-label="Tamanho" className={`flex gap-2 ${small ? "flex-nowrap" : "flex-wrap"}`}>
     {fits.map((value) => {
       const active = size === value;
-      return <button key={value} type="button" role="radio" aria-checked={active} onClick={() => onPick(value)} className={`press relative rounded-full text-[13px] font-medium ${small ? "h-9 min-w-9 px-2.5" : "h-11 min-w-11 px-3"} ${active ? "bg-[var(--vinho)] text-[var(--creme)]" : "text-[var(--ink)] shadow-[inset_0_0_0_1px_rgba(17,17,17,.18)] hover:shadow-[inset_0_0_0_1px_rgba(17,17,17,.6)]"}`}>
+      return <button key={value} type="button" role="radio" aria-checked={active} onClick={() => onPick(value)} className={`press relative rounded-full text-[13px] font-medium ${small ? "h-11 min-w-11 px-2.5" : "h-11 min-w-11 px-3"} ${active ? "bg-[var(--vinho)] text-[var(--creme)]" : "text-[var(--ink)] shadow-[inset_0_0_0_1px_rgba(17,17,17,.18)] hover:shadow-[inset_0_0_0_1px_rgba(17,17,17,.6)]"}`}>
         {value}
         {value === recommended && <span aria-hidden className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--paper)] bg-[var(--sol-1)]" />}
       </button>;
@@ -114,7 +114,7 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
 
     {/* Phones: the floating buy bar */}
     <div aria-hidden={!barOn} className={`fixed inset-x-2 bottom-[calc(.5rem+env(safe-area-inset-bottom,0px))] z-[70] space-y-2 transition-[transform,opacity] duration-[280ms] ease-[cubic-bezier(.2,.8,.2,1)] md:hidden ${barOn ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-[130%] opacity-0"}`}>
-      <div className="glass flex items-center gap-3 rounded-[22px] px-3.5 py-2.5">
+      <div className="glass flex items-center gap-2.5 rounded-[22px] px-3 py-2">
         <span className="shrink-0 text-[13px] text-[var(--muted)]">Tamanho</span>
         <div className="shelf auto-cols-max gap-1.5">
           <SizePills fits={product.fits} size={size} recommended={recommended} onPick={pick} small />

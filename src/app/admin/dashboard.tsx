@@ -17,7 +17,7 @@ export type CriacaoAdmin = {
   status: string;
   tamanho: string;
   painel: { modelagem?: string; paleta?: string[]; fonte?: string };
-  ficha: { ideia?: string; texto?: string };
+  ficha: { ideia?: string; texto?: string; assinatura?: string };
   arte_path: string;
   arte_url: string | null;
   pedido: string | null;
@@ -43,6 +43,7 @@ function Criacoes({ criacoes }: { criacoes: CriacaoAdmin[] | null }) {
             <p className="text-[var(--muted)]">{new Date(c.criada_em).toLocaleString("pt-BR")}</p>
             {c.ficha.ideia && <p className="text-sm">{c.ficha.ideia}</p>}
             {c.ficha.texto && <p>Texto: “{c.ficha.texto}”</p>}
+            {c.ficha.assinatura && <p>Cartão “Criado por você”: {c.ficha.assinatura}</p>}
             <p>Frente: fonte {c.painel.fonte}</p>
             {c.cliente && <p className="text-[var(--muted)]">{[c.cliente.nome, c.cliente.email, c.cliente.celular, c.cliente.cidade].filter(Boolean).join(" · ")}</p>}
           </div>

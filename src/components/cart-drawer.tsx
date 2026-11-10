@@ -36,7 +36,7 @@ export function CartDrawer() {
       <motion.aside key="drawer" role="dialog" aria-modal="true" aria-label="Carrinho" initial={{ x: "104%", opacity: 0.6 }} animate={{ x: 0, opacity: 1 }} exit={{ x: "104%", opacity: 0.6 }} transition={PANEL} className="glass fixed bottom-2 right-2 top-2 z-[91] flex w-[calc(100%-1rem)] max-w-[420px] flex-col overflow-hidden rounded-[28px]">
         <div className="flex items-center justify-between px-5 pb-3 pt-4">
           <p className="text-[15px] font-medium">{count ? `${count} ${count === 1 ? "item" : "itens"} no carrinho` : "Seu carrinho"}</p>
-          <button onClick={closeDrawer} aria-label="Fechar carrinho" className="press glass-tile flex h-10 w-10 items-center justify-center rounded-full hover:bg-white"><X size={17} strokeWidth={1.6} /></button>
+          <button onClick={closeDrawer} aria-label="Fechar carrinho" className="press glass-tile flex h-11 w-11 items-center justify-center rounded-full hover:bg-white"><X size={17} strokeWidth={1.6} /></button>
         </div>
 
         {items.length === 0 ? <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
@@ -62,11 +62,11 @@ export function CartDrawer() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center rounded-full bg-white/80 shadow-[inset_0_0_0_1px_rgba(0,0,0,.06)]">
-                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="press flex h-8 w-8 items-center justify-center rounded-full"><Minus size={13} /></button>
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="press flex h-11 w-11 items-center justify-center rounded-full"><Minus size={13} /></button>
                       <span className="w-5 text-center text-[13px] tabular-nums">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="press flex h-8 w-8 items-center justify-center rounded-full"><Plus size={13} /></button>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="press flex h-11 w-11 items-center justify-center rounded-full"><Plus size={13} /></button>
                     </div>
-                    <button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="press flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)]"><Trash2 size={15} strokeWidth={1.5} /></button>
+                    <button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="press flex h-11 w-11 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)]"><Trash2 size={15} strokeWidth={1.5} /></button>
                   </div>
                 </div>
               </motion.div>)}

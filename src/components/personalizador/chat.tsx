@@ -43,7 +43,7 @@ export function ChatCriacao({ mensagens, sugestoes, carregando, erro, pronto, re
         <h2 className="pz-serif text-[30px] leading-none">Criação</h2>
         <p className="mt-2 text-[13px] leading-snug text-[var(--pz-suave)]">Conte a sua ideia · a IA monta a estampa das costas</p>
       </div>
-      <button type="button" onClick={onRecomecar} aria-label="Recomeçar conversa" title="Recomeçar conversa" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--pz-linha)] text-[var(--pz-tinta)] hover:border-[var(--pz-borda)]"><RotateCcw size={14} strokeWidth={1.8} /></button>
+      <button type="button" onClick={onRecomecar} aria-label="Recomeçar conversa" title="Recomeçar conversa" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--pz-linha)] text-[var(--pz-tinta)] hover:border-[var(--pz-borda)]"><RotateCcw size={14} strokeWidth={1.8} /></button>
     </div>
 
     <div ref={lista} className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6" aria-live="polite">
@@ -62,9 +62,9 @@ export function ChatCriacao({ mensagens, sugestoes, carregando, erro, pronto, re
         {sugestoes.map((s) => <button key={s} type="button" onClick={() => enviar(undefined, s)} className="rounded-full border border-[var(--pz-borda)] px-[14px] py-[7px] text-left text-[13.5px] font-medium text-[var(--pz-tinta)] transition-colors hover:bg-[var(--pz-cartao)]">{s}</button>)}
       </div>}
       {referenciasPendentes > 0 && <p className="text-xs text-[var(--pz-suave)]">{referenciasPendentes} referência(s) seguem com a próxima mensagem.</p>}
-      <form onSubmit={enviar} className="flex items-center gap-2 rounded-[20px] border border-[var(--pz-borda)] bg-[var(--pz-campo)] py-[9px] pl-4 pr-[9px] focus-within:border-[var(--pz-vinho)]/60">
+      <form onSubmit={enviar} className="flex items-center gap-2 rounded-[20px] border border-[var(--pz-borda)] bg-[var(--pz-campo)] py-1.5 pl-4 pr-1.5 focus-within:border-[var(--pz-vinho)]/60">
         <input value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={1200} placeholder="Conte a ideia da sua estampa…" aria-label="Mensagem" className="min-w-0 flex-1 bg-transparent py-2 text-[15px] text-[var(--pz-tinta)] outline-none placeholder:text-[var(--pz-apagado)]" />
-        <button type="submit" disabled={carregando || !texto.trim()} aria-label="Enviar" className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-[var(--pz-vinho)] text-white transition-opacity disabled:cursor-default"><ArrowUp size={17} strokeWidth={2} /></button>
+        <button type="submit" disabled={carregando || !texto.trim()} aria-label="Enviar" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--pz-vinho)] text-white transition-opacity disabled:cursor-default"><ArrowUp size={17} strokeWidth={2} /></button>
       </form>
     </div>
   </div>;

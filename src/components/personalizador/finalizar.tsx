@@ -32,6 +32,8 @@ export function Finalizar({ painel, ficha, arte, referencias, className = "" }: 
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [salvaComo, setSalvaComo] = useState<string | null>(null);
+  // The "I designed it myself" effect (Franke et al. 2010): the name goes on the "Criado por você" card in the package.
+  const [assinatura, setAssinatura] = useState("");
 
   async function adicionar() {
     if (!arte) return setErro("Crie a estampa antes de adicionar ao carrinho.");
@@ -42,7 +44,7 @@ export function Finalizar({ painel, ficha, arte, referencias, className = "" }: 
       const response = await fetch("/api/estampa/salvar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ painel, ficha, tamanho, referencias, arte }),
+        body: JSON.stringify({ painel, ficha, tamanho, referencias, arte, assinatura: assinatura.trim() || undefined }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Não consegui guardar a sua criação.");
@@ -54,7 +56,7 @@ export function Finalizar({ painel, ficha, arte, referencias, className = "" }: 
         price: PRECO_PERSONALIZADA,
         size: tamanho,
         fit: modelagem,
-        color: `${nomeDaCor(painel.paleta[0])} · frente ${escritaDe(painel.fonte)} em ${fonteDe(painel.fonte).nome}`,
+        color: `${nomeDaCor(painel.paleta[0])} · frente ${escritaDe(painel.fonte)} em ${fonteDe(painel.fonte).nome}${assinatura.trim() ? ` · criado por ${assinatura.trim()}` : ""}`,
         image: await miniatura(arte, painel.paleta[0]),
       });
       setSalvaComo(arte);
@@ -69,12 +71,16 @@ export function Finalizar({ painel, ficha, arte, referencias, className = "" }: 
   const jaNoCarrinho = salvaComo === arte;
 
   return <div className={`border-t border-[var(--pz-linha)] bg-[var(--pz-creme)] px-6 py-4 ${className}`}>
-    <div className="flex items-center justify-between gap-3">
+    <label className="block">
+      <span className="pz-rotulo">Criado por você</span>
+      <input value={assinatura} onChange={(e) => setAssinatura(e.target.value.slice(0, 24))} maxLength={24} placeholder="Seu nome no cartão da embalagem (opcional)" className="mt-1.5 h-11 w-full rounded-full border border-[var(--pz-borda)] bg-[var(--pz-campo)] px-4 text-[14px] text-[var(--pz-tinta)] outline-none placeholder:text-[var(--pz-apagado)] focus:border-[var(--pz-vinho)]/60" />
+    </label>
+    <div className="mt-3 flex items-center justify-between gap-3">
       <span className="pz-rotulo">Tamanho</span>
       <span className="text-[15px] font-semibold text-[var(--pz-tinta)]">{formatPrice(PRECO_PERSONALIZADA)}</span>
     </div>
     <div className="mt-2.5 grid grid-cols-5 gap-1.5">
-      {TAMANHOS.map((t) => <button key={t} type="button" aria-pressed={tamanho === t} onClick={() => setTamanho(t)} className={`h-9 text-[13px] font-semibold transition-colors ${tamanho === t ? "bg-[var(--pz-vinho)] text-[var(--pz-creme)]" : "border border-[var(--pz-linha)] bg-[var(--pz-cartao)] text-[var(--pz-tinta)] hover:border-[var(--pz-borda)]"}`}>{t}</button>)}
+      {TAMANHOS.map((t) => <button key={t} type="button" aria-pressed={tamanho === t} onClick={() => setTamanho(t)} className={`h-11 text-[13px] font-semibold transition-colors ${tamanho === t ? "bg-[var(--pz-vinho)] text-[var(--pz-creme)]" : "border border-[var(--pz-linha)] bg-[var(--pz-cartao)] text-[var(--pz-tinta)] hover:border-[var(--pz-borda)]"}`}>{t}</button>)}
     </div>
     <button type="button" onClick={adicionar} disabled={salvando || jaNoCarrinho} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--pz-vinho)] px-4 py-3 text-[14px] font-semibold text-[var(--pz-creme)] transition-opacity hover:opacity-90 disabled:opacity-50">
       <ShoppingBag size={16} strokeWidth={1.8} /> {salvando ? "Guardando a sua criação…" : jaNoCarrinho ? "No carrinho" : "Adicionar ao carrinho"}

@@ -7,6 +7,7 @@ import { Camiseta, type ArteVerso } from "@/components/personalizador/camiseta";
 import { ChatCriacao, SUGESTOES_INICIAIS, type Mensagem } from "@/components/personalizador/chat";
 import { Confirmacao } from "@/components/personalizador/confirmacao";
 import { Finalizar } from "@/components/personalizador/finalizar";
+import { ProgressoCriacao } from "@/components/personalizador/progresso";
 import { PainelPeca, type Referencia } from "@/components/personalizador/painel";
 import { FICHA_VAZIA, PAINEL_PADRAO, type Ficha, type Painel } from "@/lib/estampa";
 
@@ -147,7 +148,7 @@ export default function PersonalizadorPage() {
 
   const aviso = "rounded-full bg-black/35 px-3 py-1 text-[11px] text-[var(--pz-creme)]";
   const rodapeVerso = (gerando || erroArte || ativa === "esboco" || (ativa === "arte" && arte)) && <>
-    {gerando && <span className={aviso}>Criando a sua estampa… leva até um minuto</span>}
+    {gerando && <ProgressoCriacao />}
     {!gerando && erroArte && <span className={`${aviso} max-w-xs rounded-md`}>{erroArte}</span>}
     {!gerando && ativa === "esboco" && <span className={aviso}>Esboço rápido · a arte final é criada depois</span>}
     {!gerando && ativa === "arte" && arte && <a href={arte} download="estampa-meranno.png" className={`${aviso} inline-flex items-center gap-1.5 hover:bg-black/50`}><Download size={12} /> Baixar arte</a>}

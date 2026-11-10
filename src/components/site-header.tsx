@@ -34,7 +34,7 @@ function AccountIcon() {
   </svg>;
 }
 const EASE = [0.22, 1, 0.36, 1] as const;
-const ROUND = "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300";
+const ROUND = "flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-300";
 const OUTLINE = `${ROUND} border border-[var(--ink)]/20 bg-[var(--paper)] text-[var(--ink)] hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)]`;
 // Over the home video, before scrolling: the same buttons in white.
 const OUTLINE_CLEAR = `${ROUND} border border-white/60 text-white hover:bg-white hover:text-[var(--ink)]`;
@@ -145,7 +145,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
         <motion.div key="menu-fundo" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} onClick={() => setMenuOpen(false)} className="fixed inset-0 z-[95] bg-black/20" />
         <motion.nav key="menu" aria-label="Menu" initial={{ opacity: 0, scale: 0.97, y: -8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: -6 }} transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }} style={{ transformOrigin: "top left" }} className="glass fixed left-2 top-2 z-[96] flex max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-[420px] flex-col overflow-y-auto overscroll-contain rounded-[28px] text-[var(--ink)]">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 pt-4">
-            <button type="button" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" className="press glass-tile flex h-10 w-10 items-center justify-center rounded-full"><X size={17} strokeWidth={1.6} /></button>
+            <button type="button" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" className="press glass-tile flex h-11 w-11 items-center justify-center rounded-full"><X size={17} strokeWidth={1.6} /></button>
             <Image src="/imagens/logo-nome-trimmed.png" alt="MERANNO" width={655} height={66} className="h-auto w-[112px]" />
             <span />
           </div>
