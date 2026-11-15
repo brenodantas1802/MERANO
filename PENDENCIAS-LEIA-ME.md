@@ -59,7 +59,8 @@ O projeto da Vercel **não está ligado ao GitHub**, então mesclar não publica
 | `OPENROUTER_API_KEY` | já existe | IA do provador e do Personalizador |
 | `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | já existem | Banco e login |
 | `OWNER_EMAILS` | já existe | Quem entra em `/admin` |
-| `SUPABASE_SECRET_KEY` | **falta** | Ver as estampas criadas em `/admin` |
+| `SUPABASE_SECRET_KEY` | **falta** | Ver em `/admin` as estampas criadas e os e-mails do cupom |
+| `NEXT_PUBLIC_CLARITY_ID` | **opcional** | Liga o mapa de calor (ver item 6) |
 
 **Como pegar a `SUPABASE_SECRET_KEY`:**
 1. No Supabase, abra o projeto **MERANO** e vá em **Project Settings → API Keys**.
@@ -73,38 +74,43 @@ Sem ela, as estampas continuam salvas e visíveis no Supabase, em **Table Editor
 
 ## 3. Testar o Personalizador com a IA de verdade
 
-Siga `docs/TESTES-PERSONALIZADOR.md`. São 5 testes, com o que conferir em cada um.
+**Já testado aqui (15/11), com a IA simulada:** a página abre no celular, a estampa da casa é usada, o chat e a conferência levam o painel e a ficha certos, a arte vai para o verso, a criação é salva no Supabase e, depois do pagamento, fica **pedida** com o número do pedido. Os dados do teste foram apagados.
+- Sobrou só o arquivo de teste `604cfb35-af8a-414e-b11d-f08389376418.png` em **Storage → estampas** (um quadrado vinho escrito TESTE). Pode apagar pelo painel do Supabase.
+- Ponto a conferir: no teste, trocar a cor da escrita no painel **não mudou** a prévia da frente. Pode ser só o teste ter clicado no botão errado; confira no teste 2.
+
+**Falta, porque precisa da IA de verdade (só existe na Vercel):** a qualidade das respostas, a recusa de marcas e o uso das referências. Siga `docs/TESTES-PERSONALIZADOR.md` depois de publicar.
 Se algo falhar: Vercel → projeto **merano** → **Logs**, filtrando por `/api/estampa`.
 
-## 4. Aviso de cupom de 10% (promete e não entrega)
+## 4. Aviso de cupom de 10% ✅ feito
 
-O aviso diz "seu cupom chega no e-mail", mas o e-mail é guardado só no navegador do cliente e nunca chega até vocês.
-
-Escolha uma:
-- **A.** Salvar os e-mails no Supabase (tabela nova) e mostrar a lista em `/admin` para vocês enviarem os cupons. Precisa de um texto de consentimento por causa da LGPD.
-- **B.** Mudar o texto para não prometer envio, por exemplo mostrando um código de cupom fixo na hora.
-- **C.** Desligar o aviso.
-
-Arquivo: `src/components/first-purchase-popup.tsx`.
+- O e-mail só é guardado se a pessoa marcar a caixa de consentimento. Fica no Supabase, tabela `cadastros_cupom`.
+- A lista aparece em `/admin` (precisa da `SUPABASE_SECRET_KEY`). **O envio do cupom é manual:** vocês mandam o código para cada e-mail.
+- Se o aviso de cookies estiver ligado, o do cupom só aparece depois dele, para não abrir dois avisos juntos.
 
 ## 5. Decisões de negócio (o código já está pronto para receber)
 
 | Decisão | Onde mudar |
 |---|---|
-| Preço da camiseta personalizada (hoje R$ 189; a pesquisa indica que pode ser maior) | `src/lib/estampa.ts` → `PRECO_PERSONALIZADA` |
-| Frete grátis a partir de quanto (a barra está pronta e desligada) | `src/components/cart-drawer.tsx` → `FRETE_GRATIS_ACIMA` (troque `null` pelo valor, ex.: `399`) |
+| ~~Preço da personalizada~~: **decidido, fica R$ 189** | `src/lib/estampa.ts` → `PRECO_PERSONALIZADA` |
+| ~~Frete grátis~~: **decidido, sem frete grátis** (a barra continua desligada) | `src/components/cart-drawer.tsx` → `FRETE_GRATIS_ACIMA` |
 | Cores de malha disponíveis de verdade | `src/lib/estampa.ts` → `CORES_MALHA` |
 | Estampas da casa (hoje 3; o protótipo tinha 6) | Coloque as imagens em `public/imagens/merano-assets/ilustracoes/` e adicione em `ESTAMPAS_CASA` (`src/lib/estampa.ts`) |
 | Ordem da vitrine "Mais desejadas" (hoje é a do catálogo; o ideal é pelas mais vendidas) | `src/app/page.tsx` → `products.slice(0, 8)` |
 
-## 6. Melhorias que a pesquisa indicou e ficaram para depois
+## 6. Melhorias que a pesquisa indicou
 
-- **Visual do pagamento:** é a página menos trabalhada. Aplicar vidro, pílulas e a paleta, como no resto do site.
-- **Avaliações de clientes:** criar a seção e pedir avaliação a quem já comprou. Nunca inventar avaliações.
-- **Mapa de calor dos cliques** (Microsoft Clarity, gratuito, ou Vercel Analytics):
-  1. Crie a conta e pegue o código de instalação.
-  2. Peça ao Claude para instalar **com aviso de consentimento** (LGPD).
-- **Ondas azuis do rodapé:** ainda são do tema de mar. Trocar para vinho e latão (`src/components/site-footer.tsx`).
+- ✅ **Visual do pagamento:** campos, cartões de entrega e pagamento, resumo e botão no visual Salão (vinho e latão). O pagamento continua **simulado** (ver o aviso no topo).
+- ✅ **Ondas do rodapé:** agora em latão, vinho e nogueira.
+- ✅ **Avaliações de clientes:** na página de cada produto. A avaliação só aparece depois de aprovada por vocês. Para aprovar, enquanto não houver tela no `/admin`:
+  1. Supabase → **Table Editor → avaliacoes**.
+  2. Na avaliação, troque `status` de `pendente` para `aprovada` (ou `recusada`).
+  - Nunca inventar avaliações; peçam a quem já comprou.
+- ✅ **Mapa de calor (Microsoft Clarity), com aviso de cookies:** pronto e **desligado** até vocês cadastrarem o código.
+  1. Crie a conta grátis em clarity.microsoft.com e um projeto para o site.
+  2. Copie o **ID do projeto** (uma sequência curta de letras e números).
+  3. Na Vercel, cadastre `NEXT_PUBLIC_CLARITY_ID` com esse ID, em **Production**, e publique de novo.
+  4. Aparece o aviso de cookies; o Clarity só carrega para quem tocar em **Aceitar**.
+  5. Recomendo deixar o mascaramento de dados do Clarity no modo mais restrito, para não gravar o que é digitado no pagamento. Confira o nome exato da opção nas configurações do Clarity; não verifiquei.
 - **Menos escolhas no Personalizador:** esconder a paleta livre e as referências atrás de "Mais opções". Foi mantido igual ao protótipo de propósito; mudar só se vocês quiserem.
 
 ## 7. Topo e imagens
