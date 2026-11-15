@@ -6,7 +6,6 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
-import { FitFigure } from "@/components/fit-figure";
 import { MeasureDiagram } from "@/components/measure-diagram";
 import { SizeChart } from "@/components/size-chart";
 import { ProductCard } from "@/components/product-card";
@@ -83,7 +82,6 @@ export default function MeranoFitPage() {
   const { profile, update, reset, hasAny } = useBodyProfile();
   const orders = useOrders();
   const [showSpecifics, setShowSpecifics] = useState(false);
-  const [view, setView] = useState<"corpo" | "peca">("corpo");
   const recommendation = recommendSize(profile, SIZE_CHART);
   const [previewSize, setPreviewSize] = useState<string | null>(null);
   const shownSize = SIZE_CHART.find((row) => row.size === (previewSize ?? recommendation?.size ?? "M")) ?? SIZE_CHART[2];
@@ -128,22 +126,8 @@ export default function MeranoFitPage() {
 
       <aside className="md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)] md:h-fit">
         <div className="overflow-hidden rounded-[2.5rem] bg-[radial-gradient(90%_60%_at_40%_35%,#2c4166_0%,#1b2a41_55%,#121c2c_100%)] text-[var(--paper)] shadow-[0_40px_80px_-50px_rgba(18,28,44,.9)]">
-          <div className="flex flex-wrap items-center justify-end gap-3 px-7 pt-7">
-            <div className="sans flex rounded-full bg-white/[.08] p-1 text-[13px] ring-1 ring-white/10" role="tablist" aria-label="Ver no corpo ou só a peça">
-              {([["corpo", "No corpo"], ["peca", "A peça"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`relative min-h-11 rounded-full px-4 transition-colors duration-300 ${view === key ? "text-[var(--ink)]" : "text-white/75 hover:text-white"}`}>
-                {view === key && <motion.span layoutId="fit-view" className="absolute inset-0 rounded-full bg-[var(--paper)]" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
-                <span className="relative">{label}</span>
-              </button>)}
-            </div>
-          </div>
-
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={view} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3, ease: EASE }}>
-              {view === "corpo"
-                ? <FitFigure profile={profile} size={shownSize} className="mx-auto -mt-1 h-auto w-full max-w-[440px]" />
-                : <div className="px-8 pb-6 pt-10 md:px-12 md:pt-14"><MeasureDiagram size={shownSize.size} /></div>}
-            </motion.div>
-          </AnimatePresence>
+          {/* The tee itself, measured: easier to read than a figure wearing it. */}
+          <div className="px-8 pb-6 pt-10 md:px-12 md:pt-14"><MeasureDiagram size={shownSize.size} /></div>
 
           <div className="flex flex-wrap items-center justify-center gap-2 px-6 pb-2" role="group" aria-label="Ver a camiseta em outro tamanho">
             {SIZE_CHART.map((row) => {
@@ -155,7 +139,8 @@ export default function MeranoFitPage() {
             })}
           </div>
           <p className="sans pb-6 text-center text-[13px] text-white/75">
-            {view === "peca" ? `Peça estendida: ombro ${shownSize.ombro}, busto ${shownSize.largura} e comprimento ${shownSize.comprimento} cm.` : note ? `No ${shownSize.size}, a camiseta ${note}.` : `Toque num tamanho pra ver o caimento${recommendation ? " · o ponto laranja é o seu" : ""}.`}
+            Peça estendida: ombro {shownSize.ombro}, busto {shownSize.largura} e comprimento {shownSize.comprimento} cm.
+            {note && <><br />No {shownSize.size}, a camiseta {note}.</>}
           </p>
 
           <div className="m-3 mt-0 flex items-center gap-5 rounded-[2rem] bg-white/[.07] p-5 ring-1 ring-white/10 md:p-6">
