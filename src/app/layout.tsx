@@ -5,6 +5,7 @@ import { CartProvider } from "@/components/cart-provider";
 import { FirstPurchasePopup } from "@/components/first-purchase-popup";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { ConsentimentoAnalise } from "@/components/consentimento-analise";
 
 // Barlow Condensed is the closest open font to the DIN Condensed look the owners picked; its regular-width sibling
 // carries the running text so long lines stay easy to read.
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`}>
-      <body><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /></CartProvider></body>
+      <body><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /><ConsentimentoAnalise /></CartProvider></body>
     </html>
   );
 }
