@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { avisoDeCookiesPendente, EVENTO_CONSENTIMENTO } from "@/lib/consentimento";
 
 const SEEN_KEY = "merano-discount-popup-seen";
 const ACCOUNT_KEY = "merano-account-exists";
@@ -19,8 +20,12 @@ export function FirstPurchasePopup() {
     const seen = window.localStorage.getItem(SEEN_KEY);
     const hasAccount = window.localStorage.getItem(ACCOUNT_KEY);
     if (seen || hasAccount) return;
-    const timer = setTimeout(() => setVisible(true), 1800);
-    return () => clearTimeout(timer);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const start = () => { timer = setTimeout(() => setVisible(true), 1800); };
+    // Waits for the cookie banner to be answered, so two notices never stack.
+    if (!avisoDeCookiesPendente()) start();
+    else window.addEventListener(EVENTO_CONSENTIMENTO, start, { once: true });
+    return () => { clearTimeout(timer); window.removeEventListener(EVENTO_CONSENTIMENTO, start); };
   }, []);
 
   function close() {
