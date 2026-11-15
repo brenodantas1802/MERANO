@@ -29,8 +29,10 @@ async function handle(request: NextRequest, ctx: RouteContext<"/api/personalizad
   const body = ["GET", "HEAD"].includes(request.method) ? undefined : await request.arrayBuffer();
   const forwarded = new Request(url, { method: request.method, headers, body });
 
+  // The Personalizador spends from its own OpenRouter key when one is set, so the try-on keeps the other balance.
+  const apiKey = process.env.PERSONALIZADOR_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
   // No D1/R2 here, so "Salvar na conta" answers that saving is being set up; drafts stay on the device.
-  return handleApi(forwarded, { OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY, OPENROUTER_CHAT_MODEL: process.env.OPENROUTER_CHAT_MODEL });
+  return handleApi(forwarded, { OPENROUTER_API_KEY: apiKey, OPENROUTER_CHAT_MODEL: process.env.OPENROUTER_CHAT_MODEL });
 }
 
 export { handle as GET, handle as POST };

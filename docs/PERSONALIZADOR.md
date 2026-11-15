@@ -20,7 +20,7 @@ Todos os arquivos copiados conferem com o SHA-256 do `MANIFESTO-ARQUIVOS.json` d
 
 ## O que a rota do site acrescenta
 
-- A chave `OPENROUTER_API_KEY` do servidor (o botão "Conectar OpenRouter" some).
+- A chave da OpenRouter do servidor (o botão "Conectar OpenRouter" some): `PERSONALIZADOR_OPENROUTER_API_KEY` quando existe (saldo próprio do Personalizador), senão a `OPENROUTER_API_KEY` do provador.
 - Limite por cliente, como no personalizador anterior: 40 mensagens e 4 gerações a cada 10 minutos.
 - Remove o cabeçalho `oai-authenticated-user-id` vindo do visitante: no servidor dele esse cabeçalho vale como conta logada.
 - `maxDuration = 300`: a geração da imagem pode levar até 4 minutos.
