@@ -14,11 +14,14 @@ function waveRow(amplitude: number, base: number) {
   return `${d} V120 H0 Z`;
 }
 
+// In the Salão palette (brass, wine, walnut) rather than sea blues, so the footer belongs to the new look.
+const SALAO = { latao: "#BA9654", vinho: "#551E2B", nogueira: "#71452F" };
+
 export function SeaWaves({ into = "var(--paper)", className = "" }: { into?: string; className?: string }) {
   const layers = [
-    { d: waveRow(14, 40), fill: SEA.light, speed: "wave-drift-slow" },
-    { d: waveRow(18, 58), fill: SEA.mid, speed: "wave-drift-reverse" },
-    { d: waveRow(12, 78), fill: SEA.foam, speed: "wave-drift" },
+    { d: waveRow(14, 40), fill: SALAO.latao, speed: "wave-drift-slow" },
+    { d: waveRow(18, 58), fill: SALAO.vinho, speed: "wave-drift-reverse" },
+    { d: waveRow(12, 78), fill: SALAO.nogueira, speed: "wave-drift" },
     { d: waveRow(10, 92), fill: into, speed: "wave-drift-slow" },
   ];
   return <div aria-hidden className={`relative h-20 overflow-hidden md:h-28 ${className}`}>

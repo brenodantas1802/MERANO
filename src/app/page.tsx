@@ -34,7 +34,7 @@ export default function Home() {
 
     <section id="colecao" className="pb-12 pt-14 md:pb-16 md:pt-20">
       <div className="mb-6 flex items-end justify-between px-6 md:px-12"><h2 className="secao"><b>02 /</b>Coleção 01</h2><Link href="/shop" className="label inline-flex min-h-11 items-center text-[12px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Ver tudo</Link></div>
-      <div className="grid grid-cols-2 gap-1 px-1 md:grid-cols-3">{products.slice(0, 6).map((product) => <ProductCard product={product} key={product.id} />)}</div>
+      <div className="grid grid-cols-2 gap-1 px-1 md:grid-cols-3">{products.filter((product) => !product.lancamento).slice(0, 6).map((product) => <ProductCard product={product} key={product.id} />)}</div>
     </section>
 
     <Lookbook />
