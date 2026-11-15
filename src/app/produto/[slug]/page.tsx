@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ProductGallery3D } from "@/components/product-gallery-3d";
 import { ProductBuy, type Colorway } from "@/components/product-buy";
 import { RelatedRow } from "@/components/related-row";
+import { Avaliacoes } from "@/components/avaliacoes";
 
 export function generateStaticParams() { return products.map((product) => ({ slug: product.id })); }
 
@@ -69,6 +70,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <div className="[grid-area:buy] md:self-center"><ProductBuy product={product} colorways={colorwaysOf(product)} /></div>
     </div>
+
+    <Avaliacoes produtoId={product.id} nomeProduto={product.name} />
 
 
   </main>

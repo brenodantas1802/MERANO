@@ -44,14 +44,26 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
   const color = product.colors[0];
   const price = formatPrice(getProductPrice(product));
   const buyRef = useRef<HTMLDivElement>(null);
-  const [barOn, setBarOn] = useState(false);
+  const [buyOffScreen, setBuyOffScreen] = useState(false);
+  // While someone types in a form further down (e.g. a review), the floating bar would cover it.
+  const [typing, setTyping] = useState(false);
+  const barOn = buyOffScreen && !typing;
 
   useEffect(() => {
     const element = buyRef.current;
     if (!element) return;
-    const observer = new IntersectionObserver(([entry]) => setBarOn(!entry.isIntersecting));
+    const observer = new IntersectionObserver(([entry]) => setBuyOffScreen(!entry.isIntersecting));
     observer.observe(element);
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const isField = (target: EventTarget | null) => target instanceof HTMLElement && target.matches("input:not([type=checkbox]):not([type=radio]), textarea, select") && !buyRef.current?.contains(target);
+    const onIn = (event: FocusEvent) => { if (isField(event.target)) setTyping(true); };
+    const onOut = (event: FocusEvent) => { if (isField(event.target)) setTyping(false); };
+    document.addEventListener("focusin", onIn);
+    document.addEventListener("focusout", onOut);
+    return () => { document.removeEventListener("focusin", onIn); document.removeEventListener("focusout", onOut); };
   }, []);
 
   function put() {
