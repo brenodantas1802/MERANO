@@ -55,7 +55,7 @@ function MeasureCard({ spec, value, onChange }: { spec: FieldSpec; value: string
       <span className={`flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300 ${filled && !outOfRange ? "scale-100 bg-[var(--sol-1)] text-white" : "scale-75 bg-[var(--ink)]/10 text-transparent"}`}><Check size={13} strokeWidth={2.4} /></span>
     </span>
     <span className="mt-2 flex items-baseline gap-2">
-      <input inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value.replace(/[^\d.,]/g, "").slice(0, 5))} placeholder="—" aria-label={`${spec.label} em ${spec.unit}`} className="display w-full min-w-0 bg-transparent text-4xl outline-none placeholder:text-[var(--ink)]/20 md:text-5xl" />
+      <input inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value.replace(/[^\d.,]/g, "").slice(0, 5))} placeholder="—" aria-label={`${spec.label} em ${spec.unit}`} className="display min-h-11 w-full min-w-0 bg-transparent text-4xl outline-none placeholder:text-[var(--ink)]/20 md:text-5xl" />
       <span className="sans shrink-0 text-sm text-[var(--muted)]">{spec.unit}</span>
     </span>
     <span className={`sans mt-2 block text-[11px] leading-snug md:text-[12px] ${outOfRange ? "text-[#8a3a2c]" : "text-[var(--muted)]"}`}>{outOfRange ? `Confere? Esperávamos entre ${min} e ${max} ${spec.unit}.` : spec.hint}</span>
@@ -68,7 +68,7 @@ function ProgressRing({ filled, total }: { filled: number; total: number }) {
   const share = filled / total;
   return <div className="relative h-28 w-28 shrink-0 md:h-44 md:w-44">
     <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" aria-hidden>
-      <defs><linearGradient id="ring-sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1B2A41" /><stop offset="1" stopColor="#5d7aa6" /></linearGradient></defs>
+      <defs><linearGradient id="ring-sun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#551E2B" /><stop offset="1" stopColor="#5d7aa6" /></linearGradient></defs>
       <circle cx="64" cy="64" r={radius} fill="none" stroke="var(--ink)" strokeOpacity={0.08} strokeWidth={7} />
       <motion.circle cx="64" cy="64" r={radius} fill="none" stroke="url(#ring-sun)" strokeWidth={7} strokeLinecap="round" strokeDasharray={length} initial={{ strokeDashoffset: length }} animate={{ strokeDashoffset: length * (1 - share) }} transition={{ duration: 1.1, ease: EASE }} />
     </svg>
@@ -99,7 +99,7 @@ export default function MeranoFitPage() {
 
     <section className="mx-auto flex max-w-360 flex-col gap-8 px-6 pb-8 pt-10 md:flex-row md:items-center md:justify-between md:px-12 md:pb-12 md:pt-14">
       <div>
-        <h1 className="display text-6xl md:text-7xl">Merano Fit</h1>
+        <h1 className="display text-6xl md:text-7xl">Meranno Fit</h1>
         <p className="mt-4 max-w-lg text-lg leading-snug text-[var(--ink)]/75">Suas medidas, uma vez só: a gente marca o seu tamanho em cada peça.</p>
       </div>
       <ProgressRing filled={filled} total={ALL.length} />
@@ -109,7 +109,7 @@ export default function MeranoFitPage() {
       <div>
         <div className="flex items-end justify-between gap-4">
           <h2 className="display text-4xl md:text-5xl">Suas medidas.</h2>
-          <a href="#como-medir" className="sans pb-1 text-sm text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Como medir</a>
+          <a href="#como-medir" className="sans inline-flex min-h-11 items-center text-sm text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]">Como medir</a>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3">{ESSENTIALS.map((spec) => <MeasureCard key={spec.field} spec={spec} value={profile[spec.field]} onChange={(value) => update(spec.field, value)} />)}</div>
 
@@ -130,7 +130,7 @@ export default function MeranoFitPage() {
         <div className="overflow-hidden rounded-[2.5rem] bg-[radial-gradient(90%_60%_at_40%_35%,#2c4166_0%,#1b2a41_55%,#121c2c_100%)] text-[var(--paper)] shadow-[0_40px_80px_-50px_rgba(18,28,44,.9)]">
           <div className="flex flex-wrap items-center justify-end gap-3 px-7 pt-7">
             <div className="sans flex rounded-full bg-white/[.08] p-1 text-[13px] ring-1 ring-white/10" role="tablist" aria-label="Ver no corpo ou só a peça">
-              {([["corpo", "No corpo"], ["peca", "A peça"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`relative rounded-full px-4 py-1.5 transition-colors duration-300 ${view === key ? "text-[var(--ink)]" : "text-white/75 hover:text-white"}`}>
+              {([["corpo", "No corpo"], ["peca", "A peça"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`relative min-h-11 rounded-full px-4 transition-colors duration-300 ${view === key ? "text-[var(--ink)]" : "text-white/75 hover:text-white"}`}>
                 {view === key && <motion.span layoutId="fit-view" className="absolute inset-0 rounded-full bg-[var(--paper)]" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
                 <span className="relative">{label}</span>
               </button>)}

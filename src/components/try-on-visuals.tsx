@@ -71,7 +71,7 @@ export function HowItWorks() {
           {[
             ["Escolha a estampa", "Toque em “Escolher camiseta” e escolha a peça que você quer provar."],
             ["Envie uma foto sua", "De frente, de lado ou de costas — corpo inteiro ou da cintura pra cima, com boa luz e sem filtro."],
-            ["Gere e compare", "Toque em “Gerar provador virtual”. Em instantes você vê a foto original e você vestindo a Merano, lado a lado."],
+            ["Gere e compare", "Toque em “Gerar provador virtual”. Em instantes você vê a foto original e você vestindo a Meranno, lado a lado."],
           ].map(([title, text], index) => <li key={title} className="flex gap-4">
             <span className="display flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--sol-1)] text-lg text-white">{index + 1}</span>
             <span><span className="block text-lg leading-tight">{title}</span><span className="sans mt-1 block text-[13px] leading-snug text-[var(--muted)]">{text}</span></span>

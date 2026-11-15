@@ -6,7 +6,7 @@ import { GoogleButton } from "@/components/auth-buttons";
 import { SignUpForm } from "@/components/auth-forms";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Criar conta · MERANO" };
+export const metadata: Metadata = { title: "Criar conta · MERANNO" };
 
 export default async function CreateAccountPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;

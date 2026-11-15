@@ -29,7 +29,7 @@ export function MeasureDiagram({ className = "", size: controlled }: { className
     <div className={className}>
       <div className="relative mx-auto w-full max-w-[34rem]">
         {/* eslint-disable-next-line @next/next/no-img-element -- pre-sized renders of the AI-upscaled cutout */}
-        <img src={`${src}-${small}.webp`} srcSet={`${src}-${small}.webp ${small}w, ${src}-${large}.webp ${large}w`} sizes="(min-width: 768px) 34rem, 90vw" width={W} height={H} alt="Camiseta Merano de frente, com as medidas de ombro a ombro, busto e comprimento" className="h-auto w-full drop-shadow-[0_40px_36px_rgba(32,28,23,.22)]" />
+        <img src={`${src}-${small}.webp`} srcSet={`${src}-${small}.webp ${small}w, ${src}-${large}.webp ${large}w`} sizes="(min-width: 768px) 34rem, 90vw" width={W} height={H} alt="Camiseta Meranno de frente, com as medidas de ombro a ombro, busto e comprimento" className="h-auto w-full drop-shadow-[0_40px_36px_rgba(32,28,23,.22)]" />
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" fill="none" strokeLinecap="round" aria-hidden>
           {(Object.keys(LINES) as (keyof typeof LINES)[]).map((key, index) => <g key={key}>
             <motion.path {...draw(0.3 + index * 0.35)} d={LINES[key].d} stroke="var(--sol-1)" strokeWidth={5} strokeDasharray="2 16" />

@@ -10,7 +10,7 @@ import { EMPTY_PROFILE, type BodyProfile, type ProfileField } from "./body-measu
 export { EMPTY_PROFILE, measure, RANGES, type BodyProfile, type ProfileField } from "./body-measure";
 
 const STORAGE_KEY = "merano-body-profile";
-// Measurements saved by the first version of Meu Merano Fit, picked up so nobody has to type them again.
+// Measurements saved by the first version of Meu Meranno Fit, picked up so nobody has to type them again.
 const LEGACY_KEY = "merano-fit-measurements";
 
 const listeners = new Set<() => void>();

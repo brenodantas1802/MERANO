@@ -52,7 +52,7 @@ export function SeasonShirt({ products }: { products: Product[] }) {
 
           <div className="mt-10">
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--ink)]/20 bg-[var(--paper)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
+              <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ink)]/20 bg-[var(--paper)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
               <div className="flex min-w-0 gap-2 overflow-x-auto py-1 [scrollbar-width:none]">
                 {stories.map((item, itemIndex) => {
                   const itemProduct = products.find((candidate) => candidate.id === item.id)!;
@@ -63,7 +63,7 @@ export function SeasonShirt({ products }: { products: Product[] }) {
                   </button>;
                 })}
               </div>
-              <button type="button" onClick={() => go(1)} aria-label="Próxima estampa" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--ink)]/20 bg-[var(--paper)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><ChevronRight size={18} strokeWidth={1.6} /></button>
+              <button type="button" onClick={() => go(1)} aria-label="Próxima estampa" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ink)]/20 bg-[var(--paper)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><ChevronRight size={18} strokeWidth={1.6} /></button>
             </div>
           </div>
         </div>

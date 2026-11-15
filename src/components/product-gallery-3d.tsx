@@ -129,13 +129,13 @@ export function ProductGallery3D({ id, name, images, views }: { id: string; name
             </Lens>
           </div>
           {count > 1 && <>
-            <button type="button" onClick={() => go(-1)} aria-label="Vista anterior" className="absolute left-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-[0_2px_10px_rgba(25,35,30,.15)] transition-transform hover:scale-105"><ChevronLeft size={16} strokeWidth={1.5} /></button>
-            <button type="button" onClick={() => go(1)} aria-label="Próxima vista" className="absolute right-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-[0_2px_10px_rgba(25,35,30,.15)] transition-transform hover:scale-105"><ChevronRight size={16} strokeWidth={1.5} /></button>
+            <button type="button" onClick={() => go(-1)} aria-label="Vista anterior" className="absolute left-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-[0_2px_10px_rgba(25,35,30,.15)] transition-transform hover:scale-105"><ChevronLeft size={16} strokeWidth={1.5} /></button>
+            <button type="button" onClick={() => go(1)} aria-label="Próxima vista" className="absolute right-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--paper)]/90 shadow-[0_2px_10px_rgba(25,35,30,.15)] transition-transform hover:scale-105"><ChevronRight size={16} strokeWidth={1.5} /></button>
           </>}
         </div>
       </ViewTransition>
       {count > 1 && <div className="mt-2 flex justify-center">
-        {frames.map((frame, dot) => <button key={frame.src} type="button" onClick={() => show(dot)} aria-label={`Ver ${frame.label.toLowerCase()}`} aria-current={dot === index} className="flex h-8 items-center px-1">
+        {frames.map((frame, dot) => <button key={frame.src} type="button" onClick={() => show(dot)} aria-label={`Ver ${frame.label.toLowerCase()}`} aria-current={dot === index} className="toque flex h-11 min-w-8 items-center justify-center px-1">
           <span className={`block h-1.5 rounded-full transition-all duration-300 ${dot === index ? "w-6 bg-[var(--ink)]" : "w-1.5 bg-[var(--ink)]/25"}`} />
         </button>)}
       </div>}

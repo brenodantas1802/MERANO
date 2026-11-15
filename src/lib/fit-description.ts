@@ -16,7 +16,7 @@ const RELATIVE: Record<number, string> = {
 const cm = (value: number) => Math.round(Math.abs(value));
 
 // The "size and fit" part of the try-on prompt: how this size of the tee sits on this person. With the customer's
-// Merano Fit measurements it comes from the same body model as the Merano Fit figure, so the photo and the figure
+// Meranno Fit measurements it comes from the same body model as the Meranno Fit figure, so the photo and the figure
 // agree; without them it describes the size against the brand's usual fit.
 export function describeFit(row: SizeRow, profile?: BodyProfile | null) {
   const garment = `Medidas da peça (deitada): largura ${row.largura} cm (${row.largura * 2} cm de circunferência), comprimento ${row.comprimento} cm, ombro a ombro ${row.ombro} cm.`;

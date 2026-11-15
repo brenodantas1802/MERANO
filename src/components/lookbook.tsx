@@ -12,7 +12,7 @@ const FRAMES: Frame[] = [
   { src: "/imagens/merano-assets/lookbook/modelo-barco.webp", alt: "Modelo de costas vestindo a camiseta Rastro no lago", caption: "Rastro no lago", href: "/produto/rastro-no-lago" },
   { src: "/imagens/merano-assets/foto praia 1.jpg", alt: "Mar visto de cima encontrando a areia", wide: true },
   { src: "/imagens/merano-assets/lookbook/modelo-tenis.webp", alt: "Modelo de costas vestindo a camiseta Match point", caption: "Match point", href: "/produto/match-point" },
-  { src: "/imagens/merano-assets/etiqueta-linho.jpg", alt: "Etiqueta de linho Merano, feito no Brasil" },
+  { src: "/imagens/merano-assets/etiqueta-linho.jpg", alt: "Etiqueta de linho Meranno, feito no Brasil" },
   { src: "/imagens/merano-assets/lookbook/modelo-who-cares.webp", alt: "Modelo de costas vestindo a camiseta Who cares", caption: "Who cares", href: "/produto/who-cares" },
 ];
 

@@ -282,7 +282,7 @@ export function FitFigure({ profile, size, className = "" }: { profile: BodyProf
   const ref = (name: string) => `url(#${id}-${name})`;
   const morph = (d: string) => ({ initial: false as const, animate: { d }, transition: SPRING });
 
-  return <svg viewBox={`0 0 ${W} ${H}`} className={className} role="img" aria-label={`Figura com as suas medidas vestindo a camiseta Merano no tamanho ${size.size}`}>
+  return <svg viewBox={`0 0 ${W} ${H}`} className={className} role="img" aria-label={`Figura com as suas medidas vestindo a camiseta Meranno no tamanho ${size.size}`}>
     <defs>
       {/* The silhouette's sea-blue, deep at the head and lighter toward the feet, continuous across body and arms. */}
       <linearGradient id={`${id}-body`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={figure.altura}><stop offset="0" stopColor="#3a6fb4" /><stop offset=".5" stopColor="#4d95c9" /><stop offset="1" stopColor="#7fd6f5" /></linearGradient>
@@ -334,7 +334,7 @@ export function FitFigure({ profile, size, className = "" }: { profile: BodyProf
 
         <motion.path {...morph(figure.band)} fill="#e7e1d6" />
         <motion.path {...morph(figure.ribs)} fill="none" stroke="#9d927f" strokeOpacity={0.28} strokeWidth={0.07} />
-        <motion.text initial={false} animate={figure.mark} transition={SPRING} textAnchor="middle" fontSize={1.25} letterSpacing={0.14} fill="#22201c" style={{ fontFamily: "var(--font-display), sans-serif" }}>MERANO</motion.text>
+        <motion.text initial={false} animate={figure.mark} transition={SPRING} textAnchor="middle" fontSize={1.25} letterSpacing={0.14} fill="#22201c" style={{ fontFamily: "var(--font-display), sans-serif" }}>MERANNO</motion.text>
       </g>
     </g>
 

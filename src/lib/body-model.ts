@@ -1,7 +1,7 @@
 import { measure, type BodyProfile } from "./body-measure";
 import type { SizeRow } from "./products";
 
-// The customer's body as the size recommendation and the Merano Fit figure both see it, so the size we suggest and
+// The customer's body as the size recommendation and the Meranno Fit figure both see it, so the size we suggest and
 // the tee we draw always agree. Whatever wasn't measured comes from average human proportions (ANSUR II, men and
 // women alike once scaled by height): heights are shares of stature measured from the floor.
 const HEIGHT = { hps: 0.845, acromion: 0.82, axilla: 0.745, chest: 0.72, waist: 0.62, hip: 0.5, crotch: 0.475, knee: 0.285, ankle: 0.045, elbow: 0.63, wrist: 0.485 };

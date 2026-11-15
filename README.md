@@ -1,6 +1,6 @@
-# MERANO
+# MERANNO
 
-MVP da MERANO, marca brasileira de moda premium feita sob demanda.
+MVP da MERANNO, marca brasileira de moda premium feita sob demanda.
 
 ## Rodar localmente
 

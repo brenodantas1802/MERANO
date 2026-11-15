@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { ForgotPasswordForm } from "@/components/auth-forms";
 
-export const metadata: Metadata = { title: "Esqueci minha senha · MERANO" };
+export const metadata: Metadata = { title: "Esqueci minha senha · MERANNO" };
 
 export default function ForgotPasswordPage() {
   return <main>

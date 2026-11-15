@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ProductGallery3D } from "@/components/product-gallery-3d";
 import { ProductBuy, type Colorway } from "@/components/product-buy";
 import { RelatedRow } from "@/components/related-row";
+import { Avaliacoes } from "@/components/avaliacoes";
 
 export function generateStaticParams() { return products.map((product) => ({ slug: product.id })); }
 
@@ -44,6 +45,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </div>
 
       <div className="[grid-area:head]">
+        {product.lancamento && <p className="secao mb-1 text-[11px]">Lançamento</p>}
         <h1 className="text-[15px] font-medium">{product.name}</h1>
         <p className="mt-1 text-[15px]">{product.salePrice && <del className="mr-2 text-[var(--muted)]">{formatPrice(product.price)}</del>}{formatPrice(price)}</p>
       </div>
@@ -69,9 +71,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="[grid-area:buy] md:self-center"><ProductBuy product={product} colorways={colorwaysOf(product)} /></div>
     </div>
 
+    <Avaliacoes produtoId={product.id} nomeProduto={product.name} />
+
 
   </main>
-  {related.length > 0 && <section className="mt-8 px-6 pb-20 md:px-12">
+  {related.length > 0 && <section className="mt-8 px-6 pb-40 md:px-12 md:pb-20">
     <h2 className="label text-[13px]">Você também pode gostar</h2>
     <RelatedRow items={related.map((item) => ({ id: item.id, name: item.name, image: item.image }))} />
   </section>}
