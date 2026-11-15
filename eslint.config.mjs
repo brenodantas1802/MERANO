@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The programmer's Personalizador, kept as he delivered it.
+    "public/personalizador/**",
+    "src/lib/personalizador/**",
   ]),
 ]);
 

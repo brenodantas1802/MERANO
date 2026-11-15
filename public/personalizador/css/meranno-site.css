@@ -1,0 +1,65 @@
+/* The site's look over the programmer's Personalizador: only styles, his HTML and JS stay as delivered.
+   The page runs inside the store (src/app/personalizar-estampa), under the site header. */
+:root {
+  --pz-vinho: #541E2B;
+  --pz-creme: #F5F1E8;
+  --pz-cartao: #FAF7F0;
+  --pz-campo: #FBF8F3;
+  --pz-linha: #E3DED5;
+  --pz-borda: #D6CBB6;
+  --pz-tinta: #3C2326;
+  --pz-suave: #7F766F;
+  --pz-apagado: #9A938D;
+}
+
+/* The store's header already carries the MERANNO wordmark and there is nothing "prototype" about the live page. */
+.preview-bar { display: none; }
+.topbar .wordmark { visibility: hidden; }
+.topbar__side { font-size: 15px; letter-spacing: 0; color: var(--pz-suave); }
+@media (min-width: 961px) { .studio { height: calc(100vh - 108px); } }
+@media (max-width: 960px) { .topbar { display: none; } }
+
+/* ---------- chat ---------- */
+.chat .chat__head { padding: 24px 24px 20px; border-bottom-color: var(--pz-linha); }
+.chat .panel-title { font: 500 30px/1 var(--serif); color: var(--pz-tinta); }
+.chat .panel-sub { margin-top: 8px; font-size: 13px; line-height: 1.4; color: var(--pz-suave); }
+.chat .icon-btn { width: 44px; height: 44px; border-color: var(--pz-linha); color: var(--pz-tinta); }
+.chat .icon-btn:hover { border-color: var(--pz-borda); background: transparent; }
+
+.chat__log { padding: 24px; gap: 20px; }
+.msg--ai { font: 500 19px/1.45 var(--serif); color: var(--pz-tinta); padding-left: 23px; }
+.msg--ai::before { width: 8px; height: 12px; top: .42em; background: var(--pz-vinho); }
+.msg--user {
+  margin-left: 40px; max-width: none;
+  background: var(--pz-vinho); color: var(--pz-creme);
+  padding: 10px 16px; border-radius: 18px 18px 6px 18px;
+  font: 400 14px/1.6 var(--sans);
+}
+.msg--note { font-size: 12.5px; color: var(--pz-suave); }
+.typing i { background: var(--pz-vinho); }
+.typing::after { content: 'pensando na sua estampa…'; margin-left: 6px; font: 400 14px/1 var(--sans); color: var(--pz-suave); align-self: center; }
+
+.chat__chips { flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 24px 12px; }
+.chip {
+  min-height: 44px; padding: 8px 14px; text-align: left;
+  border-color: var(--pz-borda); color: var(--pz-tinta);
+  font: 500 13.5px/1.35 var(--sans);
+}
+.chip:hover { background: var(--pz-cartao); }
+
+.chat__form {
+  margin: 0 24px 24px; align-items: center;
+  border-color: var(--pz-borda); border-radius: 20px;
+  padding: 6px 6px 6px 16px; background: var(--pz-campo);
+}
+.chat__form:focus-within { border-color: rgba(84, 30, 43, .6); box-shadow: none; }
+.chat__form textarea { font-size: 15px; color: var(--pz-tinta); padding: 11px 0; }
+.chat__form textarea::placeholder { color: var(--pz-apagado); }
+.send-btn { width: 44px; height: 44px; background: var(--pz-vinho); color: #fff; }
+
+/* The prompt review lives in the conversation, so it follows the same type. */
+.prompt-review { background: var(--pz-cartao) !important; border-color: var(--pz-linha); border-radius: 18px; }
+.prompt-review h3 { font: 500 22px/1.15 var(--serif); color: var(--pz-tinta); }
+.prompt-review p, .prompt-review label { font-size: 13px; color: var(--pz-tinta); }
+.prompt-review textarea, .prompt-review select { border-color: var(--pz-borda); background: var(--pz-campo); font-size: 13.5px; }
+.prompt-review .btn { min-height: 44px; border-radius: 999px; }

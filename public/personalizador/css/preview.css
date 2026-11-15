@@ -1,0 +1,6 @@
+.preview-bar{min-height:34px;padding:7px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#551e2b;color:#f6f1e8;font:500 11px/20px 'Manrope',system-ui,sans-serif;letter-spacing:.025em}
+.preview-bar>span:first-child{display:flex;align-items:center;gap:8px}
+.preview-bar i{width:6px;height:6px;background:#d8bb7f;border-radius:50%;display:inline-block}
+.preview-bar>span:last-child{opacity:.8}
+.studio{height:calc(100vh - 98px)}
+@media(max-width:960px){.preview-bar{padding:7px 16px;flex-wrap:wrap;gap:0 12px}.studio{height:auto;min-height:calc(100vh - 98px)}}

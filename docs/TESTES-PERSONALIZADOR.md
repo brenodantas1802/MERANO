@@ -1,5 +1,7 @@
 # Testes do Personalizador (rodar logo depois de publicar)
 
+> Desatualizado desde 15/11/2026: estes testes são do personalizador anterior. O atual é o do programador (ver `PERSONALIZADOR.md`).
+
 Rode no site publicado, de preferência no celular. Em cada teste, anote o que aconteceu e se houve erro (print da tela ajuda).
 Se algo falhar, veja os erros em Vercel → projeto **merano** → **Logs** (procure por `/api/estampa`).
 

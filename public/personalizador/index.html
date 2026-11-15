@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MERANNO — Personalizador</title>
+  <link rel="icon" href="data:,">
+  <meta name="description" content="Explore o protótipo MERANNO: personalize modelagem, cores e estampas e envie suas referências.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600&family=Cinzel:wght@600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Limelight&family=Manrope:wght@400;500;600;700&family=Pinyon+Script&family=Space+Grotesk:wght@600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&display=block">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/preview.css">
+  <link rel="stylesheet" href="css/ai.css">
+  <link rel="stylesheet" href="css/creations.css">
+  <link rel="stylesheet" href="css/print-editor.css">
+  <link rel="stylesheet" href="css/meranno-site.css">
+</head>
+<body>
+  <div class="preview-bar" role="status"><span><i></i>Protótipo MERANNO</span><span id="preview-status">IA aguardando conexão</span></div>
+  <header class="topbar">
+    <span class="topbar__side">Personalizador</span>
+    <h1 class="wordmark">MERANNO</h1>
+    <span class="topbar__side topbar__side--right">Pra quem entende de exclusividade</span>
+  </header>
+  <nav class="creation-actions" aria-label="Salvar e retomar criações">
+    <span id="draft-status" role="status">Preparando seu rascunho…</span>
+    <button type="button" id="save-creation">Salvar na conta</button>
+    <button type="button" id="my-creations">Minhas criações</button>
+  </nav>
+
+  <main class="studio">
+    <!-- CHAT -->
+    <section class="chat" aria-label="Conversa com a MERANNO">
+      <div class="chat__head">
+        <div>
+          <h2 class="panel-title">Criação</h2>
+          <p class="panel-sub" id="ai-status">Conversa → revisão → aprovação → prévia</p>
+          <button id="connect-ai" class="chat__connection" type="button">Conectar OpenRouter</button>
+          <div class="chat__steps" aria-label="Etapas da criação"><span>Ideia</span><span>Prompt</span><span>Prévia</span></div>
+        </div>
+        <button class="icon-btn" id="chat-reset" type="button" aria-label="Recomeçar a criação" data-tip="Recomeçar">
+          <span class="ms">restart_alt</span>
+        </button>
+      </div>
+      <ol class="chat__log" id="chat-log" aria-live="polite"></ol>
+      <div class="chat__chips" id="chat-chips"></div>
+      <form class="chat__form" id="chat-form" autocomplete="off">
+        <textarea id="chat-input" rows="1" placeholder="Conte a ideia da sua estampa…" aria-label="Mensagem"></textarea>
+        <button class="send-btn" type="submit" aria-label="Enviar"><span class="ms">arrow_upward</span></button>
+      </form>
+    </section>
+
+    <!-- PRÉVIA -->
+    <section class="stage" aria-label="Prévia da camiseta">
+      <div class="viewer" id="viewer-back">
+        <div class="viewer__bar">
+          <span class="viewer__name">Verso</span>
+          <div class="viewer__tools">
+            <button class="zoom-btn" data-zoom="out" type="button" aria-label="Diminuir zoom do verso"><span class="ms">remove</span></button>
+            <span class="zoom-val" aria-hidden="true">100%</span>
+            <button class="zoom-btn" data-zoom="in" type="button" aria-label="Aumentar zoom do verso"><span class="ms">add</span></button>
+            <button class="zoom-btn" data-zoom="fit" type="button" aria-label="Centralizar verso"><span class="ms">center_focus_weak</span></button>
+          </div>
+        </div>
+        <div class="viewer__canvas" tabindex="0" aria-label="Verso: role para dar zoom, arraste para mover">
+          <i class="frame frame--tl"></i><i class="frame frame--tr"></i><i class="frame frame--bl"></i><i class="frame frame--br"></i>
+          <div class="viewer__content"></div>
+          <div class="veil" aria-hidden="true"><span>Gerando estampa</span></div>
+        </div>
+      </div>
+      <div class="viewer" id="viewer-front">
+        <div class="viewer__bar">
+          <span class="viewer__name">Frente</span>
+          <div class="viewer__tools">
+            <button class="zoom-btn" data-zoom="out" type="button" aria-label="Diminuir zoom da frente"><span class="ms">remove</span></button>
+            <span class="zoom-val" aria-hidden="true">100%</span>
+            <button class="zoom-btn" data-zoom="in" type="button" aria-label="Aumentar zoom da frente"><span class="ms">add</span></button>
+            <button class="zoom-btn" data-zoom="fit" type="button" aria-label="Centralizar frente"><span class="ms">center_focus_weak</span></button>
+          </div>
+        </div>
+        <div class="viewer__canvas" tabindex="0" aria-label="Frente: role para dar zoom, arraste para mover">
+          <i class="frame frame--tl"></i><i class="frame frame--tr"></i><i class="frame frame--bl"></i><i class="frame frame--br"></i>
+          <div class="viewer__content"></div>
+          <div class="veil" aria-hidden="true"><span>Gerando estampa</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREFERÊNCIAS -->
+    <aside class="prefs" aria-label="Preferências da peça">
+      <div class="prefs__head">
+        <h2 class="panel-title">Sua peça</h2>
+        <button class="text-btn" id="prefs-reset" type="button"><span class="ms">undo</span>Restaurar padrões</button>
+      </div>
+
+      <section class="block direct-editor" aria-label="Editar sem chat">
+        <h3 class="block__title">Editar sem chat</h3>
+        <p class="block__desc">Clique em uma aplicação na camiseta ou selecione abaixo.</p>
+        <button type="button" class="btn btn--solid" id="add-art">Adicionar estampa PNG</button>
+        <input type="file" id="direct-art-file" accept="image/png" hidden>
+        <div id="edit-items" class="edit-items" role="group" aria-label="Aplicações da camiseta"></div>
+        <p id="edit-selection" role="status" class="block__desc">Nenhum item selecionado.</p>
+        <div class="edit-actions">
+          <button type="button" class="text-btn" id="edit-size" disabled>Tamanho e posição</button>
+          <button type="button" class="text-btn" id="delete-item" disabled>Apagar selecionado</button>
+          <button type="button" class="text-btn" id="undo-delete" disabled>Desfazer exclusão</button>
+          <button type="button" class="text-btn" id="add-brand">Adicionar MERANNO</button>
+          <button type="button" class="text-btn" id="direct-download" disabled>Baixar para produção</button>
+        </div>
+        <p class="block__desc">Arraste a estampa das costas para mover. Cada imagem é uma aplicação única.</p>
+      </section>
+      <section class="block print-editor" id="print-editor" hidden>
+        <h3 class="block__title">Ajustar estampa</h3>
+        <p class="block__desc">Tamanho e posição nas costas, sem usar IA.</p>
+        <label for="print-width">Largura <output id="print-width-value"></output></label><input type="range" id="print-width" min="1" max="36" step="0.1" disabled>
+        <p id="print-height" class="print-size"></p>
+        <label for="print-x">Esquerda / direita <output id="print-x-value"></output></label><input type="range" id="print-x" min="-10" max="10" step="0.1" disabled>
+        <label for="print-y">Acima / abaixo <output id="print-y-value"></output></label><input type="range" id="print-y" min="0" max="30" step="0.1" disabled>
+        <div class="print-editor-actions"><button type="button" class="text-btn" id="print-center">Centralizar</button><button type="button" class="text-btn" id="print-reset">Restaurar padrão</button></div>
+        <p class="print-quality" id="print-quality" role="status"></p>
+        <p class="print-area-note">Área máxima: 36 × 45 cm. Posição relativa à área de impressão; confirme a distância da gola com a confecção.</p>
+      </section>
+      <section class="block">
+        <h3 class="block__title">Modelagem</h3>
+        <div class="fits" id="fits" role="radiogroup" aria-label="Modelagem"></div>
+        <div class="fabric-heading"><h4>Cores disponíveis</h4><span id="fabric-name"></span></div>
+        <div class="fabric-colors" id="fabric-colors" role="radiogroup" aria-label="Cor da camiseta"></div>
+      </section>
+
+      <section class="block">
+        <div class="block__row">
+          <h3 class="block__title">Paleta</h3>
+          <span class="block__hint">A primeira cor é a da malha</span>
+        </div>
+        <div class="palette" id="palette"></div>
+      </section>
+
+      <section class="block">
+        <h3 class="block__title">Fonte</h3>
+        <div class="fonts" id="fonts" role="radiogroup" aria-label="Fonte do texto"></div>
+      </section>
+
+      <section class="block">
+        <div class="block__row">
+          <h3 class="block__title">Estampas da casa</h3>
+          <span class="block__hint" id="sugg-count" role="status" aria-live="polite"></span>
+        </div>
+        <div class="house-categories" role="group" aria-label="Categorias das estampas">
+          <button type="button" data-house-category="all" aria-pressed="true">Todas</button>
+          <button type="button" data-house-category="natureza" aria-pressed="false">Natureza</button>
+          <button type="button" data-house-category="esportes" aria-pressed="false">Esportes</button>
+          <button type="button" data-house-category="frases" aria-pressed="false">Frases</button>
+        </div>
+        <label class="house-search-label" for="house-search">Buscar estampa</label>
+        <input class="house-search" id="house-search" type="search" maxlength="80" placeholder="Nome ou tema" autocomplete="off" aria-controls="car-track">
+        <button class="text-btn house-clear" id="house-clear" type="button" hidden>Limpar filtros</button>
+        <p class="house-empty" id="house-empty" hidden>Nenhuma estampa encontrada. Tente outro nome ou limpe os filtros.</p>
+        <div class="carousel" id="carousel">
+          <button class="car-arrow" data-dir="-1" type="button" aria-label="Estampa anterior"><span class="ms">chevron_left</span></button>
+          <div class="car-viewport"><div class="car-track" id="car-track"></div></div>
+          <button class="car-arrow" data-dir="1" type="button" aria-label="Próxima estampa"><span class="ms">chevron_right</span></button>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block__row">
+          <h3 class="block__title">Referências</h3>
+          <span class="block__hint" id="refs-count">0 de 3</span>
+        </div>
+        <p class="block__desc">Envie até 3 imagens para inspirar sua estampa. PNG, JPG ou WebP, até 10 MB cada.</p>
+        <div class="refs" id="refs"></div>
+        <input type="file" id="refs-input" accept="image/png,image/jpeg,image/webp" multiple hidden>
+        <p class="ref-feedback" id="refs-feedback" role="status" aria-live="polite">Arraste as imagens para cá ou clique para escolher.</p>
+        <div class="ref-direction" id="ref-direction" hidden>
+          <div class="ref-colors" id="ref-colors" aria-label="Cores extraídas das referências"></div>
+          <label class="ref-toggle"><input id="refs-use-colors" type="checkbox" checked>Inspirar as cores da estampa nas imagens</label>
+          <label class="ref-note-label" for="refs-notes">O que você quer trazer da referência?</label>
+          <textarea id="refs-notes" rows="2" maxlength="600" placeholder="Ex.: o clima de jazz, a tipografia ou a composição…"></textarea>
+          <button type="button" class="btn btn--solid ref-apply" id="refs-apply">Conversar sobre referências</button>
+          <p class="ref-disclaimer">As imagens serão enviadas à OpenRouter para orientar a conversa e a estampa. A geração só começa após você aprovar o prompt.</p>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 id="modal-title">Recomeçar a criação?</h2>
+      <p>A estampa e a conversa serão apagadas. Modelagem, paleta, fonte e referências continuam como estão.</p>
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" id="modal-cancel">Continuar criando</button>
+        <button type="button" class="btn btn--solid" id="modal-confirm">Recomeçar</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="connection-dialog" class="connection-dialog" aria-labelledby="connection-title">
+    <form id="connection-form">
+      <h2 id="connection-title">Conectar a criação com IA</h2>
+      <p>Use sua chave da OpenRouter. Ela fica apenas na memória desta aba, é enviada por conexão segura ao servidor e não é salva no navegador. Ao atualizar a página, conecte novamente.</p>
+      <p>Conversa: GPT-4.1 mini. Estampa: GPT Image 2.5 Sunburst. Os pedidos usam os créditos da sua conta OpenRouter.</p>
+      <label for="router-key">Chave da OpenRouter</label>
+      <input id="router-key" type="password" autocomplete="off" spellcheck="false" minlength="16" maxlength="512" required placeholder="sk-or-…">
+      <p id="connection-error" role="status" aria-live="polite"></p>
+      <a href="https://openrouter.ai/settings/keys" target="_blank" rel="noopener noreferrer">Gerenciar minhas chaves</a>
+      <div class="connection-actions"><button id="connection-close" class="btn btn--ghost" type="button">Cancelar</button><button id="connection-submit" class="btn btn--solid" type="submit">Conectar</button></div>
+    </form>
+  </dialog>
+  <script src="js/ai-client.js"></script>
+  <script src="js/designs.js"></script>
+  <script src="js/wordmark.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/garments.js"></script>
+  <script src="js/references.js"></script>
+  <script src="js/production.js"></script>
+  <script src="js/house-prints.js"></script>
+  <script src="js/snapshot.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/creations-client.js"></script>
+  <script src="js/print-editor.js"></script>
+  <script src="js/direct-editor.js"></script>
+
+</body>
+</html>
