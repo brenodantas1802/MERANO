@@ -11,6 +11,9 @@ export function FirstPurchasePopup() {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const seen = window.localStorage.getItem(SEEN_KEY);
@@ -25,12 +28,24 @@ export function FirstPurchasePopup() {
     window.localStorage.setItem(SEEN_KEY, "1");
   }
 
-  function submit(event: React.FormEvent) {
+  // The e-mail goes to the team (Supabase, listed in /admin) only with the visitor's consent (LGPD).
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
-    window.localStorage.setItem("merano-discount-email", email);
-    window.localStorage.setItem(SEEN_KEY, "1");
-    setSent(true);
-    setTimeout(() => setVisible(false), 2200);
+    if (!consent) return setError("Marque a caixa para receber o cupom.");
+    setError("");
+    setSending(true);
+    try {
+      const response = await fetch("/api/cupom", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, consentimento: true }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Não consegui guardar seu e-mail agora.");
+      window.localStorage.setItem(SEEN_KEY, "1");
+      setSent(true);
+      setTimeout(() => setVisible(false), 2600);
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : "Não consegui guardar seu e-mail agora.");
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -55,7 +70,7 @@ export function FirstPurchasePopup() {
             {sent ? (
               <div>
                 <h2 className="display text-4xl">Combinado.</h2>
-                <p className="mt-4 text-[var(--muted)]">Seu cupom de 10% chega em breve no e-mail cadastrado. Obrigado por chegar cedo.</p>
+                <p className="mt-4 text-[var(--muted)]">Recebemos seu e-mail. A equipe Meranno envia o cupom de 10% para ele. Obrigado por chegar cedo.</p>
               </div>
             ) : (
               <>
@@ -64,8 +79,13 @@ export function FirstPurchasePopup() {
                 <p className="mt-4 text-[var(--muted)]">Deixe seu e-mail e a gente envia o cupom. Sem spam, só as novidades da coleção.</p>
                 <form onSubmit={submit} className="sans mt-7 flex flex-col gap-3 sm:flex-row">
                   <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="seu@email.com" className="h-11 w-full border-b border-[var(--ink)] bg-transparent text-sm outline-none" />
-                  <button type="submit" className="min-h-11 shrink-0 rounded-full bg-[var(--ink)] px-6 text-[11px] uppercase tracking-[.15em] text-[var(--creme)] transition-opacity hover:opacity-85">Quero o cupom</button>
+                  <button type="submit" disabled={sending} className="min-h-11 shrink-0 rounded-full bg-[var(--vinho)] px-6 text-[11px] uppercase tracking-[.15em] text-[var(--creme)] transition-opacity hover:opacity-85 disabled:opacity-60">{sending ? "Enviando…" : "Quero o cupom"}</button>
                 </form>
+                <label className="sans mt-3 flex min-h-11 cursor-pointer items-start gap-3 text-[12px] leading-snug text-[var(--muted)]">
+                  <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--vinho)]" />
+                  <span>Aceito receber o cupom e novidades da Meranno por e-mail. Posso cancelar quando quiser. <a href="/privacidade" className="underline underline-offset-2">Privacidade</a></span>
+                </label>
+                {error && <p role="alert" className="sans mt-2 text-[12px] text-[#8a3a2c]">{error}</p>}
                 <button onClick={close} className="sans mt-3 min-h-11 text-[11px] uppercase tracking-[.14em] text-[var(--muted)] underline underline-offset-4">Agora não</button>
               </>
             )}

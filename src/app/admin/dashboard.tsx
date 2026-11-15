@@ -52,7 +52,22 @@ function Criacoes({ criacoes }: { criacoes: CriacaoAdmin[] | null }) {
   </section>;
 }
 
-export function AdminDashboard({ email, criacoes }: { email: string; criacoes: CriacaoAdmin[] | null }) {
+export type CadastroCupom = { id: string; criado_em: string; email: string; cupom_enviado: boolean };
+
+// E-mails waiting for the 10% coupon. Marking one as sent is done in Supabase (cadastros_cupom.cupom_enviado).
+function Cupons({ cupons }: { cupons: CadastroCupom[] | null }) {
+  return <section className="mt-24">
+    <p className="sans mb-4 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Cupom de 10%</p>
+    <h2 className="display text-6xl">E-mails cadastrados.</h2>
+    {cupons === null ? <p className="sans mt-8 max-w-2xl text-sm text-[var(--muted)]">Para ver a lista aqui, cadastre <code>SUPABASE_SECRET_KEY</code> na Vercel. Enquanto isso, ela fica no Supabase, tabela <code>cadastros_cupom</code>.</p>
+      : cupons.length === 0 ? <p className="sans mt-8 text-sm text-[var(--muted)]">Nenhum e-mail ainda.</p>
+      : <ul className="sans mt-8 divide-y divide-[var(--line)] border-y border-[var(--line)] text-sm">
+        {cupons.map((c) => <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><span>{c.email}</span><span className="text-xs text-[var(--muted)]">{new Date(c.criado_em).toLocaleDateString("pt-BR")} · {c.cupom_enviado ? "cupom enviado" : "aguardando cupom"}</span></li>)}
+      </ul>}
+  </section>;
+}
+
+export function AdminDashboard({ email, criacoes, cupons }: { email: string; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null }) {
   return <main>
     <header className="sans flex items-center justify-between gap-4 border-b border-[var(--line)] px-6 py-5 md:px-12">
       <Link href="/" className="font-bold tracking-[.28em]">MERANNO / equipe</Link>
@@ -74,6 +89,7 @@ export function AdminDashboard({ email, criacoes }: { email: string; criacoes: C
         </table>
       </div>
       <Criacoes criacoes={criacoes} />
+      <Cupons cupons={cupons} />
     </div>
   </main>;
 }
