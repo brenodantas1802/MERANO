@@ -89,8 +89,8 @@ export type WornTee = {
 };
 
 // The chart only gives the body of the tee; the sleeve and armhole of the brand's dropped-shoulder cut follow from it.
-const SLEEVE_PER_LENGTH = 0.31;
-const OPENING_PER_WIDTH = 0.34;
+export const SLEEVE_PER_LENGTH = 0.31;
+export const OPENING_PER_WIDTH = 0.34;
 const ARMHOLE_PER_LENGTH = 0.34;
 
 export function wearTee(body: Body, row: SizeRow): WornTee {
