@@ -6,11 +6,11 @@ const SIZES = ["PP", "P", "M", "G", "GG"];
 
 // Without measurements, how each size sits next to the brand's usual oversized fit (M on an average body).
 const RELATIVE: Record<number, string> = {
-  [-2]: "bem mais justa e curta que o caimento padrão da marca: rente ao corpo, sem folga nas laterais, a costura do ombro em cima do ombro, as mangas curtas no meio do braço e a barra acima da virilha",
-  [-1]: "um pouco mais justa e curta que o caimento padrão da marca: pouca folga nas laterais, a costura do ombro quase em cima do ombro e a barra um pouco acima da virilha",
+  [-2]: "um pouco mais justa e mais curta que o caimento padrão da marca, mas ainda com folga: menos tecido nas laterais, a costura do ombro mais perto do ombro e a barra alguns centímetros mais alta",
+  [-1]: "quase igual ao caimento padrão da marca, só um pouco menos folgada: continua oversized, com a folga nas laterais um pouco menor e a barra um pouco mais alta",
   [0]: "no caimento padrão da marca, oversized: folga visível nas laterais com o tecido caindo reto, a costura do ombro um pouco além do ombro, as mangas acima do cotovelo e a barra na altura da virilha",
-  [1]: "mais larga e mais comprida que o caimento padrão da marca: bastante folga nas laterais, a costura do ombro caindo sobre o braço, as mangas perto do cotovelo e a barra abaixo da virilha",
-  [2]: "bem larga e longa: muito tecido sobrando nas laterais, com dobras, a costura do ombro caindo bem sobre o braço, as mangas passando do cotovelo e a barra no começo da coxa",
+  [1]: "quase igual ao caimento padrão da marca, só um pouco mais folgada: continua oversized, com um pouco mais de folga nas laterais e a barra um pouco mais baixa",
+  [2]: "mais larga e mais comprida que o caimento padrão da marca: mais folga nas laterais, a costura do ombro caindo um pouco mais sobre o braço e a barra alguns centímetros abaixo da virilha",
 };
 
 const cm = (value: number) => Math.round(Math.abs(value));
@@ -18,9 +18,17 @@ const cm = (value: number) => Math.round(Math.abs(value));
 // The "size and fit" part of the try-on prompt: how this size of the tee sits on this person. With the customer's
 // Meranno Fit measurements it comes from the same body model as the Meranno Fit figure, so the photo and the figure
 // agree; without them it describes the size against the brand's usual fit.
-export function describeFit(row: SizeRow, profile?: BodyProfile | null) {
+// How this size differs from M in centimetres: neighbouring sizes are only a few cm apart, and the image model exaggerates.
+function versusM(row: SizeRow, chart?: SizeRow[]) {
+  const m = chart?.find((item) => item.size === "M");
+  if (!m || row.size === "M") return "";
+  const diff = (value: number) => `${cm(value)} cm ${value < 0 ? "a menos" : "a mais"}`;
+  return ` Comparado ao M, este tamanho tem só ${diff(row.largura - m.largura)} de largura (${diff((row.largura - m.largura) * 2)} de circunferência), ${diff(row.comprimento - m.comprimento)} de comprimento e ${diff(row.ombro - m.ombro)} de ombro a ombro. É uma diferença PEQUENA: a camiseta deve parecer quase igual à do M, apenas esses poucos centímetros mais ${row.largura < m.largura ? "estreita e curta" : "larga e comprida"}. NÃO exagere: não deixe a peça colada no corpo nem gigante.`;
+}
+
+export function describeFit(row: SizeRow, profile?: BodyProfile | null, chart?: SizeRow[]) {
   const garment = `Medidas da peça (deitada): largura ${row.largura} cm (${row.largura * 2} cm de circunferência), comprimento ${row.comprimento} cm, ombro a ombro ${row.ombro} cm.`;
-  const rule = "Desenhe a camiseta exatamente com esse caimento e essas proporções em relação ao corpo da foto. NÃO ajuste a peça para \"servir bem\": se o tamanho fica grande ou pequeno nessa pessoa, isso precisa aparecer. A estampa mantém o seu tamanho real: numa peça maior ela ocupa proporcionalmente menos espaço, numa menor ocupa mais.";
+  const rule = `Desenhe a camiseta com esse caimento e essas proporções em relação ao corpo da foto, na medida real: a diferença entre tamanhos vizinhos é de poucos centímetros e deve ficar sutil.${versusM(row, chart)} A estampa mantém o seu tamanho real em relação à peça.`;
   const altura = profile ? measure(profile, "altura") : null;
   const knowsBody = !!profile && !!altura && (!!measure(profile, "busto") || !!measure(profile, "peso"));
 
