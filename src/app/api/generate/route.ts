@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     const row = size ? getSizeChart(product).find((item) => item.size === size) : undefined;
     const body: BodyProfile | null = profile ? { ...EMPTY_PROFILE, ...Object.fromEntries(Object.entries(profile).filter(([key]) => key in EMPTY_PROFILE)) } : null;
     const fit = row ? describeFit(row, body) : undefined;
-    const plan = planTryOn(product.views, pose, target && { box: target.box, total: target.total, order: target.order, candidates: target.candidates, withCrop: true }, fit);
+    const plan = planTryOn(product.views, pose, target && { box: target.box, total: target.total, order: target.order, candidates: target.candidates, withCrop: true }, fit, product.printScale);
     const garments = new Map(await garmentImages);
 
     const response = await fetch("https://openrouter.ai/api/v1/images", {
