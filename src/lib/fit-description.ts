@@ -1,5 +1,5 @@
 import { measure, type BodyProfile } from "./body-measure";
-import { bodyModel, wearTee } from "./body-model";
+import { bodyModel, OPENING_PER_WIDTH, SLEEVE_PER_LENGTH, wearTee } from "./body-model";
 import type { SizeRow } from "./products";
 
 const SIZES = ["PP", "P", "M", "G", "GG"];
@@ -23,7 +23,11 @@ function versusM(row: SizeRow, chart?: SizeRow[]) {
   const m = chart?.find((item) => item.size === "M");
   if (!m || row.size === "M") return "";
   const diff = (value: number) => `${cm(value)} cm ${value < 0 ? "a menos" : "a mais"}`;
-  return ` Comparado ao M, este tamanho tem só ${diff(row.largura - m.largura)} de largura (${diff((row.largura - m.largura) * 2)} de circunferência), ${diff(row.comprimento - m.comprimento)} de comprimento e ${diff(row.ombro - m.ombro)} de ombro a ombro. É uma diferença PEQUENA: a camiseta deve parecer quase igual à do M, apenas esses poucos centímetros mais ${row.largura < m.largura ? "estreita e curta" : "larga e comprida"}. NÃO exagere: não deixe a peça colada no corpo nem gigante.`;
+  // Where the sleeve ends moves with half the shoulder change plus the sleeve length (same ratios as body-model).
+  const shift = Math.round(((m.ombro - row.ombro) / 2 + (m.comprimento - row.comprimento) * SLEEVE_PER_LENGTH) * 2) / 2;
+  const opening = Math.round(Math.abs(row.largura - m.largura) * OPENING_PER_WIDTH * 2) / 2;
+  const sleeve = ` AS MANGAS ficam praticamente iguais às do M: terminam só cerca de ${String(Math.abs(shift)).replace(".", ",")} cm ${shift > 0 ? "mais acima" : "mais abaixo"} no braço e a abertura é cerca de ${String(opening).replace(".", ",")} cm ${row.largura < m.largura ? "mais estreita" : "mais larga"}. Mantenha o mesmo comprimento visual de manga do M, a mesma folga em volta do braço e a mesma posição em relação ao cotovelo; NÃO encurte nem afine a manga além disso.`;
+  return ` Comparado ao M, este tamanho tem só ${diff(row.largura - m.largura)} de largura (${diff((row.largura - m.largura) * 2)} de circunferência), ${diff(row.comprimento - m.comprimento)} de comprimento e ${diff(row.ombro - m.ombro)} de ombro a ombro. É uma diferença PEQUENA: a camiseta deve parecer quase igual à do M, apenas esses poucos centímetros mais ${row.largura < m.largura ? "estreita e curta" : "larga e comprida"}.${sleeve} NÃO exagere: não deixe a peça colada no corpo nem gigante.`;
 }
 
 export function describeFit(row: SizeRow, profile?: BodyProfile | null, chart?: SizeRow[]) {
@@ -48,13 +52,18 @@ export function describeFit(row: SizeRow, profile?: BodyProfile | null, chart?: 
   const shoulder = beyond < 1 ? "a costura do ombro fica em cima do ombro"
     : beyond < 4 ? `a costura do ombro cai cerca de ${cm(beyond)} cm além do ombro, começando a descer pelo braço`
     : `a costura do ombro cai cerca de ${cm(beyond)} cm além do ombro, já sobre a parte de cima do braço`;
-  // Where the sleeve ends: from the seam, down the arm, against the elbow.
-  const seamHeight = body.y.acromion - Math.max(0, beyond) * 0.8;
-  const sleeveEnd = seamHeight - tee.sleeve.length * 0.95 - body.y.elbow;
-  const sleeve = sleeveEnd > 9 ? "as mangas terminam no meio do braço, bem acima do cotovelo"
-    : sleeveEnd > 4 ? "as mangas terminam um pouco acima do cotovelo"
-    : sleeveEnd > -2 ? "as mangas chegam na altura do cotovelo"
-    : "as mangas passam do cotovelo";
+  // Where the sleeve ends: from the seam, down the arm, against the elbow. Worked out on the M, because the words
+  // ("meio do braço", "acima do cotovelo") flip between neighbouring sizes; the cm difference is in versusM.
+  const mRow = chart?.find((item) => item.size === "M") ?? row;
+  const mTee = wearTee(body, mRow);
+  const mBeyond = mTee.shoulder / 2 - body.w.shoulders / 2;
+  const seamHeight = body.y.acromion - Math.max(0, mBeyond) * 0.8;
+  const sleeveEnd = seamHeight - mTee.sleeve.length * 0.95 - body.y.elbow;
+  const sleeveWhere = sleeveEnd > 9 ? "terminam no meio do braço, bem acima do cotovelo"
+    : sleeveEnd > 4 ? "terminam um pouco acima do cotovelo"
+    : sleeveEnd > -2 ? "chegam na altura do cotovelo"
+    : "passam do cotovelo";
+  const sleeve = mRow === row ? `as mangas ${sleeveWhere}` : `as mangas ficam quase como no M, onde ${sleeveWhere}`;
   const d = tee.hemOverCrotch;
   const hem = d > 8 ? "a barra termina acima do quadril, deixando a peça curta"
     : d > 3 ? "a barra termina na altura do quadril, um pouco acima da virilha"
