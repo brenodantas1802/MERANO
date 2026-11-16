@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { detectPose, POSE_LABELS, type Pose } from "@/lib/pose";
-import { getProduct, getSizeChart } from "@/lib/products";
+import { getProvadorProduct as getProduct, getSizeChart } from "@/lib/products";
 import { EMPTY_PROFILE, type BodyProfile } from "@/lib/body-measure";
 import { describeFit } from "@/lib/fit-description";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";

@@ -11,7 +11,7 @@ import { BeforeAfter, HowItWorks, ShirtFan, TryOnSteps } from "@/components/try-
 import { SeaWaves } from "@/components/beach-art";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import type { PersonBox } from "@/lib/people";
-import { getProduct, getSizeChart, products, SIZE_CHART, type Product } from "@/lib/products";
+import { getProvadorProduct as getProduct, getSizeChart, provadorProducts as products, SIZE_CHART, type Product } from "@/lib/products";
 import { measure, useBodyProfile } from "@/lib/body-profile";
 import { recommendSize } from "@/lib/size-recommendation";
 
