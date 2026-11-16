@@ -75,8 +75,14 @@ function orientationInstruction(pose: Pose, has: (key: ViewKey) => boolean, imag
   return `A pessoa da imagem 1 está de LADO, em perfil de 90°, voltada para a ${faces} da imagem: o peito dela fica do lado ${faces} da imagem e as COSTAS dela ficam do lado ${behind} da imagem.${sideRef} A estampa das costas (imagem ${imageOf("back")}) só pode aparecer como uma faixa estreita na borda traseira do tronco, do lado ${behind} da imagem, cortada pelo ângulo, e NUNCA no lado do peito nem na manga. ${chestRule} Não vire a pessoa para a câmera.`;
 }
 
+// The measured print size, only for the sides of the shirt this pose shows.
+function scaleInstruction(keys: ViewKey[], printScale?: { front?: string; back?: string }) {
+  const parts = [keys.includes("back") && printScale?.back && `Escala da estampa das COSTAS: ${printScale.back}`, keys.includes("front") && printScale?.front && `Escala da FRENTE: ${printScale.front}`].filter(Boolean);
+  return parts.length ? `\n\n${parts.join("\n")}` : "";
+}
+
 // `fit` is the size-and-fit paragraph (lib/fit-description.ts); without it the shirt keeps the catalog's fit.
-export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject, fit?: string): TryOnPlan {
+export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject, fit?: string, printScale?: { front?: string; back?: string }): TryOnPlan {
   let keys = wantedViews(pose).filter((key) => views[key]);
   // The garment's plain colour/cut/fabric still has to come from somewhere when the catalog has no front shot.
   if (!views.front && !keys.includes("back")) keys = [...keys, "back"];
@@ -92,6 +98,6 @@ export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject, fit?
 
   return {
     views: keys,
-    prompt: `${preservePersonPrompt(!!fit)}\n\n${subject ? `${subjectInstruction({ ...subject, cropImage })}\n\n` : ""}${imageList}\n\n${orientationInstruction(pose, has, imageOf)}${fit ? `\n\n${fit}` : ""}`,
+    prompt: `${preservePersonPrompt(!!fit)}\n\n${subject ? `${subjectInstruction({ ...subject, cropImage })}\n\n` : ""}${imageList}\n\n${orientationInstruction(pose, has, imageOf)}${scaleInstruction(keys, printScale)}${fit ? `\n\n${fit}` : ""}`,
   };
 }

@@ -12,6 +12,8 @@ export type Product = {
   image: string;
   gallery: string[];
   views: ShirtViews;
+  // Measured size and place of a print, for the try-on: the image model tends to shrink big prints.
+  printScale?: { front?: string; back?: string };
   category: string;
   // Style/theme tags, used to suggest similar pieces.
   tags: string[];
@@ -152,6 +154,11 @@ export const provadorOnly: Product[] = [
     image: "/imagens/merano-assets/produtos/why-not-you-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/why-not-you-verso.jpg", "/imagens/merano-assets/produtos/why-not-you-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/why-not-you-verso.jpg", front: "/imagens/merano-assets/produtos/why-not-you-frente.jpg" },
+    // Measured on the photos: the back lettering is ~85% of the torso width, right under the collar.
+    printScale: {
+      back: "A frase WHY NOT YOU? é GRANDE: ocupa cerca de 85% da largura das costas (quase de uma costura do ombro à outra) e fica no alto das costas, logo abaixo da gola, entre 18% e 25% do comprimento da camiseta. A altura das letras é cerca de 1/9 da largura do tronco. NÃO reduza a frase: mantenha exatamente essa largura e essa altura em relação ao corpo da pessoa.",
+      front: "No peito, só a escrita Meranno pequena, do lado esquerdo de quem veste, na altura do peito (cerca de 30% do comprimento da camiseta, a partir da gola), com cerca de 18% da largura do tronco. Não aumente nem acrescente nada.",
+    },
     tags: ["frase", "tipografia", "branco"],
     category: "Camisetas",
     collection: "colecao-01",
