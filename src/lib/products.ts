@@ -141,6 +141,33 @@ export function getProduct(id: string) {
   return products.find((product) => product.id === id);
 }
 
+// Pieces shown only in the try-on (not for sale yet): kept out of `products`, so the shop, search and cart never see them.
+export const provadorOnly: Product[] = [
+  {
+    id: "why-not-you",
+    name: "Why Not You? · Branco",
+    description: "WHY NOT YOU? em preto, grande e inclinado, no alto das costas, e a assinatura Meranno pequena no peito.",
+    price: 189,
+    note: "Prévia · só no provador",
+    image: "/imagens/merano-assets/produtos/why-not-you-verso.jpg",
+    gallery: ["/imagens/merano-assets/produtos/why-not-you-verso.jpg", "/imagens/merano-assets/produtos/why-not-you-frente.jpg"],
+    views: { back: "/imagens/merano-assets/produtos/why-not-you-verso.jpg", front: "/imagens/merano-assets/produtos/why-not-you-frente.jpg" },
+    tags: ["frase", "tipografia", "branco"],
+    category: "Camisetas",
+    collection: "colecao-01",
+    material: "100% algodão de toque macio",
+    care: "Lavar do avesso em água fria. Secar à sombra.",
+    delivery: "Em breve.",
+    stock: 0,
+    fits: ["PP", "P", "M", "G", "GG"],
+    colors: ["Branco"],
+  },
+];
+export const provadorProducts: Product[] = [...provadorOnly, ...products];
+export function getProvadorProduct(id: string) {
+  return provadorProducts.find((product) => product.id === id);
+}
+
 // Cart and order entries keep the photo path from the day they were added, and photos get renamed;
 // prefer the catalog's current photo. Old entries without productId carry it in "<product>-<size>-<color>".
 export function currentImage(item: { id?: string; productId?: string; image?: string }) {
