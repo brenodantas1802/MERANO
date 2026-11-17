@@ -21,11 +21,16 @@ export function FirstPurchasePopup() {
     const hasAccount = window.localStorage.getItem(ACCOUNT_KEY);
     if (seen || hasAccount) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const start = () => { timer = setTimeout(() => setVisible(true), 1800); };
+    // Never over the pre-sale padlock animation (<html class="entrada">): after it, the visitor gets a few seconds
+    // with the site before the coupon shows.
+    const start = (espera = 1800) => {
+      timer = setTimeout(() => (document.documentElement.classList.contains("entrada") ? start(6000) : setVisible(true)), espera);
+    };
     // Waits for the cookie banner to be answered, so two notices never stack.
+    const aoConsentir = () => start();
     if (!avisoDeCookiesPendente()) start();
-    else window.addEventListener(EVENTO_CONSENTIMENTO, start, { once: true });
-    return () => { clearTimeout(timer); window.removeEventListener(EVENTO_CONSENTIMENTO, start); };
+    else window.addEventListener(EVENTO_CONSENTIMENTO, aoConsentir, { once: true });
+    return () => { clearTimeout(timer); window.removeEventListener(EVENTO_CONSENTIMENTO, aoConsentir); };
   }, []);
 
   function close() {

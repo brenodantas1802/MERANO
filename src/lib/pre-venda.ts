@@ -1,21 +1,23 @@
 // Pre-sale lock (asked for by the owners on 2026-11-17).
-//   PRE_VENDA=1             locks the site: without a valid invite cookie every page shows "Coming soon" (/em-breve).
-//   Invites are created in /admin (table convites_pre_venda). Each has its own link <site>/convite/<codigo>, a use
-//   counter and an optional limit; switching one off stops new entries through it.
-//   The invite cookie is signed with PRE_VENDA_SEGREDO, or with SUPABASE_SECRET_KEY when that isn't set (the panel
-//   needs that key anyway). Changing the secret sends everyone back to "Coming soon".
+//   PRE_VENDA=1             locks the site: without the access cookie every page shows "Coming soon" (/em-breve).
+//   Who gets in: the people on the pre-sale list (/admin → "Pré-venda", table pre_venda_autorizados) and the owners.
+//   They sign in on /pre-venda (the link sent to the WhatsApp group); the site checks the account against the list
+//   and gives that browser the access cookie. On another device they just sign in again.
+//   The cookie is signed with PRE_VENDA_SEGREDO, or with SUPABASE_SECRET_KEY when that isn't set (the list needs that
+//   key anyway). Changing the secret sends everyone back to "Coming soon" until they sign in again.
 //   PRE_VENDA_GRUPO_URL     optional; WhatsApp group link for the "Quero entrar no grupo" button on the locked page
 
-export const COOKIE_CONVITE = "meranno_convite";
-// Short-lived and readable by the page: it plays the opening animation once, right after the invite link.
+export const COOKIE_ACESSO = "meranno_convite";
+// Short-lived and readable by the page: it plays the opening animation once, right after access is granted.
 export const COOKIE_ENTRADA = "meranno_entrada";
 // Runs in <body> before anything paints: marks <html> so the felt veil covers the page from the first frame.
 export const SCRIPT_ENTRADA = `if(document.cookie.indexOf("${COOKIE_ENTRADA}=1")>-1)document.documentElement.classList.add("entrada")`;
-export const DIAS_CONVITE = 90;
+// Browsers keep a cookie for at most 400 days; after that a sign-in on /pre-venda renews it.
+export const DIAS_ACESSO = 400;
 
-// Open even while locked: the locked page itself, the invite, sign-in (an invited customer signs in to order; the
-// e-mail and Google links land on /auth), the owners' panel (it has its own check) and the legal pages.
-export const ROTAS_LIVRES = ["/em-breve", "/convite", "/conta", "/auth", "/admin", "/privacidade", "/termos"];
+// Open even while locked: the locked page, the pre-sale sign-in, the account pages (and /auth, where the e-mail and
+// Google links land), the owners' panel (it has its own check) and the legal pages.
+export const ROTAS_LIVRES = ["/em-breve", "/pre-venda", "/conta", "/auth", "/admin", "/privacidade", "/termos"];
 
 const segredo = () => process.env.PRE_VENDA_SEGREDO || process.env.SUPABASE_SECRET_KEY || "";
 
@@ -32,14 +34,14 @@ function chave() {
   return chaveGuardada.chave;
 }
 
-// Cookie value: "<invite id>.<expiry in unix seconds>.<HMAC>". Checked in the proxy without touching the database.
-export async function assinarConvite(id: string) {
-  const corpo = `${id}.${Math.floor(Date.now() / 1000) + DIAS_CONVITE * 86400}`;
+// Cookie value: "<account id>.<expiry in unix seconds>.<HMAC>". Checked in the proxy without touching the database.
+export async function assinarAcesso(id: string) {
+  const corpo = `${id}.${Math.floor(Date.now() / 1000) + DIAS_ACESSO * 86400}`;
   const assinatura = await crypto.subtle.sign("HMAC", await chave(), texto(corpo));
   return `${corpo}.${Buffer.from(assinatura).toString("base64url")}`;
 }
 
-export async function conviteValido(cookie?: string) {
+export async function acessoValido(cookie?: string) {
   if (!cookie || !segredo()) return false;
   const partes = cookie.split(".");
   if (partes.length !== 3) return false;
@@ -52,9 +54,5 @@ export async function conviteValido(cookie?: string) {
   }
 }
 
-// Invite codes: 10 characters without look-alikes (no 0/o, 1/l/i), about 49 bits — not guessable.
-const LETRAS = "abcdefghjkmnpqrstuvwxyz23456789";
-export function gerarCodigo() {
-  return Array.from(crypto.getRandomValues(new Uint8Array(10)), (byte) => LETRAS[byte % LETRAS.length]).join("");
-}
-export const codigoValido = (codigo: string) => /^[a-z0-9]{6,40}$/.test(codigo);
+export const opcoesCookieAcesso = (secure: boolean) => ({ httpOnly: true, secure, sameSite: "lax" as const, path: "/", maxAge: DIAS_ACESSO * 86400 });
+export const opcoesCookieEntrada = (secure: boolean) => ({ secure, sameSite: "lax" as const, path: "/", maxAge: 120 });

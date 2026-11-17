@@ -1,22 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isOwnerSession } from "@/lib/owners";
-import { COOKIE_CONVITE, conviteValido, preVendaAtiva, rotaLivre } from "@/lib/pre-venda";
+import { COOKIE_ACESSO, acessoValido, preVendaAtiva, rotaLivre } from "@/lib/pre-venda";
 
-// 1. Pre-sale lock: while PRE_VENDA is on, a visitor without the invite cookie sees "Coming soon" on every page
-//    (same address, the content is swapped for /em-breve).
-// 2. On the routes that read the session: keeps the Supabase session fresh (rotating its cookies, which pages can't do)
+// 1. Pre-sale lock: while PRE_VENDA is on, a visitor without the access cookie (given on /pre-venda to the people
+//    on the list) sees "Coming soon" on every page (same address, the content is swapped for /em-breve).
+// 2. On the routes that read the session (/admin, /conta, /pre-venda): keeps the Supabase session fresh (rotating its cookies, which pages can't do)
 //    and turns away anyone who isn't an owner before /admin renders. The admin page checks again on the server.
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  if (preVendaAtiva() && !rotaLivre(path) && !(await conviteValido(request.cookies.get(COOKIE_CONVITE)?.value))) {
+  if (preVendaAtiva() && !rotaLivre(path) && !(await acessoValido(request.cookies.get(COOKIE_ACESSO)?.value))) {
     const trancado = NextResponse.rewrite(new URL("/em-breve", request.url));
     trancado.headers.set("x-robots-tag", "noindex");
     return trancado;
   }
 
-  if (!path.startsWith("/admin") && !path.startsWith("/conta")) return NextResponse.next();
+  if (!["/admin", "/conta", "/pre-venda"].some((rota) => path.startsWith(rota))) return NextResponse.next();
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
