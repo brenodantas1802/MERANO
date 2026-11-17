@@ -8,7 +8,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Download, ImagePlus, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { BeforeAfter, HowItWorks, ShirtFan, TryOnSteps } from "@/components/try-on-visuals";
-import { SeaWaves } from "@/components/beach-art";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import type { PersonBox } from "@/lib/people";
 import { getProvadorProduct as getProduct, getSizeChart, provadorProducts as products, SIZE_CHART, type Product } from "@/lib/products";
@@ -25,7 +24,7 @@ type SlotKey = "principal";
 type Slot = { photo: string | null; people: People | null; analyzing: boolean; target: number | null; run: Run };
 const EMPTY_SLOT: Slot = { photo: null, people: null, analyzing: false, target: null, run: { status: "idle" } };
 const SLOT_COPY: Record<SlotKey, { title: string; hint: string }> = {
-  principal: { title: "Sua foto", hint: "De frente, de lado ou de costas. Corpo inteiro ou da cintura pra cima." },
+  principal: { title: "Sua foto", hint: "De preferência de costas, onde fica a estampa. Corpo inteiro ou da cintura pra cima." },
 };
 
 // One step of the before/after viewer.
@@ -355,8 +354,7 @@ function ProvadorContent() {
             <TryOnSteps />
           </div>
         </div>
-        <SeaWaves />
-    </section>
+      </section>
 
       <div className="mx-auto grid max-w-360 gap-14 px-6 pb-28 pt-14 md:grid-cols-[minmax(0,.95fr)_minmax(0,1.05fr)] md:gap-16 md:px-12 md:pt-20">
         <form onSubmit={handleSubmit}>

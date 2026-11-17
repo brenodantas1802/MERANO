@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type Variant = "outline" | "solid" | "glass";
+type Variant = "outline" | "solid" | "glass" | "ouro";
 
 const BASE = "group/pill relative inline-flex w-fit items-center justify-center overflow-hidden rounded-full px-7 py-3.5 sans text-[11px] font-medium uppercase tracking-[.16em] transition-colors duration-500";
 
@@ -11,6 +11,8 @@ const VARIANTS: Record<Variant, { root: string; fill: string; label: string }> =
   solid: { root: "bg-[var(--ink)] text-[var(--paper)]", fill: "bg-[var(--sol-1)]", label: "" },
   // No backdrop blur: over the hero video it would be recomputed for every video frame, which made Safari stutter.
   glass: { root: "border border-white/50 bg-white/[.16] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.35)]", fill: "bg-white", label: "group-hover/pill:text-[var(--ink)]" },
+  // Brass, the house colour (asked for by the owners on 2026-11-17 instead of black); wine text keeps it legible.
+  ouro: { root: "btn-ouro text-[var(--vinho)]", fill: "bg-[var(--vinho)]", label: "group-hover/pill:text-[var(--creme)]" },
 };
 
 export function PillLink({ href, children, variant = "outline", className = "" }: { href: string; children: ReactNode; variant?: Variant; className?: string }) {

@@ -11,7 +11,7 @@ import { ShirtStage } from "@/components/shirt-stage";
 const CHAPTERS = [
   { id: "verao-em-boa-companhia", title: ["Nascida entre", "cidade e natureza."], text: "A Meranno nasce do encontro entre corpo, território e tempo — da relação afetiva com a paisagem brasileira, sem pressa e sem excesso." },
   { id: "wine-not", title: ["Boa mesa,", "boa companhia."], text: "Cada estampa guarda um lugar onde a vida acontece devagar: uma mesa posta, a conversa que se estende, o mar no fim da rua." },
-  { id: "coracao-preto", title: ["O tempo", "é seu."], text: "Produzimos sob demanda, no ritmo de cada peça. Nada de estoque parado, nada de pressa: a peça segue até você quando fica pronta." },
+  { id: "coracao-preto", title: ["O tempo", "é seu."], text: "Peças feitas para durar e para acompanhar o seu ritmo, sem pressa, do jeito que a vida boa pede." },
 ];
 
 // Desktop: the shirt holds its place on the left and turns into the next one as each chapter reaches the middle of the screen.

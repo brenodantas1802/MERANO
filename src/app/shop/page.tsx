@@ -16,7 +16,8 @@ function ShopContent() {
   // ?tema=<tag> comes from the theme circles on the home page.
   const [tema, setTema] = useState(searchParams.get("tema"));
   const [category, setCategory] = useState(initialCategory);
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+  // ?colecao=<id> comes from the menu, the home shelf and Categorias.
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(searchParams.get("colecao"));
   const [showCollections, setShowCollections] = useState(false);
   const [sort, setSort] = useState("featured");
   const [query, setQuery] = useState("");
@@ -32,6 +33,7 @@ function ShopContent() {
     <div className="flex flex-wrap items-center justify-between gap-4 py-6">
       <div className="flex flex-wrap gap-2">
         {categories.map((value) => <button key={value} onClick={() => pickCategory(value)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${!showCollections && category === value && !selectedCollection ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>{value}</button>)}
+        {selectedCollection && <button onClick={() => setSelectedCollection(null)} className="sans flex min-h-11 items-center gap-2 bg-[var(--ink)] px-4 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">{collections.find((item) => item.id === selectedCollection)?.name ?? "Coleção"} ✕</button>}
         {tema && <button onClick={() => setTema(null)} className="sans flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">{TEMAS_NOME[tema] ?? tema} ✕</button>}
         <button onClick={() => setShowCollections(true)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${showCollections ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>Coleções</button>
       </div>
@@ -42,13 +44,12 @@ function ShopContent() {
       <div className="grid gap-6 md:grid-cols-3">
         {collections.map((collection) => {
           const count = products.filter((product) => product.collection === collection.id).length;
-          return <button key={collection.id} onClick={() => pickCollection(collection.id)} className="group relative flex aspect-square flex-col justify-end overflow-hidden text-left">
-            <Image src={collection.image} alt={collection.name} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-            <div className="absolute inset-0 bg-black/30 transition-colors duration-300 group-hover:bg-black/40" />
-            <div className="relative z-10 p-6 text-white">
+          return <button key={collection.id} onClick={() => pickCollection(collection.id)} className="group relative flex aspect-square flex-col justify-end overflow-hidden bg-[var(--areia)] text-left">
+            <Image src={collection.image} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain p-[12%] pb-[30%] transition-transform duration-700 ease-out group-hover:scale-105" />
+            <div className="relative z-10 p-6 text-[var(--ink)]">
               <span className="sans text-[11px] uppercase tracking-[.14em]">{count} peça{count > 1 ? "s" : ""}</span>
               <h2 className="mt-2 flex items-center gap-2 text-3xl">{collection.name} <ArrowUpRight size={20} className="opacity-0 transition-opacity duration-300 group-hover:opacity-100" /></h2>
-              <p className="sans mt-1 text-xs text-white/80">{collection.tagline}</p>
+              <p className="sans mt-1 text-xs text-[var(--muted)]">{collection.tagline}</p>
             </div>
           </button>;
         })}

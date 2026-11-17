@@ -1,5 +1,6 @@
 import { HeroTextReveal } from "@/components/hero-text-reveal";
 import { PillLink } from "@/components/ui/pill-link";
+import { ESPADAS } from "@/lib/naipes";
 
 // Top of the home page, on phones and computers: a giant brass ace drawn on wine felt (chosen by the owners on
 // 2026-11-10 from the options page; the sea video and the other candidates are in git history). One simple idea, no
@@ -7,8 +8,7 @@ import { PillLink } from "@/components/ui/pill-link";
 
 const MANCHETE = ["Feito para", "quem entende de", <span key="excl" className="hero-accent">exclusividade.</span>];
 
-// The spade as a path (a text "♠" can turn into a coloured emoji on some phones).
-const ESPADAS = "M50 4 C34 30 6 42 6 64 C6 80 22 89 36 84 C42 82 46 77 48 72 C47 82 43 90 33 96 L67 96 C57 90 53 82 52 72 C54 77 58 82 64 84 C78 89 94 80 94 64 C94 42 66 30 50 4 Z";
+export { ESPADAS };
 
 function AsGigante() {
   return <svg aria-hidden viewBox="0 0 100 100" className="as-gigante pointer-events-none absolute -right-[22%] top-[10%] h-[78%] w-auto md:-right-[4%] md:top-[6%] md:h-[96%]">

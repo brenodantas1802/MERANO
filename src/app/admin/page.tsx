@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isOwnerSession } from "@/lib/owners";
 import { createSecretClient } from "@/lib/supabase/publico";
+import { preVendaAtiva } from "@/lib/pre-venda";
 import { AdminDashboard, type CriacaoAdmin, type CadastroCupom } from "./dashboard";
+import type { ConviteAdmin } from "./convites";
+
+// Pre-sale invites, newest first. Needs SUPABASE_SECRET_KEY.
+async function carregarConvites(): Promise<ConviteAdmin[] | null> {
+  const supabase = createSecretClient();
+  if (!supabase) return null;
+  const { data } = await supabase.from("convites_pre_venda").select("id, codigo, nome, limite, usos, ativo, criado_em").order("criado_em", { ascending: false }).limit(200);
+  return data ?? [];
+}
 
 // E-mails left on the 10% coupon popup, newest first. Needs SUPABASE_SECRET_KEY, like the prints.
 async function carregarCupons(): Promise<CadastroCupom[] | null> {
@@ -34,5 +45,9 @@ export default async function AdminPage() {
   if (!user) redirect("/conta?next=/admin");
   const { data } = await supabase.auth.getClaims();
   if (!user.email || !user.email_confirmed_at || !isOwnerSession(user.email, data?.claims.amr)) redirect("/conta");
-  return <AdminDashboard email={user.email} criacoes={await carregarCriacoes()} cupons={await carregarCupons()} />;
+  // The invite links are shown with this site's own address (production, preview or local).
+  const cabecalhos = await headers();
+  const host = cabecalhos.get("x-forwarded-host") ?? cabecalhos.get("host") ?? "";
+  const origem = `${cabecalhos.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
+  return <AdminDashboard email={user.email} criacoes={await carregarCriacoes()} cupons={await carregarCupons()} convites={await carregarConvites()} origem={origem} cadeadoLigado={preVendaAtiva()} />;
 }

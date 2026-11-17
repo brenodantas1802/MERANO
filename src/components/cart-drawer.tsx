@@ -48,7 +48,7 @@ export function CartDrawer() {
               {FRETE_GRATIS_ACIMA ? <>
                 <p className="label text-[11px]">{falta > 0 ? `Faltam ${formatPrice(falta)} para o frete grátis` : "Frete grátis liberado"}</p>
                 <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-black/10"><motion.div className="h-full rounded-full bg-[var(--latao)]" initial={false} animate={{ width: `${Math.min(100, (total / FRETE_GRATIS_ACIMA) * 100)}%` }} transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }} /></div>
-              </> : <p className="label text-[11px]">Feito sob demanda · produção em até 7 dias úteis</p>}
+              </> : <p className="label text-[11px]">Frete calculado pelo seu CEP no pagamento</p>}
             </div>
 
             <AnimatePresence initial={false}>

@@ -46,24 +46,24 @@ export function SeasonShirt({ products }: { products: Product[] }) {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={story.id} {...swap}>
               <h2 className="display text-3xl md:text-4xl">{product.name}</h2>
-              <div className="mt-6"><PillLink href={`/produto/${product.id}`} variant="solid">Ver a peça</PillLink></div>
+              <div className="mt-6"><PillLink href={`/produto/${product.id}`} variant="ouro">Ver a peça</PillLink></div>
             </motion.div>
           </AnimatePresence>
 
           <div className="mt-10">
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ink)]/20 bg-[var(--paper)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
+              <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--latao)]/60 bg-[var(--paper)] transition-colors hover:border-[var(--latao)] hover:bg-[var(--latao)] hover:text-[var(--vinho)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
               <div className="flex min-w-0 gap-2 overflow-x-auto py-1 [scrollbar-width:none]">
                 {stories.map((item, itemIndex) => {
                   const itemProduct = products.find((candidate) => candidate.id === item.id)!;
                   const active = itemIndex === index;
-                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 rounded-full bg-white/70 p-1.5 transition-all duration-300 ${active ? "scale-105 ring-2 ring-[var(--ink)] ring-offset-2 ring-offset-[#f4f6f9]" : "opacity-70 hover:opacity-100"}`}>
+                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 rounded-full bg-white/70 p-1.5 transition-all duration-300 ${active ? "scale-105 ring-2 ring-[var(--latao)] ring-offset-2 ring-offset-[#f4f6f9]" : "opacity-70 hover:opacity-100"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element -- 200px thumbnails made for this row */}
                     <img src={thumbOf(item)} alt="" width={200} height={200} loading="lazy" className="h-full w-full object-contain" />
                   </button>;
                 })}
               </div>
-              <button type="button" onClick={() => go(1)} aria-label="Próxima estampa" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--ink)]/20 bg-[var(--paper)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><ChevronRight size={18} strokeWidth={1.6} /></button>
+              <button type="button" onClick={() => go(1)} aria-label="Próxima estampa" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--latao)]/60 bg-[var(--paper)] transition-colors hover:border-[var(--latao)] hover:bg-[var(--latao)] hover:text-[var(--vinho)]"><ChevronRight size={18} strokeWidth={1.6} /></button>
             </div>
           </div>
         </div>

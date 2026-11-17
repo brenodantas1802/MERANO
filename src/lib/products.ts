@@ -33,8 +33,13 @@ export type Product = {
 export type Collection = { id: string; name: string; tagline: string; image: string };
 
 export const collections: Collection[] = [
-  { id: "colecao-01", name: "Coleção 01", tagline: "Sol, terra e a primeira coleção da Meranno", image: "/imagens/merano-assets/banner-paisagem.jpg" },
+  // Named by the owners on 2026-11-17. `image` is a shirt cutout (the old beach banner no longer fits the brand).
+  { id: "colecao-01", name: "Summer Collection 01", tagline: "A primeira coleção da Meranno", image: "/imagens/merano-assets/recortes/verao-em-boa-companhia-1400.webp" },
 ];
+
+export function getCollection(id: string) {
+  return collections.find((collection) => collection.id === id);
+}
 
 export const products: Product[] = [
   {
@@ -51,7 +56,7 @@ export const products: Product[] = [
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Produção em até 7 dias úteis + envio.",
+    delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
     fits: ["PP", "P", "M", "G", "GG"],
     lancamento: true,
@@ -71,7 +76,7 @@ export const products: Product[] = [
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Produção em até 7 dias úteis + envio.",
+    delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
     fits: ["PP", "P", "M", "G", "GG"],
     lancamento: true,
@@ -91,7 +96,7 @@ export const products: Product[] = [
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Produção em até 7 dias úteis + envio.",
+    delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
     fits: ["PP", "P", "M", "G", "GG"],
     lancamento: true,
@@ -111,7 +116,7 @@ export const products: Product[] = [
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Produção em até 7 dias úteis + envio.",
+    delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
     fits: ["PP", "P", "M", "G", "GG"],
     lancamento: true,
@@ -131,7 +136,7 @@ export const products: Product[] = [
     collection: "colecao-01",
     material: "100% algodão de toque macio",
     care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Produção em até 7 dias úteis + envio.",
+    delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
     fits: ["PP", "P", "M", "G", "GG"],
     lancamento: true,

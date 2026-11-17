@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Package, Search } from "lucide-react";
 import { SignOutButton } from "@/components/auth-buttons";
+import { Convites, type ConviteAdmin } from "./convites";
 
 // Demo orders until checkout writes real ones to the database.
 const orders = [
@@ -67,7 +68,7 @@ function Cupons({ cupons }: { cupons: CadastroCupom[] | null }) {
   </section>;
 }
 
-export function AdminDashboard({ email, criacoes, cupons }: { email: string; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null }) {
+export function AdminDashboard({ email, criacoes, cupons, convites, origem, cadeadoLigado }: { email: string; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; convites: ConviteAdmin[] | null; origem: string; cadeadoLigado: boolean }) {
   return <main>
     <header className="sans flex items-center justify-between gap-4 border-b border-[var(--line)] px-6 py-5 md:px-12">
       <Link href="/" className="font-bold tracking-[.28em]">MERANNO / equipe</Link>
@@ -77,6 +78,7 @@ export function AdminDashboard({ email, criacoes, cupons }: { email: string; cri
       </div>
     </header>
     <div className="mx-auto max-w-360 px-6 py-14 md:px-12">
+      <Convites convites={convites} origem={origem} cadeadoLigado={cadeadoLigado} />
       <div className="flex items-end justify-between">
         <div><p className="sans mb-4 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Operação</p><h1 className="display text-7xl">Pedidos.</h1></div>
         <span className="sans flex items-center gap-2 text-[11px] uppercase tracking-[.14em] text-[var(--muted)]"><Package size={15} /> {orders.length} ativos</span>

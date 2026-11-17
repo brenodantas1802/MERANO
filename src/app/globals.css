@@ -208,6 +208,40 @@ html { -webkit-tap-highlight-color: transparent; }
 
 /* Brass hairline and numbered section labels ("01 / Mais desejadas"), from the Salão palette. */
 .rule-latao { height: 1px; background: linear-gradient(90deg, var(--latao), rgba(186, 150, 84, 0)); }
+
+/* Brass button: the same polished gold as the hero's key word, flat enough to read as a button. */
+.btn-ouro {
+	background: linear-gradient(100deg, #e2c88e 0%, #c9a663 40%, #ba9654 65%, #d6b878 100%);
+	box-shadow: inset 0 1px 0 rgba(255, 246, 222, .55), 0 10px 22px -14px rgba(85, 30, 43, .55);
+}
+
+/* Personalizador banner on the home: a hand of three cards on the wine felt (the house prints and the ace). */
+.baralho { aspect-ratio: 5 / 7; }
+.carta {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	border-radius: 14px;
+	background: var(--creme);
+	box-shadow: 0 34px 50px -24px rgba(12, 2, 6, .85), inset 0 0 0 1px rgba(186, 150, 84, .7);
+	transform-origin: 50% 118%;
+	transition: transform .8s cubic-bezier(.22, 1, .36, 1);
+}
+.carta::after {
+	content: "";
+	position: absolute;
+	inset: 7px;
+	border: 1px solid rgba(186, 150, 84, .6);
+	border-radius: 9px;
+	pointer-events: none;
+}
+.carta-esq { transform: translate(-30%, 3%) rotate(-14deg); }
+.carta-dir { transform: translate(30%, 3%) rotate(12deg); }
+.carta-frente { transform: translateY(3%) rotate(-1deg); }
+.group:hover .carta-esq { transform: translate(-36%, 1%) rotate(-18deg); }
+.group:hover .carta-dir { transform: translate(36%, 1%) rotate(16deg); }
+.group:hover .carta-frente { transform: translateY(0) rotate(0); }
+@media (prefers-reduced-motion: reduce) { .carta { transition: none; } }
 .secao { font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: .22em; font-size: 13px; color: var(--vinho); }
 .secao b { color: var(--latao); font-weight: 500; margin-right: .6em; }
 
@@ -231,3 +265,34 @@ html { -webkit-tap-highlight-color: transparent; }
    The element must be positioned: .toque makes it relative unless it is already absolute/fixed. */
 .toque:not(.absolute):not(.fixed) { position: relative; }
 .toque::after { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
+
+/* Pre-sale padlock (/em-breve and the entry veil). The shackle lifts on `.abrindo`. */
+.cadeado-arco { transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+.cadeado-balanco { transform-origin: 50% 0; animation: cadeado-balanco 3.4s ease-in-out infinite; }
+@keyframes cadeado-balanco { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+
+/* Entry veil after the invite link: hidden unless <html> has `entrada` (set by SCRIPT_ENTRADA before the first paint). */
+.veu-entrada { display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; }
+html.entrada { overflow: hidden; }
+html.entrada .veu-entrada { display: flex; }
+.veu-entrada .veu-conteudo { animation: veu-chegar .7s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes veu-chegar { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+.veu-entrada.abrindo .cadeado-arco { transform: translateY(-15px); }
+.veu-entrada.abrindo .veu-conteudo { animation: veu-sair .55s .5s ease-in forwards; }
+@keyframes veu-sair { to { opacity: 0; transform: scale(1.12); } }
+/* The page shows through a spade-shaped hole that grows from the keyhole to the whole screen. */
+.veu-entrada.abrindo {
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 4 C34 30 6 42 6 64 C6 80 22 89 36 84 C42 82 46 77 48 72 C47 82 43 90 33 96 L67 96 C57 90 53 82 52 72 C54 77 58 82 64 84 C78 89 94 80 94 64 C94 42 66 30 50 4 Z'/%3E%3C/svg%3E") center / 0 0 no-repeat, linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 4 C34 30 6 42 6 64 C6 80 22 89 36 84 C42 82 46 77 48 72 C47 82 43 90 33 96 L67 96 C57 90 53 82 52 72 C54 77 58 82 64 84 C78 89 94 80 94 64 C94 42 66 30 50 4 Z'/%3E%3C/svg%3E") center / 0 0 no-repeat, linear-gradient(#000 0 0);
+	mask-composite: exclude;
+	animation: veu-fechadura 1.7s .75s cubic-bezier(.5, 0, .45, 1) forwards;
+}
+@keyframes veu-fechadura {
+	from { -webkit-mask-size: 0 0, 100% 100%; mask-size: 0 0, 100% 100%; }
+	to { -webkit-mask-size: 420vmax 420vmax, 100% 100%; mask-size: 420vmax 420vmax, 100% 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.cadeado-balanco { animation: none; }
+	.veu-entrada.abrindo { -webkit-mask: none; mask: none; animation: veu-sair .4s forwards; }
+}

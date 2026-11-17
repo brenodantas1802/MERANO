@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Copy, CreditCard, QrCode } from "lucide-react";
 import { useCart, type CartItem } from "@/components/cart-provider";
@@ -11,17 +11,21 @@ import { ProductCard } from "@/components/product-card";
 import { saveOrder } from "@/lib/orders";
 import { formatPrice, products, similarProducts, currentImage } from "@/lib/products";
 import { Illustration } from "@/components/illustration";
+import { CEP_KEY, prazoTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
 
-// Demo checkout for presentations: nothing here is sent anywhere or charged.
+// Demo checkout for presentations: nothing here is charged. The shipping, though, is a real SuperFrete quote
+// (/api/frete) for the CEP typed here or in the cart.
 
 type Method = "pix" | "cartao";
-type Shipping = { id: string; label: string; days: string; price: number };
-
-const SHIPPING: Shipping[] = [
-  { id: "pac", label: "PAC", days: "5 a 8 dias úteis após a produção", price: 19.9 },
-  { id: "sedex", label: "SEDEX", days: "2 a 3 dias úteis após a produção", price: 34.9 },
-];
 const PIX_DISCOUNT = 0.05;
+
+function lerCep() {
+  try {
+    return typeof window === "undefined" ? "" : window.localStorage.getItem(CEP_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
 
 // Salão look: soft paper fields with a wine focus ring, brass-numbered sections, wine buttons.
 const field = "mt-2 block h-12 w-full rounded-[14px] border border-[var(--line)] bg-white/70 px-4 text-base text-[var(--ink)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-[var(--muted)]/60 focus:border-[var(--vinho)]/60 focus:shadow-[0_0_0_3px_rgba(85,30,43,.08)]";
@@ -50,7 +54,7 @@ function FakeQr() {
   return <svg viewBox={`-1 -1 ${size + 2} ${size + 2}`} className="h-44 w-44 rounded-2xl bg-white p-2 text-[var(--ink)]" shapeRendering="crispEdges" aria-label="QR Code Pix">{cells.map(([x, y]) => <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="currentColor" />)}{finder(0, 0)}{finder(18, 0)}{finder(0, 18)}</svg>;
 }
 
-function Summary({ items, subtotal, shipping, discount, total }: { items: CartItem[]; subtotal: number; shipping: Shipping | null; discount: number; total: number }) {
+function Summary({ items, subtotal, shipping, discount, total }: { items: CartItem[]; subtotal: number; shipping: OpcaoFrete | null; discount: number; total: number }) {
   return <aside className="glass h-fit rounded-[28px] p-6 md:sticky md:top-28 md:p-7">
     <p className="secao mb-5 text-[12px]">Resumo do pedido</p>
     <div className="space-y-4">{items.map((item) => <div key={item.id} className="flex gap-4">
@@ -59,7 +63,7 @@ function Summary({ items, subtotal, shipping, discount, total }: { items: CartIt
     </div>)}</div>
     <div className="sans mt-6 space-y-2 border-t border-black/10 pt-5 text-sm">
       <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-      <div className="flex justify-between"><span>Frete</span><span>{shipping ? formatPrice(shipping.price) : "—"}</span></div>
+      <div className="flex justify-between"><span>Frete</span><span>{shipping ? formatPrice(shipping.preco) : "—"}</span></div>
       {discount > 0 && <div className="flex justify-between text-[var(--vinho)]"><span>Desconto Pix (5%)</span><span>− {formatPrice(discount)}</span></div>}
     </div>
     <div className="mt-4 flex items-baseline justify-between border-t border-black/10 pt-4"><span className="text-lg">Total</span><span className="text-2xl font-semibold tabular-nums text-[var(--vinho)]">{formatPrice(total)}</span></div>
@@ -67,10 +71,11 @@ function Summary({ items, subtotal, shipping, discount, total }: { items: CartIt
 }
 
 export default function PaymentPage() {
-  const { items, total: subtotal, clear } = useCart();
-  const [cep, setCep] = useState("");
+  const { items, total: subtotal, count, clear } = useCart();
+  const [cep, setCep] = useState(lerCep);
   const [address, setAddress] = useState({ street: "", district: "", city: "" });
-  const [shippingId, setShippingId] = useState<string | null>(null);
+  const [shippingId, setShippingId] = useState<number | null>(null);
+  const frete = useFrete(cep, count);
   const [method, setMethod] = useState<Method>("pix");
   const [installments, setInstallments] = useState(1);
   const [card, setCard] = useState({ number: "", name: "", expiry: "", cvv: "" });
@@ -80,23 +85,28 @@ export default function PaymentPage() {
   const [order, setOrder] = useState<{ id: string; total: number; method: Method; productIds: string[] } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const shipping = cep.length === 9 ? SHIPPING.find((option) => option.id === shippingId) ?? null : null;
+  // The cheapest option comes selected.
+  const shipping = frete.opcoes.find((option) => option.id === shippingId) ?? frete.opcoes[0] ?? null;
   const discount = method === "pix" ? Math.round(subtotal * PIX_DISCOUNT * 100) / 100 : 0;
-  const total = subtotal + (shipping?.price ?? 0) - discount;
+  const total = subtotal + (shipping?.preco ?? 0) - discount;
 
-  async function updateCep(value: string) {
+  function updateCep(value: string) {
     const masked = maskCep(value);
     setCep(masked);
-    if (masked.length !== 9) return;
-    setShippingId((current) => current ?? "pac");
-    try {
-      const response = await fetch(`https://viacep.com.br/ws/${onlyDigits(masked)}/json/`);
-      const data = await response.json();
-      if (!data.erro) setAddress({ street: data.logradouro ?? "", district: data.bairro ?? "", city: data.localidade && data.uf ? `${data.localidade} / ${data.uf}` : "" });
-    } catch {
-      // Autofill is a convenience; the customer can still type the address.
-    }
+    try { window.localStorage.setItem(CEP_KEY, masked); } catch { /* the CEP just won't be remembered */ }
   }
+
+  // Street and district from ViaCEP once the CEP is complete. Autofill is a convenience; the customer can still type.
+  const cepDigits = onlyDigits(cep);
+  useEffect(() => {
+    if (cepDigits.length !== 8) return;
+    const controller = new AbortController();
+    fetch(`https://viacep.com.br/ws/${cepDigits}/json/`, { signal: controller.signal })
+      .then((response) => response.json())
+      .then((data) => { if (!data.erro) setAddress((current) => ({ street: current.street || (data.logradouro ?? ""), district: current.district || (data.bairro ?? ""), city: data.localidade && data.uf ? `${data.localidade} / ${data.uf}` : "" })); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [cepDigits]);
 
   function pay(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -131,11 +141,11 @@ export default function PaymentPage() {
   if (status === "paid" && order) return <main><SiteHeader /><div className="mx-auto max-w-5xl px-6 py-24 md:px-12">
     <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 220, damping: 16 }} className="mb-10 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--vinho)] text-[var(--creme)] ring-1 ring-[var(--latao)]/60 ring-offset-4 ring-offset-[var(--paper)]"><Check size={30} /></motion.div>
     <p className="sans mb-5 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Pedido {order.id} · {order.method === "pix" ? "Pix aprovado" : "Cartão aprovado"}</p>
-    <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><h1 className="display text-6xl md:text-8xl">Obrigado.<br /><i>Sua peça começa agora.</i></h1><Illustration name="laranjeira" className="w-36 shrink-0 md:w-52" /></div>
-    <p className="mt-8 max-w-lg text-2xl leading-snug">Recebemos {formatPrice(order.total)}. Sua camiseta entra na fila do ateliê hoje e você recebe o código de rastreio por e-mail assim que ela sair.</p>
+    <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><h1 className="display text-6xl md:text-8xl">Obrigado.<br /><i>Pedido confirmado.</i></h1><Illustration name="laranjeira" className="w-36 shrink-0 md:w-52" /></div>
+    <p className="mt-8 max-w-lg text-2xl leading-snug">Recebemos {formatPrice(order.total)}. Você recebe o código de rastreio por e-mail assim que o pedido for despachado.</p>
     <div className="sans mt-12 grid gap-6 border-y border-[var(--line)] py-8 text-[11px] uppercase tracking-[.12em] md:grid-cols-3">
       <div><span className="text-[var(--latao)]">01 · Hoje</span><p className="mt-2 normal-case tracking-normal text-[var(--muted)]">Pedido confirmado</p></div>
-      <div><span className="text-[var(--muted)]">02 · Até 7 dias úteis</span><p className="mt-2 normal-case tracking-normal text-[var(--muted)]">Produção no ateliê</p></div>
+      <div><span className="text-[var(--muted)]">02 · Separação</span><p className="mt-2 normal-case tracking-normal text-[var(--muted)]">A gente confere e embala</p></div>
       <div><span className="text-[var(--muted)]">03 · Envio</span><p className="mt-2 normal-case tracking-normal text-[var(--muted)]">Rastreio no seu e-mail</p></div>
     </div>
     <Link href="/shop" className="press label mt-10 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--vinho)] px-6 text-[12px] text-[var(--creme)]">Continuar explorando <ArrowRight size={14} /></Link>
@@ -174,11 +184,14 @@ export default function PaymentPage() {
             <label className={label}>Bairro<input required value={address.district} onChange={(event) => setAddress({ ...address, district: event.target.value })} className={field} /></label>
           </div>
           {address.city && <p className="sans mt-4 text-xs text-[var(--muted)]">{address.city}</p>}
-          <AnimatePresence>{cep.length === 9 && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-8 grid gap-3">
-            {SHIPPING.map((option) => <label key={option.id} className={`press flex min-h-14 cursor-pointer items-center justify-between rounded-[18px] border px-5 py-4 transition-colors ${shippingId === option.id ? "border-[var(--vinho)] bg-white/80 shadow-[0_0_0_3px_rgba(85,30,43,.06)]" : "border-[var(--line)] bg-white/40"}`}>
-              <span className="flex items-center gap-4"><input type="radio" name="frete" checked={shippingId === option.id} onChange={() => setShippingId(option.id)} className="h-5 w-5 accent-[var(--vinho)]" /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{option.label}</span><span className="text-sm text-[var(--muted)]">{option.days}</span></span></span>
-              <span className="sans text-sm">{formatPrice(option.price)}</span>
+          <AnimatePresence>{frete.pronto && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-8 grid gap-3" aria-live="polite">
+            {frete.carregando && [0, 1].map((index) => <div key={index} className="h-[68px] animate-pulse rounded-[18px] border border-[var(--line)] bg-white/40" />)}
+            {frete.erro && <p className="rounded-[18px] border border-[var(--line)] bg-white/40 px-5 py-4 text-sm text-[var(--muted)]">{frete.erro}</p>}
+            {frete.opcoes.map((option) => <label key={option.id} className={`press flex min-h-14 cursor-pointer items-center justify-between rounded-[18px] border px-5 py-4 transition-colors ${shipping?.id === option.id ? "border-[var(--vinho)] bg-white/80 shadow-[0_0_0_3px_rgba(85,30,43,.06)]" : "border-[var(--line)] bg-white/40"}`}>
+              <span className="flex items-center gap-4"><input type="radio" name="frete" required checked={shipping?.id === option.id} onChange={() => setShippingId(option.id)} className="h-5 w-5 accent-[var(--vinho)]" /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{option.nome}{option.empresa && option.empresa !== "Correios" ? ` · ${option.empresa}` : ""}</span><span className="text-sm text-[var(--muted)]">{prazoTexto(option)} após o envio</span></span></span>
+              <span className="sans text-sm">{formatPrice(option.preco)}</span>
             </label>)}
+            {frete.exemplo && <p className="sans text-[11px] uppercase tracking-[.12em] text-[var(--latao)]">Valores de exemplo</p>}
           </motion.div>}</AnimatePresence>
         </section>
 

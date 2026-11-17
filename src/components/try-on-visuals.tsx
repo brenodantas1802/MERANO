@@ -70,7 +70,7 @@ export function HowItWorks() {
         <ol className="mt-3 space-y-3 rounded-[1.75rem] bg-[var(--creme)] p-5 shadow-[0_18px_40px_-30px_rgba(32,28,23,.55)]">
           {[
             ["Escolha a estampa", "Toque em “Escolher camiseta” e escolha a peça que você quer provar."],
-            ["Envie uma foto sua", "De frente, de lado ou de costas — corpo inteiro ou da cintura pra cima, com boa luz e sem filtro."],
+            ["Envie uma foto sua", "De preferência de costas, que é onde fica a estampa — corpo inteiro ou da cintura pra cima, com boa luz e sem filtro."],
             ["Gere e compare", "Toque em “Gerar provador virtual”. Em instantes você vê a foto original e você vestindo a Meranno, lado a lado."],
           ].map(([title, text], index) => <li key={title} className="flex gap-4">
             <span className="display flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--sol-1)] text-lg text-white">{index + 1}</span>

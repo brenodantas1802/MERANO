@@ -6,6 +6,8 @@ import { FirstPurchasePopup } from "@/components/first-purchase-popup";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { ConsentimentoAnalise } from "@/components/consentimento-analise";
+import { EntradaPreVenda } from "@/components/entrada-pre-venda";
+import { SCRIPT_ENTRADA } from "@/lib/pre-venda";
 
 // Barlow Condensed is the closest open font to the DIN Condensed look the owners picked; its regular-width sibling
 // carries the running text so long lines stay easy to read.
@@ -14,13 +16,14 @@ const sans = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], variabl
 
 export const metadata: Metadata = {
   title: "MERANNO | Feito para quem entende de exclusividade.",
-  description: "Moda brasileira feita sob demanda.",
+  description: "Moda brasileira para quem entende de exclusividade.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`}>
-      <body><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /><ConsentimentoAnalise /></CartProvider></body>
+    // suppressHydrationWarning: SCRIPT_ENTRADA may add a class to <html> before React hydrates.
+    <html lang="pt-BR" data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+      <body><script dangerouslySetInnerHTML={{ __html: SCRIPT_ENTRADA }} /><EntradaPreVenda /><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /><ConsentimentoAnalise /></CartProvider></body>
     </html>
   );
 }

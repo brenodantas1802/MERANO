@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SeaWaves } from "./beach-art";
+import { ESPADAS } from "@/lib/naipes";
 import { INSTAGRAM_URL } from "./whatsapp-button";
 
 const LINKS = [
@@ -19,17 +19,13 @@ const LINKS = [
   { href: INSTAGRAM_URL, label: "Instagram" },
 ];
 
-// Pages whose own background is dark all the way down.
-const DARK_PAGES: string[] = [];
-// Pages with the shallow-water background, which continues behind the waves.
-const RIPPLE_PAGES = ["/carrinho"];
-
 export function SiteFooter() {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
-  // The waves sit between the page and the footer, so behind them goes the colour of the page above.
-  const above = DARK_PAGES.some((page) => pathname.startsWith(page)) ? "bg-[var(--terra-dark)]" : RIPPLE_PAGES.some((page) => pathname.startsWith(page)) ? "ripples-plain" : "bg-[var(--paper)]";
-  return <><SeaWaves into="#000" className={`-mb-px ${above}`} /><footer className="bg-black text-white">
-    <div className="flex flex-col gap-8 px-6 pb-24 pt-10 md:flex-row md:items-center md:justify-between md:py-10 md:pl-12 md:pr-32"><Image src="/imagens/merano-assets/logo-principal.png" alt="Meranno" width={120} height={80} className="h-14 w-auto object-contain object-left" /><nav className="sans flex flex-wrap gap-x-5 text-[11px] uppercase tracking-[.15em]">{LINKS.map((link) => <Link key={link.href} href={link.href} className="toque inline-flex min-h-11 items-center transition-opacity hover:opacity-70">{link.label}</Link>)}</nav><span className="sans text-[11px] uppercase tracking-[.15em] text-white/75">© Meranno 2026</span></div>
-  </footer></>;
+  // A brass line with the ace in the middle opens the footer (the sea waves that sat here went on 2026-11-17: the
+  // owners no longer want sea imagery).
+  return <footer className="bg-black text-white">
+    <div aria-hidden className="flex items-center gap-4 px-6 pt-8 md:px-12"><span className="h-px flex-1 bg-[linear-gradient(90deg,transparent,var(--latao))]" /><svg viewBox="0 0 100 100" className="h-4 w-4"><path d={ESPADAS} fill="var(--latao)" /></svg><span className="h-px flex-1 bg-[linear-gradient(90deg,var(--latao),transparent)]" /></div>
+    <div className="flex flex-col gap-8 px-6 pb-24 pt-8 md:flex-row md:items-center md:justify-between md:pb-10 md:pl-12 md:pr-32 md:pt-6"><Image src="/imagens/merano-assets/logo-principal.png" alt="Meranno" width={120} height={80} className="h-14 w-auto object-contain object-left" /><nav className="sans flex flex-wrap gap-x-5 text-[11px] uppercase tracking-[.15em]">{LINKS.map((link) => <Link key={link.href} href={link.href} className="toque inline-flex min-h-11 items-center transition-opacity hover:opacity-70">{link.label}</Link>)}</nav><span className="sans text-[11px] uppercase tracking-[.15em] text-white/75">© Meranno 2026</span></div>
+  </footer>;
 }

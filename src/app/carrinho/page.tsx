@@ -2,20 +2,42 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
 import { ShirtFan } from "@/components/try-on-visuals";
 import { PillLink } from "@/components/ui/pill-link";
 import { currentImage, formatPrice } from "@/lib/products";
+import { CEP_KEY, prazoTexto, useFrete } from "@/lib/use-frete";
+
+const maskCep = (value: string) => value.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
+
+function lerCep() {
+  try {
+    return typeof window === "undefined" ? "" : window.localStorage.getItem(CEP_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
 
 function CartContent() {
   const { items, total, count, removeItem, updateQuantity } = useCart();
+  // Shipping right in the cart: the cheapest SuperFrete option for the CEP (the payment page lists all of them).
+  const [cep, setCep] = useState(lerCep);
+  const frete = useFrete(cep, count);
+  const maisBarato = frete.opcoes[0] ?? null;
+  const totalComFrete = total + (maisBarato?.preco ?? 0);
+  function updateCep(value: string) {
+    const masked = maskCep(value);
+    setCep(masked);
+    try { window.localStorage.setItem(CEP_KEY, masked); } catch { /* the CEP just won't be remembered */ }
+  }
 
   if (items.length === 0) return <div className="mt-12 flex flex-col items-center rounded-[2rem] bg-[var(--paper)] px-6 py-16 text-center shadow-[0_30px_60px_-45px_rgba(32,28,23,.55)]">
     <ShirtFan size={110} />
     <p className="display mt-10 text-4xl md:text-5xl">Seu carrinho está<br /><i>esperando uma peça.</i></p>
-    <p className="mt-4 max-w-md text-lg text-[var(--ink)]/70">Cada camiseta é feita depois do seu pedido — escolha a sua estampa e a gente começa.</p>
+    <p className="mt-4 max-w-md text-lg text-[var(--ink)]/70">Escolha a sua estampa da Summer Collection 01.</p>
     <div className="mt-8"><PillLink href="/shop" variant="solid">Ver a coleção</PillLink></div>
   </div>;
 
@@ -48,12 +70,15 @@ function CartContent() {
     <aside className="h-fit rounded-[2rem] bg-[var(--mar-fundo)] p-7 text-[var(--paper)] shadow-[0_30px_60px_-40px_rgba(15,61,68,.9)] md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)]">
       <div className="mt-5 space-y-3 border-b border-white/15 pb-5 text-[15px]">
         <div className="flex justify-between"><span className="text-white/75">{count} {count === 1 ? "peça" : "peças"}</span><span>{formatPrice(total)}</span></div>
-        <div className="flex justify-between"><span className="text-white/75">Frete</span><span className="text-white/75">calculado no próximo passo</span></div>
+        <div className="flex justify-between"><span className="text-white/75">Frete</span><span className={maisBarato ? "" : "text-white/75"}>{frete.carregando ? "calculando…" : maisBarato ? formatPrice(maisBarato.preco) : "informe o CEP"}</span></div>
+        <label className="sans flex items-center gap-3 text-[12px] text-white/75">CEP
+          <input inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} placeholder="00000-000" aria-label="CEP para calcular o frete" className="h-11 min-w-0 flex-1 rounded-full border border-white/20 bg-white/10 px-4 text-[15px] text-[var(--paper)] outline-none placeholder:text-white/40 focus:border-[var(--latao)]" />
+        </label>
+        <p aria-live="polite" className="sans min-h-4 text-xs text-white/75">{frete.erro ?? (maisBarato ? `${maisBarato.nome} · ${prazoTexto(maisBarato)} após o envio${frete.opcoes.length > 1 ? ` · mais ${frete.opcoes.length - 1} ${frete.opcoes.length > 2 ? "opções" : "opção"} no pagamento` : ""}` : "")}{frete.exemplo && " · valores de exemplo"}</p>
       </div>
-      <div className="mt-5 flex items-baseline justify-between"><span className="text-lg">Total</span><span className="display text-4xl">{formatPrice(total)}</span></div>
-      <p className="sans mt-1 text-right text-xs text-white/75">ou 3x de {formatPrice(total / 3)} sem juros</p>
+      <div className="mt-5 flex items-baseline justify-between"><span className="text-lg">Total</span><span className="display text-4xl">{formatPrice(totalComFrete)}</span></div>
+      <p className="sans mt-1 text-right text-xs text-white/75">ou 3x de {formatPrice(totalComFrete / 3)} sem juros</p>
       <Link href="/pagamento" className="sans mt-7 block rounded-full bg-[var(--paper)] px-6 py-4 text-center text-[12px] font-medium uppercase tracking-[.16em] text-[var(--ink)] transition-colors hover:bg-[var(--sol-2)]">Finalizar compra</Link>
-      <p className="sans mt-4 text-center text-xs text-white/75">Produção sob demanda em até 7 dias úteis + envio</p>
     </aside>
   </div>;
 }
