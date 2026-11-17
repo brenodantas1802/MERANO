@@ -1,145 +1,167 @@
-# MERANNO: o que fazer quando estiver no computador
+# MERANNO: o que falta fazer
 
-Lista do que ficou pendente, em ordem de prioridade, com o passo a passo de cada item.
-Todo o trabalho está no GitHub, no branch `claude/virtual-taster-openrouter-89fmt8`, **PR #1**: https://github.com/brenodantas1802/MERANO/pull/1
+Atualizado em **17/11/2026**. O site no ar (https://merano-xi.vercel.app) já tem tudo o que foi feito até agora. Esta lista é só o que depende de vocês, em ordem de prioridade, com o passo a passo de cada item.
 
-Prévia das telas: https://claude.ai/artifact/QKt6Ave9X9MDecRgX49GTR
-Relatório da pesquisa: https://claude.ai/artifact/FFUKDzoUfWuKGEU7ESJJyP
+> Dica: abra o Claude Code na pasta do site e diga "faça o item X do PENDENCIAS-LEIA-ME.md".
 
-> Dica: em cada item, você pode abrir o Claude Code no projeto e dizer "faça o item X do PENDENCIAS-LEIA-ME.md".
-
----
-
-## ⚠️ Antes de tudo: o pagamento do site é simulado
-
-Hoje a tela de pagamento **não cobra nada e não guarda o pedido em lugar nenhum**.
-- Ela espera 2 segundos e mostra "Pix aprovado" ou "Cartão aprovado".
-- O pedido fica salvo só no navegador do próprio cliente.
-
-Se o site estiver aberto ao público, um cliente pode achar que pagou sem ter pago, e vocês não ficam sabendo do pedido.
-
-**O que fazer (escolha um):**
-- **A. Provisório:** trocar o fim da compra por "Enviar pedido pelo WhatsApp". Isso abre uma conversa com os itens já escritos, e o pagamento é combinado com a equipe.
-- **B. Definitivo:** integrar um meio de pagamento (Mercado Pago, Pagar.me, Stripe etc.) e salvar os pedidos no Supabase. Exige uma conta no meio de pagamento escolhido.
-
-Peça ao Claude: "implemente a opção A (ou B) do aviso de pagamento".
+Links úteis:
+- Opções do topo e antes/depois da rodada 2: https://claude.ai/artifact/95NRWaUtmySMzCogGxKrbk
+- Antes/depois da rodada 1: https://claude.ai/artifact/14rXsCZ4TE39SsZnkKAPmy
 
 ---
 
-## 1. Publicar o site com todas as mudanças
+## ⚠️ Antes de tudo: o pagamento ainda é simulado
 
-**1.1 Mesclar o PR**
-1. Abra https://github.com/brenodantas1802/MERANO/pull/1
-2. Toque em **Merge pull request** e depois em **Confirm merge**.
+A tela de pagamento **não cobra nada e não guarda o pedido em lugar nenhum**. Ela espera 2 segundos e mostra "Pix aprovado" ou "Cartão aprovado". O pedido fica salvo só no navegador do cliente.
 
-**1.2 Publicar na Vercel**
+Se vocês ligarem a pré-venda antes de resolver isso, quem entrar pode achar que comprou sem ter pago, e vocês não ficam sabendo do pedido. Veja o **item 8**.
 
-O projeto da Vercel **não está ligado ao GitHub**, então mesclar não publica sozinho. Escolha um caminho:
+---
 
-- **Caminho A, ligar a Vercel ao GitHub (recomendado, uma vez só):**
-  1. Na Vercel, abra o projeto **merano** e vá em **Settings → Git → Connect Git Repository**.
-  2. Escolha GitHub e o repositório **brenodantas1802/MERANO**. Se o GitHub pedir autorização, aceite.
-  3. Confira que a **Production Branch** é `main`.
-  4. A partir daí, cada mesclagem no `main` publica o site, e cada PR ganha um link de prévia.
-- **Caminho B, publicar pelo terminal:**
-  ```bash
-  git checkout main
-  git pull
-  npm install
-  npx vercel --prod
-  ```
-  Na primeira vez, `npx vercel` pede login e pergunta qual projeto usar: escolha **merano** do time **brenodantas1802-2440's projects**.
+## 1. Ligar o cadeado da pré-venda
 
-**1.3 Se algo der errado:** na Vercel, vá em **Deployments**, abra a versão anterior e use **Promote to Production** (ou **Instant Rollback**).
+Com o cadeado ligado, quem não está na lista vê só "Coming soon" em qualquer página. Hoje ele está **desligado** porque faltam duas variáveis na Vercel (o Claude não tem permissão para cadastrar segredos lá).
 
-## 2. Variáveis na Vercel (Settings → Environment Variables → Production)
+1. Abra a Vercel, entre no projeto **merano** e vá em **Settings → Environment Variables**.
+2. Cadastre, marcando só **Production**:
+   - **`SUPABASE_SECRET_KEY`**: a chave secreta do Supabase. Dois jeitos de pegar:
+     - no Supabase, projeto **MERANO** → **Project Settings → API Keys** → copie a chave **secret**; ou
+     - no arquivo `.env.local` da pasta do site, copie o que vem depois de `SUPABASE_SECRET_KEY=`.
+     Sem essa chave o cadeado não liga, a lista de autorizados não funciona e o `/admin` não mostra estampas nem cupons. **Nunca** coloque essa chave no código, no chat ou no WhatsApp.
+   - **`PRE_VENDA`** com o valor **`1`**.
+3. Vá em **Deployments**, abra os três pontinhos da publicação mais recente e toque em **Redeploy**. Variável nova só vale depois de publicar de novo. Se preferir, peça ao Claude: "publique o site de novo".
+4. Teste numa **janela anônima**: o site tem que mostrar "Coming soon" com o cadeado.
+
+## 2. Liberar os sócios
+
+Os cinco donos (os e-mails em `OWNER_EMAILS`) já estão liberados. Cada um faz uma vez em cada aparelho:
+
+1. Abrir **https://merano-xi.vercel.app/pre-venda**.
+2. Tocar em **Continuar com Google** com o Gmail de dono.
+3. Tocar em **Abrir o cadeado**. O cadeado abre e o site aparece pela fechadura em forma de espada.
+
+## 3. Montar a lista e mandar o link no grupo
+
+1. Entre em **https://merano-xi.vercel.app/admin** com o Google. A primeira seção é **"Quem pode entrar"**.
+2. No campo grande, cole as pessoas, **uma por linha**, com e-mail ou WhatsApp. O nome é opcional. Exemplos que funcionam:
+   ```
+   Ana Souza, 11 98765-4321
+   pedro@gmail.com
+   Mateus - (21) 99999-0000 - mateus@hotmail.com
+   ```
+3. Toque em **Adicionar à lista**. Quem já estava é ignorado, e as linhas sem e-mail nem número aparecem num aviso.
+4. A lista mostra quem **já entrou** e quem **ainda não entrou**. O **X** tira a pessoa da lista.
+5. Toque em **Copiar link** e mande no grupo. Sugestão de mensagem:
+   > Pré-venda da Meranno aberta só pra este grupo. Entra por aqui: merano-xi.vercel.app/pre-venda
+   > Use o Google ou crie sua conta com o mesmo e-mail ou WhatsApp que está aqui no grupo.
+
+**O que a pessoa do grupo faz:**
+1. Abre o link e entra com o **Google** ou toca em **Criar conta** (nome, e-mail, senha e WhatsApp).
+2. Se o e-mail ou o WhatsApp do cadastro estiver na lista, aparece **"Você está na lista"** → **Abrir o cadeado**.
+3. Se não estiver, o site pede o **WhatsApp que está no grupo**. Com o número certo, libera.
+4. A conta fica liberada **para sempre**. Em outro celular ou computador, é só entrar com a mesma conta pelo mesmo link.
+
+## 4. Conferir o e-mail de confirmação (antes de mandar o link)
+
+Quem cria conta com e-mail (sem Google) recebe um e-mail para confirmar a conta. Em outubro ficou combinado mandar esses e-mails pelo Gmail da Meranno (`Servico.merano@gmail.com`). **Ninguém confirmou se isso foi salvo.** Sem isso, o Supabase só manda e-mail para a própria equipe, e o pessoal do grupo nunca recebe a confirmação.
+
+1. Supabase → projeto **MERANO** → **Authentication** → configurações de e-mail / **SMTP**. O nome do menu pode variar.
+2. Confira se o SMTP próprio está ligado, com o Gmail e a senha de app.
+3. Teste: crie uma conta em `/conta/criar` com um e-mail que **não** seja de nenhum sócio e veja se o e-mail chega.
+
+Enquanto isso não estiver confirmado, peça para o pessoal entrar com o **Google**.
+
+## 5. Desligar o cadeado no lançamento aberto
+
+Na Vercel, apague a variável `PRE_VENDA` (ou troque para `0`) e faça **Redeploy**. O site volta a abrir para todo mundo, e a lista fica guardada.
+
+## 6. Botão "Quero entrar no grupo" (opcional)
+
+A tela "Coming soon" pode ter um botão que leva para o grupo do WhatsApp. Para ligar, cadastre na Vercel **`PRE_VENDA_GRUPO_URL`** com o link de convite do grupo e faça **Redeploy**.
+
+## 7. Frete de verdade pela SuperFrete
+
+Hoje o carrinho e o pagamento mostram o frete com **valores de exemplo** (aparece escrito "valores de exemplo"). Para virar o frete real:
+
+1. Crie a conta em https://web.superfrete.com.
+2. Vá em **Integrações → Desenvolvedores** e gere o **token**. Ele aparece **uma vez só**: copie na hora.
+3. Na Vercel (Production), cadastre:
+   - **`SUPERFRETE_TOKEN`**: o token;
+   - **`FRETE_CEP_ORIGEM`**: o CEP de onde as camisetas vão sair;
+   - **`SUPERFRETE_CONTATO`** (opcional): um e-mail da Meranno para contato técnico. A SuperFrete pede isso.
+4. **Redeploy** e teste: ponha uma camiseta no carrinho e digite um CEP.
+5. **Pesem uma camiseta embalada** e meçam o envelope. Hoje o site usa 300 g e 30 × 25 × 4 cm. Passem os números ao Claude: "o pacote da camiseta pesa X g e mede A × B × C cm".
+
+Para testar sem gastar: a SuperFrete tem um ambiente de teste (https://sandbox.superfrete.com, com outro token). Cadastre também `SUPERFRETE_URL` = `https://sandbox.superfrete.com` e, depois do teste, apague.
+
+O site só **calcula** o frete. Comprar e imprimir a etiqueta continua sendo pelo painel da SuperFrete.
+
+## 8. Pagamento de verdade (Pix e cartão)
+
+Para a pré-venda vender de verdade:
+1. **Escolham o meio de pagamento.** Os mais usados no Brasil: **Mercado Pago**, **Pagar.me**, **Stripe**. Comparem taxa do Pix, taxa do cartão, prazo para cair o dinheiro e se aceita conta de pessoa física.
+2. **Criem a conta** no escolhido, em nome de quem vai receber (CPF ou CNPJ).
+3. Peçam ao Claude: "integre o pagamento com o [nome] e salve os pedidos no Supabase". Ele vai pedir as chaves da conta, que vão na Vercel, nunca no chat.
+
+Enquanto isso não fica pronto, um provisório possível é trocar o fim da compra por **"Enviar pedido pelo WhatsApp"**, com os itens já escritos, e combinar o pagamento na conversa.
+
+## 9. Decisões que estão com vocês
+
+| Decisão | Situação |
+|---|---|
+| **Topo do site**: o ás de hoje ou o **Royal flush** (cartas com as 5 camisetas) | Ver a página das opções (link no começo) |
+| Colocar a **Va tutto bene** na vitrine da home (ficariam as 5) | O recorte já está pronto |
+| **Personalizador** continua? Ele é sob demanda por natureza | Hoje continua no site |
+| **Data de envio da pré-venda** | Para escrever no site e no pagamento |
+| **Tabela de medidas** nova | Um dos sócios vai mandar |
+| **Fotos novas** das camisetas | As da frente foram corrigidas para MERANNO no computador; trocar pelas fotos reais quando chegarem |
+| **Textos do Sobre nós** | O capítulo "O tempo é seu" está com texto provisório; outro capítulo ainda fala de "o mar no fim da rua" |
+| **Vitrine que troca as camisetas** (opção B) em outra parte do site | Ideia: Categorias ou Sobre nós |
+
+## 10. Itens antigos que continuam valendo
+
+- **Testar o Personalizador com a IA de verdade:** siga `docs/TESTES-PERSONALIZADOR.md`. Se algo falhar: Vercel → **Logs**, filtrando por `/api/estampa`.
+- **Avaliações de clientes:** só aparecem depois de aprovadas. Para aprovar: Supabase → **Table Editor → avaliacoes** → troque `status` de `pendente` para `aprovada` (ou `recusada`). Nunca inventar avaliações.
+- **Mapa de calor (Microsoft Clarity, opcional):** crie o projeto em clarity.microsoft.com, cadastre `NEXT_PUBLIC_CLARITY_ID` na Vercel e faça **Redeploy**. Ele só carrega para quem aceitar os cookies.
+- **Segurança:** no Supabase, ligue a proteção contra senhas vazadas (**Authentication → Providers → Email → Leaked password protection**; o nome pode variar).
+- **Arquivo de teste:** em Supabase → **Storage → estampas** sobrou `604cfb35-af8a-414e-b11d-f08389376418.png` (quadrado vinho escrito TESTE). Pode apagar.
+- **Nome antigo:** o Instagram `@meranoclothing` e o e-mail `equipe@merano.com` continuam com MERANO porque são endereços reais. Se mudarem, atualizar em `src/components/whatsapp-button.tsx` e `src/app/privacidade/page.tsx`.
+
+## 11. Limites da pré-venda que é bom saber
+
+- **O WhatsApp não é confirmado por SMS.** Alguém que saiba o número de um membro do grupo poderia usá-lo. Para limitar, cada número só libera **uma** conta.
+- **Tirar alguém da lista** impede novas entradas, mas não expulsa um aparelho que já entrou.
+- O acesso de cada aparelho dura até **400 dias**. Depois disso, é só entrar de novo pelo link.
+
+---
+
+## Todas as variáveis da Vercel (Settings → Environment Variables → Production)
 
 | Variável | Situação | Para quê |
 |---|---|---|
-| `OPENROUTER_API_KEY` | já existe | IA do provador e do Personalizador |
 | `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | já existem | Banco e login |
-| `OWNER_EMAILS` | já existe | Quem entra em `/admin` |
-| `SUPABASE_SECRET_KEY` | **falta** | Ver em `/admin` as estampas criadas e os e-mails do cupom |
-| `NEXT_PUBLIC_CLARITY_ID` | **opcional** | Liga o mapa de calor (ver item 6) |
+| `OWNER_EMAILS` | já existe | Quem entra no `/admin` e é liberado na pré-venda |
+| `OPENROUTER_API_KEY` e `PERSONALIZADOR_OPENROUTER_API_KEY` | já existem | IA do Provador e do Personalizador |
+| `SUPABASE_SECRET_KEY` | **falta** (item 1) | Lista da pré-venda, cadeado, estampas e cupons no `/admin` |
+| `PRE_VENDA` | **falta** (item 1) | `1` liga o cadeado |
+| `PRE_VENDA_GRUPO_URL` | opcional (item 6) | Botão do grupo no "Coming soon" |
+| `SUPERFRETE_TOKEN` e `FRETE_CEP_ORIGEM` | **falta** (item 7) | Frete real |
+| `SUPERFRETE_CONTATO`, `SUPERFRETE_URL` | opcionais (item 7) | Contato técnico e ambiente de teste |
+| `NEXT_PUBLIC_CLARITY_ID` | opcional (item 10) | Mapa de calor |
 
-**Como pegar a `SUPABASE_SECRET_KEY`:**
-1. No Supabase, abra o projeto **MERANO** e vá em **Project Settings → API Keys**.
-2. Copie a chave **secret**.
-3. Cadastre na Vercel com o nome `SUPABASE_SECRET_KEY`, só em **Production**.
-4. Publique de novo.
+Depois de cadastrar ou mudar qualquer variável: **Deployments → Redeploy**.
 
-**Nunca** coloque essa chave no código nem no chat.
+## Notas técnicas (para o Claude ou um programador)
 
-Sem ela, as estampas continuam salvas e visíveis no Supabase, em **Table Editor → criacoes_estampa** e **Storage → estampas**.
+- **Publicação:** a Vercel **não** publica sozinha quando o GitHub muda. Publicar com `vercel --prod --yes` a partir de um `git worktree` limpo (sem `.env.local` e sem os arquivos soltos da pasta).
+- **Pré-venda:** `src/proxy.ts` tranca as páginas e lê o cookie assinado `meranno_convite`. A lógica fica em:
+  - `src/lib/pre-venda.ts`: cadeado, cookie e rotas livres;
+  - `src/lib/pre-venda-lista.ts`: confere a conta contra a tabela `pre_venda_autorizados`;
+  - `src/app/pre-venda/`: página de entrada;
+  - `src/app/admin/lista-*`: lista no painel;
+  - `src/components/entrada-pre-venda.tsx`: animação.
 
-## 3. Testar o Personalizador com a IA de verdade
-
-**Já testado aqui (15/11), com a IA simulada:** a página abre no celular, a estampa da casa é usada, o chat e a conferência levam o painel e a ficha certos, a arte vai para o verso, a criação é salva no Supabase e, depois do pagamento, fica **pedida** com o número do pedido. Os dados do teste foram apagados.
-- Sobrou só o arquivo de teste `604cfb35-af8a-414e-b11d-f08389376418.png` em **Storage → estampas** (um quadrado vinho escrito TESTE). Pode apagar pelo painel do Supabase.
-- Ponto a conferir: no teste, trocar a cor da escrita no painel **não mudou** a prévia da frente. Pode ser só o teste ter clicado no botão errado; confira no teste 2.
-
-**Falta, porque precisa da IA de verdade (só existe na Vercel):** a qualidade das respostas, a recusa de marcas e o uso das referências. Siga `docs/TESTES-PERSONALIZADOR.md` depois de publicar.
-Se algo falhar: Vercel → projeto **merano** → **Logs**, filtrando por `/api/estampa`.
-
-## 4. Aviso de cupom de 10% ✅ feito
-
-- O e-mail só é guardado se a pessoa marcar a caixa de consentimento. Fica no Supabase, tabela `cadastros_cupom`.
-- A lista aparece em `/admin` (precisa da `SUPABASE_SECRET_KEY`). **O envio do cupom é manual:** vocês mandam o código para cada e-mail.
-- Se o aviso de cookies estiver ligado, o do cupom só aparece depois dele, para não abrir dois avisos juntos.
-
-## 5. Decisões de negócio (o código já está pronto para receber)
-
-| Decisão | Onde mudar |
-|---|---|
-| ~~Preço da personalizada~~: **decidido, fica R$ 189** | `src/lib/estampa.ts` → `PRECO_PERSONALIZADA` |
-| ~~Frete grátis~~: **decidido, sem frete grátis** (a barra continua desligada) | `src/components/cart-drawer.tsx` → `FRETE_GRATIS_ACIMA` |
-| Cores de malha disponíveis de verdade | `src/lib/estampa.ts` → `CORES_MALHA` |
-| Estampas da casa (hoje 3; o protótipo tinha 6) | Coloque as imagens em `public/imagens/merano-assets/ilustracoes/` e adicione em `ESTAMPAS_CASA` (`src/lib/estampa.ts`) |
-| Ordem da vitrine "Mais desejadas" (hoje é a do catálogo; o ideal é pelas mais vendidas) | `src/app/page.tsx` → `products.slice(0, 8)` |
-
-## 6. Melhorias que a pesquisa indicou
-
-- ✅ **Visual do pagamento:** campos, cartões de entrega e pagamento, resumo e botão no visual Salão (vinho e latão). O pagamento continua **simulado** (ver o aviso no topo).
-- ✅ **Ondas do rodapé:** agora em latão, vinho e nogueira.
-- ✅ **Avaliações de clientes:** na página de cada produto. A avaliação só aparece depois de aprovada por vocês. Para aprovar, enquanto não houver tela no `/admin`:
-  1. Supabase → **Table Editor → avaliacoes**.
-  2. Na avaliação, troque `status` de `pendente` para `aprovada` (ou `recusada`).
-  - Nunca inventar avaliações; peçam a quem já comprou.
-- ✅ **Mapa de calor (Microsoft Clarity), com aviso de cookies:** pronto e **desligado** até vocês cadastrarem o código.
-  1. Crie a conta grátis em clarity.microsoft.com e um projeto para o site.
-  2. Copie o **ID do projeto** (uma sequência curta de letras e números).
-  3. Na Vercel, cadastre `NEXT_PUBLIC_CLARITY_ID` com esse ID, em **Production**, e publique de novo.
-  4. Aparece o aviso de cookies; o Clarity só carrega para quem tocar em **Aceitar**.
-  5. Recomendo deixar o mascaramento de dados do Clarity no modo mais restrito, para não gravar o que é digitado no pagamento. Confira o nome exato da opção nas configurações do Clarity; não verifiquei.
-- **Menos escolhas no Personalizador:** esconder a paleta livre e as referências atrás de "Mais opções". Foi mantido igual ao protótipo de propósito; mudar só se vocês quiserem.
-
-## 7. Topo e imagens
-
-- O topo agora é o **ás gigante** fixo, no celular e no computador.
-- **Pendente:** buscar fotos reais com licença livre para uso comercial (feltro, fichas, cartas, praia), caso queiram fotos junto com o ás. Pedir ao Claude: "busque fotos com licença livre para o topo".
-- Algumas fotos de produto e a foto da etiqueta ainda mostram **MERANO** impresso. Precisam ser fotos novas.
-
-## 8. Marca: endereços que ainda usam MERANO
-
-- Instagram `@meranoclothing` e e-mail `equipe@merano.com` continuam com o nome antigo de propósito, porque são endereços reais.
-- Se mudarem o Instagram ou o e-mail, atualize em:
-  - `src/components/whatsapp-button.tsx` (Instagram);
-  - `src/app/privacidade/page.tsx` (e-mail).
-
-## 9. Provador (por último, como combinado)
-
-A pesquisa mostra que o maior ganho do provador é ajudar a **acertar o tamanho**. A ideia combinada é permitir "provar no corpo" a peça criada no Personalizador. Pedir ao Claude quando chegar a hora.
-
-## 10. Segurança (opcional, rápido)
-
-O Supabase avisa que a **proteção contra senhas vazadas** está desligada.
-- Para ligar: **Authentication → Providers → Email → Leaked password protection**. O nome do menu pode variar.
-- O mesmo painel mostra um aviso sobre as duas funções do Personalizador (`registrar_criacao` e `marcar_criacoes_pedidas`). Esse aviso é **esperado**: as funções são públicas de propósito e só permitem gravar uma criação nova e marcá-la como pedida.
-
----
-
-### Onde está cada coisa
-- Código do Personalizador: `src/app/personalizar-estampa`, `src/components/personalizador`, `src/lib/estampa.ts`, `src/app/api/estampa`
-- Como o Personalizador funciona: `docs/PERSONALIZADOR.md`
-- Testes: `docs/TESTES-PERSONALIZADOR.md`
-- Pesquisa de uso: `docs/PESQUISA-UX.md`
+  A `/em-breve` e a `/pre-venda` precisam continuar **dinâmicas**. Se forem pré-geradas no build, o cadeado entra em loop.
+- **Tabela sem uso:** `convites_pre_venda` e a função `usar_convite_pre_venda` são do primeiro modelo (convite por código), que saiu. Têm um convite de teste e podem ser apagadas.
+- **Frete:** `src/lib/frete.ts` (o pacote fica em `PACOTE_CAMISETA`), `src/app/api/frete/route.ts` e `src/lib/use-frete.ts`.
+- **Recortes das camisetas:** foram feitos com o BiRefNet (`rembg`, modelo `birefnet-general-lite`). Ficam em `public/imagens/merano-assets/recortes/`, e a vitrine da home lê `src/lib/shirt-stories.ts`.
