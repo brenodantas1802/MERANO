@@ -1,137 +1,117 @@
 # MERANNO: o que falta fazer
 
-Atualizado em **17/11/2026**. O site no ar (https://merano-xi.vercel.app) já tem tudo o que foi feito até agora. Esta lista é só o que depende de vocês, em ordem de prioridade, com o passo a passo de cada item.
+Atualizado em **21/11/2026, de madrugada**. O lançamento é **segunda, 23/11**.
 
 > Dica: abra o Claude Code na pasta do site e diga "faça o item X do PENDENCIAS-LEIA-ME.md".
 
-Links úteis:
-- Opções do topo e antes/depois da rodada 2: https://claude.ai/artifact/95NRWaUtmySMzCogGxKrbk
-- Antes/depois da rodada 1: https://claude.ai/artifact/14rXsCZ4TE39SsZnkKAPmy
+## Onde as coisas estão agora
+
+- **Site no ar** (https://merano-xi.vercel.app): ainda é a versão de 17/11. **Nada do que foi feito em 20 e 21/11 está publicado.**
+- **Trabalho novo**: no branch `lancamento-pre-venda` do GitHub, testado no computador e no celular, com o build de produção passando.
+- **Banco (Supabase)**: já tem as tabelas de pedidos e cupons e o cupom `BEMVINDO10`. O site no ar não usa nada disso ainda, então não muda nada para quem visita hoje.
+
+### O que entrou em 20 e 21/11
+
+| Parte | O que mudou |
+|---|---|
+| **Topo do site** | Royal flush: as cinco camisetas abrem em leque, em cartas, na frente do ás. Cada carta leva à peça. |
+| **Vitrine da home** | Va tutto bene entrou (ficaram as 5). |
+| **Busca** | Entende acento, plural, feminino e cor ("camisetas pretas" acha Coração · Preto e Wine not). |
+| **Pagamento** | O pedido agora é **guardado no banco**, com preço, cupom e frete recalculados no servidor (ninguém consegue mudar o preço pelo navegador). Com o Mercado Pago ligado, o cliente paga lá (Pix com 5% de desconto, ou cartão em até 3x). Sem o Mercado Pago, o pedido é registrado e abre o WhatsApp da Meranno com tudo escrito. |
+| **Página do pedido** | Cada pedido tem um link próprio (`/pedido/...`) com o andamento: pedido feito → pago → separação → enviado (com rastreio) → entregue. |
+| **Cupom** | Campo de cupom no pagamento. O pop-up pede o e-mail e mostra o código na hora (`BEMVINDO10`, 10%), que já entra aplicado no pagamento. Cupom de primeira compra recusa e-mail que já comprou. |
+| **Personalizador** | Botão **"Comprar esta peça · R$ 189"**: escolhe o tamanho (P a XXG), gera os arquivos de produção (arte em 300 DPI, marca do peito, mockups), guarda no Supabase e põe no carrinho. Testado com a IA de verdade. Para o cliente, sumiram "Salvar na conta", "Minhas criações", "Baixar para produção" e o custo de cada imagem. |
+| **/admin** | Pedidos de verdade (filtros, busca, mudar status, rastreio, copiar dados de envio, baixar planilha), **cupons** (criar, ligar/desligar, escolher o do pop-up) e estampas do Personalizador com os arquivos para a confecção. |
+| **Segurança** | O banco não aceita mais gravações anônimas de estampas. Tudo passa pelo servidor. |
 
 ---
 
-## ⚠️ Antes de tudo: o pagamento ainda é simulado
+## 1. Cadastrar as chaves na Vercel (obrigatório antes de publicar)
 
-A tela de pagamento **não cobra nada e não guarda o pedido em lugar nenhum**. Ela espera 2 segundos e mostra "Pix aprovado" ou "Cartão aprovado". O pedido fica salvo só no navegador do cliente.
+Sem a **`SUPABASE_SECRET_KEY`**, a versão nova **não registra pedidos** (o cliente vê "indisponível"), o Personalizador não compra e o `/admin` fica vazio. Por isso o Claude não publicou.
 
-Se vocês ligarem a pré-venda antes de resolver isso, quem entrar pode achar que comprou sem ter pago, e vocês não ficam sabendo do pedido. Veja o **item 8**.
-
----
-
-## 1. Ligar o cadeado da pré-venda
-
-Com o cadeado ligado, quem não está na lista vê só "Coming soon" em qualquer página. Hoje ele está **desligado** porque faltam duas variáveis na Vercel (o Claude não tem permissão para cadastrar segredos lá).
-
-1. Abra a Vercel, entre no projeto **merano** e vá em **Settings → Environment Variables**.
-2. Cadastre, marcando só **Production**:
-   - **`SUPABASE_SECRET_KEY`**: a chave secreta do Supabase. Dois jeitos de pegar:
-     - no Supabase, projeto **MERANO** → **Project Settings → API Keys** → copie a chave **secret**; ou
-     - no arquivo `.env.local` da pasta do site, copie o que vem depois de `SUPABASE_SECRET_KEY=`.
-     Sem essa chave o cadeado não liga, a lista de autorizados não funciona e o `/admin` não mostra estampas nem cupons. **Nunca** coloque essa chave no código, no chat ou no WhatsApp.
-   - **`PRE_VENDA`** com o valor **`1`**.
-3. Vá em **Deployments**, abra os três pontinhos da publicação mais recente e toque em **Redeploy**. Variável nova só vale depois de publicar de novo. Se preferir, peça ao Claude: "publique o site de novo".
+1. Vercel → projeto **merano** → **Settings → Environment Variables**. Marque só **Production** em cada uma.
+2. Cadastre:
+   - **`SUPABASE_SECRET_KEY`**: Supabase → projeto **MERANO** → **Project Settings → API Keys** → chave **secret** (ou copie do `.env.local`, o que vem depois de `SUPABASE_SECRET_KEY=`). **Nunca** coloque essa chave no código, no chat ou no WhatsApp.
+   - **`PRE_VENDA`** = **`1`**: liga o cadeado da pré-venda.
+   - **`MERCADOPAGO_ACCESS_TOKEN`**: veja o item 2. Se ainda não tiver, pode publicar sem; os pedidos saem pelo WhatsApp.
+   - **`PRE_VENDA_GRUPO_URL`** (opcional): o link de convite do grupo do WhatsApp, para o botão da tela "Coming soon".
+3. Diga ao Claude: **"pode publicar"**. Ele publica a partir do branch e testa o site no ar.
 4. Teste numa **janela anônima**: o site tem que mostrar "Coming soon" com o cadeado.
 
-## 2. Liberar os sócios
+## 2. Pagamento: Mercado Pago
 
-Os cinco donos (os e-mails em `OWNER_EMAILS`) já estão liberados. Cada um faz uma vez em cada aparelho:
+O site já está pronto para o Mercado Pago. Falta a conta.
 
-1. Abrir **https://merano-xi.vercel.app/pre-venda**.
-2. Tocar em **Continuar com Google** com o Gmail de dono.
-3. Tocar em **Abrir o cadeado**. O cadeado abre e o site aparece pela fechadura em forma de espada.
+1. Crie (ou use) a conta do Mercado Pago em nome de quem vai receber (CPF ou CNPJ).
+2. Entre em https://www.mercadopago.com.br/developers/panel/app → **Criar aplicação** → tipo **Pagamentos on-line / Checkout Pro**.
+3. Em **Credenciais de produção**, copie o **Access Token** (começa com `APP_USR-`).
+4. Cadastre na Vercel como **`MERCADOPAGO_ACCESS_TOKEN`** e peça ao Claude para publicar de novo.
+5. Não precisa configurar aviso de pagamento (webhook) no painel: cada pedido já informa ao Mercado Pago o endereço `/api/pagamento/webhook`. O site só marca como pago depois de **consultar o pagamento no próprio Mercado Pago** e conferir o valor.
+6. Teste com uma compra real de valor baixo (ex.: crie um cupom de 90% no `/admin` só para o teste e desligue depois).
 
-## 3. Montar a lista e mandar o link no grupo
+**Enquanto o Mercado Pago não estiver ligado:** o pedido fica registrado como "Aguardando pagamento" e o cliente manda a mensagem pronta no WhatsApp da Meranno (11 98646-4056). Vocês mandam o Pix ou o link do cartão e, quando o dinheiro cair, mudam o pedido para **Pago** no `/admin`.
 
-1. Entre em **https://merano-xi.vercel.app/admin** com o Google. A primeira seção é **"Quem pode entrar"**.
-2. No campo grande, cole as pessoas, **uma por linha**, com e-mail ou WhatsApp. O nome é opcional. Exemplos que funcionam:
-   ```
-   Ana Souza, 11 98765-4321
-   pedro@gmail.com
-   Mateus - (21) 99999-0000 - mateus@hotmail.com
-   ```
-3. Toque em **Adicionar à lista**. Quem já estava é ignorado, e as linhas sem e-mail nem número aparecem num aviso.
-4. A lista mostra quem **já entrou** e quem **ainda não entrou**. O **X** tira a pessoa da lista.
-5. Toque em **Copiar link** e mande no grupo. Sugestão de mensagem:
-   > Pré-venda da Meranno aberta só pra este grupo. Entra por aqui: merano-xi.vercel.app/pre-venda
-   > Use o Google ou crie sua conta com o mesmo e-mail ou WhatsApp que está aqui no grupo.
+## 3. Domínio
 
-**O que a pessoa do grupo faz:**
-1. Abre o link e entra com o **Google** ou toca em **Criar conta** (nome, e-mail, senha e WhatsApp).
-2. Se o e-mail ou o WhatsApp do cadastro estiver na lista, aparece **"Você está na lista"** → **Abrir o cadeado**.
-3. Se não estiver, o site pede o **WhatsApp que está no grupo**. Com o número certo, libera.
-4. A conta fica liberada **para sempre**. Em outro celular ou computador, é só entrar com a mesma conta pelo mesmo link.
+| Domínio | Situação | Preço |
+|---|---|---|
+| `meranno.com.br` | **Registrado em 15/11/2026** pelo CNPJ 70.145.517/0001-54, com o DNS automático do Registro.br | — |
+| `meranno.com` | Livre | US$ 12,03 por ano (renova pelo mesmo valor) |
+| `meranno.store` / `meranno.shop` | Livres | US$ 1,49 / US$ 2,99 no 1º ano, mas renovam por US$ 44 / US$ 38,39 |
 
-## 4. Conferir o e-mail de confirmação (antes de mandar o link)
+- **Se o `.com.br` é de vocês** (o CNPJ é de algum sócio?): na Vercel, **Settings → Domains → Add** `meranno.com.br` e `www.meranno.com.br`. A Vercel mostra os registros. No https://registro.br → domínio → **DNS → Editar zona**, crie os registros que ela pedir (normalmente um `A` para `@` e um `CNAME` para `www`). Leva de minutos a algumas horas. Depois avise o Claude para trocar `merano-xi.vercel.app` pelo domínio nos textos e no link da pré-venda.
+- **Se não é de vocês**: a sugestão é o `meranno.com`, que dá para comprar direto pela Vercel. Diga ao Claude "pode comprar o meranno.com"; ele confirma o valor antes de comprar.
+- O Mercado Pago e o login do Google continuam funcionando no domínio novo. No Supabase, acrescente o domínio em **Authentication → URL Configuration** (Site URL e Redirect URLs).
 
-Quem cria conta com e-mail (sem Google) recebe um e-mail para confirmar a conta. Em outubro ficou combinado mandar esses e-mails pelo Gmail da Meranno (`Servico.merano@gmail.com`). **Ninguém confirmou se isso foi salvo.** Sem isso, o Supabase só manda e-mail para a própria equipe, e o pessoal do grupo nunca recebe a confirmação.
+## 4. Cupom do amigo
 
-1. Supabase → projeto **MERANO** → **Authentication** → configurações de e-mail / **SMTP**. O nome do menu pode variar.
-2. Confira se o SMTP próprio está ligado, com o Gmail e a senha de app.
-3. Teste: crie uma conta em `/conta/criar` com um e-mail que **não** seja de nenhum sócio e veja se o e-mail chega.
+No `/admin` → **Cupons** → preencha o código (ex.: `NOMEDOAMIGO15`), o desconto, para que é, e se vale só na primeira compra → **Criar cupom**. Ele vale na hora. Para parar de valer: **Desligar**.
 
-Enquanto isso não estiver confirmado, peça para o pessoal entrar com o **Google**.
+## 5. Liberar os sócios e montar a lista da pré-venda
 
-## 5. Desligar o cadeado no lançamento aberto
+Igual ao combinado em 17/11:
+1. Cada sócio abre `/pre-venda`, entra com o **Google** e toca em **Abrir o cadeado** (uma vez por aparelho).
+2. No `/admin` → **Quem pode entrar**: cole as pessoas, uma por linha, com e-mail ou WhatsApp (nome opcional) → **Adicionar à lista**.
+3. **Copiar link** e mandar no grupo.
 
-Na Vercel, apague a variável `PRE_VENDA` (ou troque para `0`) e faça **Redeploy**. O site volta a abrir para todo mundo, e a lista fica guardada.
+O que a pessoa do grupo faz: abre o link, entra com o Google ou cria a conta (com o mesmo e-mail ou WhatsApp do grupo) e toca em **Abrir o cadeado**. Fica liberada para sempre naquela conta.
 
-## 6. Botão "Quero entrar no grupo" (opcional)
+## 6. Conferir o e-mail de confirmação de conta
 
-A tela "Coming soon" pode ter um botão que leva para o grupo do WhatsApp. Para ligar, cadastre na Vercel **`PRE_VENDA_GRUPO_URL`** com o link de convite do grupo e faça **Redeploy**.
+Quem cria conta com e-mail (sem Google) precisa receber um e-mail de confirmação. Confira no Supabase → **Authentication** → **SMTP** se o Gmail da Meranno está configurado, e teste criando uma conta com um e-mail que não seja de sócio. Enquanto não estiver confirmado, peçam para o pessoal entrar com o **Google**.
 
 ## 7. Frete de verdade pela SuperFrete
 
-Hoje o carrinho e o pagamento mostram o frete com **valores de exemplo** (aparece escrito "valores de exemplo"). Para virar o frete real:
+Hoje o frete mostra **valores de exemplo**. Para o real:
+1. Conta em https://web.superfrete.com → **Integrações → Desenvolvedores** → gere o **token** (aparece uma vez só).
+2. Na Vercel: **`SUPERFRETE_TOKEN`**, **`FRETE_CEP_ORIGEM`** (CEP de onde sai) e, opcional, **`SUPERFRETE_CONTATO`** (e-mail técnico).
+3. **Pesem uma camiseta embalada** e meçam o envelope (hoje o site usa 300 g e 30 × 25 × 4 cm) e passem ao Claude.
 
-1. Crie a conta em https://web.superfrete.com.
-2. Vá em **Integrações → Desenvolvedores** e gere o **token**. Ele aparece **uma vez só**: copie na hora.
-3. Na Vercel (Production), cadastre:
-   - **`SUPERFRETE_TOKEN`**: o token;
-   - **`FRETE_CEP_ORIGEM`**: o CEP de onde as camisetas vão sair;
-   - **`SUPERFRETE_CONTATO`** (opcional): um e-mail da Meranno para contato técnico. A SuperFrete pede isso.
-4. **Redeploy** e teste: ponha uma camiseta no carrinho e digite um CEP.
-5. **Pesem uma camiseta embalada** e meçam o envelope. Hoje o site usa 300 g e 30 × 25 × 4 cm. Passem os números ao Claude: "o pacote da camiseta pesa X g e mede A × B × C cm".
+## 8. Conteúdo que falta (com vocês)
 
-Para testar sem gastar: a SuperFrete tem um ambiente de teste (https://sandbox.superfrete.com, com outro token). Cadastre também `SUPERFRETE_URL` = `https://sandbox.superfrete.com` e, depois do teste, apague.
-
-O site só **calcula** o frete. Comprar e imprimir a etiqueta continua sendo pelo painel da SuperFrete.
-
-## 8. Pagamento de verdade (Pix e cartão)
-
-Para a pré-venda vender de verdade:
-1. **Escolham o meio de pagamento.** Os mais usados no Brasil: **Mercado Pago**, **Pagar.me**, **Stripe**. Comparem taxa do Pix, taxa do cartão, prazo para cair o dinheiro e se aceita conta de pessoa física.
-2. **Criem a conta** no escolhido, em nome de quem vai receber (CPF ou CNPJ).
-3. Peçam ao Claude: "integre o pagamento com o [nome] e salve os pedidos no Supabase". Ele vai pedir as chaves da conta, que vão na Vercel, nunca no chat.
-
-Enquanto isso não fica pronto, um provisório possível é trocar o fim da compra por **"Enviar pedido pelo WhatsApp"**, com os itens já escritos, e combinar o pagamento na conversa.
-
-## 9. Decisões que estão com vocês
-
-| Decisão | Situação |
+| Item | Situação |
 |---|---|
-| **Topo do site**: o ás de hoje ou o **Royal flush** (cartas com as 5 camisetas) | Ver a página das opções (link no começo) |
-| Colocar a **Va tutto bene** na vitrine da home (ficariam as 5) | O recorte já está pronto |
-| **Personalizador** continua? Ele é sob demanda por natureza | Hoje continua no site |
-| **Data de envio da pré-venda** | Para escrever no site e no pagamento |
-| **Tabela de medidas** nova | Um dos sócios vai mandar |
-| **Fotos novas** das camisetas | As da frente foram corrigidas para MERANNO no computador; trocar pelas fotos reais quando chegarem |
-| **Textos do Sobre nós** | O capítulo "O tempo é seu" está com texto provisório; outro capítulo ainda fala de "o mar no fim da rua" |
-| **Vitrine que troca as camisetas** (opção B) em outra parte do site | Ideia: Categorias ou Sobre nós |
+| **Data de envio da pré-venda** | Ainda não definida. Quando tiver, o Claude coloca no produto, no pagamento e na página do pedido. Hoje a página do pedido diz "avisamos pelo WhatsApp quando o pedido for despachado". |
+| **Tabela de medidas** | Um dos sócios vai mandar. |
+| **Fotos reais das camisetas** | Mandar quando tiver; hoje são os mockups corrigidos para MERANNO. |
+| **Sobre nós** | Texto provisório ("O tempo é seu"; outro capítulo fala de "o mar no fim da rua"). |
+| **Política de troca** | Refazer juntos. A página `/trocas` hoje tem o texto antigo. |
+| **Estoque** | Não aparece no site (decidido em 20/11). Pode entrar depois do sorteio. |
 
-## 10. Itens antigos que continuam valendo
+## 9. Itens menores
 
-- **Testar o Personalizador com a IA de verdade:** siga `docs/TESTES-PERSONALIZADOR.md`. Se algo falhar: Vercel → **Logs**, filtrando por `/api/estampa`.
-- **Avaliações de clientes:** só aparecem depois de aprovadas. Para aprovar: Supabase → **Table Editor → avaliacoes** → troque `status` de `pendente` para `aprovada` (ou `recusada`). Nunca inventar avaliações.
-- **Mapa de calor (Microsoft Clarity, opcional):** crie o projeto em clarity.microsoft.com, cadastre `NEXT_PUBLIC_CLARITY_ID` na Vercel e faça **Redeploy**. Ele só carrega para quem aceitar os cookies.
-- **Segurança:** no Supabase, ligue a proteção contra senhas vazadas (**Authentication → Providers → Email → Leaked password protection**; o nome pode variar).
-- **Arquivo de teste:** em Supabase → **Storage → estampas** sobrou `604cfb35-af8a-414e-b11d-f08389376418.png` (quadrado vinho escrito TESTE). Pode apagar.
-- **Nome antigo:** o Instagram `@meranoclothing` e o e-mail `equipe@merano.com` continuam com MERANO porque são endereços reais. Se mudarem, atualizar em `src/components/whatsapp-button.tsx` e `src/app/privacidade/page.tsx`.
+- **Segurança do login**: Supabase → **Authentication** → ligar **Leaked password protection** (bloqueia senhas vazadas). Pode precisar do plano Pro.
+- **Avaliações**: só aparecem depois de aprovadas (Supabase → **Table Editor → avaliacoes** → `status` = `aprovada`). Nunca inventar avaliações.
+- **Mapa de calor (opcional)**: Microsoft Clarity → `NEXT_PUBLIC_CLARITY_ID` na Vercel.
+- **Nome antigo**: Instagram `@meranoclothing` e e-mail `equipe@merano.com` continuam com MERANO porque são endereços reais.
+- **Sócio novo no código**: ele precisa ser convidado no GitHub (repositório → **Settings → Collaborators → Add people**) e receber o `.env.local` por canal seguro. O `README.md` tem o passo a passo.
 
-## 11. Limites da pré-venda que é bom saber
+## 10. Limites da pré-venda que é bom saber
 
-- **O WhatsApp não é confirmado por SMS.** Alguém que saiba o número de um membro do grupo poderia usá-lo. Para limitar, cada número só libera **uma** conta.
-- **Tirar alguém da lista** impede novas entradas, mas não expulsa um aparelho que já entrou.
-- O acesso de cada aparelho dura até **400 dias**. Depois disso, é só entrar de novo pelo link.
+- O WhatsApp não é confirmado por SMS. Cada número só libera **uma** conta.
+- Tirar alguém da lista impede novas entradas, mas não expulsa um aparelho que já entrou.
+- O acesso de cada aparelho dura até 400 dias.
 
 ---
 
@@ -139,29 +119,27 @@ Enquanto isso não fica pronto, um provisório possível é trocar o fim da comp
 
 | Variável | Situação | Para quê |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | já existem | Banco e login |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | já existem | Banco e login |
 | `OWNER_EMAILS` | já existe | Quem entra no `/admin` e é liberado na pré-venda |
-| `OPENROUTER_API_KEY` e `PERSONALIZADOR_OPENROUTER_API_KEY` | já existem | IA do Provador e do Personalizador |
-| `SUPABASE_SECRET_KEY` | **falta** (item 1) | Lista da pré-venda, cadeado, estampas e cupons no `/admin` |
+| `OPENROUTER_API_KEY`, `PERSONALIZADOR_OPENROUTER_API_KEY` | já existem | IA do Provador e do Personalizador |
+| `SUPABASE_SECRET_KEY` | **falta, obrigatória** (item 1) | Pedidos, cupons, compra do Personalizador, lista da pré-venda, `/admin` |
 | `PRE_VENDA` | **falta** (item 1) | `1` liga o cadeado |
-| `PRE_VENDA_GRUPO_URL` | opcional (item 6) | Botão do grupo no "Coming soon" |
-| `SUPERFRETE_TOKEN` e `FRETE_CEP_ORIGEM` | **falta** (item 7) | Frete real |
-| `SUPERFRETE_CONTATO`, `SUPERFRETE_URL` | opcionais (item 7) | Contato técnico e ambiente de teste |
-| `NEXT_PUBLIC_CLARITY_ID` | opcional (item 10) | Mapa de calor |
+| `MERCADOPAGO_ACCESS_TOKEN` | falta (item 2) | Pagamento on-line; sem ela, pedido pelo WhatsApp |
+| `SUPERFRETE_TOKEN`, `FRETE_CEP_ORIGEM` | faltam (item 7) | Frete real |
+| `PRE_VENDA_GRUPO_URL` | opcional | Botão do grupo no "Coming soon" |
+| `SUPERFRETE_CONTATO`, `SUPERFRETE_URL` | opcionais | Contato técnico e ambiente de teste da SuperFrete |
+| `PRE_VENDA_SEGREDO` | opcional | Assina o cookie da pré-venda (sem ela, usa a `SUPABASE_SECRET_KEY`) |
+| `NEXT_PUBLIC_CLARITY_ID` | opcional | Mapa de calor |
 
-Depois de cadastrar ou mudar qualquer variável: **Deployments → Redeploy**.
+Depois de cadastrar ou mudar qualquer variável, é preciso publicar de novo.
 
 ## Notas técnicas (para o Claude ou um programador)
 
-- **Publicação:** a Vercel **não** publica sozinha quando o GitHub muda. Publicar com `vercel --prod --yes` a partir de um `git worktree` limpo (sem `.env.local` e sem os arquivos soltos da pasta).
-- **Pré-venda:** `src/proxy.ts` tranca as páginas e lê o cookie assinado `meranno_convite`. A lógica fica em:
-  - `src/lib/pre-venda.ts`: cadeado, cookie e rotas livres;
-  - `src/lib/pre-venda-lista.ts`: confere a conta contra a tabela `pre_venda_autorizados`;
-  - `src/app/pre-venda/`: página de entrada;
-  - `src/app/admin/lista-*`: lista no painel;
-  - `src/components/entrada-pre-venda.tsx`: animação.
-
-  A `/em-breve` e a `/pre-venda` precisam continuar **dinâmicas**. Se forem pré-geradas no build, o cadeado entra em loop.
-- **Tabela sem uso:** `convites_pre_venda` e a função `usar_convite_pre_venda` são do primeiro modelo (convite por código), que saiu. Têm um convite de teste e podem ser apagadas.
-- **Frete:** `src/lib/frete.ts` (o pacote fica em `PACOTE_CAMISETA`), `src/app/api/frete/route.ts` e `src/lib/use-frete.ts`.
-- **Recortes das camisetas:** foram feitos com o BiRefNet (`rembg`, modelo `birefnet-general-lite`). Ficam em `public/imagens/merano-assets/recortes/`, e a vitrine da home lê `src/lib/shirt-stories.ts`.
+- **Publicação**: a Vercel não publica sozinha. `vercel --prod --yes` a partir de um `git worktree` limpo, com a pasta `.vercel` copiada (passo a passo no `README.md`).
+- **Pedidos**: `src/lib/pedidos.ts` (validação, preço, cupom, frete, totais, mensagem do WhatsApp, `registrarPagamento`), `src/app/api/pedidos/` (criar e "pagar agora"), `src/app/pagamento/`, `src/app/pedido/[id]/`. Mercado Pago: `src/lib/mercado-pago.ts` e `src/app/api/pagamento/webhook/`. Tabelas `pedidos` e `cupons` (RLS ligada, sem políticas: só a chave secreta lê e grava).
+- **Cupom de primeira compra**: recusa o e-mail que já tem pedido pago, separado, enviado ou entregue.
+- **Admin**: `src/app/admin/` (`dono.ts` confere o dono em cada ação; `pedidos-acoes.ts`, `pedidos-admin.tsx`, `cupons-admin.tsx`).
+- **Personalizador**: ver `docs/PERSONALIZADOR.md` (compra em `public/personalizador/js/meranno-compra.js`, rotas `/api/estampa/envio` e `/api/estampa/registrar`).
+- **Pré-venda**: `src/proxy.ts`, `src/lib/pre-venda.ts`, `src/lib/pre-venda-lista.ts`, `src/app/pre-venda/`, `src/components/entrada-pre-venda.tsx`. A `/em-breve` e a `/pre-venda` precisam continuar dinâmicas.
+- **Sem uso**: a tabela `convites_pre_venda` e a função `usar_convite_pre_venda` (primeiro modelo da pré-venda) e `src/lib/estampa-schema.ts` (Personalizador anterior). Podem ser apagadas.
+- **Recortes das camisetas e cartas do topo**: `public/imagens/merano-assets/recortes/` (as cartas são os `*-carta.webp`). A vitrine lê `src/lib/shirt-stories.ts`; o topo, `src/components/hero-topo.tsx`.

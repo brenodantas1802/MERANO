@@ -1,22 +1,10 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { createSecretClient } from "@/lib/supabase/publico";
-import { isOwnerSession } from "@/lib/owners";
+import { dono } from "./dono";
 import { lerLista } from "@/lib/pre-venda-lista";
 
-// The pre-sale list, edited from the owners' panel. Every action checks the owner again: a server action is a
-// public endpoint, the page check alone doesn't protect it.
-async function dono() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data } = await supabase.auth.getClaims();
-  if (!user?.email || !user.email_confirmed_at || !isOwnerSession(user.email, data?.claims.amr)) return null;
-  const admin = createSecretClient();
-  return admin ? { admin, email: user.email } : null;
-}
-
+// The pre-sale list, edited from the owners' panel. Every action checks the owner again (see dono).
 export type RespostaLista = { tipo: "ok" | "erro"; texto: string } | null;
 
 // Pasted text, one person per line. Entries already on the list (same e-mail or same number) are skipped.

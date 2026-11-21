@@ -261,6 +261,56 @@ html { -webkit-tap-highlight-color: transparent; }
 .as-gigante { filter: drop-shadow(0 0 30px rgba(186, 150, 84, .18)); }
 @media (prefers-reduced-motion: reduce) { .as-traco { animation: none; } }
 
+/* Royal flush (components/hero-topo.tsx): the five tees on playing cards, fanned in front of the ace. Sizes follow the
+   card width --cw, which follows the width of the top (container units). */
+.rf-topo { container-type: inline-size; --cw: 14cqw; }
+.rf-as { left: 74%; top: 3%; height: 94%; width: auto; transform: translateX(-50%); }
+.rf-mao { position: absolute; z-index: 2; left: 74%; top: 55%; width: 0; height: 0; }
+.rf-carta {
+	position: absolute; display: block; width: var(--cw); aspect-ratio: 63 / 88;
+	left: calc(var(--cw) / -2); top: calc(var(--cw) * -1.107);
+	transform-origin: 50% 185%; transform: rotate(var(--r));
+	transition: transform .45s cubic-bezier(.22, 1, .36, 1); perspective: calc(var(--cw) * 5);
+	animation: rf-dar .9s cubic-bezier(.2, .9, .3, 1) backwards; animation-delay: var(--d);
+}
+.rf-carta:hover { transform: rotate(var(--r)) translateY(calc(var(--cw) * -.13)); }
+.rf-giro { position: absolute; inset: 0; transform-style: preserve-3d; animation: rf-virar .75s cubic-bezier(.3, .7, .2, 1) backwards; animation-delay: var(--v); }
+.rf-face, .rf-verso { position: absolute; inset: 0; border-radius: 6% / 4.3%; -webkit-backface-visibility: hidden; backface-visibility: hidden; overflow: hidden; }
+.rf-face {
+	background-color: #fbf6ec;
+	background-image:
+		radial-gradient(120% 80% at 25% 10%, rgba(255, 255, 255, .9), rgba(255, 255, 255, 0) 60%),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+	background-size: auto, 120px 120px;
+	box-shadow: inset 0 0 0 1px rgba(70, 45, 25, .16), 0 2px 0 #e2d6c1, 0 calc(var(--cw) * .14) calc(var(--cw) * .21) calc(var(--cw) * -.086) rgba(12, 2, 6, .8);
+}
+.rf-face::before { content: ""; position: absolute; inset: 9% 13%; border: 1px solid rgba(85, 30, 43, .32); border-radius: 4%; pointer-events: none; }
+.rf-face::after { content: ""; position: absolute; inset: 0; background: linear-gradient(118deg, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 72%, rgba(255, 255, 255, .2) 100%); pointer-events: none; }
+.rf-indice { position: absolute; left: 4.2%; top: 3.2%; width: 9%; display: flex; flex-direction: column; align-items: center; font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 600; font-size: calc(var(--cw) * .125); line-height: .9; letter-spacing: -.04em; color: #1d1614; }
+.rf-indice svg { width: calc(var(--cw) * .075); height: calc(var(--cw) * .075); margin-top: calc(var(--cw) * .018); fill: #1d1614; }
+.rf-baixo { left: auto; top: auto; right: 4.2%; bottom: 3.2%; transform: rotate(180deg); }
+.rf-face img { position: absolute; left: 16%; top: 14%; width: 68%; height: 60%; object-fit: contain; filter: drop-shadow(0 calc(var(--cw) * .025) calc(var(--cw) * .032) rgba(40, 20, 10, .28)); }
+.rf-nome { position: absolute; left: 14%; right: 14%; bottom: 12.5%; text-align: center; font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 500; font-size: max(7px, calc(var(--cw) * .064)); line-height: 1.15; letter-spacing: .14em; text-transform: uppercase; color: var(--vinho); }
+.rf-verso {
+	transform: rotateY(180deg);
+	background-color: #4a1724;
+	background-image: repeating-linear-gradient(45deg, rgba(214, 184, 120, .22) 0 1px, transparent 1px calc(var(--cw) * .06)), repeating-linear-gradient(-45deg, rgba(214, 184, 120, .22) 0 1px, transparent 1px calc(var(--cw) * .06));
+	box-shadow: inset 0 0 0 calc(var(--cw) * .04) #fbf6ec, inset 0 0 0 calc(var(--cw) * .049) rgba(186, 150, 84, .85), 0 calc(var(--cw) * .14) calc(var(--cw) * .21) calc(var(--cw) * -.086) rgba(12, 2, 6, .8);
+}
+.rf-verso svg { position: absolute; left: 50%; top: 50%; width: 38%; transform: translate(-50%, -50%); fill: #4a1724; stroke: #d6b878; stroke-width: 2.4; }
+@keyframes rf-dar { from { transform: translate(-48cqw, 30cqw) rotate(-50deg); opacity: 0; } 30% { opacity: 1; } }
+@keyframes rf-virar { from { transform: rotateY(180deg); } }
+/* Phones: the hand sits under the header, the headline below it. The card shrinks on short screens. */
+@media (max-width: 767px) {
+	.rf-topo { --cw: min(25cqw, 13svh); }
+	.rf-as { left: 50%; top: 8%; height: 46%; }
+	.rf-mao { left: 50%; top: calc(76px + var(--cw) * 1.037); }
+	.rf-carta { top: calc(var(--cw) * -1.037); transform-origin: 50% 200%; }
+}
+/* While the pre-sale veil is up, the deal waits, so it plays when the site shows through the keyhole. */
+html.entrada .rf-topo .rf-carta, html.entrada .rf-topo .rf-giro, html.entrada .rf-topo .as-traco { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .rf-carta, .rf-giro { animation: none; transition: none; } }
+
 /* Tap area of at least 44 × 44 px around small controls, without changing how they look (docs/PESQUISA-UX.md §1).
    The element must be positioned: .toque makes it relative unless it is already absolute/fixed. */
 .toque:not(.absolute):not(.fixed) { position: relative; }

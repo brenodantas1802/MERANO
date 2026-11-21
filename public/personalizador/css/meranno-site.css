@@ -63,3 +63,42 @@
 .prompt-review p, .prompt-review label { font-size: 13px; color: var(--pz-tinta); }
 .prompt-review textarea, .prompt-review select { border-color: var(--pz-borda); background: var(--pz-campo); font-size: 13.5px; }
 .prompt-review .btn { min-height: 44px; border-radius: 999px; }
+
+/* ---------- store: "Comprar esta peça" (js/meranno-compra.js) ---------- */
+/* Saving to an account needs the programmer's own hosting; on the store the draft stays on the device. */
+#save-creation, #my-creations { display: none; }
+/* The production pack goes to the owners with the order ("Comprar esta peça"), not to the customer. */
+#direct-download { display: none; }
+/* What each image cost the store is for the team, not for the customer. */
+.generation-cost { display: none; }
+.creation-actions { justify-content: space-between; }
+.creation-actions .comprar-peca {
+  min-height: 36px; padding: 0 18px; border-radius: 999px; border: 0;
+  background: var(--pz-vinho); color: var(--pz-creme);
+  font: 600 11px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+}
+.creation-actions .comprar-peca:disabled { opacity: .35; cursor: default; }
+@media (max-width: 960px) {
+  .creation-actions .comprar-peca { position: fixed; left: 16px; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40; min-height: 52px; font-size: 12px; box-shadow: 0 14px 30px -14px rgba(84, 30, 43, .7); }
+  .creation-actions .comprar-peca:disabled { display: none; }
+  body:has(.comprar-peca:not(:disabled)) .studio { padding-bottom: 84px; }
+}
+.art-comprar { display: flex; align-items: center; width: fit-content; min-height: 44px; margin-top: 14px; padding: 0 20px; border-radius: 999px; font: 600 11px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; }
+.compra-dialog { width: min(460px, calc(100vw - 32px)); }
+.compra-dialog #compra-resumo { font-size: 14px; line-height: 1.55; color: var(--pz-tinta); }
+.compra-tamanhos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 18px 0 6px; padding: 0; border: 0; }
+.compra-tamanhos legend { margin-bottom: 8px; font: 600 12px/1.4 var(--sans); }
+.compra-dialog .compra-tamanhos label { margin: 0; }
+.compra-tamanhos input { position: absolute; opacity: 0; pointer-events: none; }
+.compra-tamanhos span { display: flex; align-items: center; justify-content: center; height: 48px; border: 1px solid var(--pz-borda); border-radius: 12px; background: #fff; font: 600 14px/1 var(--sans); cursor: pointer; }
+.compra-tamanhos input:checked + span { border-color: var(--pz-vinho); background: var(--pz-vinho); color: var(--pz-creme); }
+.compra-tamanhos input:focus-visible + span { outline: 2px solid var(--pz-vinho); outline-offset: 2px; }
+.compra-dialog .compra-nota { color: var(--pz-suave); }
+.compra-dialog #compra-status { min-height: 1.7em; color: var(--pz-suave); }
+.compra-dialog #compra-status.is-error { color: #8a3a2c; }
+.compra-acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.compra-acoes .btn { min-height: 46px; }
+@media (max-width: 520px) {
+  .compra-acoes { flex-direction: column-reverse; }
+  .compra-acoes .btn { width: 100%; }
+}

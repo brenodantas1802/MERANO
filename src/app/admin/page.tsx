@@ -7,6 +7,32 @@ import { createSecretClient } from "@/lib/supabase/publico";
 import { preVendaAtiva } from "@/lib/pre-venda";
 import { AdminDashboard, type CriacaoAdmin, type CadastroCupom } from "./dashboard";
 import type { Autorizado } from "./lista-pre-venda";
+import type { CupomAdmin } from "./cupons-admin";
+import type { Pedido, StatusPedido } from "@/lib/pedidos";
+
+const PAGOS: StatusPedido[] = ["pago", "em_separacao", "enviado", "entregue"];
+
+// Every order, newest first (a pre-sale fits easily). Needs SUPABASE_SECRET_KEY.
+async function carregarPedidos(): Promise<Pedido[] | null> {
+  const supabase = createSecretClient();
+  if (!supabase) return null;
+  const { data } = await supabase.from("pedidos").select("*").order("criado_em", { ascending: false }).limit(1000);
+  return (data ?? []) as Pedido[];
+}
+
+// The discount coupons, with how many paid orders used each one.
+function cuponsComUsos(pedidos: Pedido[] | null, cupons: Omit<CupomAdmin, "usos">[]): CupomAdmin[] {
+  const usos = new Map<string, number>();
+  for (const pedido of pedidos ?? []) if (pedido.cupom && PAGOS.includes(pedido.status)) usos.set(pedido.cupom, (usos.get(pedido.cupom) ?? 0) + 1);
+  return cupons.map((cupom) => ({ ...cupom, usos: usos.get(cupom.codigo) ?? 0 }));
+}
+
+async function carregarCuponsDesconto(): Promise<Omit<CupomAdmin, "usos">[] | null> {
+  const supabase = createSecretClient();
+  if (!supabase) return null;
+  const { data } = await supabase.from("cupons").select("codigo, percentual, descricao, ativo, primeira_compra, boas_vindas, criado_em").order("criado_em", { ascending: false });
+  return data ?? [];
+}
 
 // The pre-sale list, newest first. Needs SUPABASE_SECRET_KEY.
 async function carregarLista(): Promise<Autorizado[] | null> {
@@ -24,15 +50,20 @@ async function carregarCupons(): Promise<CadastroCupom[] | null> {
   return data ?? [];
 }
 
-// The latest custom prints, with short-lived links to their art (the bucket is private). Needs SUPABASE_SECRET_KEY.
+// The latest custom prints, with short-lived links to their files (the bucket is private). Needs SUPABASE_SECRET_KEY.
 async function carregarCriacoes(): Promise<CriacaoAdmin[] | null> {
   const supabase = createSecretClient();
   if (!supabase) return null;
   const { data, error } = await supabase.from("criacoes_estampa").select("id, criada_em, status, tamanho, painel, ficha, arte_path, pedido, cliente").order("criada_em", { ascending: false }).limit(60);
   if (error || !data) return [];
-  const links = await supabase.storage.from("estampas").createSignedUrls(data.map((row) => row.arte_path), 60 * 60);
+  const caminhos = data.flatMap((row) => [row.arte_path, ...Object.values((row.ficha?.arquivos ?? {}) as Record<string, string>)]);
+  const links = await supabase.storage.from("estampas").createSignedUrls(caminhos, 60 * 60);
   const porCaminho = new Map((links.data ?? []).map((link) => [link.path, link.signedUrl]));
-  return data.map((row) => ({ ...row, arte_url: porCaminho.get(row.arte_path) ?? null }));
+  return data.map((row) => ({
+    ...row,
+    arte_url: porCaminho.get(row.arte_path) ?? null,
+    arquivos_url: Object.fromEntries(Object.entries((row.ficha?.arquivos ?? {}) as Record<string, string>).map(([nome, caminho]) => [nome, porCaminho.get(caminho) ?? null])),
+  }));
 }
 
 export const metadata: Metadata = { title: "Equipe · MERANNO", robots: { index: false, follow: false } };
@@ -49,5 +80,6 @@ export default async function AdminPage() {
   const cabecalhos = await headers();
   const host = cabecalhos.get("x-forwarded-host") ?? cabecalhos.get("host") ?? "";
   const origem = `${cabecalhos.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
-  return <AdminDashboard email={user.email} criacoes={await carregarCriacoes()} cupons={await carregarCupons()} lista={await carregarLista()} origem={origem} cadeadoLigado={preVendaAtiva()} />;
+  const [pedidos, descontos, criacoes, cadastros, lista] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista()]);
+  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} origem={origem} cadeadoLigado={preVendaAtiva()} />;
 }

@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
 import { collections, products } from "@/lib/products";
+import { buscarProdutos } from "@/lib/busca";
 
 const TEMAS_NOME: Record<string, string> = { mar: "Mar", frase: "Frases", esporte: "Esporte", fruta: "Frutas", minimal: "Minimal", urbano: "Cidade" };
 
@@ -22,7 +23,7 @@ function ShopContent() {
   const [sort, setSort] = useState("featured");
   const [query, setQuery] = useState("");
   const categories = useMemo(() => ["Todos", ...Array.from(new Set(products.map((product) => product.category)))], []);
-  const filtered = useMemo(() => products.filter((product) => (category === "Todos" || product.category === category) && (!selectedCollection || product.collection === selectedCollection) && (!tema || product.tags.includes(tema)) && `${product.name} ${product.note}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === "price-low" ? a.price - b.price : sort === "price-high" ? b.price - a.price : sort === "name" ? a.name.localeCompare(b.name) : 0), [category, selectedCollection, query, sort, tema]);
+  const filtered = useMemo(() => buscarProdutos(products, query).filter((product) => (category === "Todos" || product.category === category) && (!selectedCollection || product.collection === selectedCollection) && (!tema || product.tags.includes(tema))).sort((a, b) => sort === "price-low" ? a.price - b.price : sort === "price-high" ? b.price - a.price : sort === "name" ? a.name.localeCompare(b.name) : 0), [category, selectedCollection, query, sort, tema]);
 
   function pickCategory(value: string) { setCategory(value); setSelectedCollection(null); setShowCollections(false); }
   function pickCollection(id: string) { setSelectedCollection(id); setCategory("Todos"); setShowCollections(false); }

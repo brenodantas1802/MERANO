@@ -7,11 +7,15 @@ import { avisoDeCookiesPendente, EVENTO_CONSENTIMENTO } from "@/lib/consentiment
 
 const SEEN_KEY = "merano-discount-popup-seen";
 const ACCOUNT_KEY = "merano-account-exists";
+// The code shown here comes back filled in on the payment page.
+export const CUPOM_KEY = "meranno-cupom";
 
 export function FirstPurchasePopup() {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [codigo, setCodigo] = useState<{ codigo: string; percentual: number } | null>(null);
+  const [copiado, setCopiado] = useState(false);
   const [consent, setConsent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -50,7 +54,10 @@ export function FirstPurchasePopup() {
       if (!response.ok) throw new Error(data.error || "Não consegui guardar seu e-mail agora.");
       window.localStorage.setItem(SEEN_KEY, "1");
       setSent(true);
-      setTimeout(() => setVisible(false), 2600);
+      if (data.codigo) {
+        setCodigo({ codigo: data.codigo, percentual: data.percentual });
+        try { window.localStorage.setItem(CUPOM_KEY, data.codigo); } catch { /* typed by hand at checkout then */ }
+      } else setTimeout(() => setVisible(false), 2600);
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : "Não consegui guardar seu e-mail agora.");
     } finally {
@@ -78,7 +85,16 @@ export function FirstPurchasePopup() {
             <button onClick={close} aria-label="Fechar" className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><X size={18} strokeWidth={1.5} /></button>
             <div className="mb-6 h-1 w-12" style={{ background: "linear-gradient(to right, #551E2B, #BA9654)" }} />
             {sent ? (
-              <div>
+              codigo ? <div>
+                <p className="sans mb-3 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Seu cupom</p>
+                <h2 className="display text-4xl leading-none md:text-5xl">{codigo.percentual}% na primeira compra.</h2>
+                <button type="button" onClick={() => { navigator.clipboard?.writeText(codigo.codigo).then(() => { setCopiado(true); setTimeout(() => setCopiado(false), 2000); }).catch(() => {}); }} className="press mt-6 flex w-full items-center justify-between rounded-2xl border border-dashed border-[var(--vinho)]/50 bg-white/60 px-5 py-4" aria-label={`Copiar o cupom ${codigo.codigo}`}>
+                  <span className="display text-3xl tracking-[.08em] text-[var(--vinho)]">{codigo.codigo}</span>
+                  <span className="sans text-[11px] uppercase tracking-[.14em] text-[var(--muted)]">{copiado ? "Copiado" : "Copiar"}</span>
+                </button>
+                <p className="mt-4 text-[var(--muted)]">Ele já fica guardado no pagamento deste aparelho. Copie para usar em outro.</p>
+                <button onClick={() => setVisible(false)} className="press sans mt-6 min-h-11 w-full rounded-full bg-[var(--vinho)] text-[11px] uppercase tracking-[.15em] text-[var(--creme)]">Ver a coleção</button>
+              </div> : <div>
                 <h2 className="display text-4xl">Combinado.</h2>
                 <p className="mt-4 text-[var(--muted)]">Recebemos seu e-mail. A equipe Meranno envia o cupom de 10% para ele. Obrigado por chegar cedo.</p>
               </div>
@@ -86,7 +102,7 @@ export function FirstPurchasePopup() {
               <>
                 <p className="sans mb-3 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Só para quem está chegando agora</p>
                 <h2 className="display text-4xl leading-none md:text-5xl">10% na sua<br />primeira compra.</h2>
-                <p className="mt-4 text-[var(--muted)]">Deixe seu e-mail e a gente envia o cupom. Sem spam, só as novidades da coleção.</p>
+                <p className="mt-4 text-[var(--muted)]">Deixe seu e-mail e receba o cupom na hora. Sem spam, só as novidades da coleção.</p>
                 <form onSubmit={submit} className="sans mt-7 flex flex-col gap-3 sm:flex-row">
                   <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="seu@email.com" className="h-11 w-full border-b border-[var(--ink)] bg-transparent text-sm outline-none" />
                   <button type="submit" disabled={sending} className="min-h-11 shrink-0 rounded-full bg-[var(--vinho)] px-6 text-[11px] uppercase tracking-[.15em] text-[var(--creme)] transition-opacity hover:opacity-85 disabled:opacity-60">{sending ? "Enviando…" : "Quero o cupom"}</button>

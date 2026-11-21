@@ -8,7 +8,7 @@ export const INSTAGRAM_URL = "https://www.instagram.com/meranoclothing/";
 const TIP = "sans pointer-events-none absolute right-full mr-3 hidden -rotate-3 whitespace-nowrap rounded-full rounded-br-sm bg-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] text-[var(--creme)] opacity-0 transition-opacity group-hover:opacity-100 md:block";
 
 // On phones these pages need the bottom corner for their own buttons and fields.
-const BUSY_ON_PHONES = ["/produto", "/carrinho", "/pagamento", "/checkout", "/conta", "/meu-fit", "/provador"];
+const BUSY_ON_PHONES = ["/produto", "/carrinho", "/pagamento", "/pedido", "/conta", "/meu-fit", "/provador"];
 
 // Floating contact buttons in the bottom-right corner: Instagram above WhatsApp, on phones and computers; none on phone
 // pages busy with a form or the buy bar.

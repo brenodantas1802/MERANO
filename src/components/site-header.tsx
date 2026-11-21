@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { useCart } from "./cart-provider";
 import { MeranoSymbol } from "./merano-symbol";
 import { products } from "@/lib/products";
+import { buscarProdutos } from "@/lib/busca";
 
 // The big links at the top of the menu; the rest of NAV_LINKS follow in a quieter list.
 const MENU_PRINCIPAL = [
@@ -55,7 +56,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const term = query.trim().toLowerCase();
   // With nothing typed yet the panel suggests a few pieces instead of showing an empty box.
-  const matches = (term ? products.filter((product) => `${product.name} ${product.category} ${product.note} ${product.tags.join(" ")}`.toLowerCase().includes(term)) : products).slice(0, 4);
+  const matches = buscarProdutos(products, term).slice(0, 4);
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -109,7 +110,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 
       <Link href="/" aria-label="Meranno - início" className="flex min-h-11 items-center gap-2.5 md:gap-3">
         <MeranoSymbol className="h-6 w-auto min-[400px]:h-7 md:h-8" ink={clear ? "#ffffff" : "#111111"} />
-        <Image src="/imagens/logo-nome-trimmed.png" alt="MERANNO" width={655} height={66} priority className={`h-auto w-[108px] min-[400px]:w-[122px] transition-[filter] duration-300 md:w-[187px] ${clear ? "brightness-0 invert" : ""}`} />
+        <Image src="/imagens/logo-nome-trimmed.png" alt="MERANNO" width={655} height={66} priority className={`h-auto w-[108px] max-[359px]:hidden min-[400px]:w-[122px] transition-[filter] duration-300 md:w-[187px] ${clear ? "brightness-0 invert" : ""}`} />
       </Link>
 
       <div className="flex items-center justify-end gap-1.5 md:gap-2">
@@ -134,7 +135,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
                 <span className="relative h-16 w-14 shrink-0 overflow-hidden bg-[var(--cream)]"><Image src={product.image} alt="" fill sizes="56px" className="object-cover transition-transform duration-500 group-hover:scale-105" /></span>
                 <span className="min-w-0 truncate text-base font-medium">{product.name}</span>
               </Link>)}
-            </div> : <p className="sans mt-6 text-sm text-[var(--muted)]">Nenhuma peça com esse nome — tente “barco”, “tênis” ou “café”.</p>}
+            </div> : <p className="sans mt-6 text-sm text-[var(--muted)]">Nenhuma peça com esse nome. Tente “coração”, “vinho” ou “verão”.</p>}
           </div>
         </motion.div>
       )}

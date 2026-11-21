@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
       { source: "/sobre-mim", destination: "/meu-fit", permanent: true },
       { source: "/meu-perfil", destination: "/meu-fit", permanent: true },
       { source: "/a-marca", destination: "/sobre-nos", permanent: true },
+      // The old manual-confirmation checkout (before the payment page); 2026-11-21.
+      { source: "/checkout", destination: "/carrinho", permanent: true },
     ];
   },
 };

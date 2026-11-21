@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
-import { createPublicClient } from "@/lib/supabase/publico";
+import { createPublicClient, createSecretClient } from "@/lib/supabase/publico";
 
-// The 10% first-purchase coupon: stores the e-mail (with the visitor's consent) so the team can send the coupon.
+// The 10% first-purchase coupon: stores the e-mail (with the visitor's consent) and answers with the welcome code
+// (the active coupon marked boas_vindas in /admin), shown right away in the pop-up.
 const isRateLimited = createRateLimiter(5);
 const cupomSchema = z.object({
   email: z.email("E-mail inválido.").max(160),
@@ -27,5 +28,8 @@ export async function POST(request: Request) {
     console.error("registrar_email_cupom failed:", error.message);
     return NextResponse.json({ error: "Não consegui guardar seu e-mail agora. Tente de novo." }, { status: 502 });
   }
-  return NextResponse.json({ ok: true });
+  const admin = createSecretClient();
+  const { data: cupom } = admin ? await admin.from("cupons").select("codigo, percentual").eq("boas_vindas", true).eq("ativo", true).maybeSingle() : { data: null };
+  if (cupom && admin) await admin.from("cadastros_cupom").update({ cupom_enviado: true }).eq("email", parsed.data.email.trim().toLowerCase());
+  return NextResponse.json({ ok: true, codigo: cupom?.codigo ?? null, percentual: cupom?.percentual ?? null });
 }

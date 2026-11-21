@@ -1,55 +1,43 @@
 # MERANNO
 
-MVP da MERANNO, marca brasileira de moda premium feita sob demanda.
+Loja da MERANNO: coleção de camisetas, Personalizador com IA, Provador e pré-venda para um grupo fechado.
 
-## Rodar localmente
+- **O que falta e o passo a passo de cada item:** [`PENDENCIAS-LEIA-ME.md`](PENDENCIAS-LEIA-ME.md)
+- **Personalizador** (app do programador dentro do site): [`docs/PERSONALIZADOR.md`](docs/PERSONALIZADOR.md)
+
+## Rodar no computador
+
+1. Instale o Node.js 20 ou mais novo.
+2. Baixe o projeto e instale as dependências:
+   ```bash
+   git clone https://github.com/brenodantas1802/MERANO.git merano
+   cd merano
+   npm install
+   ```
+3. Peça o arquivo `.env.local` a um dos sócios **por um canal seguro** (nunca pelo grupo, e-mail aberto ou chat com IA) e coloque na pasta `merano`. Ele tem as chaves do Supabase e da IA.
+4. Rode `npm run dev` e abra http://localhost:3000.
+
+Com o Claude Code: abra a pasta `merano` e peça o que precisa. As instruções para ele ficam em `AGENTS.md`.
+
+## Como o site é montado
+
+- **Next.js 16** (as regras mudaram em relação às versões antigas: leia `node_modules/next/dist/docs/` antes de mexer), React 19 e Tailwind 4.
+- **Supabase**: login, banco e arquivos. Tabelas principais: `pedidos`, `cupons`, `criacoes_estampa`, `pre_venda_autorizados`, `cadastros_cupom`, `avaliacoes`.
+- **Vercel**: hospedagem. Ela **não** publica sozinha quando o GitHub muda.
+- **Pagamento**: Mercado Pago Checkout Pro quando `MERCADOPAGO_ACCESS_TOKEN` está na Vercel; sem ele, o pedido é registrado e fechado pelo WhatsApp. O preço, o cupom e o frete são sempre calculados de novo no servidor (`src/lib/pedidos.ts`).
+- **Frete**: SuperFrete (`src/lib/frete.ts`); sem token, mostra valores de exemplo.
+- **Painel da equipe**: `/admin` (só os e-mails de `OWNER_EMAILS`, entrando com o Google): lista da pré-venda, pedidos, cupons, estampas do Personalizador e e-mails do pop-up.
+
+## Publicar
+
+Só depois de testar. A partir de uma cópia limpa do branch (sem `.env.local` e sem arquivos soltos):
 
 ```bash
-npm install
-npm run dev
+git worktree add ../merano-publicar main
+cp -r .vercel ../merano-publicar/   # o vínculo com o projeto da Vercel não vai para o GitHub
+cd ../merano-publicar
+vercel --prod --yes
+cd .. && git worktree remove merano-publicar
 ```
 
-Abra http://localhost:3000.
-
-## Banco de dados
-
-1. Copie `.env.example` para `.env` e informe `DATABASE_URL`.
-2. Gere o client: `npx prisma generate`.
-3. Crie a primeira migration quando o PostgreSQL estiver disponível: `npx prisma migrate dev --name init`.
-
-O projeto usa a configuração atual do Prisma em `prisma.config.ts`; a URL do banco fica fora do schema e vem de `DATABASE_URL`.
-
-O checkout desta fase envia a intenção do pedido para confirmação manual; nenhum cartão é armazenado ou processado.
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+As variáveis (chaves) ficam na Vercel, em **Settings → Environment Variables**. A lista completa está no fim do `PENDENCIAS-LEIA-ME.md`.
