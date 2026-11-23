@@ -24,7 +24,7 @@
     const garment = GARMENTS[key];
     const back = side === 'back';
     const id = `photo-shirt-${++sequence}`;
-    const asset = `assets/garments/${key}-v2.png`;
+    const asset = `assets/garments/${key}-v2.webp`;
     const sourceX = back ? -768 : 0;
     const x = 200 - 384 * garment.sx;
     const y = 32 - garment.top * garment.sy;

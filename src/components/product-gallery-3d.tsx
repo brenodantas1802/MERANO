@@ -44,7 +44,8 @@ function Slide({ frame, alt, order, count, position }: { frame: Frame; alt: stri
   });
   return (
     <motion.div style={{ x }} className="absolute inset-0">
-      <Image src={frame.src} alt={alt} fill draggable={false} loading="eager" sizes="(min-width: 768px) 55vw, 100vw" className="object-cover" />
+      {/* The first photo is what the page is waiting for: it goes first. */}
+      <Image src={frame.src} alt={alt} fill draggable={false} loading="eager" fetchPriority={order === 0 ? "high" : "low"} sizes="(min-width: 768px) 55vw, 100vw" className="object-cover" />
     </motion.div>
   );
 }

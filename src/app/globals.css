@@ -45,9 +45,6 @@ body {
 .sans { font-family: var(--font-sans), Arial, Helvetica, sans-serif; }
 /* Short asides: plain, quiet text (kept for the few that still carry information). */
 .serif-note { font-family: var(--font-sans), Arial, sans-serif; font-style: normal; font-weight: 400; line-height: 1.3; text-transform: none; }
-.marquee { animation: marquee 38s linear infinite; }
-@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@media (prefers-reduced-motion: reduce) { .marquee { animation: none; } }
 /* Titles, prices and labels: the condensed cut, set tight. */
 .display { font-family: var(--font-display), "Arial Narrow", sans-serif; letter-spacing: 0.005em; line-height: 0.95; font-weight: 500; }
 .display i, .display em { font-style: normal; font-weight: inherit; }
@@ -79,46 +76,10 @@ body {
 	padding-right: .08em;
 }
 
-.hero-wash { background: linear-gradient(135deg, #d8ded3 0%, #e8e2d3 53%, #c8d0c2 100%); }
 .product-wash { background: linear-gradient(155deg, #d7dfd7 0%, #b9c3b5 54%, #e4d7c4 100%); }
-.product-wash-two { background: linear-gradient(155deg, #d9d0c6 0%, #b9a895 50%, #e1ddd2 100%); }
-.product-wash-three { background: linear-gradient(155deg, #cbd7d5 0%, #9eafb0 60%, #d8d4c8 100%); }
-.fade-up { animation: fade-up .65s ease both; }
-@keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Beach illustrations (components/beach-art.tsx) */
-.wave-drift { animation: wave-drift 14s linear infinite; }
-.wave-drift-slow { animation: wave-drift 26s linear infinite; }
-.wave-drift-reverse { animation: wave-drift 20s linear infinite reverse; }
-@keyframes wave-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.bob { animation: bob 4.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
-@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-4px) rotate(2deg); } }
-@media (prefers-reduced-motion: reduce) { .wave-drift, .wave-drift-slow, .wave-drift-reverse, .bob { animation: none; } }
 
-/* Shallow-water background: faint ripples with a sea tint that fades out down the page. */
-.ripples {
-	background-color: var(--paper);
-	background-image:
-		linear-gradient(to bottom, rgba(140, 197, 214, 0.22), rgba(255, 255, 255, 0) 520px),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='48' viewBox='0 0 220 48'%3E%3Cpath d='M0 14 Q27.5 4 55 14 T110 14 T165 14 T220 14' fill='none' stroke='%234F97B3' stroke-opacity='0.13' stroke-width='1.4'/%3E%3Cpath d='M-55 38 Q-27.5 28 0 38 T55 38 T110 38 T165 38 T220 38 T275 38' fill='none' stroke='%239FB0C8' stroke-opacity='0.35' stroke-width='1.2'/%3E%3C/svg%3E");
-	background-size: auto, 220px 48px;
-	background-repeat: no-repeat, repeat;
-}
-/* Same ripples without the tint, for areas that continue a .ripples page (e.g. behind the footer waves). */
-.ripples-plain {
-	background-color: var(--paper);
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='48' viewBox='0 0 220 48'%3E%3Cpath d='M0 14 Q27.5 4 55 14 T110 14 T165 14 T220 14' fill='none' stroke='%234F97B3' stroke-opacity='0.13' stroke-width='1.4'/%3E%3Cpath d='M-55 38 Q-27.5 28 0 38 T55 38 T110 38 T165 38 T220 38 T275 38' fill='none' stroke='%239FB0C8' stroke-opacity='0.35' stroke-width='1.2'/%3E%3C/svg%3E");
-	background-size: 220px 48px;
-}
 
-/* Shop hero (components/shop-hero-art.tsx) */
-.swing { animation: swing 5s ease-in-out infinite; transform-origin: 50% 12px; }
-.swing-slow { animation: swing-wide 6.5s ease-in-out infinite; transform-origin: top center; }
-.spin-slow { animation: spin-slow 28s linear infinite; }
-@keyframes swing { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
-@keyframes swing-wide { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
-@keyframes spin-slow { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .swing, .swing-slow, .spin-slow { animation: none; } }
 
 /* Late-afternoon glow: soft sun-coloured light at the top of the page that melts into the paper. */
 .sunset-glow {
@@ -145,26 +106,6 @@ body {
 @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }
 
-/* Personalizador MERANNO (/personalizar-estampa): colours sampled from the owners' prototype. */
-.pz-tema {
-	--pz-vinho: #541E2B;
-	--pz-creme: #F5F1E8;
-	--pz-cartao: #FAF7F0;
-	--pz-campo: #FBF8F3;
-	--pz-areia: #EEE6D9;
-	--pz-foto: #E9E5DE;
-	--pz-linha: #E3DED5;
-	--pz-borda: #D6CBB6;
-	--pz-ouro: #D6AE8B;
-	--pz-tinta: #3C2326;
-	--pz-suave: #7F766F;
-	--pz-apagado: #9A938D;
-	font-family: var(--font-manrope), Arial, Helvetica, sans-serif;
-}
-.pz-serif { font-family: var(--font-cormorant-garamond), "Cormorant Garamond", Georgia, serif; font-weight: 500; }
-.pz-rotulo { font-family: var(--font-cormorant-garamond), Georgia, serif; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--pz-suave); }
-.pz-palco { background: radial-gradient(70% 60% at 50% 42%, #662837 0%, #5C2130 48%, #4C1A26 100%); }
-.pz-listras { background: repeating-linear-gradient(135deg, var(--pz-cartao) 0 8px, #EFE8DE 8px 9px); }
 
 /* Storefront motion and glass, after the Ermos benchmark: short, consistent timings and frosted floating panels. */
 :root {
@@ -176,35 +117,25 @@ body {
 html { -webkit-tap-highlight-color: transparent; }
 .glass {
 	background: rgba(246, 241, 232, .66);
-	-webkit-backdrop-filter: blur(26px) saturate(1.7);
-	backdrop-filter: blur(26px) saturate(1.7);
+	-webkit-backdrop-filter: blur(14px) saturate(1.4);
+	backdrop-filter: blur(14px) saturate(1.4);
 	border: 1px solid rgba(255, 255, 255, .6);
 	box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 18px 50px rgba(15, 18, 24, .16);
 }
 /* Cards inside a glass panel: a lighter frosted tile. */
 .glass-tile { background: rgba(251, 248, 242, .62); border: 1px solid rgba(255, 255, 255, .65); }
-.glass-dark {
-	background: rgba(17, 17, 17, .72);
-	-webkit-backdrop-filter: blur(22px) saturate(1.4);
-	backdrop-filter: blur(22px) saturate(1.4);
-	border: 1px solid rgba(255, 255, 255, .08);
-	box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
-}
 @media (prefers-reduced-transparency: reduce) {
 	.glass, .glass-tile { background: rgba(246, 241, 232, .98); -webkit-backdrop-filter: none; backdrop-filter: none; }
-	.glass-dark { background: #111; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 /* Instant feedback under the finger. */
 .press { transition: transform var(--dur-tap) var(--ease-out), opacity var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
 .press:active { transform: scale(.97); }
+@media (prefers-reduced-motion: reduce) { .press:active { transform: none; } }
 /* Horizontal shelves that snap card by card under the thumb. */
 .shelf { display: grid; grid-auto-flow: column; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .shelf::-webkit-scrollbar { display: none; }
 .shelf > * { scroll-snap-align: start; }
-/* Announcement strip. */
-.ticker { animation: ticker 32s linear infinite; }
-@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@media (prefers-reduced-motion: reduce) { .ticker { animation: none; } .press:active { transform: none; } }
+
 
 /* Brass hairline and numbered section labels ("01 / Mais desejadas"), from the Salão palette. */
 .rule-latao { height: 1px; background: linear-gradient(90deg, var(--latao), rgba(186, 150, 84, 0)); }
@@ -245,20 +176,26 @@ html { -webkit-tap-highlight-color: transparent; }
 .secao { font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: .22em; font-size: 13px; color: var(--vinho); }
 .secao b { color: var(--latao); font-weight: 500; margin-right: .6em; }
 
-/* Wine felt under a warm lamp: the card-table surface from the Salão palette, drawn in CSS (no photo). */
+/* Wine felt under a warm lamp: the card-table surface from the Salão palette, drawn in CSS (no photo). The grain is a
+   tiny pre-rendered noise tile inlined here (an SVG noise filter cost every phone a lot of drawing). */
 .feltro {
 	background-color: var(--vinho);
 	background-image:
 		radial-gradient(60% 55% at 70% 18%, rgba(255, 214, 150, .22), transparent 70%),
 		radial-gradient(120% 90% at 50% 120%, rgba(20, 6, 10, .65), transparent 60%),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+		url("data:image/webp;base64,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");
 	background-size: auto, auto, 160px 160px;
 }
+
+/* Home headline, line by line (components/hero-text-reveal.tsx). */
+.revela { animation: revela .45s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes revela { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .revela { animation: none; } }
 
 /* Home top: the giant ace (components/hero-topo.tsx). */
 .as-traco { stroke-dasharray: 1; stroke-dashoffset: 0; animation: tracar 2.4s cubic-bezier(.6,0,.2,1) both; }
 @keyframes tracar { from { stroke-dashoffset: 1; } }
-.as-gigante { filter: drop-shadow(0 0 30px rgba(186, 150, 84, .18)); }
+@media (min-width: 768px) and (hover: hover) { .as-gigante { filter: drop-shadow(0 0 30px rgba(186, 150, 84, .18)); } }
 @media (prefers-reduced-motion: reduce) { .as-traco { animation: none; } }
 
 /* Royal flush (components/hero-topo.tsx): the five tees on playing cards, fanned in front of the ace. Sizes follow the

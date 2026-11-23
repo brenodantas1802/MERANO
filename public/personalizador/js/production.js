@@ -102,7 +102,7 @@
     const brandSize=dimensions(snapshot.design.houseId?8:Number(options.brandWidthCM),brandAsset.height/brandAsset.width);
     const art=png300(await renderImage(image,size.width,size.height));
     const brand=png300(await renderImage(brandAsset.image,brandSize.width,brandSize.height));
-    const garment=await fetch(`assets/garments/${snapshot.fit}-v2.png`).then(r=>{if(!r.ok)throw Error('Não foi possível preparar o mockup.');return r.blob();});
+    const garment=await fetch(`assets/garments/${snapshot.fit}-v2.webp`).then(r=>{if(!r.ok)throw Error('Não foi possível preparar o mockup.');return r.blob();});
     const garmentURL=await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.readAsDataURL(garment);});
     async function mockup(side){let svg=M.shirtSVG({fit:snapshot.fit,side,fabric:snapshot.fabric,brandVisible:snapshot.brandVisible,design:{...snapshot.design,aiImage:image.src},label:side});svg=svg.replace(/href="assets\/garments\/[^"]+"/g,`href="${garmentURL}"`);return loadImage(svgURL(svg));}
     const front=await mockup('front'),back=await mockup('back');

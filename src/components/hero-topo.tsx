@@ -38,8 +38,10 @@ function RoyalFlush() {
         <span className="rf-face">
           <span className="rf-indice">{carta.valor}<Naipe /></span>
           <span className="rf-indice rf-baixo">{carta.valor}<Naipe /></span>
+          {/* Lazy: on the home they're in view and load at once; when another page prefetches the home in the
+              background (hidden), they don't load at all. */}
           {/* eslint-disable-next-line @next/next/no-img-element -- small transparent cutout, sized by the card */}
-          <img src={`/imagens/merano-assets/recortes/${carta.id}-carta.webp`} alt="" width={360} height={380} decoding="async" fetchPriority="high" />
+          <img src={`/imagens/merano-assets/recortes/${carta.id}-carta.webp`} alt="" width={360} height={380} decoding="async" loading="lazy" />
           <span className="rf-nome">{carta.nome}</span>
         </span>
         <span className="rf-verso"><Naipe /></span>

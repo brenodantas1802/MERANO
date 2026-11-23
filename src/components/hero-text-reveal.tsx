@@ -1,22 +1,11 @@
-"use client";
-
-import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
+// The headline rises in line by line with a CSS animation (globals.css, .revela): it runs as soon as the page paints,
+// without waiting for the page's JavaScript, and only animates opacity and position (cheap on any phone).
 export function HeroTextReveal({ lines, className }: { lines: ReactNode[]; className?: string }) {
   return (
     <h1 className={className}>
-      {lines.map((line, index) => (
-        <motion.span
-          key={index}
-          initial={{ opacity: 0, filter: "blur(4px)", y: 10 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1, ease: "easeInOut" }}
-          className="block"
-        >
-          {line}
-        </motion.span>
-      ))}
+      {lines.map((line, index) => <span key={index} className="revela block" style={{ animationDelay: `${index * 0.1}s` }}>{line}</span>)}
     </h1>
   );
 }

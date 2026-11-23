@@ -11,7 +11,8 @@ import { SCRIPT_ENTRADA } from "@/lib/pre-venda";
 
 // Barlow Condensed is the closest open font to the DIN Condensed look the owners picked; its regular-width sibling
 // carries the running text so long lines stay easy to read.
-const display = Barlow_Condensed({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-display", display: "swap" });
+// Only the weights the site uses (500 for titles and labels, 600 for the card indices): every weight is one more file.
+const display = Barlow_Condensed({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-display", display: "swap" });
 const sans = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
 
 export const metadata: Metadata = {

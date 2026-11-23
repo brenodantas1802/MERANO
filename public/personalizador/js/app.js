@@ -426,7 +426,7 @@
       const ready=!!item.art;
       const card=h(ready?'button':'div',{class:'slide'+(ready?'':' slide--pending'),...(ready?{type:'button',tabindex:i===state.slide?'0':'-1','aria-label':'Usar '+item.name}:{}),'data-house-id':item.id});
       if(item.mockup){const img=h('img',{src:item.mockup,alt:item.name,loading:'lazy'});img.style.cssText='width:100%;height:180px;object-fit:contain';card.append(img);}
-      else if(ready){card.innerHTML=M.shirtSVG({fit:'regular',side:'back',fabric:hex(item.fabric)});loadHouse(item).then(design=>{card.querySelector('svg').outerHTML=M.shirtSVG({fit:'regular',side:'back',fabric:hex(item.fabric),design});}).catch(()=>{card.disabled=true;card.querySelector('.slide__cta').textContent='Arte indisponível';});}
+      else if(ready){card.innerHTML=M.shirtSVG({fit:'regular',side:'back',fabric:hex(item.fabric)});card._mostrarArte=()=>{if(card._arte)return;card._arte=true;loadHouse(item,true).then(design=>{card.querySelector('svg').outerHTML=M.shirtSVG({fit:'regular',side:'back',fabric:hex(item.fabric),design});}).catch(()=>{card.disabled=true;card.querySelector('.slide__cta').textContent='Arte indisponível';});};}
       else card.append(h('span',{class:'ms','aria-hidden':'true'},'image'));
       const name=h('span',{class:'slide__name'});name.textContent=item.name;card.append(name);
       const caption=h('span',{class:'slide__cta'});caption.textContent=ready?'Aplicar e personalizar':'Aguardando a arte final';card.append(caption);
@@ -446,18 +446,22 @@
     $('#car-track').style.transform='translateX('+(-state.slide*100)+'%)';
     $('#car-track').querySelectorAll('.slide').forEach((el,i)=>{if(el.tagName==='BUTTON')el.tabIndex=i===state.slide?0:-1;});
     $('#sugg-count').textContent=(state.slide+1)+' de '+n;
+    // The art of the slide in view and of the next one; the others load when the customer gets to them.
+    const slides=$('#car-track').querySelectorAll('.slide');[state.slide,(state.slide+1)%n].forEach(i=>slides[i]?._mostrarArte?.());
   }
   $('#carousel').querySelectorAll('.car-arrow').forEach(b=>b.addEventListener('click',()=>moveCarousel(+b.dataset.dir)));
-  async function loadHouse(item){
-    if(!houseAssets.has(item.id))houseAssets.set(item.id,(async()=>{
-      const response=await fetch(item.art);if(!response.ok)throw Error('Não foi possível abrir a arte. Tente novamente.');
-      const blob=await response.blob();if(blob.type!=='image/png')throw Error('A estampa precisa ser um PNG transparente.');
+  // preview: the carousel shows a light WebP (assets/house/previas); the PNG at print quality loads only when applied.
+  async function loadHouse(item,preview){
+    const chave=item.id+(preview?':previa':'');
+    if(!houseAssets.has(chave))houseAssets.set(chave,(async()=>{
+      const response=await fetch(preview?item.art.replace('assets/house/','assets/house/previas/').replace(/\.png$/,'.webp'):item.art);if(!response.ok)throw Error('Não foi possível abrir a arte. Tente novamente.');
+      const blob=await response.blob();if(!preview&&blob.type!=='image/png')throw Error('A estampa precisa ser um PNG transparente.');
       const url=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Não foi possível ler a arte.'));reader.readAsDataURL(blob);});
         const image=new Image();image.src=url;await image.decode();
         const prepared=await window.MerannoProduction.prepareArt(image);
         return {aiImage:prepared.image.src,houseId:item.id,houseName:item.name,placement:'back',prompt:item.description,approvedAt:new Date().toISOString()};
-    })().catch(error=>{houseAssets.delete(item.id);throw error;}));
-    return houseAssets.get(item.id);
+    })().catch(error=>{houseAssets.delete(chave);throw error;}));
+    return houseAssets.get(chave);
   }
   function addDownload(message,design){
     const download=h('button',{class:'art-download btn btn--solid',type:'button'});download.textContent='Baixar para produção';

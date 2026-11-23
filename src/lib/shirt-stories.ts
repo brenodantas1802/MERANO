@@ -13,10 +13,8 @@ export const SHIRT_STORIES: ShirtStory[] = [
   { id: "coracao-branco", title: ["Coração", "· Branco."], print: "O mesmo coração em aquarela, com as anotações em preto sobre o algodão branco.", cutout: cutout("coracao-branco", 575, 1150, 1229) },
   // Added to the home showcase on 2026-11-21, at the owners' request (all five launch tees).
   { id: "va-tutto-bene", title: ["Va tutto", "bene."], print: "Um terraço com limoeiros numa tarde sem pressa: tudo bem, um passo de cada vez.", cutout: cutout("va-tutto-bene", 600, 1200, 1271) },
-  { id: "verao-em-boa-companhia", title: ["Verão em", "boa companhia."], print: "Laranjeira em flor e, escrito à mão: sol, boa comida, boas histórias. Sempre.", cutout: cutout("verao-em-boa-companhia", 1400, 2800, 2777) },
-  { id: "wine-not", title: ["Wine", "not?"], print: "Uma garrafa de vinho no meio das letras pintadas à mão.", cutout: cutout("wine-not", 1200, 2400, 2141) },
+  { id: "verao-em-boa-companhia", title: ["Verão em", "boa companhia."], print: "Laranjeira em flor e, escrito à mão: sol, boa comida, boas histórias. Sempre.", cutout: cutout("verao-em-boa-companhia", 700, 1400, 1388) },
+  { id: "wine-not", title: ["Wine", "not?"], print: "Uma garrafa de vinho no meio das letras pintadas à mão.", cutout: cutout("wine-not", 600, 1200, 1070) },
 ];
-
-export const FRONT_CUTOUT = cutout("frente-merano", 1200, 2400, 2361);
 
 export const getShirtStory = (id: string) => SHIRT_STORIES.find((story) => story.id === id);

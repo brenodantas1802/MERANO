@@ -11,14 +11,16 @@ import { buscarProdutos } from "@/lib/busca";
 
 const TEMAS_NOME: Record<string, string> = { mar: "Mar", frase: "Frases", esporte: "Esporte", fruta: "Frutas", minimal: "Minimal", urbano: "Cidade" };
 
-function ShopContent() {
-  const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("categoria") ?? "Todos";
+type Filtros = { categoria?: string | null; tema?: string | null; colecao?: string | null };
+
+// The shop itself. The server sends it already filled (all pieces, no filters), so nothing jumps while the page loads;
+// in the browser it picks up the filters from the address.
+function ShopView({ inicial = {} }: { inicial?: Filtros }) {
   // ?tema=<tag> comes from the theme circles on the home page.
-  const [tema, setTema] = useState(searchParams.get("tema"));
-  const [category, setCategory] = useState(initialCategory);
+  const [tema, setTema] = useState(inicial.tema ?? null);
+  const [category, setCategory] = useState(inicial.categoria ?? "Todos");
   // ?colecao=<id> comes from the menu, the home shelf and Categorias.
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(searchParams.get("colecao"));
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(inicial.colecao ?? null);
   const [showCollections, setShowCollections] = useState(false);
   const [sort, setSort] = useState("featured");
   const [query, setQuery] = useState("");
@@ -64,6 +66,11 @@ function ShopContent() {
   </>;
 }
 
+function ShopContent() {
+  const searchParams = useSearchParams();
+  return <ShopView inicial={{ categoria: searchParams.get("categoria"), tema: searchParams.get("tema"), colecao: searchParams.get("colecao") }} />;
+}
+
 export default function ShopPage() {
-  return <main><SiteHeader /><Suspense fallback={null}><ShopContent /></Suspense></main>;
+  return <main><SiteHeader /><Suspense fallback={<ShopView />}><ShopContent /></Suspense></main>;
 }
