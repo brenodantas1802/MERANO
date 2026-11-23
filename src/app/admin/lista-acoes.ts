@@ -66,3 +66,18 @@ export async function recusarPedido(id: string): Promise<RespostaLista> {
   refresh();
   return { tipo: "ok", texto: "Recusado." };
 }
+
+// Administrators chosen in the panel. The fixed owners (OWNER_EMAILS) can't be removed here.
+export async function mudarAdmin(email: string, admin: boolean): Promise<RespostaLista> {
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só administradores, entrando com o Google, podem mudar isso." };
+  const alvo = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(alvo) || alvo.length > 160) return { tipo: "erro", texto: "E-mail inválido." };
+  if (!admin && alvo === sessao.email.toLowerCase()) return { tipo: "erro", texto: "Você não pode tirar o seu próprio acesso." };
+  const { error } = admin
+    ? await sessao.admin.from("administradores").upsert({ email: alvo, adicionado_por: sessao.email }, { onConflict: "email" })
+    : await sessao.admin.from("administradores").delete().eq("email", alvo);
+  if (error) return { tipo: "erro", texto: "Não consegui salvar agora. Tente de novo." };
+  refresh();
+  return { tipo: "ok", texto: admin ? "Agora é administrador." : "Deixou de ser administrador." };
+}

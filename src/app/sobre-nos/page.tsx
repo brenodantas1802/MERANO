@@ -15,7 +15,7 @@ const steps = [
 const faqs = [
   { question: "Quanto tempo leva a entrega?", answer: "O prazo do transporte aparece no pagamento, calculado pelo seu CEP, junto com o valor do frete." },
   { question: "Posso acompanhar o andamento do meu pedido?", answer: "Sim. Você recebe o código de rastreio por e-mail assim que o pedido for despachado." },
-  { question: "E se eu precisar trocar o tamanho depois?", answer: "Sem problema — aceitamos trocas em até 30 dias após o recebimento, desde que a peça esteja sem uso e com a etiqueta preservada." },
+  { question: "E se eu precisar trocar o tamanho depois?", answer: "Não fazemos trocas. Por isso a tabela de medidas e o Meranno Fit estão em cada peça: confira antes de comprar." },
 ];
 
 export default function BrandPage() {

@@ -80,7 +80,7 @@ export function FirstPurchasePopup() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[var(--creme)] p-8 shadow-2xl md:p-10"
+            className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[var(--superficie)] p-8 shadow-2xl md:p-10"
           >
             <button onClick={close} aria-label="Fechar" className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center text-[var(--muted)] transition-colors hover:text-[var(--ink)]"><X size={18} strokeWidth={1.5} /></button>
             <div className="mb-6 h-1 w-12" style={{ background: "linear-gradient(to right, #551E2B, #BA9654)" }} />

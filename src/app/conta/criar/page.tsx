@@ -19,7 +19,7 @@ export default async function CreateAccountPage({ searchParams }: { searchParams
     <div className="px-6 pb-24 pt-12 md:pt-16">
       <div className="mx-auto w-full max-w-md">
         <h1 className="display text-center text-5xl md:text-6xl">Criar conta</h1>
-        <div className="mt-10 rounded-[2rem] bg-[var(--creme)] p-6 text-center shadow-[0px_2px_24px_-6px_rgba(17,17,17,0.18)] md:p-8">
+        <div className="mt-10 rounded-[2rem] bg-[var(--superficie)] p-6 text-center shadow-[0px_2px_24px_-6px_rgba(17,17,17,0.18)] md:p-8">
           <SignUpForm next={next} />
           <div className="my-5 flex items-center gap-3 text-[12px] text-[var(--muted)]"><span className="h-px flex-1 bg-[var(--line)]" />ou<span className="h-px flex-1 bg-[var(--line)]" /></div>
           <GoogleButton next={next} />

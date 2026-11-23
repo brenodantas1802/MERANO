@@ -8,6 +8,7 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 import { ConsentimentoAnalise } from "@/components/consentimento-analise";
 import { EntradaPreVenda } from "@/components/entrada-pre-venda";
 import { SCRIPT_ENTRADA } from "@/lib/pre-venda";
+import { SCRIPT_TEMA, TEMA_PADRAO } from "@/lib/tema";
 
 // Barlow Condensed is the closest open font to the DIN Condensed look the owners picked; its regular-width sibling
 // carries the running text so long lines stay easy to read.
@@ -22,9 +23,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // suppressHydrationWarning: SCRIPT_ENTRADA may add a class to <html> before React hydrates.
-    <html lang="pt-BR" data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
-      <body><script dangerouslySetInnerHTML={{ __html: SCRIPT_ENTRADA }} /><EntradaPreVenda /><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /><ConsentimentoAnalise /></CartProvider></body>
+    // suppressHydrationWarning: SCRIPT_TEMA and SCRIPT_ENTRADA may change <html> before React hydrates.
+    <html lang="pt-BR" data-tema={TEMA_PADRAO} data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+      <body><script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA + SCRIPT_ENTRADA }} /><EntradaPreVenda /><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /><ConsentimentoAnalise /></CartProvider></body>
     </html>
   );
 }

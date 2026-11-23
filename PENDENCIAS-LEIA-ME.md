@@ -42,6 +42,33 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 
 ---
 
+### Reunião de 22/11 (noite)
+
+**Feito:**
+- **Capa nova**: só o vídeo do crupiê dando cartas (escurecido, sem som), os dois botões embaixo e a logo branca no topo. Vídeo em `public/imagens/capa/` (890 KB no computador, 450 KB no celular).
+- **Logo nova** (o M com a taça) no topo, no menu e no rodapé, vetorizada a partir da arte de vocês: branca sobre a capa, na cor do texto no resto.
+- **Modo escuro** (preto e bordô) como principal, com botão para o claro (lua/sol no topo do computador; no menu do celular). A escolha fica salva no aparelho.
+- **Vitrine**: Why Not You?, Verão em boa companhia (no meio), Va tutto bene e Wine not?. A Why Not You? passou a ser vendida. A Coração · Preto saiu da vitrine e segue no carrossel 3D e na loja.
+- **Carrossel 3D**: troca mais rápida (mesma animação) e a camiseta não corta mais em tela de notebook.
+- **Banner das 3 cartas** trocado por um banner limpo (camiseta regular sobre preto).
+- **Medidas no Meranno Fit**: camiseta regular de verdade com só os centímetros.
+- **Sem trocas**: página Trocas reescrita, FAQ, Entrega e Sobre nós ajustados, e no pagamento um aviso com caixinha obrigatória. A lei ainda garante 7 dias para desistir de compras pela internet (art. 49 do CDC) e cobre defeitos: está escrito na página Trocas.
+- **Administradores pelo painel**: em Pré-venda → Quem pode entrar, botão "Tornar admin" ao lado de cada pessoa. A pessoa precisa entrar com o Google, com o mesmo e-mail que está na lista.
+- **Instagram** corrigido para `@merannoclothing`.
+- Vídeos antigos do site anterior: já tinham saído na otimização.
+
+**Falta (com vocês):**
+| Item | O que preciso |
+|---|---|
+| Nomes novos dos produtos | A lista definida no grupo (ex.: o nome no lugar de "Coração"). |
+| Estampa nova | Qual estampa troca e o arquivo. |
+| Fotos das camisetas | As versões em modelagem regular (o Speaker 1 vai refazer no ChatGPT). Corrigem também o recorte e a sombra do carrossel 3D. |
+| Contato | O número duplo (Yuri) e o e-mail novo. |
+| Sobre nós | Os textos novos, mais pessoais. |
+| Detalhes do produto | O que exatamente ajustar. |
+| Microsoft Clarity | Criar a conta em clarity.microsoft.com e me passar o ID do projeto. |
+| Vídeo | Conferir se a qualidade HD (720p) da capa ficou boa. |
+
 ## 1. Cadastrar as chaves na Vercel (obrigatório antes de publicar)
 
 Sem a **`SUPABASE_SECRET_KEY`**, a versão nova **não registra pedidos** (o cliente vê "indisponível"), o Personalizador não compra e o `/admin` fica vazio.
@@ -141,7 +168,7 @@ Frete e pagamento não dependem um do outro: podem ligar qualquer um primeiro. O
 - **Segurança do login**: Supabase → **Authentication** → ligar **Leaked password protection** (bloqueia senhas vazadas). Pode precisar do plano Pro.
 - **Avaliações**: só aparecem depois de aprovadas (Supabase → **Table Editor → avaliacoes** → `status` = `aprovada`). Nunca inventar avaliações.
 - **Mapa de calor (opcional)**: Microsoft Clarity → `NEXT_PUBLIC_CLARITY_ID` na Vercel.
-- **Nome antigo**: Instagram `@meranoclothing` e e-mail `equipe@merano.com` continuam com MERANO porque são endereços reais.
+- **Instagram**: `@merannoclothing` (corrigido em 22/11). O e-mail `equipe@merano.com` mudou: falta o novo.
 - **Sócio novo no código**: ele precisa ser convidado no GitHub (repositório → **Settings → Collaborators → Add people**) e receber o `.env.local` por canal seguro. O `README.md` tem o passo a passo.
 - **Cores da Remix**: a Remix vende Off White (não branco puro). Confiram se o "Coração · Branco" e o "Va tutto bene" saem em Off White e, se for, o Claude troca o nome da cor.
 

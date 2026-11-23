@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { GoogleButton, RememberAccount, SignOutButton } from "@/components/auth-buttons";
 import { SignInForm } from "@/components/auth-forms";
 import { createClient } from "@/lib/supabase/server";
-import { isOwnerSession } from "@/lib/owners";
+import { ehAdmin } from "@/lib/admins";
 
 const ERRORS: Record<string, string> = {
   login: "Não deu pra concluir a entrada. Tente de novo; se veio do e-mail de confirmação, abra o link no mesmo aparelho em que criou a conta.",
@@ -23,7 +23,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const name = (user?.user_metadata.full_name ?? user?.user_metadata.name ?? "") as string;
   const avatar = user?.user_metadata.avatar_url as string | undefined;
   const { data: claims } = await supabase.auth.getClaims();
-  const owner = user?.email_confirmed_at && isOwnerSession(user.email, claims?.claims.amr);
+  const owner = !!user?.email_confirmed_at && (await ehAdmin(user.email, claims?.claims.amr));
 
   return (
     <main>
@@ -45,12 +45,12 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
               </div>
             </div>
             <nav aria-label="Menu da conta" className="mt-8 space-y-3">
-              {MENU.map((item) => <Link key={item.title} href={item.href} className="group flex items-center justify-between rounded-2xl bg-[var(--creme)] px-6 py-5 shadow-[0px_2px_16px_-6px_rgba(32,28,23,0.18)] transition-transform hover:-translate-y-0.5"><span><span className="block text-2xl">{item.title}</span><span className="sans text-xs text-[var(--muted)]">{item.text}</span></span><span className="text-xl transition-transform group-hover:translate-x-1">→</span></Link>)}
+              {MENU.map((item) => <Link key={item.title} href={item.href} className="group flex items-center justify-between rounded-2xl bg-[var(--superficie)] px-6 py-5 shadow-[0px_2px_16px_-6px_rgba(32,28,23,0.18)] transition-transform hover:-translate-y-0.5"><span><span className="block text-2xl">{item.title}</span><span className="sans text-xs text-[var(--muted)]">{item.text}</span></span><span className="text-xl transition-transform group-hover:translate-x-1">→</span></Link>)}
               {owner && <Link href="/admin" className="group flex items-center justify-between rounded-2xl bg-[var(--terra-dark)] px-6 py-5 text-[var(--creme)] transition-transform hover:-translate-y-0.5"><span><span className="block text-2xl">Painel da equipe</span><span className="sans text-xs text-[var(--creme)]/65">Pedidos e operação da Meranno.</span></span><span className="text-xl transition-transform group-hover:translate-x-1">→</span></Link>}
             </nav>
             <div className="mt-8 flex justify-center"><SignOutButton className="sans rounded-full border border-[var(--ink)]/20 px-6 py-3 text-[14px] transition-colors hover:bg-[var(--areia-clara)]" /></div>
           </> : <>
-            <div className="mt-10 rounded-[2rem] bg-[var(--creme)] p-6 text-center shadow-[0px_2px_24px_-6px_rgba(17,17,17,0.18)] md:p-8">
+            <div className="mt-10 rounded-[2rem] bg-[var(--superficie)] p-6 text-center shadow-[0px_2px_24px_-6px_rgba(17,17,17,0.18)] md:p-8">
               <p className="display text-3xl">Entrar</p>
               {erro && ERRORS[erro] && <p role="alert" className="sans mt-5 rounded-xl bg-[#8a3a2c]/10 px-4 py-3 text-left text-[13px] text-[#8a3a2c]">{ERRORS[erro]}</p>}
               <div className="mt-6"><SignInForm next={next} /></div>

@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
     <div className="px-6 pb-24 pt-12 md:pt-16">
       <div className="mx-auto w-full max-w-md">
         <h1 className="display text-center text-5xl md:text-6xl">Esqueci minha senha</h1>
-        <div className="mt-10 rounded-[2rem] bg-[var(--creme)] p-6 text-center shadow-[0px_2px_24px_-6px_rgba(17,17,17,0.18)] md:p-8">
+        <div className="mt-10 rounded-[2rem] bg-[var(--superficie)] p-6 text-center shadow-[0px_2px_24px_-6px_rgba(17,17,17,0.18)] md:p-8">
           <p className="mb-6 text-[15px] text-[var(--ink)]/80">Digite o e-mail da sua conta e enviaremos um link para você criar uma senha nova.</p>
           <ForgotPasswordForm />
         </div>

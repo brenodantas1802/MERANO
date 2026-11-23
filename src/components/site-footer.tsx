@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { LogoNome, LogoSimbolo } from "./logo-meranno";
 import { usePathname } from "next/navigation";
 import { ESPADAS } from "@/lib/naipes";
 import { INSTAGRAM_URL } from "./whatsapp-button";
@@ -26,6 +26,6 @@ export function SiteFooter() {
   // owners no longer want sea imagery).
   return <footer className="bg-black text-white">
     <div aria-hidden className="flex items-center gap-4 px-6 pt-8 md:px-12"><span className="h-px flex-1 bg-[linear-gradient(90deg,transparent,var(--latao))]" /><svg viewBox="0 0 100 100" className="h-4 w-4"><path d={ESPADAS} fill="var(--latao)" /></svg><span className="h-px flex-1 bg-[linear-gradient(90deg,var(--latao),transparent)]" /></div>
-    <div className="flex flex-col gap-8 px-6 pb-24 pt-8 md:flex-row md:items-center md:justify-between md:pb-10 md:pl-12 md:pr-32 md:pt-6"><Image src="/imagens/merano-assets/logo-principal.png" alt="Meranno" width={120} height={80} className="h-14 w-auto object-contain object-left" /><nav className="sans flex flex-wrap gap-x-5 text-[11px] uppercase tracking-[.15em]">{LINKS.map((link) => <Link key={link.href} href={link.href} className="toque inline-flex min-h-11 items-center transition-opacity hover:opacity-70">{link.label}</Link>)}</nav><span className="sans text-[11px] uppercase tracking-[.15em] text-white/75">© Meranno 2026</span></div>
+    <div className="flex flex-col gap-8 px-6 pb-24 pt-8 md:flex-row md:items-center md:justify-between md:pb-10 md:pl-12 md:pr-32 md:pt-6"><span className="flex flex-col items-start gap-2 text-white" aria-label="MERANNO" role="img"><LogoSimbolo className="h-9 w-auto" /><LogoNome className="h-auto w-[118px]" /></span><nav className="sans flex flex-wrap gap-x-5 text-[11px] uppercase tracking-[.15em]">{LINKS.map((link) => <Link key={link.href} href={link.href} className="toque inline-flex min-h-11 items-center transition-opacity hover:opacity-70">{link.label}</Link>)}</nav><span className="sans text-[11px] uppercase tracking-[.15em] text-white/75">© Meranno 2026</span></div>
   </footer>;
 }

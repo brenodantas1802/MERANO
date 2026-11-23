@@ -40,8 +40,8 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
             <motion.div
               key={story.id}
               initial={reduce ? { opacity: 0 } : { rotateY: 90, opacity: 0.4 }}
-              animate={reduce ? { opacity: 1 } : { rotateY: 0, opacity: 1, transition: { duration: 0.5, ease: EASE_OUT } }}
-              exit={reduce ? { opacity: 0 } : { rotateY: -90, opacity: 0.4, transition: { duration: 0.26, ease: "easeIn" } }}
+              animate={reduce ? { opacity: 1 } : { rotateY: 0, opacity: 1, transition: { duration: 0.3, ease: EASE_OUT } }}
+              exit={reduce ? { opacity: 0 } : { rotateY: -90, opacity: 0.4, transition: { duration: 0.15, ease: "easeIn" } }}
               style={{ transformStyle: "preserve-3d" }}
               className="relative"
             >

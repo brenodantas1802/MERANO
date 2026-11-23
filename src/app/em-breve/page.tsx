@@ -7,7 +7,7 @@ import { COOKIE_ACESSO, acessoValido, preVendaAtiva } from "@/lib/pre-venda";
 
 export const metadata: Metadata = { title: "MERANNO | Coming soon", robots: { index: false, follow: false } };
 
-const INSTAGRAM = "https://www.instagram.com/meranoclothing/";
+const INSTAGRAM = "https://www.instagram.com/merannoclothing/";
 
 // What every page shows during the pre-sale to someone without the invite (the proxy swaps the content for this).
 // It covers the whole screen, above the footer and the floating buttons of the root layout.

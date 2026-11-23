@@ -174,20 +174,14 @@ export const products: Product[] = [
     lancamento: true,
     colors: ["Preto"],
   },
-];
-
-export function getProduct(id: string) {
-  return products.find((product) => product.id === id);
-}
-
-// Pieces shown only in the try-on (not for sale yet): kept out of `products`, so the shop, search and cart never see them.
-export const provadorOnly: Product[] = [
+  // On sale since 2026-11-22 (owners' meeting): it was a try-on preview before.
   {
     id: "why-not-you",
     name: "Why Not You? · Branco",
     description: "WHY NOT YOU? em preto, grande e inclinado, no alto das costas, e a assinatura Meranno pequena no peito.",
     price: PRECO_LANCAMENTO,
-    note: "Prévia · só no provador",
+    salePrice: PRECO_PRE_VENDA,
+    note: "Estampa Why Not You?",
     image: "/imagens/merano-assets/produtos/why-not-you-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/why-not-you-verso.jpg", "/imagens/merano-assets/produtos/why-not-you-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/why-not-you-verso.jpg", front: "/imagens/merano-assets/produtos/why-not-you-frente.jpg" },
@@ -201,12 +195,21 @@ export const provadorOnly: Product[] = [
     collection: "colecao-01",
     material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Em breve.",
-    stock: 0,
+    delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
+    stock: 10,
     fits: [...TAMANHOS_LOJA],
+    lancamento: true,
     colors: ["Branco"],
   },
 ];
+
+export function getProduct(id: string) {
+  return products.find((product) => product.id === id);
+}
+
+// Pieces shown only in the try-on (not for sale yet): kept out of `products`, so the shop, search and cart never see them.
+// Empty since 2026-11-22: Why Not You? went on sale.
+export const provadorOnly: Product[] = [];
 export const provadorProducts: Product[] = [...provadorOnly, ...products];
 export function getProvadorProduct(id: string) {
   return provadorProducts.find((product) => product.id === id);

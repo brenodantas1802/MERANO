@@ -29,7 +29,7 @@ function messageFor(error: { code?: string; message?: string }) {
   }
 }
 
-const FIELD = "h-12 w-full border border-[var(--ink)]/20 bg-white px-4 text-[15px] outline-none transition-colors placeholder:text-[var(--muted)]/70 focus:border-[var(--ink)]";
+const FIELD = "h-12 w-full border border-[var(--ink)]/20 bg-[var(--campo)] px-4 text-[15px] outline-none transition-colors placeholder:text-[var(--muted)]/70 focus:border-[var(--ink)]";
 
 function Field({ label, hint, ...input }: { label: string; hint?: string } & InputHTMLAttributes<HTMLInputElement>) {
   const id = useId();
@@ -55,7 +55,7 @@ function PasswordField({ label, hint, value, onChange, autoComplete }: { label: 
   </div>;
 }
 
-const SUBMIT = "label h-12 w-full bg-[var(--ink)] text-[13px] text-[var(--creme)] disabled:opacity-60";
+const SUBMIT = "label h-12 w-full bg-[var(--ink)] text-[13px] text-[var(--paper)] disabled:opacity-60";
 const ALERT = "rounded-xl bg-[#8a3a2c]/10 px-4 py-3 text-left text-[13px] text-[#8a3a2c]";
 
 // E-mail and password, for an account that already exists.

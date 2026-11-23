@@ -97,10 +97,10 @@ async function downloadImage(dataUrl: string, name: string) {
 
 function ShirtPicker({ selected, onSelect, onClose }: { selected: Product | null; onSelect: (product: Product) => void; onClose: () => void }) {
   return (
-    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-4 rounded-[1.75rem] bg-[var(--creme)] p-5 shadow-[0_18px_40px_-28px_rgba(32,28,23,.5)]">
+    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="mt-4 rounded-[1.75rem] bg-[var(--superficie)] p-5 shadow-[0_18px_40px_-28px_rgba(32,28,23,.5)]">
       <div className="mb-4 flex items-center justify-between">
         <p className="display text-2xl">Escolha a estampa</p>
-        <button type="button" onClick={onClose} aria-label="Fechar" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-[var(--ink)] hover:text-[var(--creme)]"><X size={16} /></button>
+        <button type="button" onClick={onClose} aria-label="Fechar" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-[var(--ink)] hover:text-[var(--paper)]"><X size={16} /></button>
       </div>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {products.map((product) => (
@@ -241,12 +241,12 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
         </div>
 
         {success && (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[var(--creme)] px-5 py-4">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[var(--superficie)] px-5 py-4">
             <div>
               <p className="text-lg leading-tight">{product?.name}{success.size ? ` · tamanho ${success.size}` : ""}</p>
               <p className="sans mt-1 text-[11px] text-[var(--muted)]">Pose: {success.poseLabel.toLowerCase()} · vestimos {success.shown} · <span title="custo real da geração">{money(success.cost)}</span></p>
             </div>
-            <button type="button" onClick={() => void downloadImage(success.image, `merano-${success.productId}-${success.pose}`)} className="sans flex items-center gap-2 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]"><Download size={13} /> Baixar foto</button>
+            <button type="button" onClick={() => void downloadImage(success.image, `merano-${success.productId}-${success.pose}`)} className="sans flex items-center gap-2 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><Download size={13} /> Baixar foto</button>
           </div>
         )}
       </div>
@@ -362,10 +362,10 @@ function ProvadorContent() {
           <section>
             <div className="mb-5 flex items-baseline gap-4"><span className="sans text-xs text-[var(--sol-1)]">01</span><h2 className="display text-3xl md:text-4xl">A estampa.</h2></div>
             {selectedProduct ? (
-              <div className="flex items-center gap-4 rounded-[1.75rem] bg-[var(--creme)] p-3 pr-5 shadow-[0_18px_40px_-30px_rgba(32,28,23,.55)]">
+              <div className="flex items-center gap-4 rounded-[1.75rem] bg-[var(--superficie)] p-3 pr-5 shadow-[0_18px_40px_-30px_rgba(32,28,23,.55)]">
                 <NextImage src={selectedProduct.image} alt={selectedProduct.name} width={160} height={192} sizes="80px" className="h-24 w-20 shrink-0 rounded-2xl bg-[var(--areia)] object-cover" />
                 <div className="min-w-0 flex-1"><p className="truncate text-2xl leading-tight">{selectedProduct.name}</p><p className="sans mt-1 text-[11px] uppercase tracking-[.1em] text-[var(--muted)]">{selectedProduct.note}</p></div>
-                <button type="button" onClick={() => setPickerOpen((open) => !open)} className="sans shrink-0 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--creme)]">{pickerOpen ? "Fechar" : "Trocar"}</button>
+                <button type="button" onClick={() => setPickerOpen((open) => !open)} className="sans shrink-0 rounded-full border border-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]">{pickerOpen ? "Fechar" : "Trocar"}</button>
               </div>
             ) : (
               <button type="button" onClick={() => setPickerOpen((open) => !open)} className="group flex w-full items-center justify-between rounded-[1.75rem] bg-[var(--areia)]/30 px-6 py-5 text-left transition-colors hover:bg-[var(--areia)]/45">
@@ -389,7 +389,7 @@ function ProvadorContent() {
           <section className="mt-14">
             <div className="mb-5 flex items-baseline gap-4"><span className="sans text-xs text-[var(--sol-1)]">03</span><h2 className="display text-3xl md:text-4xl">O tamanho.</h2></div>
             <div role="radiogroup" aria-label="Tamanho para provar" className="flex flex-wrap gap-2">
-              {(selectedProduct?.fits ?? SIZE_CHART.map((row) => row.size)).map((value) => <button key={value} type="button" role="radio" aria-checked={size === value} onClick={() => setChosenSize(value)} className={`sans relative h-12 w-12 rounded-full border text-sm transition-colors ${size === value ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--creme)]" : "border-[var(--ink)]/25 hover:border-[var(--ink)]"}`}>
+              {(selectedProduct?.fits ?? SIZE_CHART.map((row) => row.size)).map((value) => <button key={value} type="button" role="radio" aria-checked={size === value} onClick={() => setChosenSize(value)} className={`sans relative h-12 w-12 rounded-full border text-sm transition-colors ${size === value ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]" : "border-[var(--ink)]/25 hover:border-[var(--ink)]"}`}>
                 {value}
                 {value === recommended && <span aria-hidden className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[var(--paper)] bg-[var(--sol-1)]" />}
               </button>)}

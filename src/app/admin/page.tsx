@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isOwnerSession } from "@/lib/owners";
+import { donosFixos, ehAdmin } from "@/lib/admins";
 import { createSecretClient } from "@/lib/supabase/publico";
 import { preVendaAtiva } from "@/lib/pre-venda";
 import { CONFIG_PADRAO, resumoFinanceiro, type ConfigFinanceira, type Despesa } from "@/lib/financeiro";
@@ -63,6 +63,14 @@ async function carregarFinanceiro(): Promise<{ config: ConfigFinanceira; despesa
   return { config, despesas: (despesas ?? []).map((despesa) => ({ ...despesa, valor: Number(despesa.valor) })) as Despesa[] };
 }
 
+// Administrators made in the panel (besides the fixed owners).
+async function carregarAdmins(): Promise<string[]> {
+  const supabase = createSecretClient();
+  if (!supabase) return [];
+  const { data } = await supabase.from("administradores").select("email").order("criado_em");
+  return (data ?? []).map((linha) => linha.email as string);
+}
+
 // E-mails left on the 10% coupon popup, newest first. Needs SUPABASE_SECRET_KEY, like the prints.
 async function carregarCupons(): Promise<CadastroCupom[] | null> {
   const supabase = createSecretClient();
@@ -96,12 +104,12 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/conta?next=/admin");
   const { data } = await supabase.auth.getClaims();
-  if (!user.email || !user.email_confirmed_at || !isOwnerSession(user.email, data?.claims.amr)) redirect("/conta");
+  if (!user.email || !user.email_confirmed_at || !(await ehAdmin(user.email, data?.claims.amr))) redirect("/conta");
   // The pre-sale link is shown with this site's own address (production, preview or local).
   const cabecalhos = await headers();
   const host = cabecalhos.get("x-forwarded-host") ?? cabecalhos.get("host") ?? "";
   const origem = `${cabecalhos.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
-  const [pedidos, descontos, criacoes, cadastros, lista, pedidosAcesso, { config, despesas }] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista(), carregarPedidosAcesso(), carregarFinanceiro()]);
+  const [pedidos, descontos, criacoes, cadastros, lista, pedidosAcesso, { config, despesas }, admins] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista(), carregarPedidosAcesso(), carregarFinanceiro(), carregarAdmins()]);
   const financeiro = { resumo: resumoFinanceiro(pedidos ?? [], config, despesas), config, despesas, disponivel: pedidos !== null };
-  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} />;
+  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} admins={{ fixos: donosFixos(), painel: admins, voce: user.email.toLowerCase() }} />;
 }

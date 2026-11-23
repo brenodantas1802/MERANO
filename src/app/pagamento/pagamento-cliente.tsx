@@ -272,6 +272,11 @@ export function Pagamento({ online, provedor, entrega }: { online: boolean; prov
             : `O pedido vai para o nosso WhatsApp já escrito, e a equipe manda ${method === "pix" ? "o Pix" : "o link do cartão"} para você pagar.`}</p>
         </section>
 
+        {/* No exchanges (owners, 2026-11-22): said plainly before paying, and the customer confirms it. */}
+        <label className="flex items-start gap-3 rounded-[18px] border border-[var(--vinho)]/30 bg-[var(--vinho)]/[.05] px-5 py-4 text-sm leading-relaxed">
+          <input type="checkbox" required name="sem-trocas" className="mt-1 h-5 w-5 shrink-0 accent-[var(--vinho)]" />
+          <span><b className="font-medium">A Meranno não faz trocas</b> de tamanho, cor ou modelo. Conferi o tamanho na tabela de medidas. Desistência em até 7 dias e peças com defeito: veja a <Link href="/trocas" target="_blank" className="underline underline-offset-2">página Trocas</Link>.</span>
+        </label>
         {erro && <p role="alert" className="rounded-[18px] border border-[#8a3a2c]/30 bg-[#8a3a2c]/5 px-5 py-4 text-sm text-[#8a3a2c]">{erro}</p>}
         <button type="submit" disabled={status !== "form"} className="press label flex h-14 w-full items-center justify-between rounded-full bg-[var(--vinho)] px-7 text-[var(--creme)] shadow-[0_14px_30px_-14px_rgba(85,30,43,.7)] transition-opacity hover:opacity-95 disabled:cursor-wait disabled:opacity-75">
           <span className="text-[12px]">{botao}<span className="ml-2 tabular-nums text-[var(--latao)]">{formatPrice(total)}</span></span>

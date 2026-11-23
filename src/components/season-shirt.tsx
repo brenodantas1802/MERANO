@@ -33,12 +33,13 @@ export function SeasonShirt({ products }: { products: Product[] }) {
     return () => window.clearTimeout(timer);
   }, [stories]);
 
-  const swap = reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE, delay: 0.12 } }, exit: { opacity: 0, y: -10, transition: { duration: 0.2 } } };
+  // Quick (owners, 2026-11-22: same animation, faster switch).
+  const swap = reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: EASE, delay: 0.06 } }, exit: { opacity: 0, y: -10, transition: { duration: 0.12 } } };
 
   return (
     <section ref={ref} className="season-wash relative grid grid-cols-[minmax(0,1fr)] md:grid-cols-[1.1fr_.9fr]">
       <div className="px-6 pb-4 pt-16 md:sticky md:top-[var(--header-h,72px)] md:h-[calc(100svh-var(--header-h,72px))] md:self-start md:p-10">
-        <ShirtStage story={story} turn={scrollTurn} sheen={scrollYProgress} priority sizes="(min-width: 768px) 600px, 88vw" alt={`Camiseta ${product.name}, verso`} className="w-[min(88vw,30rem)] md:w-[min(44vw,46rem)]" />
+        <ShirtStage story={story} turn={scrollTurn} sheen={scrollYProgress} priority sizes="(min-width: 768px) 600px, 88vw" alt={`Camiseta ${product.name}, verso`} className="w-[min(88vw,30rem)] md:w-[min(44vw,46rem,calc((100svh-var(--header-h,72px)-7rem)*.9))]" />
       </div>
 
       <div className="px-6 pb-20 md:px-0 md:pb-[14svh] md:pr-20">
@@ -57,7 +58,7 @@ export function SeasonShirt({ products }: { products: Product[] }) {
                 {stories.map((item, itemIndex) => {
                   const itemProduct = products.find((candidate) => candidate.id === item.id)!;
                   const active = itemIndex === index;
-                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 rounded-full bg-white/70 p-1.5 transition-all duration-300 ${active ? "scale-105 ring-2 ring-[var(--latao)] ring-offset-2 ring-offset-[#f4f6f9]" : "opacity-70 hover:opacity-100"}`}>
+                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 rounded-full bg-white/70 p-1.5 transition-all duration-300 ${active ? "scale-105 ring-2 ring-[var(--latao)] ring-offset-2 ring-offset-[var(--paper)]" : "opacity-70 hover:opacity-100"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element -- 200px thumbnails made for this row */}
                     <img src={thumbOf(item)} alt="" width={200} height={200} loading="lazy" className="h-full w-full object-contain" />
                   </button>;

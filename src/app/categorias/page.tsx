@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { ESPADAS } from "@/components/hero-topo";
+import { ESPADAS } from "@/lib/naipes";
 import { collections, products } from "@/lib/products";
 
 // The pieces are grouped by collection (the owners asked on 2026-11-17 for "Summer Collection 01" here).

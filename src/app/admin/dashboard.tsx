@@ -6,7 +6,7 @@ import { Moon, Sun } from "lucide-react";
 import { SignOutButton } from "@/components/auth-buttons";
 import type { ConfigFinanceira, Despesa, ResumoFinanceiro } from "@/lib/financeiro";
 import { FinanceiroAdmin } from "./financeiro-admin";
-import { ListaPreVenda, type Autorizado, type PedidoAcesso } from "./lista-pre-venda";
+import { ListaPreVenda, type Admins, type Autorizado, type PedidoAcesso } from "./lista-pre-venda";
 import { PedidosAdmin } from "./pedidos-admin";
 import { CuponsAdmin, type CupomAdmin } from "./cupons-admin";
 import type { Pedido } from "@/lib/pedidos";
@@ -109,7 +109,7 @@ const SECOES = [["financeiro", "Financeiro"], ["pedidos", "Pedidos"], ["pre-vend
 
 export type Financeiro = { resumo: ResumoFinanceiro; config: ConfigFinanceira; despesas: Despesa[]; disponivel: boolean };
 
-export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro }) {
+export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, admins }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; admins: Admins }) {
   const { tema, trocar } = useTema();
   return <div className="painel min-h-screen" data-tema={tema || undefined}>
     <header className="sans sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur">
@@ -130,7 +130,7 @@ export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, li
     <main className="mx-auto max-w-360 px-6 py-14 md:px-12">
       <FinanceiroAdmin {...financeiro} />
       <div id="pedidos" className="scroll-mt-28"><PedidosAdmin pedidos={pedidos} /></div>
-      <div id="pre-venda" className="scroll-mt-28"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} /></div>
+      <div id="pre-venda" className="scroll-mt-28"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} admins={admins} /></div>
       <div id="cupons" className="scroll-mt-28"><CuponsAdmin cupons={descontos} /></div>
       <Criacoes criacoes={criacoes} />
       <Cupons cupons={cupons} />

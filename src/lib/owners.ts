@@ -5,10 +5,13 @@ export function isOwner(email?: string | null) {
   return owners.includes(email.trim().toLowerCase());
 }
 
-type Amr = { method: string } | string;
+export type Amr = { method: string } | string;
 
-// An owner signed in through Google in this session. Google has checked that the address is theirs; a password
-// sign-up has not, so an account made with an owner's e-mail and a password never reaches the panel.
+// Signed in through Google in this session. Google has checked that the address is theirs; a password sign-up has not,
+// so an account made with an owner's e-mail and a password never reaches the panel.
+export const viaGoogle = (amr?: readonly Amr[] | null) => !!amr?.some((entry) => (typeof entry === "string" ? entry : entry.method) === "oauth");
+
+// A fixed owner (OWNER_EMAILS) signed in through Google. Administrators made in the panel: see lib/admins (ehAdmin).
 export function isOwnerSession(email?: string | null, amr?: readonly Amr[] | null) {
-  return isOwner(email) && !!amr?.some((entry) => (typeof entry === "string" ? entry : entry.method) === "oauth");
+  return isOwner(email) && viaGoogle(amr);
 }

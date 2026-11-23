@@ -1,12 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { isOwnerSession } from "@/lib/owners";
+import { viaGoogle } from "@/lib/owners";
 import { COOKIE_ACESSO, acessoValido, preVendaAtiva, rotaLivre } from "@/lib/pre-venda";
 
 // 1. Pre-sale lock: while PRE_VENDA is on, a visitor without the access cookie (given on /pre-venda to the people
 //    on the list) sees "Coming soon" on every page (same address, the content is swapped for /em-breve).
 // 2. On the routes that read the session (/admin, /conta, /pre-venda): keeps the Supabase session fresh (rotating its cookies, which pages can't do)
-//    and turns away anyone who isn't an owner before /admin renders. The admin page checks again on the server.
+//    and turns away anyone not signed in with Google before /admin renders. The admin page checks the administrator.
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
@@ -34,7 +34,7 @@ export async function proxy(request: NextRequest) {
 
   if (path.startsWith("/admin")) {
     const email = data?.claims.email;
-    if (!email || !isOwnerSession(email, data?.claims.amr)) {
+    if (!email || !viaGoogle(data?.claims.amr)) {
       const redirect = NextResponse.redirect(new URL(email ? "/conta" : "/conta?next=/admin", request.url));
       response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
       return redirect;

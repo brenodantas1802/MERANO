@@ -36,7 +36,7 @@ export function CartDrawer() {
       <motion.aside key="drawer" role="dialog" aria-modal="true" aria-label="Carrinho" initial={{ x: "104%", opacity: 0.6 }} animate={{ x: 0, opacity: 1 }} exit={{ x: "104%", opacity: 0.6 }} transition={PANEL} className="glass fixed bottom-2 right-2 top-2 z-[91] flex w-[calc(100%-1rem)] max-w-[420px] flex-col overflow-hidden rounded-[28px]">
         <div className="flex items-center justify-between px-5 pb-3 pt-4">
           <p className="text-[15px] font-medium">{count ? `${count} ${count === 1 ? "item" : "itens"} no carrinho` : "Seu carrinho"}</p>
-          <button onClick={closeDrawer} aria-label="Fechar carrinho" className="press glass-tile flex h-11 w-11 items-center justify-center rounded-full hover:bg-white"><X size={17} strokeWidth={1.6} /></button>
+          <button onClick={closeDrawer} aria-label="Fechar carrinho" className="press glass-tile flex h-11 w-11 items-center justify-center rounded-full hover:bg-[var(--superficie)]"><X size={17} strokeWidth={1.6} /></button>
         </div>
 
         {items.length === 0 ? <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">

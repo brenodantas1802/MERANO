@@ -22,7 +22,7 @@ export function GoogleButton({ next = "/conta" }: { next?: string }) {
     const { error } = await createClient().auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` } });
     if (error) setBusy(false);
   }
-  return <button type="button" onClick={signIn} disabled={busy} className="sans flex w-full items-center justify-center gap-3 rounded-full border border-[var(--ink)]/15 bg-white px-6 py-4 text-[15px] text-[var(--ink)] shadow-[0_10px_30px_-18px_rgba(32,28,23,.45)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_34px_-18px_rgba(32,28,23,.55)] disabled:translate-y-0 disabled:opacity-60">
+  return <button type="button" onClick={signIn} disabled={busy} className="sans flex w-full items-center justify-center gap-3 rounded-full border border-[var(--ink)]/15 bg-white px-6 py-4 text-[15px] text-[#141110] shadow-[0_10px_30px_-18px_rgba(32,28,23,.45)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_34px_-18px_rgba(32,28,23,.55)] disabled:translate-y-0 disabled:opacity-60">
     <GoogleMark />
     {busy ? "Abrindo o Google…" : "Continuar com Google"}
   </button>;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isOwnerSession } from "@/lib/owners";
+import { ehAdmin } from "@/lib/admins";
 import { createClient } from "@/lib/supabase/server";
 
 // Answers only "is the person signed in here an owner?", for the "Painel da equipe" item in the top menu. It never
@@ -10,5 +10,5 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email || !user.email_confirmed_at) return NextResponse.json({ dono: false }, { headers: naoGuardar });
   const { data } = await supabase.auth.getClaims();
-  return NextResponse.json({ dono: isOwnerSession(user.email, data?.claims.amr) }, { headers: naoGuardar });
+  return NextResponse.json({ dono: await ehAdmin(user.email, data?.claims.amr) }, { headers: naoGuardar });
 }

@@ -34,7 +34,7 @@ export default async function PreVenda() {
       <h1 className="display mt-8 text-[clamp(3rem,12vw,5.2rem)] leading-[.9]">Pré-venda.</h1>
       <p className="mt-3 text-[16px] text-[var(--creme)]/80">Summer Collection 01, só para quem está no grupo.</p>
 
-      <div className="mt-8 w-full rounded-[2rem] bg-[var(--creme)] p-6 text-left text-[var(--ink)] shadow-[0_30px_60px_-30px_rgba(12,2,6,.8)] md:p-8">
+      <div className="mt-8 w-full rounded-[2rem] bg-[var(--superficie)] p-6 text-left text-[var(--ink)] shadow-[0_30px_60px_-30px_rgba(12,2,6,.8)] md:p-8">
         {jaLiberado ? <Entrando /> : !user ? <>
           <p className="display text-3xl">Entre para liberar</p>
           <p className="sans mt-2 text-[14px] text-[var(--muted)]">Use a conta com o e-mail ou o WhatsApp que está no grupo. Na primeira vez, crie a sua conta; depois é só entrar.</p>

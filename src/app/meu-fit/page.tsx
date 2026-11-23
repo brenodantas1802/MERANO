@@ -49,7 +49,7 @@ function MeasureCard({ spec, value, onChange }: { spec: FieldSpec; value: string
   // Read the same way the recommendation reads it (a height of "1,75" counts as 175 cm).
   const filled = value !== "" && measure({ ...EMPTY_PROFILE, [spec.field]: value }, spec.field) !== null;
   const outOfRange = value !== "" && !filled;
-  return <label className={`group relative block cursor-text rounded-[1.5rem] p-4 md:rounded-[1.75rem] md:p-5 transition-all duration-300 focus-within:bg-white focus-within:shadow-[0_24px_50px_-34px_rgba(32,28,23,.6)] focus-within:ring-2 focus-within:ring-[var(--ink)] ${filled && !outOfRange ? "bg-white/85 shadow-[0_18px_40px_-34px_rgba(32,28,23,.55)]" : "bg-white/45 ring-1 ring-[var(--ink)]/10"}`}>
+  return <label className={`group relative block cursor-text rounded-[1.5rem] p-4 md:rounded-[1.75rem] md:p-5 transition-all duration-300 focus-within:bg-[var(--superficie)] focus-within:shadow-[0_24px_50px_-34px_rgba(32,28,23,.6)] focus-within:ring-2 focus-within:ring-[var(--ink)] ${filled && !outOfRange ? "bg-white/85 shadow-[0_18px_40px_-34px_rgba(32,28,23,.55)]" : "bg-white/45 ring-1 ring-[var(--ink)]/10"}`}>
     <span className="flex items-center justify-between gap-3">
       <span className="text-[15px] leading-tight md:text-lg">{spec.label}</span>
       <span className={`flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300 ${filled && !outOfRange ? "scale-100 bg-[var(--sol-1)] text-white" : "scale-75 bg-[var(--ink)]/10 text-transparent"}`}><Check size={13} strokeWidth={2.4} /></span>
@@ -191,7 +191,7 @@ export default function MeranoFitPage() {
           </div>}
           <Link href="/provador" className={`group flex flex-col justify-between gap-6 rounded-[2rem] bg-[var(--terra-dark)] p-8 text-[var(--creme)] md:p-10 ${orders.length ? "md:col-span-2 md:flex-row md:items-center" : ""}`}>
             <div><h2 className="display text-3xl md:text-4xl">Experimente no Provador virtual.</h2><p className="mt-2 max-w-md text-[var(--creme)]/70">Envie uma foto sua, escolha a estampa e veja você vestindo a peça.</p></div>
-            <span className="sans inline-flex w-fit items-center gap-2 rounded-full bg-[var(--creme)] px-6 py-3.5 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)] transition-colors group-hover:bg-[var(--sol-2)]">Abrir provador</span>
+            <span className="sans inline-flex w-fit items-center gap-2 rounded-full bg-[var(--superficie)] px-6 py-3.5 text-[11px] uppercase tracking-[.15em] text-[var(--terra-dark)] transition-colors group-hover:bg-[var(--sol-2)]">Abrir provador</span>
           </Link>
         </div>
       </div>

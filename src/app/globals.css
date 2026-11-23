@@ -24,6 +24,27 @@
 	--mar-fundo: #551E2B;
 	--espuma: #d9e8e2;
 	--areia-clara: #F1EADF;
+	/* Surfaces that follow the theme: cards and form fields. */
+	--superficie: #F6F1E8;
+	--campo: rgba(255, 255, 255, .7);
+}
+
+/* Dark theme (owners, 2026-11-22: "preto e bordô"), the default; html[data-tema] comes from lib/tema. */
+:root[data-tema="escuro"] {
+	color-scheme: dark;
+	--paper: #0C0909;
+	--ink: #F2E9DE;
+	--muted: #A69689;
+	--line: #2A2120;
+	--cream: #1A1313;
+	--areia: #2A1D1F;
+	--areia-clara: #141010;
+	--terra-dark: #1A1212;
+	--vinho: #A23B53;
+	--sol-1: #A23B53;
+	--mar-fundo: #6B1F30;
+	--superficie: #171112;
+	--campo: rgba(255, 255, 255, .06);
 }
 
 * { box-sizing: border-box; }
@@ -61,20 +82,6 @@ body {
 @keyframes via-blur { 35% { filter: blur(2px); } }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 260ms; }
 @media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
-
-/* Hero key word: sunlit gold italic with a slow sheen; the drop shadow keeps it readable over bright surf. */
-.hero-accent {
-	display: inline-block;
-	font-weight: 600;
-	background: linear-gradient(100deg, #f3e3bf 0%, #d4b06a 30%, #ba9654 55%, #ead39d 80%, #f3e3bf 100%);
-	background-size: 160% 100%;
-	background-position: 30% 50%;
-	-webkit-background-clip: text;
-	background-clip: text;
-	color: transparent;
-	filter: drop-shadow(0 2px 22px rgba(4, 18, 24, .5));
-	padding-right: .08em;
-}
 
 .product-wash { background: linear-gradient(155deg, #d7dfd7 0%, #b9c3b5 54%, #e4d7c4 100%); }
 
@@ -146,40 +153,13 @@ html { -webkit-tap-highlight-color: transparent; }
 	box-shadow: inset 0 1px 0 rgba(255, 246, 222, .55), 0 10px 22px -14px rgba(85, 30, 43, .55);
 }
 
-/* Personalizador banner on the home: a hand of three cards on the wine felt (the house prints and the ace). */
-.baralho { aspect-ratio: 5 / 7; }
-.carta {
-	position: absolute;
-	inset: 0;
-	overflow: hidden;
-	border-radius: 14px;
-	background: var(--creme);
-	box-shadow: 0 34px 50px -24px rgba(12, 2, 6, .85), inset 0 0 0 1px rgba(186, 150, 84, .7);
-	transform-origin: 50% 118%;
-	transition: transform .8s cubic-bezier(.22, 1, .36, 1);
-}
-.carta::after {
-	content: "";
-	position: absolute;
-	inset: 7px;
-	border: 1px solid rgba(186, 150, 84, .6);
-	border-radius: 9px;
-	pointer-events: none;
-}
-.carta-esq { transform: translate(-30%, 3%) rotate(-14deg); }
-.carta-dir { transform: translate(30%, 3%) rotate(12deg); }
-.carta-frente { transform: translateY(3%) rotate(-1deg); }
-.group:hover .carta-esq { transform: translate(-36%, 1%) rotate(-18deg); }
-.group:hover .carta-dir { transform: translate(36%, 1%) rotate(16deg); }
-.group:hover .carta-frente { transform: translateY(0) rotate(0); }
-@media (prefers-reduced-motion: reduce) { .carta { transition: none; } }
 .secao { font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 500; text-transform: uppercase; letter-spacing: .22em; font-size: 13px; color: var(--vinho); }
 .secao b { color: var(--latao); font-weight: 500; margin-right: .6em; }
 
 /* Wine felt under a warm lamp: the card-table surface from the Salão palette, drawn in CSS (no photo). The grain is a
    tiny pre-rendered noise tile inlined here (an SVG noise filter cost every phone a lot of drawing). */
 .feltro {
-	background-color: var(--vinho);
+	background-color: #551E2B;
 	background-image:
 		radial-gradient(60% 55% at 70% 18%, rgba(255, 214, 150, .22), transparent 70%),
 		radial-gradient(120% 90% at 50% 120%, rgba(20, 6, 10, .65), transparent 60%),
@@ -187,66 +167,6 @@ html { -webkit-tap-highlight-color: transparent; }
 	background-size: auto, auto, 160px 160px;
 }
 
-/* Home headline, line by line (components/hero-text-reveal.tsx). */
-.revela { animation: revela .45s cubic-bezier(.2, .8, .2, 1) both; }
-@keyframes revela { from { opacity: 0; transform: translateY(10px); } }
-@media (prefers-reduced-motion: reduce) { .revela { animation: none; } }
-
-/* Home top: the giant ace (components/hero-topo.tsx). */
-.as-traco { stroke-dasharray: 1; stroke-dashoffset: 0; animation: tracar 2.4s cubic-bezier(.6,0,.2,1) both; }
-@keyframes tracar { from { stroke-dashoffset: 1; } }
-@media (min-width: 768px) and (hover: hover) { .as-gigante { filter: drop-shadow(0 0 30px rgba(186, 150, 84, .18)); } }
-@media (prefers-reduced-motion: reduce) { .as-traco { animation: none; } }
-
-/* Royal flush (components/hero-topo.tsx): the five tees on playing cards, fanned in front of the ace. Sizes follow the
-   card width --cw, which follows the width of the top (container units). */
-.rf-topo { container-type: inline-size; --cw: 14cqw; }
-.rf-as { left: 74%; top: 3%; height: 94%; width: auto; transform: translateX(-50%); }
-.rf-mao { position: absolute; z-index: 2; left: 74%; top: 55%; width: 0; height: 0; }
-.rf-carta {
-	position: absolute; display: block; width: var(--cw); aspect-ratio: 63 / 88;
-	left: calc(var(--cw) / -2); top: calc(var(--cw) * -1.107);
-	transform-origin: 50% 185%; transform: rotate(var(--r));
-	transition: transform .45s cubic-bezier(.22, 1, .36, 1); perspective: calc(var(--cw) * 5);
-	animation: rf-dar .9s cubic-bezier(.2, .9, .3, 1) backwards; animation-delay: var(--d);
-}
-.rf-carta:hover { transform: rotate(var(--r)) translateY(calc(var(--cw) * -.13)); }
-.rf-giro { position: absolute; inset: 0; transform-style: preserve-3d; animation: rf-virar .75s cubic-bezier(.3, .7, .2, 1) backwards; animation-delay: var(--v); }
-.rf-face, .rf-verso { position: absolute; inset: 0; border-radius: 6% / 4.3%; -webkit-backface-visibility: hidden; backface-visibility: hidden; overflow: hidden; }
-.rf-face {
-	background-color: #fbf6ec;
-	background-image:
-		radial-gradient(120% 80% at 25% 10%, rgba(255, 255, 255, .9), rgba(255, 255, 255, 0) 60%),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
-	background-size: auto, 120px 120px;
-	box-shadow: inset 0 0 0 1px rgba(70, 45, 25, .16), 0 2px 0 #e2d6c1, 0 calc(var(--cw) * .14) calc(var(--cw) * .21) calc(var(--cw) * -.086) rgba(12, 2, 6, .8);
-}
-.rf-face::before { content: ""; position: absolute; inset: 9% 13%; border: 1px solid rgba(85, 30, 43, .32); border-radius: 4%; pointer-events: none; }
-.rf-face::after { content: ""; position: absolute; inset: 0; background: linear-gradient(118deg, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 72%, rgba(255, 255, 255, .2) 100%); pointer-events: none; }
-.rf-indice { position: absolute; left: 4.2%; top: 3.2%; width: 9%; display: flex; flex-direction: column; align-items: center; font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 600; font-size: calc(var(--cw) * .125); line-height: .9; letter-spacing: -.04em; color: #1d1614; }
-.rf-indice svg { width: calc(var(--cw) * .075); height: calc(var(--cw) * .075); margin-top: calc(var(--cw) * .018); fill: #1d1614; }
-.rf-baixo { left: auto; top: auto; right: 4.2%; bottom: 3.2%; transform: rotate(180deg); }
-.rf-face img { position: absolute; left: 16%; top: 14%; width: 68%; height: 60%; object-fit: contain; filter: drop-shadow(0 calc(var(--cw) * .025) calc(var(--cw) * .032) rgba(40, 20, 10, .28)); }
-.rf-nome { position: absolute; left: 14%; right: 14%; bottom: 12.5%; text-align: center; font-family: var(--font-display), "Arial Narrow", sans-serif; font-weight: 500; font-size: max(7px, calc(var(--cw) * .064)); line-height: 1.15; letter-spacing: .14em; text-transform: uppercase; color: var(--vinho); }
-.rf-verso {
-	transform: rotateY(180deg);
-	background-color: #4a1724;
-	background-image: repeating-linear-gradient(45deg, rgba(214, 184, 120, .22) 0 1px, transparent 1px calc(var(--cw) * .06)), repeating-linear-gradient(-45deg, rgba(214, 184, 120, .22) 0 1px, transparent 1px calc(var(--cw) * .06));
-	box-shadow: inset 0 0 0 calc(var(--cw) * .04) #fbf6ec, inset 0 0 0 calc(var(--cw) * .049) rgba(186, 150, 84, .85), 0 calc(var(--cw) * .14) calc(var(--cw) * .21) calc(var(--cw) * -.086) rgba(12, 2, 6, .8);
-}
-.rf-verso svg { position: absolute; left: 50%; top: 50%; width: 38%; transform: translate(-50%, -50%); fill: #4a1724; stroke: #d6b878; stroke-width: 2.4; }
-@keyframes rf-dar { from { transform: translate(-48cqw, 30cqw) rotate(-50deg); opacity: 0; } 30% { opacity: 1; } }
-@keyframes rf-virar { from { transform: rotateY(180deg); } }
-/* Phones: the hand sits under the header, the headline below it. The card shrinks on short screens. */
-@media (max-width: 767px) {
-	.rf-topo { --cw: min(25cqw, 13svh); }
-	.rf-as { left: 50%; top: 8%; height: 46%; }
-	.rf-mao { left: 50%; top: calc(76px + var(--cw) * 1.037); }
-	.rf-carta { top: calc(var(--cw) * -1.037); transform-origin: 50% 200%; }
-}
-/* While the pre-sale veil is up, the deal waits, so it plays when the site shows through the keyhole. */
-html.entrada .rf-topo .rf-carta, html.entrada .rf-topo .rf-giro, html.entrada .rf-topo .as-traco { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) { .rf-carta, .rf-giro { animation: none; transition: none; } }
 
 /* Tap area of at least 44 × 44 px around small controls, without changing how they look (docs/PESQUISA-UX.md §1).
    The element must be positioned: .toque makes it relative unless it is already absolute/fixed. */
@@ -285,7 +205,7 @@ html.entrada .veu-entrada { display: flex; }
 }
 
 /* Owners' panel (/admin): light by default, dark when the device asks for it or an owner picks it (data-tema). */
-.painel { --cartao: #FBF8F2; --campo: #FFFFFF; --realce: #EFE7DA; --trilho: #E8DFD0; --ganho: #1F6E4A; --perda: #8A3A2C; background: var(--paper); color: var(--ink); }
+.painel { --paper: #F6F1E8; --ink: #141110; --muted: #6E6259; --line: #E3D9C9; --areia: #E3D9C9; --cream: #EFE7DA; --vinho: #551E2B; --cartao: #FBF8F2; --campo: #FFFFFF; --realce: #EFE7DA; --trilho: #E8DFD0; --ganho: #1F6E4A; --perda: #8A3A2C; background: var(--paper); color: var(--ink); }
 .painel .tema-sol { display: none; }
 .painel[data-tema="escuro"] { color-scheme: dark; --paper: #141110; --ink: #EFE8DD; --muted: #A3978C; --line: #302926; --areia: #2A2320; --cream: #1E1917; --vinho: #A64A5E; --cartao: #1B1715; --campo: #110E0D; --realce: #2A231F; --trilho: #2E2622; --ganho: #6FC59A; --perda: #E8907D; }
 .painel[data-tema="escuro"] .tema-sol { display: block; }
@@ -295,3 +215,19 @@ html.entrada .veu-entrada { display: flex; }
   .painel:not([data-tema="claro"]) .tema-sol { display: block; }
   .painel:not([data-tema="claro"]) .tema-lua { display: none; }
 }
+
+/* Home cover (components/hero-topo.tsx): the darkened poker video fills the screen. Reduced motion: the still poster. */
+.capa-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: reduce) {
+	.capa-video { display: none; }
+	.capa { background: #0b0808 url("/imagens/capa/poker-poster.webp") center / cover no-repeat; }
+}
+
+/* Dark theme: the few light colours written straight into components (translucent white cards, black hairlines). */
+:root[data-tema="escuro"] :is(.bg-white\/30, .bg-white\/40, .bg-white\/45, .bg-white\/50, .bg-white\/60, .bg-white\/70, .bg-white\/80, .bg-white\/85, .bg-white\/90) { background-color: rgba(255, 255, 255, .06); }
+:root[data-tema="escuro"] .text-black\/30 { color: rgba(255, 255, 255, .35); }
+:root[data-tema="escuro"] .border-black\/10 { border-color: rgba(255, 255, 255, .1); }
+:root[data-tema="escuro"] .season-wash { background: radial-gradient(55% 60% at 27% 48%, rgba(120, 30, 50, .32) 0%, rgba(120, 30, 50, 0) 72%), linear-gradient(180deg, var(--paper) 0%, #140D0F 100%); }
+:root[data-tema="escuro"] .glass { background: rgba(16, 11, 11, .74); border-color: rgba(255, 255, 255, .08); box-shadow: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 18px 50px rgba(0, 0, 0, .5); }
+:root[data-tema="escuro"] .glass-tile { background: rgba(255, 255, 255, .05); border-color: rgba(255, 255, 255, .08); }
+@media (prefers-reduced-transparency: reduce) { :root[data-tema="escuro"] :is(.glass, .glass-tile) { background: #171112; } }

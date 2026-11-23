@@ -29,7 +29,7 @@ export function BeforeAfter({ className = "" }: { className?: string }) {
       <img src={MODEL} alt="" className="absolute inset-y-0 right-0 h-full w-[200%] max-w-none object-cover" />
     </span>
     <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-white shadow" />
-    <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[11px] text-[var(--ink)] shadow-md">↔</span>
+    <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[11px] text-[#141110] shadow-md">↔</span>
   </span>;
 }
 
@@ -67,7 +67,7 @@ export function HowItWorks() {
     </button>
     <AnimatePresence initial={false}>
       {open && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.4, ease: EASE }} className="overflow-hidden">
-        <ol className="mt-3 space-y-3 rounded-[1.75rem] bg-[var(--creme)] p-5 shadow-[0_18px_40px_-30px_rgba(32,28,23,.55)]">
+        <ol className="mt-3 space-y-3 rounded-[1.75rem] bg-[var(--superficie)] p-5 shadow-[0_18px_40px_-30px_rgba(32,28,23,.55)]">
           {[
             ["Escolha a estampa", "Toque em “Escolher camiseta” e escolha a peça que você quer provar."],
             ["Envie uma foto sua", "De preferência de costas, que é onde fica a estampa — corpo inteiro ou da cintura pra cima, com boa luz e sem filtro."],

@@ -35,10 +35,10 @@ function ShopView({ inicial = {} }: { inicial?: Filtros }) {
 
     <div className="flex flex-wrap items-center justify-between gap-4 py-6">
       <div className="flex flex-wrap gap-2">
-        {categories.map((value) => <button key={value} onClick={() => pickCategory(value)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${!showCollections && category === value && !selectedCollection ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>{value}</button>)}
-        {selectedCollection && <button onClick={() => setSelectedCollection(null)} className="sans flex min-h-11 items-center gap-2 bg-[var(--ink)] px-4 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">{collections.find((item) => item.id === selectedCollection)?.name ?? "Coleção"} ✕</button>}
-        {tema && <button onClick={() => setTema(null)} className="sans flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">{TEMAS_NOME[tema] ?? tema} ✕</button>}
-        <button onClick={() => setShowCollections(true)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${showCollections ? "bg-[var(--ink)] text-[var(--creme)]" : "border border-[var(--line)]"}`}>Coleções</button>
+        {categories.map((value) => <button key={value} onClick={() => pickCategory(value)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${!showCollections && category === value && !selectedCollection ? "bg-[var(--ink)] text-[var(--paper)]" : "border border-[var(--line)]"}`}>{value}</button>)}
+        {selectedCollection && <button onClick={() => setSelectedCollection(null)} className="sans flex min-h-11 items-center gap-2 bg-[var(--ink)] px-4 text-[11px] uppercase tracking-[.12em] text-[var(--paper)]">{collections.find((item) => item.id === selectedCollection)?.name ?? "Coleção"} ✕</button>}
+        {tema && <button onClick={() => setTema(null)} className="sans flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2 text-[11px] uppercase tracking-[.12em] text-[var(--paper)]">{TEMAS_NOME[tema] ?? tema} ✕</button>}
+        <button onClick={() => setShowCollections(true)} className={`sans min-h-11 px-4 text-[11px] uppercase tracking-[.12em] ${showCollections ? "bg-[var(--ink)] text-[var(--paper)]" : "border border-[var(--line)]"}`}>Coleções</button>
       </div>
       {!showCollections && <label className="sans flex items-center gap-2 text-[11px] uppercase tracking-[.12em]"><SlidersHorizontal size={14} /><select value={sort} onChange={(event) => setSort(event.target.value)} className="h-11 bg-transparent outline-none"><option value="featured">Em destaque</option><option value="price-low">Menor preço</option><option value="price-high">Maior preço</option><option value="name">Nome</option></select></label>}
     </div>
