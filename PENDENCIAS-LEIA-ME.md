@@ -31,12 +31,13 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 | **Composição** | "Camiseta regular unissex, 100% algodão penteado, malha de 180 g/m²". |
 | **Preço** | **R$ 180**, por **R$ 160 na pré-venda** (aparece "R$ 180" riscado). Depois da pré-venda, apagar `salePrice` dos produtos em `src/lib/products.ts`. A peça do Personalizador continua R$ 189 (`PRECO_PERSONALIZADA`). |
 | **Provador** | O pedido à IA agora diz que a peça é **regular** (ombro na ponta do ombro, manga até o meio do braço, corpo reto) e usa as medidas da Remix. **Atenção:** as fotos das camisetas no site ainda são mockups de oversized; o Provador ignora o corte delas, mas o ideal é trocar por fotos da regular. |
+| **Menu do topo** | Último item "Painel da equipe", que só aparece para os e-mails dos donos (o servidor confere; clientes nunca veem). |
 | **Painel `/admin`** | Agora abre no **Financeiro**: faturamento, custos, lucro, caixa estimado, a receber, para despachar, enviados, entregues, metas da pré-venda (20) e do lançamento (60), comparação com o planejamento e lançamento de despesas (já tem caixas R$ 805 e MEI R$ 92). Custos e taxas editáveis em "Ajustar custos, taxas e metas". **Modo claro e noturno** (segue o celular; botão de lua/sol para trocar). |
 | **Segurança** | Nenhuma tabela é acessível pela chave pública do site (RLS ligado em todas, sem permissões para a API pública). Avaliações e cadastro de e-mail do cupom passam pelo servidor. Tabelas novas já nascem fechadas. |
 | **Meranno Fit** | Recomenda pelo busto (medido, ou estimado pela altura e pelo peso), calibrado na tabela da Remix regular: P até 94 cm de busto, M até 100, G até 106. Acima disso recomenda o G e avisa que é o maior tamanho e veste mais justo. Os resultados "aleatórios" vinham da medida do ombro (quem errava a fita pulava de P para GG) e da altura digitada em metros ("1,75" era ignorada). As duas coisas foram corrigidas. O ombro virou medida opcional. |
 | **Data de entrega** | "Entrega prevista para 7 de dezembro" no produto, no pagamento e no pedido. Para mudar: `ENTREGA_PRE_VENDA` em `src/lib/pedidos.ts`. |
 | **Mensagem VIP** | Quando o pagamento é confirmado, a página do pedido mostra: "Obrigado pela preferência. Você comprou na pré-venda, garantiu R$ X de desconto e agora é cliente VIP da Meranno. Entrega prevista: 7/12". O "garantiu R$ X de desconto" soma o desconto da pré-venda (R$ 180 → R$ 160), do Pix e do cupom. |
-| **Pagamento pelo Asaas** | Pronto no código. Com a chave do Asaas na Vercel, o cliente paga na página segura do Asaas: Pix com 5% de desconto, ou cartão em até 3x. O pedido só vira "Pago" depois que o site **consulta o próprio Asaas** e confere o valor. Sem a chave, o pedido continua fechando pelo WhatsApp. |
+| **Pagamento pelo Asaas** | Pronto no código. Com a chave do Asaas na Vercel, o cliente paga na página segura do Asaas: Pix ou cartão em até 3x, pelo mesmo preço (sem desconto no Pix, decisão de 22/11). O pedido só vira "Pago" depois que o site **consulta o próprio Asaas** e confere o valor. Sem a chave, o pedido continua fechando pelo WhatsApp. |
 | **Pedidos de acesso** | Quem entra no `/pre-venda` sem estar na lista digita o WhatsApp e cai em "Pedidos de acesso" no `/admin`, para vocês liberarem ou recusarem. |
 
 ---
@@ -129,7 +130,7 @@ Frete e pagamento não dependem um do outro: podem ligar qualquer um primeiro. O
 |---|---|
 | **Data de entrega da pré-venda** | **Feito**: 7/12. |
 | **Tabela de medidas** | **Feito**: Remix Oversized (confirmar o modelo, ver acima). |
-| **Desconto da pré-venda** | A mensagem VIP fala em desconto. Hoje o desconto que existe é o do Pix (5%) e o dos cupons. Se a pré-venda tiver um preço especial, digam qual. |
+| **Desconto da pré-venda** | **Feito**: R$ 180 por R$ 160 na pré-venda. Sem desconto no Pix. |
 | **Fotos reais das camisetas** | Mandar quando tiver; hoje são os mockups corrigidos para MERANNO. |
 | **Sobre nós** | Texto provisório ("O tempo é seu"; outro capítulo fala de "o mar no fim da rua"). |
 | **Política de troca** | Refazer juntos. A página `/trocas` hoje tem o texto antigo. |
