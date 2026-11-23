@@ -11,7 +11,7 @@ import { SizeChart } from "@/components/size-chart";
 import { ProductCard } from "@/components/product-card";
 import { PillLink } from "@/components/ui/pill-link";
 import { ShirtFan } from "@/components/try-on-visuals";
-import { measure, RANGES, useBodyProfile, type ProfileField } from "@/lib/body-profile";
+import { EMPTY_PROFILE, measure, RANGES, useBodyProfile, type ProfileField } from "@/lib/body-profile";
 import { recommendSize } from "@/lib/size-recommendation";
 import { bodyModel, fitNote } from "@/lib/body-model";
 import { useOrders } from "@/lib/orders";
@@ -21,15 +21,16 @@ type FieldSpec = { field: ProfileField; label: string; unit: string; hint: strin
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const ESSENTIALS: FieldSpec[] = [
-  { field: "altura", label: "Altura", unit: "cm", hint: "Descalço, encostado na parede." },
+  { field: "altura", label: "Altura", unit: "cm", hint: "Descalço, encostado na parede (ex.: 175)." },
   { field: "peso", label: "Peso", unit: "kg", hint: "Só pra calibrar o caimento." },
   { field: "busto", label: "Busto / tórax", unit: "cm", hint: "Na parte mais larga do peito." },
   { field: "cintura", label: "Cintura", unit: "cm", hint: "Na linha do umbigo, relaxado." },
   { field: "quadril", label: "Quadril", unit: "cm", hint: "Na parte mais larga, pés juntos." },
-  { field: "ombro", label: "Ombro a ombro", unit: "cm", hint: "Pelas costas, de ponta a ponta." },
 ];
 
+// Optional: the chest decides the size; a shoulder measured at home is too rough to move it.
 const SPECIFICS: FieldSpec[] = [
+  { field: "ombro", label: "Ombro a ombro", unit: "cm", hint: "Pelas costas, de ponta a ponta." },
   { field: "tronco", label: "Tronco", unit: "cm", hint: "Da base do pescoço até a cintura, pelas costas." },
   { field: "braco", label: "Braço", unit: "cm", hint: "Do ombro ao pulso, com o braço relaxado." },
   { field: "entrepernas", label: "Entrepernas", unit: "cm", hint: "Da virilha até o tornozelo, por dentro." },
@@ -39,15 +40,15 @@ const ALL = [...ESSENTIALS, ...SPECIFICS];
 const STEPS = [
   { title: "Busto", text: "Passe a fita ao redor da parte mais larga do peito, paralela ao chão, sem apertar." },
   { title: "Cintura e quadril", text: "Cintura na linha do umbigo; quadril na parte mais larga, com os pés juntos." },
-  { title: "Ombro a ombro", text: "Pelas costas, da ponta de um ombro até a ponta do outro." },
+  { title: "Sem fita?", text: "Altura e peso já dão uma boa estimativa. O busto medido acerta em cheio." },
   { title: "Postura", text: "Em pé e relaxado, sem prender a respiração: a medida é do corpo em repouso." },
 ];
 
 function MeasureCard({ spec, value, onChange }: { spec: FieldSpec; value: string; onChange: (value: string) => void }) {
   const [min, max] = RANGES[spec.field];
-  const number = Number(value.replace(",", "."));
-  const filled = value !== "" && Number.isFinite(number);
-  const outOfRange = value !== "" && (!Number.isFinite(number) || number < min || number > max);
+  // Read the same way the recommendation reads it (a height of "1,75" counts as 175 cm).
+  const filled = value !== "" && measure({ ...EMPTY_PROFILE, [spec.field]: value }, spec.field) !== null;
+  const outOfRange = value !== "" && !filled;
   return <label className={`group relative block cursor-text rounded-[1.5rem] p-4 md:rounded-[1.75rem] md:p-5 transition-all duration-300 focus-within:bg-white focus-within:shadow-[0_24px_50px_-34px_rgba(32,28,23,.6)] focus-within:ring-2 focus-within:ring-[var(--ink)] ${filled && !outOfRange ? "bg-white/85 shadow-[0_18px_40px_-34px_rgba(32,28,23,.55)]" : "bg-white/45 ring-1 ring-[var(--ink)]/10"}`}>
     <span className="flex items-center justify-between gap-3">
       <span className="text-[15px] leading-tight md:text-lg">{spec.label}</span>
@@ -84,7 +85,7 @@ export default function MeranoFitPage() {
   const [showSpecifics, setShowSpecifics] = useState(false);
   const recommendation = recommendSize(profile, SIZE_CHART);
   const [previewSize, setPreviewSize] = useState<string | null>(null);
-  const shownSize = SIZE_CHART.find((row) => row.size === (previewSize ?? recommendation?.size ?? "M")) ?? SIZE_CHART[2];
+  const shownSize = SIZE_CHART.find((row) => row.size === (previewSize ?? recommendation?.size ?? "M")) ?? SIZE_CHART[1];
   const filled = ALL.filter(({ field }) => measure(profile, field)).length;
   // Same body the figure is drawn from; without a chest (measured or from height and weight) there's nothing to say.
   const note = measure(profile, "busto") || (measure(profile, "altura") && measure(profile, "peso")) ? fitNote(bodyModel(profile), shownSize) : null;
@@ -112,7 +113,7 @@ export default function MeranoFitPage() {
         <div className="mt-6 grid grid-cols-2 gap-3">{ESSENTIALS.map((spec) => <MeasureCard key={spec.field} spec={spec} value={profile[spec.field]} onChange={(value) => update(spec.field, value)} />)}</div>
 
         <button type="button" onClick={() => setShowSpecifics((open) => !open)} aria-expanded={showSpecifics} className="mt-6 flex w-full items-center justify-between rounded-[1.75rem] border border-[var(--ink)]/15 bg-white/30 px-6 py-5 text-left transition-colors hover:bg-white/60">
-          <span><span className="display block text-2xl">Medidas finas</span><span className="sans text-[13px] text-[var(--muted)]">Opcional — tronco, braço e entrepernas</span></span>
+          <span><span className="display block text-2xl">Medidas finas</span><span className="sans text-[13px] text-[var(--muted)]">Opcional — ombro, tronco, braço e entrepernas</span></span>
           <motion.span animate={{ rotate: showSpecifics ? 180 : 0 }} transition={{ duration: 0.3, ease: EASE }} className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--paper)]"><ChevronDown size={18} strokeWidth={1.6} /></motion.span>
         </button>
         <AnimatePresence initial={false}>
@@ -139,7 +140,7 @@ export default function MeranoFitPage() {
             })}
           </div>
           <p className="sans pb-6 text-center text-[13px] text-white/75">
-            Peça estendida: ombro {shownSize.ombro}, busto {shownSize.largura} e comprimento {shownSize.comprimento} cm.
+            Peça estendida: tórax {shownSize.largura}, barra {shownSize.barra ?? shownSize.largura} e comprimento {String(shownSize.comprimento).replace(".", ",")} cm.
             {note && <><br />No {shownSize.size}, a camiseta {note}.</>}
           </p>
 
@@ -160,7 +161,7 @@ export default function MeranoFitPage() {
           <ol className="mt-8 grid gap-x-8 gap-y-7 sm:grid-cols-2">
             {STEPS.map((step, index) => <li key={step.title} className="flex gap-4"><span className="display flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--ink)] text-lg italic">{index + 1}</span><div><h3 className="text-xl">{step.title}</h3><p className="mt-1 leading-relaxed text-[var(--muted)]">{step.text}</p></div></li>)}
           </ol>
-          <p className="mt-10 border-l-2 border-[var(--sol-1)] pl-5 leading-relaxed text-[var(--muted)]">Nossas camisetas têm modelagem ampla. Se ficar entre dois tamanhos, prefira o maior para um caimento mais solto.</p>
+          <p className="mt-10 border-l-2 border-[var(--sol-1)] pl-5 leading-relaxed text-[var(--muted)]">Nossas camisetas têm modelagem regular, de corte clássico: escolha o tamanho que você costuma usar. Se ficar entre dois tamanhos, o maior deixa mais folgada.</p>
         </div>
         <div>
           <h2 className="display text-4xl md:text-5xl">Tabela de medidas.</h2>

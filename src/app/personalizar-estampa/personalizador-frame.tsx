@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useCart } from "@/components/cart-provider";
 import { PRECO_PERSONALIZADA } from "@/lib/estampa";
+import { TAMANHOS_LOJA } from "@/lib/products";
 
 // The programmer's Personalizador in an iframe. "Comprar esta peça" in there (js/meranno-compra.js) saves the
 // creation on the server and then sends it here, to go into the store's cart.
@@ -11,7 +12,7 @@ type Mensagem = { tipo: "meranno:carrinho"; item: { criacaoId: string; preco: nu
 function valida(dados: unknown): dados is Mensagem {
   const item = (dados as Mensagem | null)?.item;
   return (dados as Mensagem | null)?.tipo === "meranno:carrinho" && !!item
-    && /^[0-9a-f-]{36}$/.test(item.criacaoId) && ["P", "M", "G", "GG", "XXG"].includes(item.tamanho)
+    && /^[0-9a-f-]{36}$/.test(item.criacaoId) && (TAMANHOS_LOJA as readonly string[]).includes(item.tamanho)
     && typeof item.modelagem === "string" && item.modelagem.length <= 30 && typeof item.cor === "string" && item.cor.length <= 40
     && typeof item.imagem === "string" && item.imagem.startsWith("data:image/jpeg;base64,") && item.imagem.length < 300_000;
 }

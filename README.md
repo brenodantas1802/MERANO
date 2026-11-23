@@ -24,7 +24,8 @@ Com o Claude Code: abra a pasta `merano` e peça o que precisa. As instruções 
 - **Next.js 16** (as regras mudaram em relação às versões antigas: leia `node_modules/next/dist/docs/` antes de mexer), React 19 e Tailwind 4.
 - **Supabase**: login, banco e arquivos. Tabelas principais: `pedidos`, `cupons`, `criacoes_estampa`, `pre_venda_autorizados`, `cadastros_cupom`, `avaliacoes`.
 - **Vercel**: hospedagem. Ela **não** publica sozinha quando o GitHub muda.
-- **Pagamento**: Mercado Pago Checkout Pro quando `MERCADOPAGO_ACCESS_TOKEN` está na Vercel; sem ele, o pedido é registrado e fechado pelo WhatsApp. O preço, o cupom e o frete são sempre calculados de novo no servidor (`src/lib/pedidos.ts`).
+- **Pagamento**: Asaas Checkout quando `ASAAS_API_KEY` está na Vercel (o Mercado Pago fica como alternativa, com `MERCADOPAGO_ACCESS_TOKEN`); sem nenhum, o pedido é registrado e fechado pelo WhatsApp. O preço, o cupom e o frete são sempre calculados de novo no servidor (`src/lib/pedidos.ts`); o provedor é escolhido em `src/lib/pagamento.ts`.
+- **Tamanhos**: P a XXG, da Remix On Demand (Camiseta Oversized Unissex). Tabela e composição em `src/lib/products.ts`.
 - **Frete**: SuperFrete (`src/lib/frete.ts`); sem token, mostra valores de exemplo.
 - **Painel da equipe**: `/admin` (só os e-mails de `OWNER_EMAILS`, entrando com o Google): lista da pré-venda, pedidos, cupons, estampas do Personalizador e e-mails do pop-up.
 

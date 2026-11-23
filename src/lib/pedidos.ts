@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { cotarFrete, freteConfigurado, freteExemplo, type OpcaoFrete } from "@/lib/frete";
 import { PRECO_PERSONALIZADA } from "@/lib/estampa";
-import { formatPrice, getProduct, getProductPrice } from "@/lib/products";
+import { formatPrice, getProduct, getProductPrice, TAMANHOS_LOJA } from "@/lib/products";
 import type { StatusPedido } from "@/lib/pedido-status";
 
 // Orders from the payment page (table `pedidos`, server only through the secret key). Everything that costs money is
@@ -10,7 +10,11 @@ import type { StatusPedido } from "@/lib/pedido-status";
 // prices is trusted.
 
 export const PIX_DESCONTO = 0.05;
-export const TAMANHOS_PERSONALIZADA = ["P", "M", "G", "GG", "XXG"] as const;
+
+// Pre-sale delivery date (owners, 2026-11-22). Shown on the product, the payment page and the order.
+export const ENTREGA_PRE_VENDA = { curta: "7/12", longa: "7 de dezembro" };
+// The Personalizador sells the same sizes as the shop.
+export const TAMANHOS_PERSONALIZADA = TAMANHOS_LOJA;
 export { STATUS_PEDIDO, type StatusPedido } from "@/lib/pedido-status";
 export type Metodo = "pix" | "cartao" | "whatsapp";
 
@@ -60,13 +64,15 @@ export type PedidoEntrada = z.infer<typeof pedidoSchema>;
 
 export type ItemPedido = { productId: string | null; criacaoId: string | null; nome: string; tamanho: string; cor: string; preco: number; quantidade: number };
 export type CupomAplicado = { codigo: string; percentual: number };
+// What the order keeps about its online payment. `checkouts` are all the Asaas checkouts opened for it.
+export type PagamentoRegistro = { forma?: string; provedor?: string; id?: string; mp_id?: string; status?: string; metodo?: string; atualizado?: string; link?: string; preferencia?: string; checkout?: string; checkouts?: string[] };
 
 export type Pedido = {
   id: string; numero: string; criado_em: string; status: StatusPedido; metodo: Metodo; email: string;
   cliente: { nome: string; email: string; celular: string; cpf: string };
   endereco: { cep: string; rua: string; numero: string; complemento: string; bairro: string; cidade: string; uf: string };
   itens: ItemPedido[]; subtotal: number; desconto_cupom: number; desconto_pix: number; frete: OpcaoFrete; total: number;
-  cupom: string | null; pagamento: { mp_id?: string; status?: string; metodo?: string; atualizado?: string; link?: string }; rastreio: string | null;
+  cupom: string | null; pagamento: PagamentoRegistro; rastreio: string | null;
 };
 
 // Orders that count as a purchase (for first-purchase coupons).
@@ -158,14 +164,16 @@ export function mensagemWhatsApp(pedido: Pick<Pedido, "numero" | "itens" | "fret
 export const WHATSAPP_NUMERO = "5511986464056";
 export const linkWhatsApp = (mensagem: string) => `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensagem)}`;
 
-// Applies what Mercado Pago says about a payment to its order. Only an approved payment of the full amount marks the
-// order as paid; anything else is just noted.
-export async function registrarPagamento(admin: SupabaseClient, pagamento: { id: string; status: string; pedidoId: string; valor: number; metodo: string }) {
+// Applies what the payment provider says (read straight from it, never from the browser) to its order. Only a paid
+// payment of the full amount marks the order as paid; anything else is just noted. `pago` is the provider's own
+// verdict (Asaas); without it, Mercado Pago's "approved".
+export async function registrarPagamento(admin: SupabaseClient, pagamento: { id: string; status: string; pedidoId: string; valor: number; metodo: string; pago?: boolean; provedor?: string }) {
   const { data: pedido } = await admin.from("pedidos").select("id, status, total, pagamento, cupom").eq("id", pagamento.pedidoId).maybeSingle();
   if (!pedido) return null;
-  const pago = pagamento.status === "approved" && Math.abs(Number(pedido.total) - pagamento.valor) < 0.01;
+  const aprovado = pagamento.pago ?? pagamento.status === "approved";
+  const pago = aprovado && Math.abs(Number(pedido.total) - pagamento.valor) < 0.06;
   const novoStatus = pago && pedido.status === "aguardando_pagamento" ? "pago" : pedido.status;
-  const registro = { ...pedido.pagamento, mp_id: pagamento.id, status: pagamento.status, metodo: pagamento.metodo, atualizado: new Date().toISOString() };
+  const registro = { ...pedido.pagamento, id: pagamento.id, ...(pagamento.provedor === "mercadopago" ? { mp_id: pagamento.id } : {}), provedor: pagamento.provedor ?? pedido.pagamento?.provedor, status: pagamento.status, metodo: pagamento.metodo, atualizado: new Date().toISOString() };
   await admin.from("pedidos").update({ status: novoStatus, pagamento: registro, atualizado_em: new Date().toISOString() }).eq("id", pedido.id);
   return novoStatus as StatusPedido;
 }

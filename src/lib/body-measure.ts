@@ -30,10 +30,12 @@ export const RANGES: Record<ProfileField, [number, number]> = {
   idade: [10, 110],
 };
 
-// Parsed measurement in cm/kg, or null when empty or out of a plausible human range.
+// Parsed measurement in cm/kg, or null when empty or out of a plausible human range. A height typed in metres
+// ("1,75") is read as centimetres.
 export function measure(profile: BodyProfile, field: ProfileField): number | null {
-  const value = Number(String(profile[field] ?? "").replace(",", "."));
+  let value = Number(String(profile[field] ?? "").replace(",", "."));
   if (!Number.isFinite(value) || value <= 0) return null;
+  if (field === "altura" && value >= 1 && value < 2.5) value = Math.round(value * 100);
   const [min, max] = RANGES[field];
   return value >= min && value <= max ? value : null;
 }

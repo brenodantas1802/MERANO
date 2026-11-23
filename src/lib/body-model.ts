@@ -88,10 +88,14 @@ export type WornTee = {
   stretched: boolean;
 };
 
-// The chart only gives the body of the tee; the sleeve and armhole of the brand's dropped-shoulder cut follow from it.
-export const SLEEVE_PER_LENGTH = 0.31;
-export const OPENING_PER_WIDTH = 0.34;
-const ARMHOLE_PER_LENGTH = 0.34;
+// Seam to seam across the shoulders. The Remix chart doesn't give it; on a regular unisex tee it is about 86% of the
+// chest width (M: 53 cm of chest, about 46 cm of shoulders). To replace with the real value once a piece is measured.
+export const ombroDa = (row: SizeRow) => row.ombro ?? Math.round(row.largura * 0.86);
+
+// The chart only gives the body of the tee; the sleeve and armhole of the regular (set-in sleeve) cut follow from it.
+export const SLEEVE_PER_LENGTH = 0.27;
+export const OPENING_PER_WIDTH = 0.32;
+const ARMHOLE_PER_LENGTH = 0.3;
 
 export function wearTee(body: Body, row: SizeRow): WornTee {
   const circumference = row.largura * 2;
@@ -109,7 +113,7 @@ export function wearTee(body: Body, row: SizeRow): WornTee {
     hemWidth,
     hem,
     hemOverCrotch: hem - body.y.crotch,
-    shoulder: Math.max(row.ombro * 0.92, body.w.shoulders + 1),
+    shoulder: Math.max(ombroDa(row) * 0.92, body.w.shoulders + 1),
     // Hanging along the body, the sleeve is seen almost edge-on: about 70% of its flat opening shows.
     sleeve: { length: row.comprimento * SLEEVE_PER_LENGTH, width: Math.max(row.largura * OPENING_PER_WIDTH * 0.7, body.w.upperArm + 2) },
     armhole: row.comprimento * ARMHOLE_PER_LENGTH,
@@ -117,16 +121,16 @@ export function wearTee(body: Body, row: SizeRow): WornTee {
   };
 }
 
-// Ease the brand's wide cut is drawn around: with 16 cm the chart lands on the usual Brazilian sizes
-// (PP up to 88 cm of chest, P 94, M 100, G 106, GG 112) and the tee still falls loose.
-export const AMPLE_EASE = 16;
+// Ease over the chest (cm of circumference) the size is picked with. On the Remix regular chart it lands each size on
+// the usual Brazilian body chart (P up to 94 cm of chest, M 100, G 106): the customer takes the size they always wear.
+export const AMPLE_EASE = 6;
 // The hem may end this far above the crotch before the tee reads as short.
 export const HEM_ABOVE_CROTCH = 5;
 
 // How this size sits on the chest and in length, completing "No M, a camiseta ...".
 export function fitNote(body: Body, row: SizeRow) {
   const tee = wearTee(body, row);
-  const chest = tee.ease < 6 ? "fica justa" : tee.ease < AMPLE_EASE - 2 ? "fica mais rente que o pensado" : tee.ease <= 26 ? "cai ampla, como foi pensada" : "fica bem solta";
+  const chest = tee.ease < 1 ? "fica justa" : tee.ease < AMPLE_EASE ? "fica mais rente que o pensado" : tee.ease <= 13 ? "cai reta, no caimento regular" : tee.ease <= 20 ? "fica um pouco solta" : "fica bem larga";
   const length = tee.hemOverCrotch > HEM_ABOVE_CROTCH ? "fica curta no comprimento" : tee.hemOverCrotch < -11 ? "fica bem comprida" : tee.hemOverCrotch < -5 ? "fica um pouco mais comprida" : null;
   if (!length) return chest;
   return chest.startsWith("fica ") ? `${chest} e ${length.slice(5)}` : `${chest}, e ${length}`;

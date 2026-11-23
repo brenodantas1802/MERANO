@@ -4,14 +4,14 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { createSecretClient } from "@/lib/supabase/publico";
-import { lerPagamento, pagamentoOnline } from "@/lib/mercado-pago";
-import { linkWhatsApp, mensagemWhatsApp, registrarPagamento, type Pedido, type StatusPedido } from "@/lib/pedidos";
-import { formatPrice } from "@/lib/products";
+import { conferirRetorno, NOME_PROVEDOR, pagamentoOnline, type Provedor } from "@/lib/pagamento";
+import { ENTREGA_PRE_VENDA, linkWhatsApp, mensagemWhatsApp, type Pedido, type StatusPedido } from "@/lib/pedidos";
+import { formatPrice, getProduct } from "@/lib/products";
 import { PagarAgora } from "./pagar-agora";
 
 export const metadata: Metadata = { title: "Seu pedido | MERANNO", robots: { index: false, follow: false } };
 
-// An order's own page: where Mercado Pago sends the customer back, and the link to follow the order later.
+// An order's own page: where the payment provider sends the customer back, and the link to follow the order later.
 // The address is the order's random id, so only whoever got the link sees it.
 const ETAPAS: StatusPedido[] = ["aguardando_pagamento", "pago", "em_separacao", "enviado", "entregue"];
 const ROTULO: Partial<Record<StatusPedido, string>> = { aguardando_pagamento: "Pedido feito", pago: "Pago", em_separacao: "Separação", enviado: "Enviado", entregue: "Entregue" };
@@ -25,7 +25,7 @@ const TITULO: Record<StatusPedido, [string, string]> = {
   cancelado: ["Pedido cancelado.", ""],
 };
 
-// Mercado Pago links last two days (see criarPreferencia).
+// Orders keep their price for two days ("Pagar agora" opens a fresh payment link until then).
 const passouDeDoisDias = (criadoEm: string) => Date.now() - new Date(criadoEm).getTime() > 2 * 86400_000;
 
 export default async function PedidoPage({ params, searchParams }: PageProps<"/pedido/[id]">) {
@@ -38,15 +38,8 @@ export default async function PedidoPage({ params, searchParams }: PageProps<"/p
   let pedido = await ler();
   if (!pedido) notFound();
 
-  // Back from Mercado Pago with a payment id: confirm it right away instead of waiting for the notification.
-  const paymentId = String(busca.payment_id ?? busca.collection_id ?? "");
-  if (pedido.status === "aguardando_pagamento" && paymentId && pagamentoOnline()) {
-    const pagamento = await lerPagamento(paymentId).catch(() => null);
-    if (pagamento?.pedidoId === pedido.id) {
-      await registrarPagamento(admin, pagamento);
-      pedido = (await ler()) ?? pedido;
-    }
-  }
+  // Back from the payment: confirm it right away instead of waiting for the notification.
+  if (await conferirRetorno(admin, pedido, busca).catch(() => false)) pedido = (await ler()) ?? pedido;
 
   const status = pedido.status;
   const [linha1, linha2] = TITULO[status];
@@ -56,7 +49,16 @@ export default async function PedidoPage({ params, searchParams }: PageProps<"/p
     ? mensagemWhatsApp(pedido, forma)
     : `Olá, Meranno! Tenho uma dúvida sobre o pedido ${pedido.numero}.`);
   const recusado = status === "aguardando_pagamento" && ["rejected", "cancelled"].includes(pedido.pagamento?.status ?? "");
-  const emAnalise = status === "aguardando_pagamento" && ["in_process", "pending", "authorized"].includes(pedido.pagamento?.status ?? "");
+  const emAnalise = status === "aguardando_pagamento" && ["in_process", "pending", "authorized", "AWAITING_RISK_ANALYSIS"].includes(pedido.pagamento?.status ?? "");
+  const provedor = NOME_PROVEDOR[pedido.pagamento?.provedor as Provedor] ?? "pagamento";
+  // Pre-sale buyers who paid: the owners' thank-you note (2026-11-22), with the discount they really got, if any.
+  const comprou = ["pago", "em_separacao"].includes(status);
+  // Pre-sale price under the launch price, plus coupon and Pix discounts.
+  const precoCheio = pedido.itens.reduce((total, item) => {
+    const produto = item.productId ? getProduct(item.productId) : undefined;
+    return total + (produto && produto.price > item.preco ? (produto.price - item.preco) * item.quantidade : 0);
+  }, 0);
+  const economia = precoCheio + Number(pedido.desconto_cupom ?? 0) + Number(pedido.desconto_pix ?? 0);
   const expirado = passouDeDoisDias(pedido.criado_em);
   const primeiroNome = pedido.cliente?.nome?.split(" ")[0] ?? "";
 
@@ -76,14 +78,21 @@ export default async function PedidoPage({ params, searchParams }: PageProps<"/p
       {status === "aguardando_pagamento" && pedido.metodo === "whatsapp" && <p>Envie o pedido pelo WhatsApp e a equipe Meranno manda {forma === "pix" ? "o Pix" : "o link do cartão"} para você pagar.</p>}
       {status === "aguardando_pagamento" && pedido.metodo !== "whatsapp" && (recusado
         ? <p>O pagamento não foi aprovado. Você pode tentar de novo, com outro cartão ou com Pix.</p>
-        : emAnalise ? <p>O pagamento está em análise no Mercado Pago. Assim que for aprovado, esta página muda sozinha quando você voltar a ela.</p>
+        : emAnalise ? <p>O pagamento está em análise no {provedor}. Assim que for aprovado, esta página muda sozinha quando você voltar a ela.</p>
           : <p>{primeiroNome ? `${primeiroNome}, falta` : "Falta"} só o pagamento para garantir as suas peças.</p>)}
-      {status === "pago" && <p>Recebemos o pagamento{primeiroNome ? `, ${primeiroNome}` : ""}. Como é pré-venda, avisamos pelo WhatsApp quando o pedido for despachado.</p>}
+      {status === "pago" && <p>Recebemos o pagamento{primeiroNome ? `, ${primeiroNome}` : ""}. Seu pedido está na nossa lista, com entrega prevista para {ENTREGA_PRE_VENDA.longa}.</p>}
       {status === "em_separacao" && <p>As peças estão sendo separadas e embaladas. O código de rastreio aparece aqui quando o pedido sair.</p>}
       {status === "enviado" && <p>O pedido saiu{pedido.frete?.nome ? ` por ${pedido.frete.nome}` : ""}.{pedido.rastreio ? "" : " O código de rastreio aparece aqui em breve."}</p>}
       {status === "entregue" && <p>Esperamos que goste. Qualquer coisa, é só chamar no WhatsApp.</p>}
       {status === "cancelado" && <p>Este pedido foi cancelado. Se foi engano, fale com a gente pelo WhatsApp.</p>}
     </div>
+
+    {comprou && <section className="mt-10 max-w-2xl rounded-[28px] bg-[var(--vinho)] px-7 py-8 text-[var(--creme)] shadow-[0_24px_50px_-30px_rgba(85,30,43,.8)] md:px-9">
+      <p className="sans text-[11px] uppercase tracking-[.2em] text-[var(--latao)]">Cliente VIP · pré-venda</p>
+      <p className="display mt-3 text-3xl leading-tight md:text-4xl">Obrigado pela preferência{primeiroNome ? `, ${primeiroNome}` : ""}.</p>
+      <p className="mt-4 text-lg leading-snug text-[var(--creme)]/85">Você comprou na pré-venda{economia > 0 ? <>, garantiu {formatPrice(economia)} de desconto</> : null} e agora é cliente VIP da Meranno.</p>
+      <p className="sans mt-6 inline-flex rounded-full border border-[var(--latao)]/60 px-4 py-2 text-[12px] uppercase tracking-[.14em]">Entrega prevista: {ENTREGA_PRE_VENDA.curta}</p>
+    </section>}
 
     {pedido.rastreio && <p className="mt-6 rounded-[18px] border border-[var(--line)] bg-white/50 px-5 py-4"><span className="sans block text-[11px] uppercase tracking-[.14em] text-[var(--muted)]">Código de rastreio</span><b className="mt-1 block select-all text-lg tracking-[.06em]">{pedido.rastreio}</b></p>}
 

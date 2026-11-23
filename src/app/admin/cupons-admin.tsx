@@ -6,7 +6,7 @@ import { criarCupom, cupomDoPopup, ligarCupom, type Resposta } from "./pedidos-a
 // Discount coupons: create, switch on/off, and pick the one the welcome popup reveals. "Usos" counts paid orders.
 export type CupomAdmin = { codigo: string; percentual: number; descricao: string | null; ativo: boolean; primeira_compra: boolean; boas_vindas: boolean; criado_em: string; usos: number };
 
-const campo = "mt-2 block h-12 w-full rounded-[14px] border border-[var(--line)] bg-white/70 px-4 text-base outline-none focus:border-[var(--vinho)]/60";
+const campo = "mt-2 block h-12 w-full rounded-[14px] border border-[var(--line)] bg-[var(--campo)] px-4 text-base outline-none focus:border-[var(--vinho)]/60";
 
 function Cupom({ cupom }: { cupom: CupomAdmin }) {
   const [salvando, startTransition] = useTransition();
@@ -21,8 +21,8 @@ function Cupom({ cupom }: { cupom: CupomAdmin }) {
       {resposta && <p role="status" className={`sans mt-1 text-xs ${resposta.tipo === "erro" ? "text-[var(--vinho)]" : "text-[var(--muted)]"}`}>{resposta.texto}</p>}
     </div>
     <div className="sans flex flex-wrap gap-2 text-[11px] uppercase tracking-[.12em]">
-      {!cupom.boas_vindas && cupom.ativo && <button type="button" disabled={salvando} onClick={() => agir(() => cupomDoPopup(cupom.codigo))} className="press h-10 rounded-full border border-[var(--line)] px-4 hover:bg-[var(--creme)]">Usar no pop-up</button>}
-      <button type="button" disabled={salvando} onClick={() => agir(() => ligarCupom(cupom.codigo, !cupom.ativo))} className={`press h-10 rounded-full px-4 ${cupom.ativo ? "border border-[var(--line)] hover:bg-[var(--creme)]" : "bg-[var(--vinho)] text-[var(--creme)]"}`}>{cupom.ativo ? "Desligar" : "Ligar"}</button>
+      {!cupom.boas_vindas && cupom.ativo && <button type="button" disabled={salvando} onClick={() => agir(() => cupomDoPopup(cupom.codigo))} className="press h-10 rounded-full border border-[var(--line)] px-4 hover:bg-[var(--realce)]">Usar no pop-up</button>}
+      <button type="button" disabled={salvando} onClick={() => agir(() => ligarCupom(cupom.codigo, !cupom.ativo))} className={`press h-10 rounded-full px-4 ${cupom.ativo ? "border border-[var(--line)] hover:bg-[var(--realce)]" : "bg-[var(--vinho)] text-[var(--creme)]"}`}>{cupom.ativo ? "Desligar" : "Ligar"}</button>
     </div>
   </li>;
 }

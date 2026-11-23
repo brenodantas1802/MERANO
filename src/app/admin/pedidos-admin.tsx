@@ -23,7 +23,7 @@ const COR: Record<StatusPedido, string> = {
   pago: "bg-[var(--vinho)] text-[var(--creme)]",
   em_separacao: "bg-[var(--vinho)]/80 text-[var(--creme)]",
   enviado: "bg-[#1f6e4a] text-white",
-  entregue: "bg-[#1f6e4a]/15 text-[#1f6e4a]",
+  entregue: "bg-[var(--ganho)]/15 text-[var(--ganho)]",
   cancelado: "bg-[var(--line)] text-[var(--muted)] line-through",
 };
 
@@ -34,7 +34,9 @@ const cpfBonito = (cpf: string) => soDigitos(cpf).replace(/^(\d{3})(\d{3})(\d{3}
 const celularBonito = (celular: string) => soDigitos(celular).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
 const cepBonito = (cep: string) => soDigitos(cep).replace(/^(\d{5})(\d{3})$/, "$1-$2");
 const reais = (valor: unknown) => Number(valor ?? 0).toFixed(2).replace(".", ",");
-const formaPagamento = (pedido: Pedido) => pedido.metodo === "whatsapp" ? "WhatsApp" : pedido.metodo === "pix" ? "Pix (Mercado Pago)" : "Cartão (Mercado Pago)";
+const NOMES_PROVEDOR: Record<string, string> = { asaas: "Asaas", mercadopago: "Mercado Pago" };
+const provedorDo = (pedido: Pedido) => NOMES_PROVEDOR[pedido.pagamento?.provedor ?? ""] ?? (pedido.pagamento?.mp_id || pedido.pagamento?.preferencia ? "Mercado Pago" : "on-line");
+const formaPagamento = (pedido: Pedido) => pedido.metodo === "whatsapp" ? "WhatsApp" : `${pedido.metodo === "pix" ? "Pix" : "Cartão"} (${provedorDo(pedido)})`;
 
 function dadosDeEnvio(pedido: Pedido) {
   const e = pedido.endereco;
@@ -59,7 +61,7 @@ function baixarCsv(pedidos: Pedido[]) {
 function Copiar({ texto, rotulo }: { texto: string; rotulo: string }) {
   const [feito, setFeito] = useState(false);
   return <button type="button" onClick={async () => { try { await navigator.clipboard.writeText(texto); setFeito(true); setTimeout(() => setFeito(false), 1800); } catch { /* text stays visible */ } }}
-    className="sans press inline-flex h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-[11px] uppercase tracking-[.12em] hover:bg-[var(--creme)]">{feito ? <><Check size={13} /> Copiado</> : <><Copy size={13} /> {rotulo}</>}</button>;
+    className="sans press inline-flex h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-[11px] uppercase tracking-[.12em] hover:bg-[var(--realce)]">{feito ? <><Check size={13} /> Copiado</> : <><Copy size={13} /> {rotulo}</>}</button>;
 }
 
 function Linha({ pedido }: { pedido: Pedido }) {
@@ -83,7 +85,7 @@ function Linha({ pedido }: { pedido: Pedido }) {
         <p className="mb-2 text-[11px] uppercase tracking-[.14em] text-[var(--muted)]">Peças</p>
         {pedido.itens.map((item, indice) => <p key={indice}>{item.quantidade}× {item.nome} · <b>{item.tamanho}</b>{item.cor ? ` · ${item.cor}` : ""}{item.criacaoId ? " · personalizada" : ""}</p>)}
         <p className="pt-3 text-[var(--muted)]">Subtotal {formatPrice(Number(pedido.subtotal))}{pedido.cupom ? ` · cupom ${pedido.cupom} −${formatPrice(Number(pedido.desconto_cupom))}` : ""}{Number(pedido.desconto_pix) > 0 ? ` · Pix −${formatPrice(Number(pedido.desconto_pix))}` : ""} · {pedido.frete?.nome} {formatPrice(Number(pedido.frete?.preco ?? 0))}</p>
-        <p className="text-[var(--muted)]">{formaPagamento(pedido)}{pedido.pagamento?.status ? ` · Mercado Pago: ${pedido.pagamento.status}` : ""}</p>
+        <p className="text-[var(--muted)]">{formaPagamento(pedido)}{pedido.pagamento?.status ? ` · ${provedorDo(pedido)}: ${pedido.pagamento.status}` : ""}</p>
       </div>
       <div className="sans space-y-1 text-sm">
         <p className="mb-2 text-[11px] uppercase tracking-[.14em] text-[var(--muted)]">Entrega</p>
@@ -96,14 +98,14 @@ function Linha({ pedido }: { pedido: Pedido }) {
       </div>
       <div className="sans space-y-4 text-sm">
         <label className="block text-[11px] uppercase tracking-[.14em] text-[var(--muted)]">Status
-          <select value={pedido.status} disabled={salvando} onChange={(event) => agir(() => mudarStatusPedido(pedido.id, event.target.value))} className="mt-2 block h-11 w-full rounded-[12px] border border-[var(--line)] bg-white/70 px-3 text-sm normal-case tracking-normal text-[var(--ink)]">
+          <select value={pedido.status} disabled={salvando} onChange={(event) => agir(() => mudarStatusPedido(pedido.id, event.target.value))} className="mt-2 block h-11 w-full rounded-[12px] border border-[var(--line)] bg-[var(--campo)] px-3 text-sm normal-case tracking-normal text-[var(--ink)]">
             {Object.entries(STATUS_PEDIDO).map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}
           </select>
         </label>
         <form onSubmit={(event) => { event.preventDefault(); agir(() => salvarRastreio(pedido.id, rastreio)); }} className="block">
           <label className="block text-[11px] uppercase tracking-[.14em] text-[var(--muted)]" htmlFor={`rastreio-${pedido.id}`}>Código de rastreio</label>
           <div className="mt-2 flex gap-2">
-            <input id={`rastreio-${pedido.id}`} value={rastreio} onChange={(event) => setRastreio(event.target.value)} placeholder="AA123456789BR" className="h-11 min-w-0 flex-1 rounded-[12px] border border-[var(--line)] bg-white/70 px-3 uppercase" />
+            <input id={`rastreio-${pedido.id}`} value={rastreio} onChange={(event) => setRastreio(event.target.value)} placeholder="AA123456789BR" className="h-11 min-w-0 flex-1 rounded-[12px] border border-[var(--line)] bg-[var(--campo)] px-3 uppercase" />
             <button type="submit" disabled={salvando} className="press h-11 shrink-0 rounded-full bg-[var(--vinho)] px-4 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">Salvar</button>
           </div>
         </form>

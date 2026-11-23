@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
-import { createPublicClient, createSecretClient } from "@/lib/supabase/publico";
+import { createSecretClient } from "@/lib/supabase/publico";
 
 // The 10% first-purchase coupon: stores the e-mail (with the visitor's consent) and answers with the welcome code
 // (the active coupon marked boas_vindas in /admin), shown right away in the pop-up.
@@ -21,15 +21,15 @@ export async function POST(request: Request) {
   }
   const parsed = cupomSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message || "Dados inválidos." }, { status: 400 });
-  const supabase = createPublicClient();
-  if (!supabase) return NextResponse.json({ error: "Supabase não configurado no servidor." }, { status: 500 });
-  const { error } = await supabase.rpc("registrar_email_cupom", { p_email: parsed.data.email, p_consentimento: true });
+  // Through the server with the secret key: the function is closed to the publishable key.
+  const admin = createSecretClient();
+  if (!admin) return NextResponse.json({ error: "Supabase não configurado no servidor." }, { status: 500 });
+  const { error } = await admin.rpc("registrar_email_cupom", { p_email: parsed.data.email, p_consentimento: true });
   if (error) {
     console.error("registrar_email_cupom failed:", error.message);
     return NextResponse.json({ error: "Não consegui guardar seu e-mail agora. Tente de novo." }, { status: 502 });
   }
-  const admin = createSecretClient();
-  const { data: cupom } = admin ? await admin.from("cupons").select("codigo, percentual").eq("boas_vindas", true).eq("ativo", true).maybeSingle() : { data: null };
-  if (cupom && admin) await admin.from("cadastros_cupom").update({ cupom_enviado: true }).eq("email", parsed.data.email.trim().toLowerCase());
+  const { data: cupom } = await admin.from("cupons").select("codigo, percentual").eq("boas_vindas", true).eq("ativo", true).maybeSingle();
+  if (cupom) await admin.from("cadastros_cupom").update({ cupom_enviado: true }).eq("email", parsed.data.email.trim().toLowerCase());
   return NextResponse.json({ ok: true, codigo: cupom?.codigo ?? null, percentual: cupom?.percentual ?? null });
 }

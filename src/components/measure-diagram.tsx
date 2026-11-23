@@ -3,37 +3,41 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { SIZE_CHART } from "@/lib/products";
-import { FRONT_CUTOUT } from "@/lib/shirt-stories";
 
-// Our front shirt with the three measurements of the size chart drawn over it.
-// Coordinates are in the cutout's own pixels (1200 × 1180), so the lines sit on the seams at any size.
-const W = 1200;
-const H = 1180;
+// The regular tee, drawn flat from the front, with the three measurements of the size chart over it.
+// Coordinates are in the drawing's own units (600 × 640), so the lines sit on the seams at any size.
+const W = 600;
+const H = 640;
+// Set-in sleeves, the shoulder seam on the shoulder point, a straight body: the Remix regular cut.
+const TEE = "M244 34 Q300 74 356 34 L436 58 Q470 70 490 112 L516 176 L458 204 L424 160 L424 606 Q300 616 176 606 L176 160 L142 204 L84 176 L110 112 Q130 70 164 58 Z";
+const COLLAR = "M244 34 Q300 74 356 34 M232 38 Q300 92 368 38";
+const SEAMS = "M164 58 Q178 110 176 160 M436 58 Q422 110 424 160 M102 150 L148 186 M498 150 L452 186 M178 590 Q300 600 422 590";
 const LINES = {
-  ombro: { d: "M192 205H1008", ticks: "M192 180v50M1008 180v50", label: { x: 600, y: 165 }, name: "Ombro a ombro" },
-  busto: { d: "M220 712H978", ticks: "M220 687v50M978 687v50", label: { x: 600, y: 672 }, name: "Busto (largura)" },
-  comprimento: { d: "M330 60V1168", ticks: "M305 60h50M305 1168h50", label: { x: 330, y: 930 }, name: "Comprimento" },
+  busto: { d: "M176 196H424", ticks: "M176 180v32M424 180v32", label: { x: 300, y: 170 }, name: "Tórax" },
+  barra: { d: "M176 566H424", ticks: "M176 550v32M424 550v32", label: { x: 330, y: 540 }, name: "Barra" },
+  comprimento: { d: "M226 40V606", ticks: "M210 40h32M210 606h32", label: { x: 226, y: 400 }, name: "Comprimento" },
 } as const;
 
 const draw = (delay: number) => ({ initial: { pathLength: 0, opacity: 0 }, whileInView: { pathLength: 1, opacity: 1 }, viewport: { once: true }, transition: { pathLength: { duration: 1.2, ease: "easeInOut" as const, delay }, opacity: { duration: 0.2, delay } } });
+const cm = (value: number) => String(value).replace(".", ",");
 
 // Pass `size` to drive it from outside (it then shows no size buttons of its own).
 export function MeasureDiagram({ className = "", size: controlled }: { className?: string; size?: string }) {
   const [picked, setSize] = useState("M");
   const size = controlled ?? picked;
-  const row = SIZE_CHART.find((item) => item.size === size) ?? SIZE_CHART[2];
-  const values = { ombro: row.ombro, busto: row.largura, comprimento: row.comprimento };
-  const { src, small, large } = FRONT_CUTOUT;
+  const row = SIZE_CHART.find((item) => item.size === size) ?? SIZE_CHART[1] ?? SIZE_CHART[0];
+  const values = { busto: cm(row.largura), barra: cm(row.barra ?? row.largura), comprimento: cm(row.comprimento) };
 
   return (
     <div className={className}>
-      <div className="relative mx-auto w-full max-w-[34rem]">
-        {/* eslint-disable-next-line @next/next/no-img-element -- pre-sized renders of the AI-upscaled cutout */}
-        <img src={`${src}-${small}.webp`} srcSet={`${src}-${small}.webp ${small}w, ${src}-${large}.webp ${large}w`} sizes="(min-width: 768px) 34rem, 90vw" width={W} height={H} alt="Camiseta Meranno de frente, com as medidas de ombro a ombro, busto e comprimento" className="h-auto w-full drop-shadow-[0_40px_36px_rgba(32,28,23,.22)]" />
-        <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" fill="none" strokeLinecap="round" aria-hidden>
+      <div className="relative mx-auto w-full max-w-[30rem]">
+        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full drop-shadow-[0_34px_30px_rgba(10,14,22,.35)]" fill="none" strokeLinecap="round" strokeLinejoin="round" role="img" aria-label="Camiseta regular Meranno de frente, com as medidas de tórax, barra e comprimento">
+          <path d={TEE} fill="#efe9dc" stroke="#d9d0bd" strokeWidth={3} />
+          <path d={COLLAR} stroke="#cfc5b0" strokeWidth={3} />
+          <path d={SEAMS} stroke="#ddd4c2" strokeWidth={2} strokeDasharray="5 7" />
           {(Object.keys(LINES) as (keyof typeof LINES)[]).map((key, index) => <g key={key}>
-            <motion.path {...draw(0.3 + index * 0.35)} d={LINES[key].d} stroke="var(--sol-1)" strokeWidth={5} strokeDasharray="2 16" />
-            <motion.path {...draw(0.2 + index * 0.35)} d={LINES[key].ticks} stroke="var(--sol-1)" strokeWidth={5} />
+            <motion.path {...draw(0.3 + index * 0.35)} d={LINES[key].d} stroke="var(--sol-1)" strokeWidth={3.5} strokeDasharray="2 10" />
+            <motion.path {...draw(0.2 + index * 0.35)} d={LINES[key].ticks} stroke="var(--sol-1)" strokeWidth={3.5} />
           </g>)}
         </svg>
         {(Object.keys(LINES) as (keyof typeof LINES)[]).map((key, index) => {

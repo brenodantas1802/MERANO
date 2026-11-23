@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { dono } from "./dono";
-import { lerLista } from "@/lib/pre-venda-lista";
+import { aprovarPedido, lerLista } from "@/lib/pre-venda-lista";
 
 // The pre-sale list, edited from the owners' panel. Every action checks the owner again (see dono).
 export type RespostaLista = { tipo: "ok" | "erro"; texto: string } | null;
@@ -42,7 +42,27 @@ export async function adicionarNaLista(_anterior: RespostaLista, form: FormData)
 export async function removerDaLista(id: string) {
   const sessao = await dono();
   if (!sessao) return;
-  const { error } = await sessao.admin.from("pre_venda_autorizados").delete().eq("id", id);
-  if (error) console.error("removerDaLista failed:", error.message);
+  const { data } = await sessao.admin.from("pre_venda_autorizados").delete().eq("id", id).select("usuario_id").maybeSingle();
+  // A person let in through an access request leaves the requests too, so a new one can come in if needed.
+  if (data?.usuario_id) await sessao.admin.from("pre_venda_pedidos").delete().eq("usuario_id", data.usuario_id);
   refresh();
+}
+
+// Access requests (people who signed in on /pre-venda without being on the list).
+export async function liberarPedido(id: string): Promise<RespostaLista> {
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só os donos, entrando com o Google, podem liberar." };
+  const resultado = await aprovarPedido(sessao.admin, id, sessao.email);
+  if (!resultado.ok) return { tipo: "erro", texto: resultado.erro };
+  refresh();
+  return { tipo: "ok", texto: "Liberado." };
+}
+
+export async function recusarPedido(id: string): Promise<RespostaLista> {
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só os donos, entrando com o Google, podem recusar." };
+  const { error } = await sessao.admin.from("pre_venda_pedidos").update({ status: "recusado", resolvido_em: new Date().toISOString(), resolvido_por: sessao.email }).eq("id", id);
+  if (error) return { tipo: "erro", texto: "Não consegui salvar. Tente de novo." };
+  refresh();
+  return { tipo: "ok", texto: "Recusado." };
 }

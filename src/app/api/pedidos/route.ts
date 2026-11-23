@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
 import { createSecretClient } from "@/lib/supabase/publico";
 import { createClient } from "@/lib/supabase/server";
-import { criarPreferencia, pagamentoOnline } from "@/lib/mercado-pago";
+import { abrirPagamento, pagamentoOnline } from "@/lib/pagamento";
 import { escolherFrete, linkWhatsApp, mensagemWhatsApp, novoNumero, pedidoSchema, precificarItens, totais, validarCupom, type Pedido } from "@/lib/pedidos";
 import { origemDe } from "@/lib/origem";
 
 // Creates an order from the payment page. Prices, coupon, shipping and total are worked out here. Then either the
-// Mercado Pago payment link (when MERCADOPAGO_ACCESS_TOKEN is set) or a WhatsApp message to close the sale by hand.
+// payment link (Asaas, or Mercado Pago; see lib/pagamento) or a WhatsApp message to close the sale by hand.
 const isRateLimited = createRateLimiter(12);
 
 export async function POST(request: Request) {
@@ -76,11 +76,11 @@ export async function POST(request: Request) {
   if (!online) return NextResponse.json({ id: criado.id, numero: criado.numero, whatsapp: linkWhatsApp(mensagemWhatsApp(criado, entrada.metodo)) }, { status: 201 });
 
   try {
-    const { link, preferencia } = await criarPreferencia(criado, origemDe(request));
-    await admin.from("pedidos").update({ pagamento: { forma: entrada.metodo, preferencia, link } }).eq("id", criado.id);
+    const { link, registro } = await abrirPagamento(criado, origemDe(request));
+    await admin.from("pedidos").update({ pagamento: registro }).eq("id", criado.id);
     return NextResponse.json({ id: criado.id, numero: criado.numero, pagar: link }, { status: 201 });
   } catch (error) {
-    console.error("Mercado Pago preference failed:", error instanceof Error ? error.message : error);
+    console.error("Payment link failed:", error instanceof Error ? error.message : error);
     // The order is saved: its page offers to try the payment again.
     return NextResponse.json({ id: criado.id, numero: criado.numero, error: "O pedido foi registrado, mas o pagamento não abriu. Tente de novo na página do pedido." }, { status: 502 });
   }

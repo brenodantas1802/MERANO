@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { detectPose, POSE_LABELS, type Pose } from "@/lib/pose";
-import { getProvadorProduct as getProduct, getSizeChart } from "@/lib/products";
+import { getProvadorProduct as getProduct, getSizeChart, TAMANHOS_LOJA } from "@/lib/products";
 import { EMPTY_PROFILE, type BodyProfile } from "@/lib/body-measure";
 import { describeFit } from "@/lib/fit-description";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
@@ -36,7 +36,7 @@ const generateSchema = z.object({
     })
     .optional(),
   // The size to try on, and the customer's Meranno Fit measurements when they have them (strings, as typed).
-  size: z.enum(["PP", "P", "M", "G", "GG"]).optional(),
+  size: z.enum(TAMANHOS_LOJA).optional(),
   profile: z.record(z.string(), z.string().max(12)).optional(),
   aspectRatio: z.string().optional(),
   resolution: z.string().optional(),

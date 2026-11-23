@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
 import { SignOutButton } from "@/components/auth-buttons";
-import { ListaPreVenda, type Autorizado } from "./lista-pre-venda";
+import type { ConfigFinanceira, Despesa, ResumoFinanceiro } from "@/lib/financeiro";
+import { FinanceiroAdmin } from "./financeiro-admin";
+import { ListaPreVenda, type Autorizado, type PedidoAcesso } from "./lista-pre-venda";
 import { PedidosAdmin } from "./pedidos-admin";
 import { CuponsAdmin, type CupomAdmin } from "./cupons-admin";
 import type { Pedido } from "@/lib/pedidos";
@@ -28,7 +32,7 @@ const cm = (valor?: number) => (valor ?? 0).toLocaleString("pt-BR", { maximumFra
 // Prints made in the Personalizador. `null` means the secret key isn't configured, so the list can't be read here.
 // "No carrinho" ones were added to a cart but not ordered (yet); "Pedida" ones are in an order.
 function Criacoes({ criacoes }: { criacoes: CriacaoAdmin[] | null }) {
-  return <section className="mt-24">
+  return <section id="estampas" className="mt-24 scroll-mt-28">
     <div className="flex items-end justify-between"><div><p className="sans mb-4 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Personalizador</p><h2 className="display text-6xl">Estampas criadas.</h2></div></div>
     <p className="sans mt-4 max-w-2xl text-sm text-[var(--muted)]">Os arquivos para a confecção: arte em PNG a 300 DPI no tamanho da ficha, marca do peito e mockups só de referência. Envie os PNGs como documento no WhatsApp, nunca como foto.</p>
     {criacoes === null ? <p className="sans mt-8 max-w-2xl text-sm text-[var(--muted)]">Para ver as estampas aqui, cadastre a variável <code>SUPABASE_SECRET_KEY</code> (chave secreta do Supabase) na Vercel. Enquanto isso, elas ficam no Supabase: tabela <code>criacoes_estampa</code> e pasta <code>estampas</code> no Storage.</p>
@@ -40,7 +44,7 @@ function Criacoes({ criacoes }: { criacoes: CriacaoAdmin[] | null }) {
           const foto = capa ?? c.arte_url ?? "";
           const links = ([["Arte 300 DPI", c.arte_url], ["Marca do peito", c.arquivos_url.marca], ["Mockup frente", c.arquivos_url.mockupFrente], ["Mockup costas", c.arquivos_url.mockupCostas]] as [string, string | null | undefined][]).filter((link): link is [string, string] => !!link[1]);
           return <article key={c.id} className="border border-[var(--line)]">
-            <div className="aspect-[3/4] bg-[#f5f1e9]" style={capa ? undefined : { background: c.painel.paleta?.[0] ?? "#eee" }}>
+            <div className="aspect-[3/4] bg-[var(--cartao)]" style={capa ? undefined : { background: c.painel.paleta?.[0] ?? "#eee" }}>
               {/* eslint-disable-next-line @next/next/no-img-element -- signed Supabase link */}
               {foto && <a href={foto} target="_blank" rel="noreferrer"><img src={foto} alt={c.ficha.ideia ?? "Estampa"} className="h-full w-full object-contain" /></a>}
             </div>
@@ -68,7 +72,7 @@ export type CadastroCupom = { id: string; criado_em: string; email: string; cupo
 
 // E-mails left on the first-purchase popup. "Viu o cupom" when the popup showed a code to that person.
 function Cupons({ cupons }: { cupons: CadastroCupom[] | null }) {
-  return <section className="mt-24">
+  return <section id="emails" className="mt-24 scroll-mt-28">
     <p className="sans mb-4 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Pop-up de primeira compra</p>
     <h2 className="display text-6xl">E-mails cadastrados.</h2>
     {cupons === null ? <p className="sans mt-8 max-w-2xl text-sm text-[var(--muted)]">Para ver a lista aqui, cadastre <code>SUPABASE_SECRET_KEY</code> na Vercel. Enquanto isso, ela fica no Supabase, tabela <code>cadastros_cupom</code>.</p>
@@ -79,21 +83,57 @@ function Cupons({ cupons }: { cupons: CadastroCupom[] | null }) {
   </section>;
 }
 
-export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, origem, cadeadoLigado }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; origem: string; cadeadoLigado: boolean }) {
-  return <main>
-    <header className="sans flex items-center justify-between gap-4 border-b border-[var(--line)] px-6 py-5 md:px-12">
-      <Link href="/" className="font-bold tracking-[.28em]">MERANNO / equipe</Link>
-      <div className="flex items-center gap-4 text-[13px] text-[var(--muted)]">
-        <span className="hidden truncate sm:inline">{email}</span>
-        <SignOutButton className="rounded-full border border-[var(--ink)]/20 px-4 py-2 text-[var(--ink)] transition-colors hover:bg-[var(--creme)]" />
+// Light or dark: follows the device until an owner picks one with the button; the pick stays in this browser.
+const TEMA_KEY = "meranno-admin-tema";
+type Tema = "claro" | "escuro" | "";
+const ouvintesTema = new Set<() => void>();
+function lerTema(): Tema {
+  try {
+    const salvo = window.localStorage.getItem(TEMA_KEY);
+    return salvo === "claro" || salvo === "escuro" ? salvo : "";
+  } catch {
+    return "";
+  }
+}
+function useTema() {
+  const tema = useSyncExternalStore((avisar) => { ouvintesTema.add(avisar); return () => { ouvintesTema.delete(avisar); }; }, lerTema, (): Tema => "");
+  const trocar = () => {
+    const escuroAgora = tema ? tema === "escuro" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    try { window.localStorage.setItem(TEMA_KEY, escuroAgora ? "claro" : "escuro"); } catch { /* the pick just won't be remembered */ }
+    ouvintesTema.forEach((avisar) => avisar());
+  };
+  return { tema, trocar };
+}
+
+const SECOES = [["financeiro", "Financeiro"], ["pedidos", "Pedidos"], ["pre-venda", "Pré-venda"], ["cupons", "Cupons"], ["estampas", "Estampas"], ["emails", "E-mails"]] as const;
+
+export type Financeiro = { resumo: ResumoFinanceiro; config: ConfigFinanceira; despesas: Despesa[]; disponivel: boolean };
+
+export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro }) {
+  const { tema, trocar } = useTema();
+  return <div className="painel min-h-screen" data-tema={tema || undefined}>
+    <header className="sans sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur">
+      <div className="flex items-center justify-between gap-4 px-6 py-4 md:px-12">
+        <Link href="/" className="font-bold tracking-[.28em]">MERANNO / equipe</Link>
+        <div className="flex items-center gap-2 text-[13px] text-[var(--muted)] sm:gap-4">
+          <span className="hidden truncate md:inline">{email}</span>
+          <button type="button" onClick={trocar} aria-label="Trocar entre modo claro e modo noturno" title="Modo claro / noturno" className="press flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] text-[var(--ink)] hover:bg-[var(--realce)]">
+            <Moon size={16} className="tema-lua" /><Sun size={16} className="tema-sol" />
+          </button>
+          <SignOutButton className="rounded-full border border-[var(--line)] px-4 py-2 text-[var(--ink)] transition-colors hover:bg-[var(--realce)]" />
+        </div>
       </div>
+      <nav aria-label="Seções do painel" className="shelf gap-1 px-4 pb-3 md:px-10">
+        {SECOES.map(([id, nome]) => <a key={id} href={`#${id}`} className="shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] uppercase tracking-[.12em] text-[var(--muted)] hover:bg-[var(--realce)] hover:text-[var(--ink)]">{nome}</a>)}
+      </nav>
     </header>
-    <div className="mx-auto max-w-360 px-6 py-14 md:px-12">
-      <ListaPreVenda lista={lista} origem={origem} cadeadoLigado={cadeadoLigado} />
-      <PedidosAdmin pedidos={pedidos} />
-      <CuponsAdmin cupons={descontos} />
+    <main className="mx-auto max-w-360 px-6 py-14 md:px-12">
+      <FinanceiroAdmin {...financeiro} />
+      <div id="pedidos" className="scroll-mt-28"><PedidosAdmin pedidos={pedidos} /></div>
+      <div id="pre-venda" className="scroll-mt-28"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} /></div>
+      <div id="cupons" className="scroll-mt-28"><CuponsAdmin cupons={descontos} /></div>
       <Criacoes criacoes={criacoes} />
       <Cupons cupons={cupons} />
-    </div>
-  </main>;
+    </main>
+  </div>;
 }

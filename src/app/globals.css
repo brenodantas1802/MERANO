@@ -346,3 +346,15 @@ html.entrada .veu-entrada { display: flex; }
 	.cadeado-balanco { animation: none; }
 	.veu-entrada.abrindo { -webkit-mask: none; mask: none; animation: veu-sair .4s forwards; }
 }
+
+/* Owners' panel (/admin): light by default, dark when the device asks for it or an owner picks it (data-tema). */
+.painel { --cartao: #FBF8F2; --campo: #FFFFFF; --realce: #EFE7DA; --trilho: #E8DFD0; --ganho: #1F6E4A; --perda: #8A3A2C; background: var(--paper); color: var(--ink); }
+.painel .tema-sol { display: none; }
+.painel[data-tema="escuro"] { color-scheme: dark; --paper: #141110; --ink: #EFE8DD; --muted: #A3978C; --line: #302926; --areia: #2A2320; --cream: #1E1917; --vinho: #A64A5E; --cartao: #1B1715; --campo: #110E0D; --realce: #2A231F; --trilho: #2E2622; --ganho: #6FC59A; --perda: #E8907D; }
+.painel[data-tema="escuro"] .tema-sol { display: block; }
+.painel[data-tema="escuro"] .tema-lua { display: none; }
+@media (prefers-color-scheme: dark) {
+  .painel:not([data-tema="claro"]) { color-scheme: dark; --paper: #141110; --ink: #EFE8DD; --muted: #A3978C; --line: #302926; --areia: #2A2320; --cream: #1E1917; --vinho: #A64A5E; --cartao: #1B1715; --campo: #110E0D; --realce: #2A231F; --trilho: #2E2622; --ganho: #6FC59A; --perda: #E8907D; }
+  .painel:not([data-tema="claro"]) .tema-sol { display: block; }
+  .painel:not([data-tema="claro"]) .tema-lua { display: none; }
+}

@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { isOwner } from "@/lib/owners";
 import { createSecretClient } from "@/lib/supabase/publico";
 
@@ -65,15 +65,77 @@ export async function autorizacao(user: User): Promise<Autorizacao> {
   return { liberado: false };
 }
 
-// The WhatsApp typed on /pre-venda: lets the account in if the number is on the list and not taken by another account.
-export async function liberarPorTelefone(user: User, texto: string): Promise<{ ok: true } | { ok: false; erro: string }> {
+const nomeDa = (user: User) => String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? "").replace(/\s+/g, " ").trim().slice(0, 80) || null;
+
+export type StatusPedido = "pendente" | "liberado" | "recusado";
+export type ResultadoTelefone = { ok: true } | { ok: false; erro: string } | { ok: false; pendente: true };
+
+// The WhatsApp typed on /pre-venda. On the list (and not taken by another account): the account is let in. Not on the
+// list: it becomes an access request for the team to approve in /admin.
+export async function liberarPorTelefone(user: User, texto: string): Promise<ResultadoTelefone> {
   const telefone = normalizarTelefone(texto);
   if (!telefone) return { ok: false, erro: "Confira o número: com DDD, são 10 ou 11 dígitos." };
   const admin = createSecretClient();
   if (!admin) return { ok: false, erro: "A lista da pré-venda não está disponível agora. Tente de novo em instantes." };
   const { data } = await admin.from("pre_venda_autorizados").select("id, usuario_id").eq("telefone", telefone).limit(1).maybeSingle();
-  if (!data) return { ok: false, erro: "Esse número não está na lista da pré-venda. Use o mesmo WhatsApp que está no grupo." };
-  if (data.usuario_id && data.usuario_id !== user.id) return { ok: false, erro: "Esse número já foi usado por outra conta. Se foi você, entre com aquela conta." };
-  await admin.from("pre_venda_autorizados").update({ usuario_id: user.id, liberado_em: new Date().toISOString() }).eq("id", data.id);
+  if (data?.usuario_id && data.usuario_id !== user.id) return { ok: false, erro: "Esse número já foi usado por outra conta. Se foi você, entre com aquela conta." };
+  if (data) {
+    await admin.from("pre_venda_autorizados").update({ usuario_id: user.id, liberado_em: new Date().toISOString() }).eq("id", data.id);
+    return { ok: true };
+  }
+  const { data: anterior } = await admin.from("pre_venda_pedidos").select("status").eq("usuario_id", user.id).maybeSingle();
+  if (anterior?.status === "recusado") return { ok: false, erro: "A equipe não liberou esta conta. Se acha que é engano, fale com quem te mandou o link." };
+  const { error } = await admin.from("pre_venda_pedidos").upsert({ usuario_id: user.id, nome: nomeDa(user), email: user.email?.toLowerCase() ?? null, telefone, status: "pendente", resolvido_em: null, resolvido_por: null }, { onConflict: "usuario_id" });
+  if (error) {
+    console.error("pre_venda_pedidos upsert failed:", error.message);
+    return { ok: false, erro: "Não consegui enviar o pedido agora. Tente de novo em instantes." };
+  }
+  return { ok: false, pendente: true };
+}
+
+// This account's access request, if it sent one.
+export async function pedidoDaConta(usuarioId: string): Promise<{ status: StatusPedido; telefone: string | null } | null> {
+  const admin = createSecretClient();
+  if (!admin) return null;
+  const { data } = await admin.from("pre_venda_pedidos").select("status, telefone").eq("usuario_id", usuarioId).maybeSingle();
+  return (data as { status: StatusPedido; telefone: string | null } | null) ?? null;
+}
+
+// "Abrir o cadeado" worked: the list shows when the person first came in.
+export async function marcarEntrada(usuarioId: string) {
+  await createSecretClient()?.from("pre_venda_autorizados").update({ liberado_em: new Date().toISOString() }).eq("usuario_id", usuarioId).is("liberado_em", null);
+}
+
+// The owners approve a request in /admin: the account goes on the list, tied to it. A list row with the same e-mail
+// or WhatsApp that no account used yet is reused; an e-mail or number already used by another account is left out.
+export async function aprovarPedido(admin: SupabaseClient, pedidoId: string, dono: string): Promise<{ ok: true } | { ok: false; erro: string }> {
+  const { data: pedido } = await admin.from("pre_venda_pedidos").select("id, usuario_id, nome, email, telefone").eq("id", pedidoId).maybeSingle();
+  if (!pedido) return { ok: false, erro: "Pedido não encontrado." };
+  const { data: ligada } = await admin.from("pre_venda_autorizados").select("id").eq("usuario_id", pedido.usuario_id).limit(1).maybeSingle();
+  if (!ligada) {
+    let livre: string | null = null;
+    const usados = new Set<string>();
+    for (const coluna of ["email", "telefone"] as const) {
+      const valor = pedido[coluna];
+      if (!valor) continue;
+      const { data } = await admin.from("pre_venda_autorizados").select("id, usuario_id").eq(coluna, valor).maybeSingle();
+      if (!data) continue;
+      if (data.usuario_id) usados.add(coluna);
+      else livre ??= data.id;
+    }
+    const resultado = livre
+      ? await admin.from("pre_venda_autorizados").update({ usuario_id: pedido.usuario_id, nome: pedido.nome }).eq("id", livre)
+      : await (async () => {
+        const email = usados.has("email") ? null : pedido.email;
+        const telefone = usados.has("telefone") ? null : pedido.telefone;
+        if (!email && !telefone) return { error: { message: "e-mail e número já usados" } };
+        return admin.from("pre_venda_autorizados").insert({ nome: pedido.nome, email, telefone, usuario_id: pedido.usuario_id, criado_por: dono });
+      })();
+    if (resultado.error) {
+      console.error("aprovarPedido failed:", resultado.error.message);
+      return { ok: false, erro: resultado.error.message === "e-mail e número já usados" ? "Esse e-mail e esse WhatsApp já liberaram outras contas." : "Não consegui liberar agora. Tente de novo." };
+    }
+  }
+  await admin.from("pre_venda_pedidos").update({ status: "liberado", resolvido_em: new Date().toISOString(), resolvido_por: dono }).eq("id", pedido.id);
   return { ok: true };
 }

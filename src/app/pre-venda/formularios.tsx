@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { abrirCadeado, entrarComTelefone, type Resultado } from "./acoes";
 
 // After access is granted: a full page load of "/" (not a client navigation), so the padlock animation runs.
@@ -25,13 +26,24 @@ export function AbrirCadeado() {
   useEntrar(resultado);
   return <form action={abrir} className="mt-6">
     <button type="submit" disabled={abrindo || resultado?.ok} className={botao}>{abrindo || resultado?.ok ? "Abrindo…" : "Abrir o cadeado"}</button>
-    {resultado && !resultado.ok && <p role="alert" className={aviso}>{resultado.erro}</p>}
+    {resultado && "erro" in resultado && <p role="alert" className={aviso}>{resultado.erro}</p>}
   </form>;
 }
 
 const mascara = (valor: string) => valor.replace(/\D/g, "").slice(0, 11).replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{1,4})$/, "$1-$2");
 
-export function FormTelefone() {
+// While the team hasn't answered the access request: the page checks again every 20 seconds, so it turns into
+// "Você está na lista" by itself once an owner taps "Liberar" in /admin.
+export function Aguardando() {
+  const router = useRouter();
+  useEffect(() => {
+    const intervalo = window.setInterval(() => { if (document.visibilityState === "visible") router.refresh(); }, 20000);
+    return () => window.clearInterval(intervalo);
+  }, [router]);
+  return <p className="sans mt-5 flex items-center gap-3 text-[13px] text-[var(--muted)]"><span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-[var(--latao)]" />Esperando a equipe liberar. Pode deixar esta página aberta.</p>;
+}
+
+export function FormTelefone({ rotulo = "Liberar meu acesso" }: { rotulo?: string }) {
   const [resultado, enviar, enviando] = useActionState(entrarComTelefone, null);
   const [telefone, setTelefone] = useState("");
   useEntrar(resultado);
@@ -39,7 +51,7 @@ export function FormTelefone() {
     <label className="sans block text-[12px] text-[var(--muted)]">WhatsApp que está no grupo
       <input name="telefone" required inputMode="tel" autoComplete="tel" value={telefone} onChange={(event) => setTelefone(mascara(event.target.value))} placeholder="(11) 90000-0000" className="mt-2 block h-12 w-full rounded-[14px] border border-[var(--line)] bg-white/70 px-4 text-base text-[var(--ink)] outline-none focus:border-[var(--vinho)]/60" />
     </label>
-    <button type="submit" disabled={enviando || resultado?.ok} className={`${botao} mt-4`}>{enviando || resultado?.ok ? "Conferindo…" : "Liberar meu acesso"}</button>
-    {resultado && !resultado.ok && <p role="alert" className={aviso}>{resultado.erro}</p>}
+    <button type="submit" disabled={enviando || resultado?.ok} className={`${botao} mt-4`}>{enviando || resultado?.ok ? "Conferindo…" : rotulo}</button>
+    {resultado && "erro" in resultado && <p role="alert" className={aviso}>{resultado.erro}</p>}
   </form>;
 }

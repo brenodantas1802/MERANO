@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-// Supabase with the public key and no session, for route handlers that only call the narrow public functions
-// (registrar_criacao, marcar_criacoes_pedidas) and upload into the "estampas" bucket.
+// Supabase with the public key and no session. The database is closed to this key (RLS, no grants): only the
+// keep-alive function answers it. Everything else goes through createSecretClient on the server.
 export function createPublicClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;

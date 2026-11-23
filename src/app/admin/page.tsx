@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { isOwnerSession } from "@/lib/owners";
 import { createSecretClient } from "@/lib/supabase/publico";
 import { preVendaAtiva } from "@/lib/pre-venda";
+import { CONFIG_PADRAO, resumoFinanceiro, type ConfigFinanceira, type Despesa } from "@/lib/financeiro";
 import { AdminDashboard, type CriacaoAdmin, type CadastroCupom } from "./dashboard";
-import type { Autorizado } from "./lista-pre-venda";
+import type { Autorizado, PedidoAcesso } from "./lista-pre-venda";
 import type { CupomAdmin } from "./cupons-admin";
 import type { Pedido, StatusPedido } from "@/lib/pedidos";
 
@@ -40,6 +41,26 @@ async function carregarLista(): Promise<Autorizado[] | null> {
   if (!supabase) return null;
   const { data } = await supabase.from("pre_venda_autorizados").select("id, nome, email, telefone, liberado_em, criado_em").order("criado_em", { ascending: false }).limit(2000);
   return data ?? [];
+}
+
+// Access requests waiting for an answer, plus the refused ones (they can still be let in).
+async function carregarPedidosAcesso(): Promise<PedidoAcesso[] | null> {
+  const supabase = createSecretClient();
+  if (!supabase) return null;
+  const { data } = await supabase.from("pre_venda_pedidos").select("id, nome, email, telefone, status, criado_em").in("status", ["pendente", "recusado"]).order("criado_em", { ascending: false }).limit(500);
+  return (data ?? []) as PedidoAcesso[];
+}
+
+// The finance settings (one row) and the logged expenses, newest first. Numbers come back from Postgres as text.
+async function carregarFinanceiro(): Promise<{ config: ConfigFinanceira; despesas: Despesa[] }> {
+  const supabase = createSecretClient();
+  if (!supabase) return { config: CONFIG_PADRAO, despesas: [] };
+  const [{ data: linha }, { data: despesas }] = await Promise.all([
+    supabase.from("financeiro_config").select("*").eq("id", 1).maybeSingle(),
+    supabase.from("despesas").select("id, data, descricao, categoria, valor, criado_por").order("data", { ascending: false }).order("criado_em", { ascending: false }).limit(500),
+  ]);
+  const config = Object.fromEntries(Object.keys(CONFIG_PADRAO).map((chave) => [chave, linha?.[chave] != null ? Number(linha[chave]) : CONFIG_PADRAO[chave as keyof ConfigFinanceira]])) as ConfigFinanceira;
+  return { config, despesas: (despesas ?? []).map((despesa) => ({ ...despesa, valor: Number(despesa.valor) })) as Despesa[] };
 }
 
 // E-mails left on the 10% coupon popup, newest first. Needs SUPABASE_SECRET_KEY, like the prints.
@@ -80,6 +101,7 @@ export default async function AdminPage() {
   const cabecalhos = await headers();
   const host = cabecalhos.get("x-forwarded-host") ?? cabecalhos.get("host") ?? "";
   const origem = `${cabecalhos.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
-  const [pedidos, descontos, criacoes, cadastros, lista] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista()]);
-  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} origem={origem} cadeadoLigado={preVendaAtiva()} />;
+  const [pedidos, descontos, criacoes, cadastros, lista, pedidosAcesso, { config, despesas }] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista(), carregarPedidosAcesso(), carregarFinanceiro()]);
+  const financeiro = { resumo: resumoFinanceiro(pedidos ?? [], config, despesas), config, despesas, disponivel: pedidos !== null };
+  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} />;
 }

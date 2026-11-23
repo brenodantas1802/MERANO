@@ -224,7 +224,7 @@
   function renderFits() {
     invalidateIfChanged();
     const el = $('#fits'); el.innerHTML = '';
-    FITS.forEach((f) => {
+    FITS.filter((f) => f.id === 'regular').forEach((f) => {
       el.append(h('button', {
         class: 'fit', type: 'button', role: 'radio', 'aria-checked': String(state.fit === f.id),
         onclick: () => { if (state.fit !== f.id) { state.fit = f.id; ensureFabric(true); renderAll(); } },
@@ -426,7 +426,7 @@
       const ready=!!item.art;
       const card=h(ready?'button':'div',{class:'slide'+(ready?'':' slide--pending'),...(ready?{type:'button',tabindex:i===state.slide?'0':'-1','aria-label':'Usar '+item.name}:{}),'data-house-id':item.id});
       if(item.mockup){const img=h('img',{src:item.mockup,alt:item.name,loading:'lazy'});img.style.cssText='width:100%;height:180px;object-fit:contain';card.append(img);}
-      else if(ready){card.innerHTML=M.shirtSVG({fit:item.fit,side:'back',fabric:hex(item.fabric)});loadHouse(item).then(design=>{card.querySelector('svg').outerHTML=M.shirtSVG({fit:item.fit,side:'back',fabric:hex(item.fabric),design});}).catch(()=>{card.disabled=true;card.querySelector('.slide__cta').textContent='Arte indisponível';});}
+      else if(ready){card.innerHTML=M.shirtSVG({fit:'regular',side:'back',fabric:hex(item.fabric)});loadHouse(item).then(design=>{card.querySelector('svg').outerHTML=M.shirtSVG({fit:'regular',side:'back',fabric:hex(item.fabric),design});}).catch(()=>{card.disabled=true;card.querySelector('.slide__cta').textContent='Arte indisponível';});}
       else card.append(h('span',{class:'ms','aria-hidden':'true'},'image'));
       const name=h('span',{class:'slide__name'});name.textContent=item.name;card.append(name);
       const caption=h('span',{class:'slide__cta'});caption.textContent=ready?'Aplicar e personalizar':'Aguardando a arte final';card.append(caption);
@@ -469,7 +469,7 @@
     invalidateReview();setBusy(true);
     try{
       const design=await loadHouse(item);
-      state.fit=item.fit;state.palette[0]=item.fabric;ensureFabric(false);
+      state.fit='regular';state.palette[0]=item.fabric;ensureFabric(false);
       state.design={...design};state.brandVisible=true;state.deleted=null;state.history=[];state.restoredPrompt=null;log.innerHTML='';renderAll();
       viewBack.reset();viewFront.reset();
       const msg='“'+item.name+'” aplicada nas costas. Use o editor da peça para mover ou apagar; o chat pode criar variações.';
@@ -830,7 +830,7 @@
       try {
         for(const ref of snapshot.refs){const blob=await(await fetch(ref.dataURL)).blob(),item=await MerannoReferences.prepare(new File([blob],ref.name,{type:blob.type}));item.savedDataURL=ref.dataURL;prepared.push(item);}
         invalidateReview();state.refs.forEach(ref=>URL.revokeObjectURL(ref.url));
-        state.brandVisible=snapshot.brandVisible;state.deleted=null;state.fit=snapshot.fit;state.palette=[...snapshot.palette];state.font=snapshot.font;state.design=snapshot.design;state.refs=prepared;state.history=snapshot.history;state.restoredPrompt=snapshot.reviewDraft;
+        state.brandVisible=snapshot.brandVisible;state.deleted=null;state.fit='regular';state.palette=[...snapshot.palette];state.font=snapshot.font;state.design=snapshot.design;state.refs=prepared;state.history=snapshot.history;state.restoredPrompt=snapshot.reviewDraft;
         $('#refs-notes').value=snapshot.referenceNotes;$('#refs-use-colors').checked=snapshot.useReferenceColors;input.value=snapshot.messageDraft;grow();
         log.innerHTML='';for(const msg of state.history)pushMsg(msg.role==='user'?'user':'ai',msg.text);if(!state.history.length)pushMsg('ai',INTRO);
         if(state.restoredPrompt){const note=pushMsg('note','Prompt salvo. Peça uma nova revisão no chat antes de gerar.');note.classList.add('saved-prompt');const area=h('textarea',{'aria-label':'Prompt salvo para retomar',readonly:true});area.value=state.restoredPrompt.prompt;note.append(area);}

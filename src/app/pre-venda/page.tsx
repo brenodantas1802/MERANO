@@ -7,8 +7,8 @@ import { GoogleButton, SignOutButton } from "@/components/auth-buttons";
 import { SignInForm } from "@/components/auth-forms";
 import { createClient } from "@/lib/supabase/server";
 import { COOKIE_ACESSO, acessoValido, preVendaAtiva } from "@/lib/pre-venda";
-import { autorizacao } from "@/lib/pre-venda-lista";
-import { AbrirCadeado, Entrando, FormTelefone } from "./formularios";
+import { autorizacao, pedidoDaConta } from "@/lib/pre-venda-lista";
+import { AbrirCadeado, Aguardando, Entrando, FormTelefone } from "./formularios";
 
 export const metadata: Metadata = { title: "MERANNO | Pré-venda", robots: { index: false, follow: false } };
 
@@ -21,6 +21,9 @@ export default async function PreVenda() {
   const jaLiberado = await acessoValido(jar.get(COOKIE_ACESSO)?.value);
   const { data: { user } } = await supabase.auth.getUser();
   const situacao = user ? await autorizacao(user) : null;
+  // Not on the list: the access request this account sent the team, if any.
+  const pedido = user && !situacao?.liberado ? await pedidoDaConta(user.id) : null;
+  const telefoneBonito = (telefone: string) => telefone.slice(2).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
   const nome = ((user?.user_metadata.full_name ?? user?.user_metadata.name ?? "") as string).split(" ")[0];
 
   return <main className="feltro fixed inset-0 z-[1000] overflow-y-auto text-[var(--creme)]">
@@ -43,9 +46,21 @@ export default async function PreVenda() {
           <p className="display text-3xl">Você está na lista{nome ? `, ${nome}` : ""}.</p>
           <p className="sans mt-2 text-[14px] text-[var(--muted)]">Sua conta está liberada. Em outro celular ou computador, é só entrar com ela de novo.</p>
           <AbrirCadeado />
+        </> : pedido?.status === "pendente" ? <>
+          <p className="display text-3xl">Pedido enviado.</p>
+          <p className="sans mt-2 text-[14px] text-[var(--muted)]">A equipe Meranno vai conferir {pedido.telefone ? <>o WhatsApp <strong className="text-[var(--ink)]">{telefoneBonito(pedido.telefone)}</strong> no grupo</> : "seu cadastro"} e liberar a sua conta. Quando liberar, esta página abre o cadeado. Se fechar, é só abrir o mesmo link de novo.</p>
+          <Aguardando />
+          <details className="sans mt-5 text-[13px] text-[var(--muted)]">
+            <summary className="cursor-pointer underline underline-offset-4">Digitei o número errado</summary>
+            <FormTelefone rotulo="Enviar de novo" />
+          </details>
+        </> : pedido?.status === "recusado" ? <>
+          <p className="display text-3xl">Acesso não liberado.</p>
+          <p className="sans mt-2 text-[14px] text-[var(--muted)]">A equipe não liberou a conta <strong className="text-[var(--ink)]">{user.email}</strong>. Se acha que é engano, fale com quem te mandou o link.</p>
+          <div className="sans mt-5 flex justify-center text-[13px] text-[var(--muted)]"><SignOutButton className="underline underline-offset-4 hover:text-[var(--ink)]" /><span className="ml-1">e entrar com outra conta</span></div>
         </> : <>
           <p className="display text-3xl">Quase lá.</p>
-          <p className="sans mt-2 text-[14px] text-[var(--muted)]">O e-mail <strong className="text-[var(--ink)]">{user.email}</strong> não está na lista. Se o seu WhatsApp está no grupo, digite o número para liberar esta conta.</p>
+          <p className="sans mt-2 text-[14px] text-[var(--muted)]">O e-mail <strong className="text-[var(--ink)]">{user.email}</strong> não está na lista. Digite o WhatsApp que você usa no grupo: se ele estiver na lista, libera na hora; se não, o pedido vai para a equipe liberar.</p>
           <FormTelefone />
           <div className="sans mt-5 flex justify-center text-[13px] text-[var(--muted)]"><SignOutButton className="underline underline-offset-4 hover:text-[var(--ink)]" /><span className="ml-1">e entrar com outra conta</span></div>
         </>}

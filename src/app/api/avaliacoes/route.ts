@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getProduct } from "@/lib/products";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
-import { createPublicClient } from "@/lib/supabase/publico";
+import { createSecretClient } from "@/lib/supabase/publico";
 
 // Reviews: anyone can send one; it shows up only after the team approves it in Supabase (status "aprovada").
+// The table is closed to the publishable key: this route reads and writes it on the server, after its own checks.
 const isRateLimited = createRateLimiter(5);
 
 const novaSchema = z.object({
@@ -18,9 +19,9 @@ const novaSchema = z.object({
 export async function GET(request: Request) {
   const produto = new URL(request.url).searchParams.get("produto") ?? "";
   if (!getProduct(produto)) return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
-  const supabase = createPublicClient();
+  const supabase = createSecretClient();
   if (!supabase) return NextResponse.json({ avaliacoes: [] });
-  const { data, error } = await supabase.from("avaliacoes").select("id, criada_em, nome, nota, texto").eq("produto_id", produto).order("criada_em", { ascending: false }).limit(50);
+  const { data, error } = await supabase.from("avaliacoes").select("id, criada_em, nome, nota, texto").eq("produto_id", produto).eq("status", "aprovada").order("criada_em", { ascending: false }).limit(50);
   if (error) {
     console.error("avaliacoes select failed:", error.message);
     return NextResponse.json({ avaliacoes: [] });
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
   }
   const parsed = novaSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message || "Dados inválidos." }, { status: 400 });
-  const supabase = createPublicClient();
+  const supabase = createSecretClient();
   if (!supabase) return NextResponse.json({ error: "Supabase não configurado no servidor." }, { status: 500 });
   const { produto, nome, nota, texto, pedido } = parsed.data;
   const { error } = await supabase.rpc("enviar_avaliacao", { p_produto: produto, p_nome: nome, p_nota: nota, p_texto: texto, p_pedido: pedido ?? "" });

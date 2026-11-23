@@ -71,7 +71,7 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
       setMissing((count) => count + 1);
       return false;
     }
-    addItem({ id: `${product.id}-${size}-${color}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Ampla", color, image: product.image });
+    addItem({ id: `${product.id}-${size}-${color}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Regular", color, image: product.image });
     return true;
   }
 

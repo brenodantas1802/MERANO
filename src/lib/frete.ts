@@ -6,8 +6,10 @@
 
 export type OpcaoFrete = { id: number; nome: string; empresa: string; preco: number; prazoMin: number; prazoMax: number };
 
-// One folded tee in its envelope. To confirm with the owners after weighing a real parcel.
-export const PACOTE_CAMISETA = { weight: 0.3, height: 4, width: 25, length: 30 };
+// One folded tee in its box, in kg and cm. The Remix regular tee (180 g/m²) weighs about 160 g in M; with the box,
+// tissue and tag the parcel is about 0.3 kg. The box size is a guess: replace it with the real one once measured
+// (the carrier charges by the real weight or by the box volume, whichever is higher).
+export const PACOTE_CAMISETA = { weight: 0.3, height: 5, width: 20, length: 28 };
 
 // PAC, SEDEX and Mini Envios. Jadlog (3) and Loggi only show up when one of their drop-off points is near the origin.
 const SERVICOS = "1,2,17,3";

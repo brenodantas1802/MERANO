@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 
-// "Pagar agora": asks the server for a fresh Mercado Pago link for this order and goes there.
+// "Pagar agora": asks the server for a fresh payment link for this order and goes there.
 export function PagarAgora({ id }: { id: string }) {
   const [abrindo, setAbrindo] = useState(false);
   const [erro, setErro] = useState("");

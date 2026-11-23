@@ -3,11 +3,11 @@ import type { Pedido } from "@/lib/pedidos";
 // Mercado Pago Checkout Pro: the customer pays on Mercado Pago's own page (Pix or card), so card data never touches
 // this site. Docs: https://www.mercadopago.com.br/developers/pt/docs/checkout-pro
 //   MERCADOPAGO_ACCESS_TOKEN   Production access token (Suas integrações → Credenciais de produção). Server only.
-// Without it the payment page sends the order through WhatsApp instead.
+// Used only while Asaas isn't connected (see lib/pagamento). Without either, orders go through WhatsApp.
 
 const API = "https://api.mercadopago.com";
 
-export const pagamentoOnline = () => Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN);
+export const mercadoPagoConfigurado = () => Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN);
 
 const cabecalhos = (extra: Record<string, string> = {}) => ({ Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`, "Content-Type": "application/json", ...extra });
 

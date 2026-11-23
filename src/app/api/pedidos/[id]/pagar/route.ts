@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
 import { createSecretClient } from "@/lib/supabase/publico";
-import { criarPreferencia, pagamentoOnline } from "@/lib/mercado-pago";
+import { abrirPagamento, pagamentoOnline } from "@/lib/pagamento";
 import type { Pedido } from "@/lib/pedidos";
 import { origemDe } from "@/lib/origem";
 
-// "Pagar agora" on an order's page: a fresh Mercado Pago link for an order still waiting for payment.
+// "Pagar agora" on an order's page: a fresh payment link for an order still waiting for payment.
 const isRateLimited = createRateLimiter(10);
 
 export async function POST(request: Request, ctx: RouteContext<"/api/pedidos/[id]/pagar">) {
@@ -19,11 +19,11 @@ export async function POST(request: Request, ctx: RouteContext<"/api/pedidos/[id
   // Older than two days: the prices may have changed, so the customer starts again from the cart.
   if (Date.now() - new Date(pedido.criado_em).getTime() > 2 * 86400_000) return NextResponse.json({ error: "Esse pedido expirou. Monte o carrinho de novo." }, { status: 410 });
   try {
-    const { link, preferencia } = await criarPreferencia(pedido, origemDe(request));
-    await admin.from("pedidos").update({ pagamento: { ...pedido.pagamento, preferencia, link } }).eq("id", id);
+    const { link, registro } = await abrirPagamento(pedido, origemDe(request));
+    await admin.from("pedidos").update({ pagamento: registro }).eq("id", id);
     return NextResponse.json({ pagar: link });
   } catch (error) {
-    console.error("Mercado Pago preference failed:", error instanceof Error ? error.message : error);
+    console.error("Payment link failed:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "O pagamento não abriu agora. Tente de novo em instantes." }, { status: 502 });
   }
 }

@@ -41,12 +41,40 @@ export function getCollection(id: string) {
   return collections.find((collection) => collection.id === id);
 }
 
+// Flat measurements of the garment, in cm: `largura` is the chest (tórax, half the circumference), `barra` the hem
+// width, `comprimento` the length, `ombro` seam to seam (left out when the supplier doesn't publish it).
+export type SizeRow = { size: string; largura: number; comprimento: number; barra?: number; ombro?: number };
+
+// The blank the collection is printed on: Remix On Demand's "Camiseta Algodão Unissex", the regular cut (owners,
+// 2026-11-22: no more oversized). From remixondemand.com/catalogo, read on 2026-11-22; their chart has a 2 cm
+// tolerance and doesn't give the shoulders.
+export const REMIX_REGULAR: SizeRow[] = [
+  { size: "P", largura: 50, barra: 51, comprimento: 70 },
+  { size: "M", largura: 53, barra: 54, comprimento: 73 },
+  { size: "G", largura: 56, barra: 57, comprimento: 76 },
+  { size: "GG", largura: 59, barra: 60, comprimento: 79 },
+  { size: "XXG", largura: 62, barra: 63, comprimento: 82 },
+];
+// What the shop sells (owners, 2026-11-22): P, M and G only. The chart, the Meranno Fit and the try-on show just these.
+export const TAMANHOS_LOJA = ["P", "M", "G"] as const;
+export const SIZE_CHART: SizeRow[] = REMIX_REGULAR.filter((row) => (TAMANHOS_LOJA as readonly string[]).includes(row.size));
+export const TOLERANCIA_CM = 2;
+
+// Composition of the Remix regular blank.
+export const MATERIAL = "Camiseta regular unissex, 100% algodão penteado, malha de 180 g/m²";
+
+// Prices (owners, 2026-11-22): the tee costs R$ 180; in the pre-sale it sells for R$ 160.
+// While the pre-sale runs the tees show R$ 180 crossed out and sell for R$ 160; after it, drop `salePrice`.
+export const PRECO_LANCAMENTO = 180;
+export const PRECO_PRE_VENDA = 160;
+
 export const products: Product[] = [
   {
     id: "coracao-preto",
     name: "Coração · Preto",
     description: "Um coração vermelho em aquarela, rabiscado com anotações à mão nas costas, e a assinatura Meranno discreta no peito.",
-    price: 189,
+    price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Coração",
     image: "/imagens/merano-assets/produtos/coracao-preto-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/coracao-preto-verso.jpg", "/imagens/merano-assets/produtos/coracao-preto-frente.jpg"],
@@ -54,11 +82,11 @@ export const products: Product[] = [
     tags: ["coracao", "aquarela", "manuscrito", "preto"],
     category: "Camisetas",
     collection: "colecao-01",
-    material: "100% algodão de toque macio",
+    material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
     delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
-    fits: ["PP", "P", "M", "G", "GG"],
+    fits: [...TAMANHOS_LOJA],
     lancamento: true,
     colors: ["Preto"],
   },
@@ -66,7 +94,8 @@ export const products: Product[] = [
     id: "coracao-branco",
     name: "Coração · Branco",
     description: "O mesmo coração em aquarela, com as anotações em preto sobre a malha branca, e a assinatura Meranno no peito.",
-    price: 189,
+    price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Coração",
     image: "/imagens/merano-assets/produtos/coracao-branco-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/coracao-branco-verso.jpg", "/imagens/merano-assets/produtos/coracao-branco-frente.jpg"],
@@ -74,11 +103,11 @@ export const products: Product[] = [
     tags: ["coracao", "aquarela", "manuscrito", "branco"],
     category: "Camisetas",
     collection: "colecao-01",
-    material: "100% algodão de toque macio",
+    material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
     delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
-    fits: ["PP", "P", "M", "G", "GG"],
+    fits: [...TAMANHOS_LOJA],
     lancamento: true,
     colors: ["Branco"],
   },
@@ -86,7 +115,8 @@ export const products: Product[] = [
     id: "va-tutto-bene",
     name: "Va tutto bene",
     description: "Um terraço com limoeiros sobre o mar, numa tarde sem pressa. Va tutto bene, un passo alla volta: tudo bem, um passo de cada vez.",
-    price: 189,
+    price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Va tutto bene",
     image: "/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg", "/imagens/merano-assets/produtos/va-tutto-bene-frente.jpg"],
@@ -94,11 +124,11 @@ export const products: Product[] = [
     tags: ["mar", "limao", "verao", "italia", "branco"],
     category: "Camisetas",
     collection: "colecao-01",
-    material: "100% algodão de toque macio",
+    material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
     delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
-    fits: ["PP", "P", "M", "G", "GG"],
+    fits: [...TAMANHOS_LOJA],
     lancamento: true,
     colors: ["Branco"],
   },
@@ -106,7 +136,8 @@ export const products: Product[] = [
     id: "verao-em-boa-companhia",
     name: "Verão em boa companhia",
     description: "Laranjeira em flor, sol e boa comida — lugares simples, dias inesquecíveis.",
-    price: 189,
+    price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Verão em Boa Companhia",
     image: "/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg"],
@@ -114,11 +145,11 @@ export const products: Product[] = [
     category: "Camisetas",
     tags: ["fruta", "botanico", "verao", "natureza"],
     collection: "colecao-01",
-    material: "100% algodão de toque macio",
+    material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
     delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
-    fits: ["PP", "P", "M", "G", "GG"],
+    fits: [...TAMANHOS_LOJA],
     lancamento: true,
     colors: ["Azul marinho"],
   },
@@ -126,7 +157,8 @@ export const products: Product[] = [
     id: "wine-not",
     name: "Wine not?",
     description: "Uma garrafa aberta e a melhor resposta para qualquer convite — por que não?",
-    price: 189,
+    price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Wine Not?",
     image: "/imagens/merano-assets/produtos/wine-not-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/wine-not-verso.jpg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg"],
@@ -134,11 +166,11 @@ export const products: Product[] = [
     category: "Camisetas",
     tags: ["frase", "vinho", "pintado-a-mao", "preto"],
     collection: "colecao-01",
-    material: "100% algodão de toque macio",
+    material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
     delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
     stock: 10,
-    fits: ["PP", "P", "M", "G", "GG"],
+    fits: [...TAMANHOS_LOJA],
     lancamento: true,
     colors: ["Preto"],
   },
@@ -154,7 +186,7 @@ export const provadorOnly: Product[] = [
     id: "why-not-you",
     name: "Why Not You? · Branco",
     description: "WHY NOT YOU? em preto, grande e inclinado, no alto das costas, e a assinatura Meranno pequena no peito.",
-    price: 189,
+    price: PRECO_LANCAMENTO,
     note: "Prévia · só no provador",
     image: "/imagens/merano-assets/produtos/why-not-you-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/why-not-you-verso.jpg", "/imagens/merano-assets/produtos/why-not-you-frente.jpg"],
@@ -167,11 +199,11 @@ export const provadorOnly: Product[] = [
     tags: ["frase", "tipografia", "branco"],
     category: "Camisetas",
     collection: "colecao-01",
-    material: "100% algodão de toque macio",
+    material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
     delivery: "Em breve.",
     stock: 0,
-    fits: ["PP", "P", "M", "G", "GG"],
+    fits: [...TAMANHOS_LOJA],
     colors: ["Branco"],
   },
 ];
@@ -188,16 +220,6 @@ export function currentImage(item: { id?: string; productId?: string; image?: st
     || products.filter((candidate) => id === candidate.id || id.startsWith(`${candidate.id}-`)).sort((a, b) => b.id.length - a.id.length)[0];
   return product ? product.image : item.image;
 }
-
-export type SizeRow = { size: string; largura: number; comprimento: number; ombro: number };
-
-export const SIZE_CHART: SizeRow[] = [
-  { size: "PP", largura: 52, comprimento: 68, ombro: 46 },
-  { size: "P", largura: 55, comprimento: 70, ombro: 48 },
-  { size: "M", largura: 58, comprimento: 72, ombro: 50 },
-  { size: "G", largura: 61, comprimento: 74, ombro: 52 },
-  { size: "GG", largura: 64, comprimento: 76, ombro: 54 },
-];
 
 export function formatPrice(price: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);

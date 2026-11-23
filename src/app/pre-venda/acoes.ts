@@ -1,11 +1,12 @@
 "use server";
 
+import { refresh } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { COOKIE_ACESSO, COOKIE_ENTRADA, assinarAcesso, opcoesCookieAcesso, opcoesCookieEntrada, preVendaAtiva } from "@/lib/pre-venda";
-import { autorizacao, liberarPorTelefone } from "@/lib/pre-venda-lista";
+import { autorizacao, liberarPorTelefone, marcarEntrada } from "@/lib/pre-venda-lista";
 
-export type Resultado = { ok: true } | { ok: false; erro: string } | null;
+export type Resultado = { ok: true } | { ok: false; erro: string } | { ok: false; pendente: true } | null;
 
 // Gives this browser the signed access cookie and the one-shot cookie for the padlock animation. The page then
 // does a full load of "/" so the animation plays (a soft navigation would skip it).
@@ -14,6 +15,7 @@ async function darAcesso(usuarioId: string) {
   const jar = await cookies();
   jar.set(COOKIE_ACESSO, await assinarAcesso(usuarioId), opcoesCookieAcesso(secure));
   jar.set(COOKIE_ENTRADA, "1", opcoesCookieEntrada(secure));
+  await marcarEntrada(usuarioId);
 }
 
 async function usuario() {
@@ -31,12 +33,17 @@ export async function abrirCadeado(): Promise<Resultado> {
   return { ok: true };
 }
 
-// The account's e-mail isn't on the list: the WhatsApp number from the group can be.
+// The account's e-mail isn't on the list: the WhatsApp number from the group can be. A number that isn't on the
+// list either becomes an access request for the team; the page then shows it waiting.
 export async function entrarComTelefone(_anterior: Resultado, form: FormData): Promise<Resultado> {
   if (!preVendaAtiva()) return { ok: true };
   const user = await usuario();
   if (!user) return { ok: false, erro: "Entre na sua conta primeiro." };
   const resultado = await liberarPorTelefone(user, String(form.get("telefone") ?? ""));
+  if ("pendente" in resultado) {
+    refresh();
+    return resultado;
+  }
   if (!resultado.ok) return resultado;
   await darAcesso(user.id);
   return { ok: true };

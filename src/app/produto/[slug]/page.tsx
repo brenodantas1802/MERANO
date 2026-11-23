@@ -2,8 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { getCollection, getProduct, getSizeChart, products, formatPrice, getProductPrice, similarProducts, type Product } from "@/lib/products";
+import { getCollection, getProduct, getSizeChart, products, formatPrice, getProductPrice, similarProducts, TOLERANCIA_CM, type Product } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
+import { ENTREGA_PRE_VENDA } from "@/lib/pedidos";
 import { ProductGallery3D } from "@/components/product-gallery-3d";
 import { ProductBuy, type Colorway } from "@/components/product-buy";
 import { RelatedRow } from "@/components/related-row";
@@ -53,7 +54,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="[grid-area:details] md:mt-6 md:border-t-0">
         <Detail title="Detalhes do produto">
           <p>{product.description}</p>
-          <p className="mt-2">Modelagem ampla, de {product.fits[0]} a {product.fits[product.fits.length - 1]}.</p>
+          <p className="mt-2">Modelagem regular, de corte clássico, de {product.fits[0]} a {product.fits[product.fits.length - 1]}. Escolha o tamanho que você costuma usar.</p>
+          <p className="mt-2">Pré-venda: entrega prevista para {ENTREGA_PRE_VENDA.longa}.</p>
         </Detail>
         <Detail title="Composição e cuidados">
           <p>{product.material}.</p>
@@ -61,10 +63,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </Detail>
         <Detail title="Tabela de medidas">
           <table className="w-full text-left">
-            <thead className="text-[var(--muted)]"><tr><th className="py-1 font-normal">Tam.</th><th className="font-normal">Busto</th><th className="font-normal">Compr.</th><th className="font-normal">Ombro</th></tr></thead>
-            <tbody>{chart.map((row) => <tr key={row.size} className="border-t border-[var(--ink)]/10"><td className="py-1.5 font-medium text-[var(--ink)]">{row.size}</td><td>{row.largura}</td><td>{row.comprimento}</td><td>{row.ombro}</td></tr>)}</tbody>
+            <thead className="text-[var(--muted)]"><tr><th className="py-1 font-normal">Tam.</th><th className="font-normal">Tórax</th><th className="font-normal">Barra</th><th className="font-normal">Compr.</th></tr></thead>
+            <tbody>{chart.map((row) => <tr key={row.size} className="border-t border-[var(--ink)]/10"><td className="py-1.5 font-medium text-[var(--ink)]">{row.size}</td><td>{row.largura}</td><td>{row.barra ?? row.largura}</td><td>{String(row.comprimento).replace(".", ",")}</td></tr>)}</tbody>
           </table>
-          <p className="mt-3">Medidas da peça em cm, deitada. <Link href="/meu-fit" className="underline underline-offset-4 hover:text-[var(--ink)]">Descubra seu tamanho</Link></p>
+          <p className="mt-3">Medidas da peça em cm, deitada, com tolerância de {TOLERANCIA_CM} cm. <Link href="/meu-fit" className="underline underline-offset-4 hover:text-[var(--ink)]">Descubra seu tamanho</Link></p>
         </Detail>
       </div>
 

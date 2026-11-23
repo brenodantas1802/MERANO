@@ -14,8 +14,9 @@ import { formatPrice, products, currentImage } from "@/lib/products";
 import { Illustration } from "@/components/illustration";
 import { CEP_KEY, prazoTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
 
-// Payment page. The order is created on the server (/api/pedidos), which prices everything again. With Mercado Pago
-// connected the customer pays on Mercado Pago's page; until then the order goes out as a WhatsApp message.
+// Payment page. The order is created on the server (/api/pedidos), which prices everything again. With online payment
+// connected (Asaas, or Mercado Pago) the customer pays on the provider's page; until then the order goes out as a
+// WhatsApp message.
 
 type Method = "pix" | "cartao";
 type Cupom = { codigo: string; percentual: number };
@@ -114,7 +115,7 @@ function Summary({ items, subtotal, shipping, cupom, descontoCupom, descontoPix,
 
 type Feito = { id: string; numero: string; total: number; whatsapp: string };
 
-export function Pagamento({ online }: { online: boolean }) {
+export function Pagamento({ online, provedor, entrega }: { online: boolean; provedor: string; entrega: string }) {
   const { items, total: subtotal, count, clear } = useCart();
   const router = useRouter();
   const [cep, setCep] = useState(() => lerLocal(CEP_KEY));
@@ -236,6 +237,7 @@ export function Pagamento({ online }: { online: boolean }) {
 
         <section>
           <h2 className={titulo}><span className={numero}>02 /</span>Entrega</h2>
+          <p className="-mt-2 mb-5 max-w-xl text-[var(--muted)]">Pré-venda: entrega prevista para <b className="font-medium text-[var(--ink)]">{entrega}</b>.</p>
           <div className="grid gap-4 md:grid-cols-[180px_1fr]">
             <label className={label}>CEP<input required inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} placeholder="00000-000" className={field} /></label>
             <label className={label}>Rua<input required autoComplete="address-line1" value={address.street} onChange={(event) => setAddress({ ...address, street: event.target.value })} className={field} /></label>
@@ -266,7 +268,7 @@ export function Pagamento({ online }: { online: boolean }) {
             {([["pix", "Pix", "5% de desconto", QrCode], ["cartao", "Cartão de crédito", "até 3x sem juros", CreditCard]] as const).map(([id, name, hint, Icon]) => <button key={id} type="button" role="radio" aria-checked={method === id} onClick={() => setMethod(id)} className={`press flex min-h-16 items-center gap-3 rounded-[18px] border px-4 py-4 text-left transition-colors ${method === id ? "border-[var(--vinho)] bg-[var(--vinho)] text-[var(--creme)]" : "border-[var(--line)] bg-white/40 hover:border-[var(--vinho)]/50"}`}><Icon size={20} strokeWidth={1.5} /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{name}</span><span className={`text-sm ${method === id ? "text-[var(--creme)]/70" : "text-[var(--muted)]"}`}>{hint}</span></span></button>)}
           </div>
           <p className="mt-5 max-w-xl text-[var(--muted)]">{online
-            ? method === "pix" ? "Você paga no ambiente seguro do Mercado Pago, com o QR Code ou o Pix copia e cola. A confirmação chega na hora." : "Você paga no ambiente seguro do Mercado Pago, em até 3x sem juros. Os dados do cartão não passam pelo site da Meranno."
+            ? method === "pix" ? `Você paga no ambiente seguro do ${provedor}, com o QR Code ou o Pix copia e cola. A confirmação chega na hora.` : `Você paga no ambiente seguro do ${provedor}, em até 3x sem juros. Os dados do cartão não passam pelo site da Meranno.`
             : `O pedido vai para o nosso WhatsApp já escrito, e a equipe manda ${method === "pix" ? "o Pix" : "o link do cartão"} para você pagar.`}</p>
         </section>
 
@@ -275,7 +277,7 @@ export function Pagamento({ online }: { online: boolean }) {
           <span className="text-[12px]">{botao}<span className="ml-2 tabular-nums text-[var(--latao)]">{formatPrice(total)}</span></span>
           {status !== "form" ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--creme)] border-t-transparent" /> : <ArrowRight size={18} />}
         </button>
-        <p className="sans -mt-6 text-center text-[11px] uppercase tracking-[.12em] text-[var(--muted)]">{online ? "Pagamento processado pelo Mercado Pago" : "Sem cobrança automática: o pagamento é combinado no WhatsApp"}</p>
+        <p className="sans -mt-6 text-center text-[11px] uppercase tracking-[.12em] text-[var(--muted)]">{online ? `Pagamento processado pelo ${provedor}` : "Sem cobrança automática: o pagamento é combinado no WhatsApp"}</p>
       </div>
 
       <Summary items={items} subtotal={subtotal} shipping={shipping} cupom={cupom} descontoCupom={descontoCupom} descontoPix={descontoPix} total={total} email={email} onCupom={setCupom} />
