@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Product } from "@/lib/products";
@@ -19,17 +19,16 @@ export function SeasonShirt({ products }: { products: Product[] }) {
   const [index, setIndex] = useState(0);
   const story = stories[index];
   const product = products.find((item) => item.id === story.id)!;
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  // A slow quarter-breath of rotation tied to the scroll; the shirt never travels.
-  const scrollTurn = useTransform(scrollYProgress, [0, 1], [-9, 9]);
+  // The shirt stays still (owners, 2026-11-22): no floating, no turning with the scroll; it only leans toward the mouse.
   const go = (step: number) => setIndex((current) => (current + step + stories.length) % stories.length);
 
-  // On larger screens, warm the other shirts' images a moment after load so switching is instant.
+  // Warm the other shirts' images (the size this screen will use) a moment after load, on every device, so the flip to
+  // the next shirt never waits for a download or a decode (that was the stutter).
   useEffect(() => {
-    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    const grande = window.matchMedia("(min-width: 768px)").matches && window.devicePixelRatio > 1;
     // decode() prepares each image off the main thread, so switching doesn't stall on decoding.
-    const warm = () => stories.slice(1).forEach((item) => { const image = new Image(); image.src = `${item.cutout.src}-${item.cutout.small}.webp`; image.decode().catch(() => undefined); });
-    const timer = window.setTimeout(warm, 2500);
+    const warm = () => stories.slice(1).forEach((item) => { const image = new Image(); image.src = `${item.cutout.src}-${grande ? item.cutout.large : item.cutout.small}.webp`; image.decode().catch(() => undefined); });
+    const timer = window.setTimeout(warm, 1500);
     return () => window.clearTimeout(timer);
   }, [stories]);
 
@@ -39,7 +38,7 @@ export function SeasonShirt({ products }: { products: Product[] }) {
   return (
     <section ref={ref} className="season-wash relative grid grid-cols-[minmax(0,1fr)] md:grid-cols-[1.1fr_.9fr]">
       <div className="px-6 pb-4 pt-16 md:sticky md:top-[var(--header-h,72px)] md:h-[calc(100svh-var(--header-h,72px))] md:self-start md:p-10">
-        <ShirtStage story={story} turn={scrollTurn} sheen={scrollYProgress} priority sizes="(min-width: 768px) 600px, 88vw" alt={`Camiseta ${product.name}, verso`} className="w-[min(88vw,30rem)] md:w-[min(44vw,46rem,calc((100svh-var(--header-h,72px)-7rem)*.9))]" />
+        <ShirtStage story={story} priority sizes="(min-width: 768px) 600px, 88vw" alt={`Camiseta ${product.name}, verso`} className="w-[min(88vw,30rem)] md:w-[min(44vw,46rem,calc((100svh-var(--header-h,72px)-7rem)*.9))]" />
       </div>
 
       <div className="px-6 pb-20 md:px-0 md:pb-[14svh] md:pr-20">
@@ -54,11 +53,11 @@ export function SeasonShirt({ products }: { products: Product[] }) {
           <div className="mt-10">
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--latao)]/60 bg-[var(--paper)] transition-colors hover:border-[var(--latao)] hover:bg-[var(--latao)] hover:text-[var(--vinho)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
-              <div className="flex min-w-0 gap-2 overflow-x-auto py-1 [scrollbar-width:none]">
+              <div className="flex min-w-0 gap-2 overflow-x-auto p-2 [scrollbar-width:none]">
                 {stories.map((item, itemIndex) => {
                   const itemProduct = products.find((candidate) => candidate.id === item.id)!;
                   const active = itemIndex === index;
-                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 rounded-full bg-white/70 p-1.5 transition-all duration-300 ${active ? "scale-105 ring-2 ring-[var(--latao)] ring-offset-2 ring-offset-[var(--paper)]" : "opacity-70 hover:opacity-100"}`}>
+                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[#EFE9DF] p-1 transition-[opacity,box-shadow] duration-300 ${active ? "ring-2 ring-[var(--latao)] ring-offset-2 ring-offset-[var(--paper)]" : "opacity-70 hover:opacity-100"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element -- 200px thumbnails made for this row */}
                     <img src={thumbOf(item)} alt="" width={200} height={200} loading="lazy" className="h-full w-full object-contain" />
                   </button>;

@@ -6,8 +6,8 @@ import type { ShirtStory } from "@/lib/shirt-stories";
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
-// A cut-out shirt floating in 3D: it leans toward the pointer, breathes with `turn` (degrees, usually tied to scroll),
-// and when `story` changes the current shirt turns edge-on and the next one turns in.
+// A cut-out shirt in 3D: still, it leans toward the mouse, and when `story` changes the current shirt turns edge-on and
+// the next one turns in. `turn` and `sheen` (scroll-tied motion) are optional and no longer used on the home.
 export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, priority = false }: { story: ShirtStory; alt: string; sizes: string; className?: string; turn?: MotionValue<number>; sheen?: MotionValue<number>; priority?: boolean }) {
   const reduce = useReducedMotion() ?? false;
   const still = useMotionValue(0);
@@ -15,7 +15,7 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
   const tiltY = useSpring(useMotionValue(0), { stiffness: 110, damping: 18 });
   const scrollTurn = turn ?? still;
   const rotateY = useTransform(() => (reduce ? 0 : scrollTurn.get()) + tiltY.get());
-  const sheenX = useTransform(() => `${(sheen?.get() ?? 0.5) * 120 - 60 + tiltY.get() * 2}%`);
+  const sheenX = useTransform(() => `${(sheen?.get() ?? 0.5) * 120 - 60 + tiltY.get() * 4}%`);
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (reduce || event.pointerType !== "mouse") return;
@@ -28,8 +28,7 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
 
   return (
     <div onPointerMove={onPointerMove} onPointerLeave={onPointerLeave} className="flex h-full w-full items-center justify-center [perspective:1600px]">
-      {/* The slow float is a CSS animation on its own layer, so it runs on the GPU without repainting the shirt. */}
-      <div className={`float-slow relative ${className}`}>
+      <div className={`relative ${className}`}>
         {/* The shadow is the shirt's own outline, blurred once and kept flat under the turning shirt. As a filter inside the
             3D layer it came out square on iPhones and was redrawn on every scroll frame. */}
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 translate-y-[45px] opacity-[.28] blur-[20px]" style={{ aspectRatio: `1 / ${ratio}` }}>

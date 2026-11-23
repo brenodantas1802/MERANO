@@ -108,10 +108,6 @@ body {
 .btn-dive:hover:not(:disabled), .btn-dive:focus-visible { background-position: 0 100%; }
 @media (prefers-reduced-motion: reduce) { .btn-dive { transition: none; } }
 
-/* Slow float for the showcase shirt, composited on the GPU. */
-.float-slow { animation: float-slow 7s ease-in-out infinite; will-change: transform; }
-@keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-@media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }
 
 
 /* Storefront motion and glass, after the Ermos benchmark: short, consistent timings and frosted floating panels. */

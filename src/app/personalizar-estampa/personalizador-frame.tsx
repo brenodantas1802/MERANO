@@ -80,7 +80,7 @@ export function PersonalizadorFrame() {
     </div>
     <div className="order-1 mx-auto w-[min(70vw,22rem)] overflow-hidden rounded-[28px] bg-[#0c0909] md:order-2 md:w-[min(34vw,26rem)]">
       {/* eslint-disable-next-line @next/next/no-img-element -- small pre-sized image, the plain tee waiting for a print */}
-      <img src="/imagens/personalizador-banner.webp" alt="Camiseta regular Meranno, lisa, vista de costas" width={600} height={800} className="h-auto w-full" />
+      <img src="/imagens/personalizador-banner.webp" alt="Camiseta regular Meranno com a estampa Match Point nas costas" width={600} height={800} className="h-auto w-full" />
     </div>
   </section>;
 

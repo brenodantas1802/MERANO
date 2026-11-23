@@ -174,33 +174,6 @@ export const products: Product[] = [
     lancamento: true,
     colors: ["Preto"],
   },
-  // On sale since 2026-11-22 (owners' meeting): it was a try-on preview before.
-  {
-    id: "why-not-you",
-    name: "Why Not You? · Branco",
-    description: "WHY NOT YOU? em preto, grande e inclinado, no alto das costas, e a assinatura Meranno pequena no peito.",
-    price: PRECO_LANCAMENTO,
-    salePrice: PRECO_PRE_VENDA,
-    note: "Estampa Why Not You?",
-    image: "/imagens/merano-assets/produtos/why-not-you-verso.jpg",
-    gallery: ["/imagens/merano-assets/produtos/why-not-you-verso.jpg", "/imagens/merano-assets/produtos/why-not-you-frente.jpg"],
-    views: { back: "/imagens/merano-assets/produtos/why-not-you-verso.jpg", front: "/imagens/merano-assets/produtos/why-not-you-frente.jpg" },
-    // Measured on the photos: the back lettering is ~85% of the torso width, right under the collar.
-    printScale: {
-      back: "A frase WHY NOT YOU? é GRANDE: ocupa cerca de 85% da largura das costas (quase de uma costura do ombro à outra) e fica no alto das costas, logo abaixo da gola, entre 18% e 25% do comprimento da camiseta. A altura das letras é cerca de 1/9 da largura do tronco. NÃO reduza a frase: mantenha exatamente essa largura e essa altura em relação ao corpo da pessoa.",
-      front: "No peito, só a escrita Meranno pequena, do lado esquerdo de quem veste, na altura do peito (cerca de 30% do comprimento da camiseta, a partir da gola), com cerca de 18% da largura do tronco. Não aumente nem acrescente nada.",
-    },
-    tags: ["frase", "tipografia", "branco"],
-    category: "Camisetas",
-    collection: "colecao-01",
-    material: MATERIAL,
-    care: "Lavar do avesso em água fria. Secar à sombra.",
-    delivery: "Envio para todo o Brasil, com prazo e valor calculados pelo CEP.",
-    stock: 10,
-    fits: [...TAMANHOS_LOJA],
-    lancamento: true,
-    colors: ["Branco"],
-  },
 ];
 
 export function getProduct(id: string) {
@@ -208,7 +181,7 @@ export function getProduct(id: string) {
 }
 
 // Pieces shown only in the try-on (not for sale yet): kept out of `products`, so the shop, search and cart never see them.
-// Empty since 2026-11-22: Why Not You? went on sale.
+// Empty: Why Not You? was taken off the site on 2026-11-22 (a one-off piece for an influencer, not for sale).
 export const provadorOnly: Product[] = [];
 export const provadorProducts: Product[] = [...provadorOnly, ...products];
 export function getProvadorProduct(id: string) {

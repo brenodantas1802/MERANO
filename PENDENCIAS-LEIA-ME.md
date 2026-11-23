@@ -48,7 +48,7 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 - **Capa nova**: só o vídeo do crupiê dando cartas (escurecido, sem som), os dois botões embaixo e a logo branca no topo. Vídeo em `public/imagens/capa/` (890 KB no computador, 450 KB no celular).
 - **Logo nova** (o M com a taça) no topo, no menu e no rodapé, vetorizada a partir da arte de vocês: branca sobre a capa, na cor do texto no resto.
 - **Modo escuro** (preto e bordô) como principal, com botão para o claro (lua/sol no topo do computador; no menu do celular). A escolha fica salva no aparelho.
-- **Vitrine**: Why Not You?, Verão em boa companhia (no meio), Va tutto bene e Wine not?. A Why Not You? passou a ser vendida. A Coração · Preto saiu da vitrine e segue no carrossel 3D e na loja.
+- **Vitrine**: Wine not?, Verão em boa companhia (no meio) e Va tutto bene; os Corações ficam no carrossel 3D logo abaixo. A Why Not You? saiu do site inteiro (peça única para um influenciador, não vende).
 - **Carrossel 3D**: troca mais rápida (mesma animação) e a camiseta não corta mais em tela de notebook.
 - **Banner das 3 cartas** trocado por um banner limpo (camiseta regular sobre preto).
 - **Medidas no Meranno Fit**: camiseta regular de verdade com só os centímetros.
