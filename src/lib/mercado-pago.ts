@@ -11,8 +11,8 @@ export const mercadoPagoConfigurado = () => Boolean(process.env.MERCADOPAGO_ACCE
 
 const cabecalhos = (extra: Record<string, string> = {}) => ({ Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`, "Content-Type": "application/json", ...extra });
 
-// Creates the payment for an order and returns the link to Mercado Pago's page. Pix orders only offer Pix (they carry
-// the 5% discount); card orders offer credit card in up to 3 instalments.
+// Creates the payment for an order and returns the link to Mercado Pago's page. Pix orders only offer Pix; card orders
+// offer credit card in up to 3 instalments.
 export async function criarPreferencia(pedido: Pedido, origem: string) {
   const publico = !/localhost|127\.0\.0\.1/.test(origem);
   const volta = `${origem}/pedido/${pedido.id}`;

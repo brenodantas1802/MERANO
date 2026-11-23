@@ -63,7 +63,7 @@ async function dadosDoCliente(pedido: Pedido) {
 }
 
 // Creates the checkout for an order and returns the link to Asaas's page. The order is one line with its total (pieces,
-// shipping and discounts already worked out on the server). Pix orders only offer Pix (they carry the 5% discount);
+// shipping and discounts already worked out on the server). Pix orders only offer Pix;
 // card orders offer credit card, paid at once or in up to 3 instalments.
 export async function criarCheckout(pedido: Pedido, origem: string) {
   const volta = `${origem}/pedido/${pedido.id}`;

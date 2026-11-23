@@ -9,7 +9,8 @@ import type { StatusPedido } from "@/lib/pedido-status";
 // worked out here from the catalogue, the coupon table and a fresh shipping quote: nothing the browser sends about
 // prices is trusted.
 
-export const PIX_DESCONTO = 0.05;
+// No Pix discount (owners, 2026-11-22): Pix and card cost the same. Kept as a number so it can come back.
+export const PIX_DESCONTO = 0;
 
 // Pre-sale delivery date (owners, 2026-11-22). Shown on the product, the payment page and the order.
 export const ENTREGA_PRE_VENDA = { curta: "7/12", longa: "7 de dezembro" };

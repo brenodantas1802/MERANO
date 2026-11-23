@@ -20,7 +20,7 @@ import { CEP_KEY, prazoTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete"
 
 type Method = "pix" | "cartao";
 type Cupom = { codigo: string; percentual: number };
-const PIX_DISCOUNT = 0.05;
+const PIX_DISCOUNT = 0; // same as PIX_DESCONTO on the server
 const centavos = (valor: number) => Math.round(valor * 100) / 100;
 
 function lerLocal(chave: string) {
@@ -107,7 +107,7 @@ function Summary({ items, subtotal, shipping, cupom, descontoCupom, descontoPix,
       <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
       {descontoCupom > 0 && <div className="flex justify-between text-[var(--vinho)]"><span>Cupom {cupom?.codigo} ({cupom?.percentual}%)</span><span>− {formatPrice(descontoCupom)}</span></div>}
       <div className="flex justify-between"><span>Frete</span><span>{shipping ? formatPrice(shipping.preco) : "—"}</span></div>
-      {descontoPix > 0 && <div className="flex justify-between text-[var(--vinho)]"><span>Desconto Pix (5%)</span><span>− {formatPrice(descontoPix)}</span></div>}
+      {descontoPix > 0 && <div className="flex justify-between text-[var(--vinho)]"><span>Desconto Pix</span><span>− {formatPrice(descontoPix)}</span></div>}
     </div>
     <div className="mt-4 flex items-baseline justify-between border-t border-black/10 pt-4"><span className="text-lg">Total</span><span className="text-2xl font-semibold tabular-nums text-[var(--vinho)]">{formatPrice(total)}</span></div>
   </aside>;
@@ -265,7 +265,7 @@ export function Pagamento({ online, provedor, entrega }: { online: boolean; prov
         <section>
           <h2 className={titulo}><span className={numero}>03 /</span>Pagamento</h2>
           <div role="radiogroup" aria-label="Forma de pagamento" className="grid grid-cols-2 gap-3">
-            {([["pix", "Pix", "5% de desconto", QrCode], ["cartao", "Cartão de crédito", "até 3x sem juros", CreditCard]] as const).map(([id, name, hint, Icon]) => <button key={id} type="button" role="radio" aria-checked={method === id} onClick={() => setMethod(id)} className={`press flex min-h-16 items-center gap-3 rounded-[18px] border px-4 py-4 text-left transition-colors ${method === id ? "border-[var(--vinho)] bg-[var(--vinho)] text-[var(--creme)]" : "border-[var(--line)] bg-white/40 hover:border-[var(--vinho)]/50"}`}><Icon size={20} strokeWidth={1.5} /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{name}</span><span className={`text-sm ${method === id ? "text-[var(--creme)]/70" : "text-[var(--muted)]"}`}>{hint}</span></span></button>)}
+            {([["pix", "Pix", "na hora, com QR Code", QrCode], ["cartao", "Cartão de crédito", "até 3x sem juros", CreditCard]] as const).map(([id, name, hint, Icon]) => <button key={id} type="button" role="radio" aria-checked={method === id} onClick={() => setMethod(id)} className={`press flex min-h-16 items-center gap-3 rounded-[18px] border px-4 py-4 text-left transition-colors ${method === id ? "border-[var(--vinho)] bg-[var(--vinho)] text-[var(--creme)]" : "border-[var(--line)] bg-white/40 hover:border-[var(--vinho)]/50"}`}><Icon size={20} strokeWidth={1.5} /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{name}</span><span className={`text-sm ${method === id ? "text-[var(--creme)]/70" : "text-[var(--muted)]"}`}>{hint}</span></span></button>)}
           </div>
           <p className="mt-5 max-w-xl text-[var(--muted)]">{online
             ? method === "pix" ? `Você paga no ambiente seguro do ${provedor}, com o QR Code ou o Pix copia e cola. A confirmação chega na hora.` : `Você paga no ambiente seguro do ${provedor}, em até 3x sem juros. Os dados do cartão não passam pelo site da Meranno.`

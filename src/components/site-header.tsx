@@ -34,6 +34,14 @@ function AccountIcon() {
     <path d="M5.5 20v-4a3 3 0 0 1 3-3h7a3 3 0 0 1 3 3v4z" />
   </svg>;
 }
+// Whether the person signed in here is an owner, asked once per page load, the first time the menu opens. The answer
+// comes from the server; the owners' list never reaches the browser.
+let donoPromessa: Promise<boolean> | null = null;
+function perguntarSeDono() {
+  donoPromessa ??= fetch("/api/sou-dono", { cache: "no-store" }).then((resposta) => resposta.ok ? resposta.json() : { dono: false }).then((dados) => dados?.dono === true).catch(() => false);
+  return donoPromessa;
+}
+
 const EASE = [0.22, 1, 0.36, 1] as const;
 const ROUND = "flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-300";
 const OUTLINE = `${ROUND} border border-[var(--ink)]/20 bg-[var(--paper)] text-[var(--ink)] hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)]`;
@@ -48,6 +56,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dono, setDono] = useState(false);
   // The menu is portalled to <body> so it sits above every floating button; only once the page runs in the browser.
   const noNavegador = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [query, setQuery] = useState("");
@@ -95,7 +104,11 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 
   const closeSearch = () => { setSearchOpen(false); setQuery(""); };
   const toggleSearch = () => { setMenuOpen(false); if (searchOpen) closeSearch(); else setSearchOpen(true); };
-  const toggleMenu = () => { closeSearch(); setMenuOpen((open) => !open); };
+  const toggleMenu = () => {
+    closeSearch();
+    if (!menuOpen) perguntarSeDono().then(setDono);
+    setMenuOpen((open) => !open);
+  };
   const panel = "glass mx-2 mt-2 overflow-hidden rounded-[28px]";
   const clear = overlay && !scrolled && !menuOpen && !searchOpen;
   const outline = clear ? OUTLINE_CLEAR : OUTLINE;
@@ -167,6 +180,10 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
               </Link>)}
             </div>
           </div>
+          {/* Last item, owners only (the server says so; /admin checks again on its own). */}
+          {dono && <div className="mx-6 mb-6 border-t border-black/10 pt-3">
+            <Link href="/admin" onClick={() => setMenuOpen(false)} className="press flex min-h-11 items-center justify-between text-[15px] text-[var(--vinho)]">Painel da equipe<span aria-hidden className="text-[var(--latao)]">›</span></Link>
+          </div>}
         </motion.nav>
       </>}
     </AnimatePresence>, document.body)}
