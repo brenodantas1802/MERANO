@@ -45,7 +45,7 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 ### Reunião de 22/11 (noite)
 
 **Feito:**
-- **Capa nova**: só o vídeo do crupiê dando cartas (escurecido, sem som), os dois botões embaixo e a logo branca no topo. Vídeo em `public/imagens/capa/` (1 MB no computador, 0,5 MB no celular).
+- **Capa nova**: só o vídeo do crupiê dando cartas (escurecido, sem som), os dois botões embaixo e a logo branca no topo. Vídeo em `public/imagens/capa/` (1 MB no computador; no celular um recorte vertical próprio de 0,4 MB).
 - **Logo nova** (o M com a taça) no topo, no menu e no rodapé, vetorizada a partir da arte de vocês: branca sobre a capa, na cor do texto no resto.
 - **Modo escuro** (preto e bordô) como principal, com botão para o claro (lua/sol no topo do computador; no menu do celular). A escolha fica salva no aparelho.
 - **Vitrine**: Wine not?, Verão em boa companhia (no meio) e Va tutto bene; os Corações ficam no carrossel 3D logo abaixo. A Why Not You? saiu do site inteiro (peça única para um influenciador, não vende).
@@ -59,7 +59,9 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 
 **Ajustes da revisão (23/11):**
 - **Vídeo sem travar**: ele tinha um único quadro-chave para os 10 segundos inteiros, então toda vez que voltava a tocar (ao subir a página) o navegador decodificava tudo desde o início e congelava. Agora tem um quadro-chave por segundo, só toca enquanto está na tela, e a imagem de espera é o primeiro quadro dele (a troca não aparece). As fotos do carrossel 3D só baixam quando a seção chega perto, para não disputar a internet com o vídeo.
-- **Vídeo no celular** com menos zoom: ocupa o alto da tela (cerca de 40% da cena em vez de 25%), focado nas mãos e nas fichas, e se funde no preto sob os botões.
+- **Vídeo no celular** com menos zoom (refeito depois do teste no celular dos sócios): no iPhone a barra do Safari deixa a tela com ~660 px de altura, então o primeiro ajuste quase não mudou nada. Agora o celular tem um vídeo próprio, recortado em 4:5 (as mãos do crupiê, as cartas e as fichas, 576×720, 0,4 MB), e a capa no celular é um quadro 4:5 com a vitrine logo abaixo.
+- **Vídeo só toca inteiro**: ele baixa em segundo plano (prioridade baixa, depois dos arquivos da página) e só começa quando chegou todo, então não engasga no meio. Até lá aparece o primeiro quadro parado, idêntico, e a troca não se vê. Com "economia de dados" ligada, fica só a imagem parada.
+- **Bolinhas do carrossel 3D** no celular: as cinco cabem inteiras numa fileira (sem as setas), nenhuma cortada na borda.
 - **Vitrine no celular** sem carrossel: só Wine not? e Verão em boa companhia, paradas. No computador continuam as três.
 - **Toque no celular**: botões, links e fotos não são mais "arrastados" sem querer e o toque responde na hora.
 - **Minha conta e páginas da conta** abrem na hora com um aviso de carregando, e o servidor da Vercel passou para São Paulo (`gru1`, no `vercel.json`), ao lado do banco: tudo que consulta o banco ficou mais rápido para quem está no Brasil.

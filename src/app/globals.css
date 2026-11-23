@@ -223,20 +223,13 @@ html.entrada .veu-entrada { display: flex; }
   .painel:not([data-tema="claro"]) .tema-lua { display: none; }
 }
 
-/* Home cover (components/hero-topo.tsx): the darkened poker video fills the screen. Reduced motion: the still poster. */
+/* Home cover (components/hero-topo.tsx, capa-video.tsx): the darkened poker video over its own first frame (a still in
+   a <picture>). Computers: the whole screen. Phones: a 4:5 frame with its own crop of the video (owners, 2026-11-23:
+   a landscape video stretched over a tall screen showed only a blurred sleeve). Reduced motion: the still only. */
 .capa-midia { position: absolute; inset: 0; }
 .capa-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-/* Phones (owners, 2026-11-22: "tirar um pouco do zoom"): a landscape video filling a tall screen showed only a sleeve.
-   It now takes the top of the screen only, so about 40% of the scene shows instead of 25%, and its foot fades into the black
-   under the buttons. */
-@media (max-width: 767px) {
-	.capa-midia { bottom: auto; height: min(100%, 150vw); }
-	.capa-video { object-position: 62% 50%; } /* the dealer's hands and the chips, not the blurred player on the left */
-	.capa-midia::after { content: ""; position: absolute; inset: auto 0 0; height: 38%; background: linear-gradient(180deg, rgba(11, 8, 8, 0), #0b0808); }
-}
 @media (prefers-reduced-motion: reduce) {
-	.capa-video { display: none; }
-	.capa-midia { background: url("/imagens/capa/poker-poster.webp") center / cover no-repeat; }
+	video.capa-video { display: none; }
 }
 
 /* Dark theme: the few light colours written straight into components (translucent white cards, black hairlines). */

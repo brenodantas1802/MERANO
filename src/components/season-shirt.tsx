@@ -60,18 +60,20 @@ export function SeasonShirt({ products }: { products: Product[] }) {
 
           <div className="mt-10">
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--latao)]/60 bg-[var(--paper)] transition-colors hover:border-[var(--latao)] hover:bg-[var(--latao)] hover:text-[var(--vinho)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
-              <div className="flex min-w-0 touch-pan-x gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain p-2 [scrollbar-width:none]">
+              <button type="button" onClick={() => go(-1)} aria-label="Estampa anterior" className="hidden h-11 w-11 shrink-0 md:flex items-center justify-center rounded-full border border-[var(--latao)]/60 bg-[var(--paper)] transition-colors hover:border-[var(--latao)] hover:bg-[var(--latao)] hover:text-[var(--vinho)]"><ChevronLeft size={18} strokeWidth={1.6} /></button>
+              {/* Every shirt in one still row, never a half circle at the edge (owners, 2026-11-22/23): on phones the arrows go
+                  and the thumbnails shrink a little so all five fit. */}
+              <div className="-ml-2 flex min-w-0 gap-3 p-2 md:ml-0 md:gap-2">
                 {stories.map((item, itemIndex) => {
                   const itemProduct = products.find((candidate) => candidate.id === item.id)!;
                   const active = itemIndex === index;
-                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[#EFE9DF] p-1 transition-[opacity,box-shadow] duration-300 ${active ? "ring-2 ring-[var(--latao)] ring-offset-2 ring-offset-[var(--paper)]" : "opacity-70 hover:opacity-100"}`}>
+                  return <button key={item.id} type="button" onClick={() => setIndex(itemIndex)} aria-label={`Ver ${itemProduct.name}`} aria-pressed={active} title={itemProduct.name} className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-full md:h-14 md:w-14 bg-[#EFE9DF] p-1 transition-[opacity,box-shadow] duration-300 ${active ? "ring-2 ring-[var(--latao)] ring-offset-2 ring-offset-[var(--paper)]" : "opacity-70 hover:opacity-100"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element -- 200px thumbnails made for this row */}
                     <img src={thumbOf(item)} alt="" width={200} height={200} loading="lazy" className="h-full w-full object-contain" />
                   </button>;
                 })}
               </div>
-              <button type="button" onClick={() => go(1)} aria-label="Próxima estampa" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--latao)]/60 bg-[var(--paper)] transition-colors hover:border-[var(--latao)] hover:bg-[var(--latao)] hover:text-[var(--vinho)]"><ChevronRight size={18} strokeWidth={1.6} /></button>
+              <button type="button" onClick={() => go(1)} aria-label="Próxima estampa" className="hidden h-11 w-11 shrink-0 md:flex items-center justify-center rounded-full border border-[var(--latao)]/60 bg-[var(--paper)] transition-colors hover:border-[var(--latao)] hover:bg-[var(--latao)] hover:text-[var(--vinho)]"><ChevronRight size={18} strokeWidth={1.6} /></button>
             </div>
           </div>
         </div>
