@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 const ART = {
   barco: { src: "/imagens/merano-assets/ilustracoes/barco.webp", width: 836, height: 522, ink: true, alt: "Barco de pesca em mar calmo, desenho da estampa Mares tranquilos" },
   cafe: { src: "/imagens/merano-assets/ilustracoes/cafe.webp", width: 772, height: 965, ink: true, alt: "Fachada de café com mesa na calçada, desenho da estampa Café" },
-  laranjeira: { src: "/imagens/merano-assets/ilustracoes/laranjeira.webp", width: 890, height: 944, ink: false, alt: "Ramo de laranjeira em flor, da estampa Verão em boa companhia" },
+  laranjeira: { src: "/imagens/merano-assets/ilustracoes/laranjeira.webp", width: 890, height: 944, ink: false, alt: "Ramo de laranjeira em flor, da estampa Arancia" },
 } as const;
 
 export type IllustrationName = keyof typeof ART;

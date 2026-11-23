@@ -7,7 +7,7 @@ import { SHIRT_STORIES, thumbOf } from "@/lib/shirt-stories";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const MODEL = "/imagens/merano-assets/lookbook/modelo-barco.webp";
-const FAN = ["coracao-preto", "verao-em-boa-companhia", "wine-not"].map((id) => SHIRT_STORIES.find((story) => story.id === id)!);
+const FAN = ["amore-black", "arancia", "why-not"].map((id) => SHIRT_STORIES.find((story) => story.id === id)!);
 
 // Three of our shirts fanned out like cards in a hand.
 export function ShirtFan({ size = 56 }: { size?: number }) {

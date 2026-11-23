@@ -44,7 +44,7 @@ export type EstampaCasaId = "barco" | "cafe" | "laranjeira";
 export const ESTAMPAS_CASA: { id: EstampaCasaId; nome: string; src: string; largura: number; altura: number; tinta: boolean; descricao: string }[] = [
   { id: "barco", nome: "Mares tranquilos", src: "/imagens/merano-assets/ilustracoes/barco.webp", largura: 836, altura: 522, tinta: true, descricao: "gravura em traço fino de um barco de pesca em mar calmo" },
   { id: "cafe", nome: "Café", src: "/imagens/merano-assets/ilustracoes/cafe.webp", largura: 772, altura: 965, tinta: true, descricao: "gravura em traço fino da fachada de um café com mesa na calçada" },
-  { id: "laranjeira", nome: "Verão em boa companhia", src: "/imagens/merano-assets/ilustracoes/laranjeira.webp", largura: 891, altura: 944, tinta: false, descricao: "ilustração pintada de um ramo de laranjeira com frutos e flores" },
+  { id: "laranjeira", nome: "Arancia", src: "/imagens/merano-assets/ilustracoes/laranjeira.webp", largura: 891, altura: 944, tinta: false, descricao: "ilustração pintada de um ramo de laranjeira com frutos e flores" },
 ];
 export const estampaCasaDe = (id: string) => ESTAMPAS_CASA.find((estampa) => estampa.id === id);
 

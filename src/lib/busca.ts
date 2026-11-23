@@ -1,7 +1,7 @@
 import { getCollection, type Product } from "@/lib/products";
 
 // Product search for the header and the Shop. Forgiving the way people type on a phone: no accents, any order, plural
-// and feminine ("camisetas pretas" finds "Coração · Preto"), and the start of a word is enough ("cora").
+// and feminine ("camisetas pretas" finds "Amore Black"), and the start of a word is enough ("cora").
 
 const normalizar = (texto: string) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 

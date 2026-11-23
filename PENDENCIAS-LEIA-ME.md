@@ -72,10 +72,11 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 - **Mais leve ao abrir**: os cards da vitrine não "sobem" mais ao aparecer e o pop-up do cupom carrega depois da página. No teste de celular lento, o tempo travado ao abrir a inicial caiu de 600 ms para ~170 ms (nota 71 → 82).
 - **Bolinha da Vercel** desligada nas prévias (variável `VERCEL_PREVIEW_FEEDBACK_ENABLED=0` em Preview). No site oficial ela não aparece.
 
+**Nomes novos (23/11)**: Arancia (a da laranja, azul-marinho), Amore Black e Amore White (as do coração), Riviera (a do café no terraço, antiga Va tutto bene) e Why not (a do vinho). Os endereços também mudaram (`/produto/arancia`, `/produto/amore-black`, `/produto/amore-white`, `/produto/riviera`, `/produto/why-not`); os antigos redirecionam, e carrinhos, favoritos e pedidos de antes continuam valendo (`IDS_ANTIGOS` em `src/lib/products.ts`).
+
 **Falta (com vocês):**
 | Item | O que preciso |
 |---|---|
-| Nomes novos dos produtos | A lista definida no grupo (Wine not? e Verão em boa companhia também mudaram de nome). |
 | Estampa nova | Qual estampa troca e o arquivo. |
 | Fotos das camisetas | As versões em modelagem regular (o Speaker 1 vai refazer no ChatGPT). Corrigem também o recorte e a sombra do carrossel 3D. |
 | Contato | O número duplo (Yuri) e o e-mail novo. |

@@ -151,7 +151,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
                 <span className="relative h-16 w-14 shrink-0 overflow-hidden bg-[var(--cream)]"><Image src={product.image} alt="" fill sizes="56px" className="object-cover transition-transform duration-500 group-hover:scale-105" /></span>
                 <span className="min-w-0 truncate text-base font-medium">{product.name}</span>
               </Link>)}
-            </div> : <p className="sans mt-6 text-sm text-[var(--muted)]">Nenhuma peça com esse nome. Tente “coração”, “vinho” ou “verão”.</p>}
+            </div> : <p className="sans mt-6 text-sm text-[var(--muted)]">Nenhuma peça com esse nome. Tente “amore”, “arancia” ou “why not”.</p>}
           </div>
         </motion.div>
       )}

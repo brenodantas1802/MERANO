@@ -5,9 +5,9 @@ import { HeroTopo } from "@/components/hero-topo";
 import { SeasonShirt } from "@/components/season-shirt";
 import { ProductShelf } from "@/components/product-shelf";
 
-// The home showcase (owners, 2026-11-22): Wine not? first, the orange one (Verão em boa companhia) in the middle,
-// Va tutto bene on the right; the hearts follow in the big 3D carousel below (and stay in the shop).
-const VITRINE = ["wine-not", "verao-em-boa-companhia", "va-tutto-bene"];
+// The home showcase (owners, 2026-11-22): Why not first, the orange one (Arancia) in the middle, Riviera on the right
+// (phones show the first two); the Amore pair follows in the big 3D carousel below (and stays in the shop).
+const VITRINE = ["why-not", "arancia", "riviera"];
 
 // Personalizador banner: the regular tee on black with one of the house prints (Match Point), only the button leads to
 // the Personalizador (owners, 2026-11-22). It replaced the three playing cards (the owners found them ugly).

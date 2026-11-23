@@ -70,16 +70,16 @@ export const PRECO_PRE_VENDA = 160;
 
 export const products: Product[] = [
   {
-    id: "coracao-preto",
-    name: "Coração · Preto",
+    id: "amore-black",
+    name: "Amore Black",
     description: "Um coração vermelho em aquarela, rabiscado com anotações à mão nas costas, e a assinatura Meranno discreta no peito.",
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
-    note: "Estampa Coração",
+    note: "Estampa Amore",
     image: "/imagens/merano-assets/produtos/coracao-preto-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/coracao-preto-verso.jpg", "/imagens/merano-assets/produtos/coracao-preto-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/coracao-preto-verso.jpg", front: "/imagens/merano-assets/produtos/coracao-preto-frente.jpg" },
-    tags: ["coracao", "aquarela", "manuscrito", "preto"],
+    tags: ["amore", "amor", "coracao", "aquarela", "manuscrito", "preto", "black"],
     category: "Camisetas",
     collection: "colecao-01",
     material: MATERIAL,
@@ -91,16 +91,16 @@ export const products: Product[] = [
     colors: ["Preto"],
   },
   {
-    id: "coracao-branco",
-    name: "Coração · Branco",
+    id: "amore-white",
+    name: "Amore White",
     description: "O mesmo coração em aquarela, com as anotações em preto sobre a malha branca, e a assinatura Meranno no peito.",
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
-    note: "Estampa Coração",
+    note: "Estampa Amore",
     image: "/imagens/merano-assets/produtos/coracao-branco-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/coracao-branco-verso.jpg", "/imagens/merano-assets/produtos/coracao-branco-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/coracao-branco-verso.jpg", front: "/imagens/merano-assets/produtos/coracao-branco-frente.jpg" },
-    tags: ["coracao", "aquarela", "manuscrito", "branco"],
+    tags: ["amore", "amor", "coracao", "aquarela", "manuscrito", "branco", "white"],
     category: "Camisetas",
     collection: "colecao-01",
     material: MATERIAL,
@@ -112,16 +112,16 @@ export const products: Product[] = [
     colors: ["Branco"],
   },
   {
-    id: "va-tutto-bene",
-    name: "Va tutto bene",
+    id: "riviera",
+    name: "Riviera",
     description: "Um terraço com limoeiros sobre o mar, numa tarde sem pressa. Va tutto bene, un passo alla volta: tudo bem, um passo de cada vez.",
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
-    note: "Estampa Va tutto bene",
+    note: "Estampa Riviera · Va tutto bene",
     image: "/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg", "/imagens/merano-assets/produtos/va-tutto-bene-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg", front: "/imagens/merano-assets/produtos/va-tutto-bene-frente.jpg" },
-    tags: ["mar", "limao", "verao", "italia", "branco"],
+    tags: ["riviera", "mar", "limao", "cafe", "verao", "italia", "branco"],
     category: "Camisetas",
     collection: "colecao-01",
     material: MATERIAL,
@@ -133,17 +133,17 @@ export const products: Product[] = [
     colors: ["Branco"],
   },
   {
-    id: "verao-em-boa-companhia",
-    name: "Verão em boa companhia",
+    id: "arancia",
+    name: "Arancia",
     description: "Laranjeira em flor, sol e boa comida — lugares simples, dias inesquecíveis.",
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
-    note: "Estampa Verão em Boa Companhia",
+    note: "Estampa Arancia",
     image: "/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg"],
     views: { back: "/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg" },
     category: "Camisetas",
-    tags: ["fruta", "botanico", "verao", "natureza"],
+    tags: ["arancia", "laranja", "fruta", "botanico", "verao", "natureza", "azul"],
     collection: "colecao-01",
     material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -154,17 +154,17 @@ export const products: Product[] = [
     colors: ["Azul marinho"],
   },
   {
-    id: "wine-not",
-    name: "Wine not?",
+    id: "why-not",
+    name: "Why not",
     description: "Uma garrafa aberta e a melhor resposta para qualquer convite — por que não?",
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
-    note: "Estampa Wine Not?",
+    note: "Estampa Why not",
     image: "/imagens/merano-assets/produtos/wine-not-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/wine-not-verso.jpg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg"],
     views: { back: "/imagens/merano-assets/produtos/wine-not-verso.jpg", front: "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg" },
     category: "Camisetas",
-    tags: ["frase", "vinho", "pintado-a-mao", "preto"],
+    tags: ["frase", "vinho", "wine", "pintado-a-mao", "preto"],
     collection: "colecao-01",
     material: MATERIAL,
     care: "Lavar do avesso em água fria. Secar à sombra.",
@@ -176,8 +176,19 @@ export const products: Product[] = [
   },
 ];
 
+// The pieces' old addresses (renamed by the owners on 2026-11-23): carts, favourites, orders and links from before still
+// find their piece. The old /produto/... links also redirect (next.config.ts).
+export const IDS_ANTIGOS: Record<string, string> = {
+  "coracao-preto": "amore-black",
+  "coracao-branco": "amore-white",
+  "va-tutto-bene": "riviera",
+  "verao-em-boa-companhia": "arancia",
+  "wine-not": "why-not",
+};
+
 export function getProduct(id: string) {
-  return products.find((product) => product.id === id);
+  const atual = IDS_ANTIGOS[id] ?? id;
+  return products.find((product) => product.id === atual);
 }
 
 // Pieces shown only in the try-on (not for sale yet): kept out of `products`, so the shop, search and cart never see them.
@@ -185,7 +196,8 @@ export function getProduct(id: string) {
 export const provadorOnly: Product[] = [];
 export const provadorProducts: Product[] = [...provadorOnly, ...products];
 export function getProvadorProduct(id: string) {
-  return provadorProducts.find((product) => product.id === id);
+  const atual = IDS_ANTIGOS[id] ?? id;
+  return provadorProducts.find((product) => product.id === atual);
 }
 
 // Cart and order entries keep the photo path from the day they were added, and photos get renamed;

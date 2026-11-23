@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
       { source: "/a-marca", destination: "/sobre-nos", permanent: true },
       // The old manual-confirmation checkout (before the payment page); 2026-11-21.
       { source: "/checkout", destination: "/carrinho", permanent: true },
+      // The pieces renamed by the owners on 2026-11-23 (IDS_ANTIGOS in src/lib/products.ts).
+      { source: "/produto/coracao-preto", destination: "/produto/amore-black", permanent: true },
+      { source: "/produto/coracao-branco", destination: "/produto/amore-white", permanent: true },
+      { source: "/produto/va-tutto-bene", destination: "/produto/riviera", permanent: true },
+      { source: "/produto/verao-em-boa-companhia", destination: "/produto/arancia", permanent: true },
+      { source: "/produto/wine-not", destination: "/produto/why-not", permanent: true },
     ];
   },
 };
