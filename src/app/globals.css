@@ -118,6 +118,17 @@ body {
 	--ease-out: cubic-bezier(.2, .8, .2, 1);
 }
 html { -webkit-tap-highlight-color: transparent; }
+/* Phones (owners, 2026-11-22: buttons and photos got dragged by accident). Links, buttons and pictures are never picked
+   up and dragged; a long press on a link or button doesn't select its text or open the link preview; and a tap fires at
+   once, without waiting to see if it's a double-tap zoom. Text in paragraphs stays selectable. */
+a, button, img, video, svg, label, [role="button"] { -webkit-user-drag: none; }
+a, button, summary, label, select, [role="button"], input[type="checkbox"], input[type="radio"] { touch-action: manipulation; }
+@media (hover: none) {
+	a, button, summary, [role="button"] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+}
+/* app/loading.tsx: the spinner fades in only if the page takes a moment. */
+.carregando { opacity: 0; transition: none; animation: spin 1s linear infinite, carregando-surgir .2s .25s forwards; }
+@keyframes carregando-surgir { to { opacity: 1; } }
 .glass {
 	background: rgba(246, 241, 232, .66);
 	-webkit-backdrop-filter: blur(14px) saturate(1.4);
@@ -213,10 +224,19 @@ html.entrada .veu-entrada { display: flex; }
 }
 
 /* Home cover (components/hero-topo.tsx): the darkened poker video fills the screen. Reduced motion: the still poster. */
+.capa-midia { position: absolute; inset: 0; }
 .capa-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* Phones (owners, 2026-11-22: "tirar um pouco do zoom"): a landscape video filling a tall screen showed only a sleeve.
+   It now takes the top of the screen only, so about 40% of the scene shows instead of 25%, and its foot fades into the black
+   under the buttons. */
+@media (max-width: 767px) {
+	.capa-midia { bottom: auto; height: min(100%, 150vw); }
+	.capa-video { object-position: 62% 50%; } /* the dealer's hands and the chips, not the blurred player on the left */
+	.capa-midia::after { content: ""; position: absolute; inset: auto 0 0; height: 38%; background: linear-gradient(180deg, rgba(11, 8, 8, 0), #0b0808); }
+}
 @media (prefers-reduced-motion: reduce) {
 	.capa-video { display: none; }
-	.capa { background: #0b0808 url("/imagens/capa/poker-poster.webp") center / cover no-repeat; }
+	.capa-midia { background: url("/imagens/capa/poker-poster.webp") center / cover no-repeat; }
 }
 
 /* Dark theme: the few light colours written straight into components (translucent white cards, black hairlines). */

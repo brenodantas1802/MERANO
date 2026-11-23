@@ -45,7 +45,7 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 ### Reunião de 22/11 (noite)
 
 **Feito:**
-- **Capa nova**: só o vídeo do crupiê dando cartas (escurecido, sem som), os dois botões embaixo e a logo branca no topo. Vídeo em `public/imagens/capa/` (890 KB no computador, 450 KB no celular).
+- **Capa nova**: só o vídeo do crupiê dando cartas (escurecido, sem som), os dois botões embaixo e a logo branca no topo. Vídeo em `public/imagens/capa/` (1 MB no computador, 0,5 MB no celular).
 - **Logo nova** (o M com a taça) no topo, no menu e no rodapé, vetorizada a partir da arte de vocês: branca sobre a capa, na cor do texto no resto.
 - **Modo escuro** (preto e bordô) como principal, com botão para o claro (lua/sol no topo do computador; no menu do celular). A escolha fica salva no aparelho.
 - **Vitrine**: Wine not?, Verão em boa companhia (no meio) e Va tutto bene; os Corações ficam no carrossel 3D logo abaixo. A Why Not You? saiu do site inteiro (peça única para um influenciador, não vende).
@@ -57,14 +57,26 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 - **Instagram** corrigido para `@merannoclothing`.
 - Vídeos antigos do site anterior: já tinham saído na otimização.
 
+**Ajustes da revisão (23/11):**
+- **Vídeo sem travar**: ele tinha um único quadro-chave para os 10 segundos inteiros, então toda vez que voltava a tocar (ao subir a página) o navegador decodificava tudo desde o início e congelava. Agora tem um quadro-chave por segundo, só toca enquanto está na tela, e a imagem de espera é o primeiro quadro dele (a troca não aparece). As fotos do carrossel 3D só baixam quando a seção chega perto, para não disputar a internet com o vídeo.
+- **Vídeo no celular** com menos zoom: ocupa o alto da tela (cerca de 40% da cena em vez de 25%), focado nas mãos e nas fichas, e se funde no preto sob os botões.
+- **Vitrine no celular** sem carrossel: só Wine not? e Verão em boa companhia, paradas. No computador continuam as três.
+- **Toque no celular**: botões, links e fotos não são mais "arrastados" sem querer e o toque responde na hora.
+- **Minha conta e páginas da conta** abrem na hora com um aviso de carregando, e o servidor da Vercel passou para São Paulo (`gru1`, no `vercel.json`), ao lado do banco: tudo que consulta o banco ficou mais rápido para quem está no Brasil.
+- **Va tutto bene no 3D**: a ponta da manga esquerda estava cortada na borda da foto; refeita espelhando a manga direita.
+- **Banner**: estampa Match Point maior nas costas.
+- **Categorias**: fundo do cartão da Summer Collection em bordô forte.
+- **Sobre nós**: a história de vocês cinco (Breno, Yuri, Mateus, Pedro e Enzo); as camisetas que giravam com a rolagem saíram (pesavam no celular).
+- **Mais leve ao abrir**: os cards da vitrine não "sobem" mais ao aparecer e o pop-up do cupom carrega depois da página. No teste de celular lento, o tempo travado ao abrir a inicial caiu de 600 ms para ~170 ms (nota 71 → 82).
+- **Bolinha da Vercel** desligada nas prévias (variável `VERCEL_PREVIEW_FEEDBACK_ENABLED=0` em Preview). No site oficial ela não aparece.
+
 **Falta (com vocês):**
 | Item | O que preciso |
 |---|---|
-| Nomes novos dos produtos | A lista definida no grupo (ex.: o nome no lugar de "Coração"). |
+| Nomes novos dos produtos | A lista definida no grupo (Wine not? e Verão em boa companhia também mudaram de nome). |
 | Estampa nova | Qual estampa troca e o arquivo. |
 | Fotos das camisetas | As versões em modelagem regular (o Speaker 1 vai refazer no ChatGPT). Corrigem também o recorte e a sombra do carrossel 3D. |
 | Contato | O número duplo (Yuri) e o e-mail novo. |
-| Sobre nós | Os textos novos, mais pessoais. |
 | Detalhes do produto | O que exatamente ajustar. |
 | Microsoft Clarity | Criar a conta em clarity.microsoft.com e me passar o ID do projeto. |
 | Vídeo | Conferir se a qualidade HD (720p) da capa ficou boa. |

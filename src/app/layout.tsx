@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart-provider";
-import { FirstPurchasePopup } from "@/components/first-purchase-popup";
+import { FirstPurchasePopupTardio } from "@/components/first-purchase-popup-tardio";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { ConsentimentoAnalise } from "@/components/consentimento-analise";
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // suppressHydrationWarning: SCRIPT_TEMA and SCRIPT_ENTRADA may change <html> before React hydrates.
     <html lang="pt-BR" data-tema={TEMA_PADRAO} data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
-      <body><script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA + SCRIPT_ENTRADA }} /><EntradaPreVenda /><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopup /><ConsentimentoAnalise /></CartProvider></body>
+      <body><script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA + SCRIPT_ENTRADA }} /><EntradaPreVenda /><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopupTardio /><ConsentimentoAnalise /></CartProvider></body>
     </html>
   );
 }

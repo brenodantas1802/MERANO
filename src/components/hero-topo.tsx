@@ -1,20 +1,11 @@
 import { PillLink } from "@/components/ui/pill-link";
+import { CapaVideo } from "@/components/capa-video";
 
-// Top of the home page (owners' meeting, 2026-11-22): a clean cover, only the background video of a dealer handing out
-// poker cards, darkened (dark bar, Art Deco mood), the white logo in the header above it and the two buttons.
-// Video: public/imagens/capa/poker-1280.mp4 (computers) and poker-854.mp4 (phones), re-encoded darker and without
-// sound from the owners' file (100427-video-720.mp4); the poster shows at once while the video loads.
-//
-// The <video> is written as plain HTML so the browser gets the `muted` attribute in the first response: without it
-// iPhones don't autoplay (React only sets `muted` after the page's JavaScript runs).
-const VIDEO = `<video class="capa-video" autoplay muted loop playsinline preload="auto" poster="/imagens/capa/poker-poster.webp" aria-hidden="true">
-  <source src="/imagens/capa/poker-854.mp4" type="video/mp4" media="(max-width: 767px)">
-  <source src="/imagens/capa/poker-1280.mp4" type="video/mp4">
-</video>`;
-
+// Top of the home page (owners' meeting, 2026-11-22): a clean cover, only the background video (components/capa-video),
+// darkened (dark bar, Art Deco mood), the white logo in the header above it and the two buttons.
 export function HeroTopo() {
   return <section className="capa relative flex min-h-[100svh] items-end overflow-hidden bg-[#0b0808] text-white">
-    <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: VIDEO }} />
+    <CapaVideo />
     {/* Darker at the top (under the white logo) and at the bottom (under the buttons). */}
     <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,5,5,.72)_0%,rgba(8,5,5,.18)_32%,rgba(8,5,5,.25)_60%,rgba(30,8,14,.88)_100%)]" />
     <h1 className="sr-only">MERANNO, feito para quem entende de exclusividade.</h1>

@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { FaqAccordion } from "@/components/faq-accordion";
-import { ShirtChapters } from "@/components/shirt-chapters";
 import { PillLink } from "@/components/ui/pill-link";
 
 const steps = [
@@ -18,15 +17,26 @@ const faqs = [
   { question: "E se eu precisar trocar o tamanho depois?", answer: "Não fazemos trocas. Por isso a tabela de medidas e o Meranno Fit estão em cada peça: confira antes de comprar." },
 ];
 
+// The owners' story (2026-11-22). The shirts that turned with the scroll (ShirtChapters) left this page the same day:
+// heavy on phones, and the owners prefer the page short.
+const HISTORIA = [
+  "Decidimos empreender juntos e começamos pelo que mais faz parte do nosso dia a dia: o estilo, o jeito de se vestir.",
+  "Pesquisando, vimos como era difícil achar estampas boas, mesmo nas lojas mais famosas.",
+  "Daí veio a Meranno: um personalizador para você criar a sua própria estampa, e coleções com estampas que têm a nossa cara.",
+];
+
 export default function BrandPage() {
   return <main><SiteHeader />
     <article className="mx-auto max-w-360 px-6 pb-16 md:px-12 md:pb-20">
       <Link href="/" className="sans mb-16 flex items-center gap-2 pt-8 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar para o início</Link>
 
-      <ScrollReveal><p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">quem a gente é</p><h1 className="display mt-3 max-w-4xl text-7xl md:text-9xl">Sobre <i>nós.</i></h1><p className="mt-10 max-w-2xl text-2xl leading-snug md:text-3xl">Uma marca brasileira para quem percebe que vestir também é uma forma de pertencer.</p></ScrollReveal>
-    </article>
+      <ScrollReveal><p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">quem a gente é</p><h1 className="display mt-3 max-w-4xl text-7xl md:text-9xl">Sobre <i>nós.</i></h1></ScrollReveal>
 
-    <ShirtChapters />
+      <div className="mt-12 max-w-2xl md:mt-16">
+        <p className="text-2xl leading-snug md:text-3xl">Somos cinco amigos: Breno, Yuri, Mateus, Pedro e Enzo.</p>
+        {HISTORIA.map((paragrafo) => <p key={paragrafo} className="mt-6 text-lg leading-relaxed text-[var(--muted)] md:text-xl">{paragrafo}</p>)}
+      </div>
+    </article>
 
     {/* 2026-11-17: the sea banner, the beach photo ("Um Brasil sem filtro"), the old linen label and the 7-day lead
         time were taken out at the owners' request (the beach no longer fits; new label and lead time to come). The
@@ -47,8 +57,8 @@ export default function BrandPage() {
       </div>
 
       <ScrollReveal delay={0.1} className="mt-24 flex flex-col items-start gap-6 border-t border-[var(--line)] pt-14 md:flex-row md:items-center md:justify-between">
-        <p className="max-w-xl text-2xl leading-snug">Pronta para escolher a sua peça?</p>
-        <PillLink href="/shop">Ver coleção</PillLink>
+        <p className="max-w-xl text-2xl leading-snug">Escolha a sua peça ou crie a sua estampa.</p>
+        <div className="flex flex-wrap gap-3"><PillLink href="/shop">Ver coleção</PillLink><PillLink href="/personalizar-estampa">Criar a minha</PillLink></div>
       </ScrollReveal>
     </article>
   </main>;

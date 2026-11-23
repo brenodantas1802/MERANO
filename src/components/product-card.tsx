@@ -2,14 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { ViewTransition, useState, type MouseEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { QuickAdd } from "@/components/quick-add";
 import { FavoriteButton } from "@/components/favorite-button";
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 // A tall photo with the piece's other views behind side arrows, and its name centred underneath (prices are shown on
 // the product page only).
@@ -25,12 +22,9 @@ export function ProductCard({ product }: { product: Product }) {
     setIndex((current) => (current + by + photos.length) % photos.length);
   };
 
-  return <motion.article
-    className="group relative"
-    initial={{ opacity: 0, y: 16 }}
-    whileInView={{ opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } }}
-    viewport={{ once: true, margin: "-40px" }}
-  >
+  // No rise-in on scroll (owners, 2026-11-22: nothing going up and down): the card is simply there, and the page has
+  // one animated component less to start on phones.
+  return <article className="group relative">
     <Link href={`/produto/${product.id}`} aria-label={`Ver ${product.name}`} transitionTypes={["nav-forward"]}>
       <ViewTransition name={`produto-${product.id}`} share="morph" default="none">
         <div onPointerEnter={() => setWarm(true)} className="relative aspect-[.82] overflow-hidden bg-[var(--cream)]/40">
@@ -53,5 +47,5 @@ export function ProductCard({ product }: { product: Product }) {
     </Link>
     <FavoriteButton productId={product.id} name={product.name} className="press toque glass absolute right-2.5 top-2.5 z-20 flex h-9 w-9 items-center justify-center rounded-full shadow-none" />
     <QuickAdd product={product} />
-  </motion.article>;
+  </article>;
 }
