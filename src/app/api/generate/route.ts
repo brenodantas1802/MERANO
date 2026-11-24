@@ -1,10 +1,13 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { detectPose, POSE_LABELS, type Pose } from "@/lib/pose";
 import { getProvadorProduct as getProduct, getSizeChart, TAMANHOS_LOJA } from "@/lib/products";
 import { EMPTY_PROFILE, type BodyProfile } from "@/lib/body-measure";
 import { describeFit } from "@/lib/fit-description";
+import { viaGoogle } from "@/lib/owners";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 import { planTryOn, type ViewKey } from "@/lib/tryon";
 
 const IMAGE_MODEL = "openai/gpt-image-2.5-flare";
@@ -20,6 +23,25 @@ function isOverDailyLimit() {
   if (daily.count >= DAILY_LIMIT) return true;
   daily.count += 1;
   return false;
+}
+
+// Who tries on with no limits (owner's request, 2026-11-23, while the try-on is being tuned): the owner Breno, signed in
+// with Google (a password account with his address never counts), kept here as the SHA-256 of the e-mail so the address
+// isn't in the code; and the local dev server, where Claude runs its tests. Everyone else keeps both limits.
+const SEM_LIMITE = new Set(["7428b99babe0a3fe84c33ec4d3e97ebf91d4fac2b278d44de4b432f6945c1c85"]);
+
+async function semLimite() {
+  if (process.env.NODE_ENV === "development") return true;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email || !user.email_confirmed_at) return false;
+    if (!SEM_LIMITE.has(createHash("sha256").update(user.email.trim().toLowerCase()).digest("hex"))) return false;
+    const { data } = await supabase.auth.getClaims();
+    return viaGoogle(data?.claims.amr);
+  } catch {
+    return false;
+  }
 }
 
 const generateSchema = z.object({
@@ -57,7 +79,8 @@ async function loadGarmentImage(origin: string, path: string) {
 }
 
 export async function POST(request: Request) {
-  if (isRateLimited(clientKey(request))) {
+  const livre = await semLimite();
+  if (!livre && isRateLimited(clientKey(request))) {
     return NextResponse.json({ error: "Limite de gerações atingido. Aguarde alguns minutos e tente novamente." }, { status: 429 });
   }
 
@@ -83,7 +106,7 @@ export async function POST(request: Request) {
   if (!product) {
     return NextResponse.json({ error: "Camisa não encontrada." }, { status: 404 });
   }
-  if (isOverDailyLimit()) {
+  if (!livre && isOverDailyLimit()) {
     return NextResponse.json({ error: "O provador atingiu o limite de uso de hoje. Tente novamente amanhã." }, { status: 429 });
   }
 
