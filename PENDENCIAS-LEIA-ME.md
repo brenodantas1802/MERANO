@@ -81,6 +81,7 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 - **Categorias virou Coleções** (`/colecoes`; o endereço antigo redireciona). No menu: Coleções, Meranno Fit e Sobre nós, nessa ordem.
 - **Voltar para a página inicial**: no topo do menu (fora da inicial) e, no celular, uma seta discreta "Voltar para o início" logo abaixo da barra (a barra do celular não tem espaço para mais um botão).
 - **Cadeado** (Coming soon, pré-venda e a abertura do convite): bordô forte e liso (`#39000F`, sem a textura e a luz que apagavam a cor), dourado mais vivo no cadeado, no botão e no nome, texto do botão em bordô quase preto, e as barras do Safari na mesma cor.
+- **Provador** (noite): o modelo do lookbook foi vestido com as cinco camisetas pelo próprio provador do site (cerca de US$ 0,23 no OpenRouter, contando uma geração que se perdeu na conexão) e alinhado à foto original. No passo 3 do topo, metade original e metade Amore Black; no "o seu resultado aparece aqui", as cinco passam uma a uma com o nome, ou fica a que a pessoa escolheu. O passo 2 continua com a foto original.
 
 **Falta (com vocês):**
 | Item | O que preciso |

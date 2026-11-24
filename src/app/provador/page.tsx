@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Download, ImagePlus, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
-import { BeforeAfter, HowItWorks, ShirtFan, TryOnSteps } from "@/components/try-on-visuals";
+import { BeforeAfter, HowItWorks, MODELO_VESTIDO, ShirtFan, TryOnSteps } from "@/components/try-on-visuals";
 import { AnalyzingImage } from "@/components/ui/analyzing-image";
 import type { PersonBox } from "@/lib/people";
 import { getProvadorProduct as getProduct, getSizeChart, provadorProducts as products, SIZE_CHART, type Product } from "@/lib/products";
@@ -177,10 +177,11 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
   if (!frame) {
     return (
       <div className="relative flex aspect-[3/4] flex-col items-center justify-center overflow-hidden rounded-[2rem] bg-[var(--areia)]/30 p-8 text-center md:aspect-auto md:h-[min(70vh,760px)]">
-        {product ? (
+        {/* Before the first try-on: the model wearing the chosen shirt, or each of ours in turn. */}
+        {product && !MODELO_VESTIDO.includes(product.id) ? (
           <NextImage src={product.image} alt={product.name} width={600} height={720} sizes="(min-width: 768px) 280px, 50vw" className="h-auto w-1/2 rotate-3 rounded-2xl bg-[var(--paper)] p-2 shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         ) : (
-          <BeforeAfter className="aspect-[4/5] w-1/2 rounded-2xl shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
+          <BeforeAfter key={product?.id ?? "todas"} vestidos={product ? [product.id] : MODELO_VESTIDO} rotulo className="aspect-[4/5] w-1/2 rounded-2xl shadow-[0_24px_50px_-28px_rgba(32,28,23,.6)]" />
         )}
         <p className="serif-note mt-8 text-2xl text-[var(--terra)]">o seu resultado aparece aqui</p>
         <p className="sans mt-3 max-w-xs text-[11px] leading-relaxed text-[var(--muted)]">Você vai poder comparar a foto original com a versão vestindo a Meranno, lado a lado.</p>

@@ -1,12 +1,18 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronDown, ImagePlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { products } from "@/lib/products";
 import { SHIRT_STORIES, thumbOf } from "@/lib/shirt-stories";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const MODEL = "/imagens/merano-assets/lookbook/modelo-barco.webp";
+// The lookbook model as photographed, and the same photo dressed in each of our shirts by the site's own try-on
+// (2026-11-23), each laid over the original's frame so the before/after split lines up to the pixel.
+const MODEL = "/imagens/merano-assets/provador/modelo.webp";
+export const MODELO_VESTIDO = ["amore-black", "amore-white", "riviera", "arancia", "why-not"];
+const vestido = (id: string) => `/imagens/merano-assets/provador/modelo-${id}.webp`;
+const nome = (id: string) => products.find((product) => product.id === id)?.name ?? "";
 const FAN = ["amore-black", "arancia", "why-not"].map((id) => SHIRT_STORIES.find((story) => story.id === id)!);
 
 // Three of our shirts fanned out like cards in a hand.
@@ -19,17 +25,36 @@ export function ShirtFan({ size = 56 }: { size?: number }) {
   </span>;
 }
 
-// The same photo twice, split down the middle: as taken, and in colour "wearing" the result.
-export function BeforeAfter({ className = "" }: { className?: string }) {
+// The model split down the middle: as photographed (in grey) and wearing our shirt. With several shirts the right half
+// goes through them in turn (with reduced motion the first one stays); `rotulo` names the shirt shown, on a white
+// written as a colour because the dark theme dims bg-white/90 (the label sits on the photo in both themes).
+export function BeforeAfter({ className = "", vestidos = ["amore-black"], rotulo = false }: { className?: string; vestidos?: string[]; rotulo?: boolean }) {
+  const [vez, setVez] = useState(0);
+  const parado = useReducedMotion();
+  const atual = vestidos[vez % vestidos.length];
+  useEffect(() => {
+    if (vestidos.length < 2 || parado) return;
+    const timer = window.setInterval(() => setVez((value) => value + 1), 2800);
+    return () => window.clearInterval(timer);
+  }, [vestidos.length, parado]);
+  // The next shirt loads while this one is on show, so the change is a fade and never a blank half.
+  useEffect(() => {
+    if (vestidos.length > 1) new Image().src = vestido(vestidos[(vez + 1) % vestidos.length]);
+  }, [vez, vestidos]);
+
   return <span className={`relative block overflow-hidden ${className}`} aria-hidden>
     {/* eslint-disable-next-line @next/next/no-img-element */}
     <img src={MODEL} alt="" className="absolute inset-0 h-full w-full object-cover grayscale" />
     <span className="absolute inset-y-0 right-0 w-1/2 overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={MODEL} alt="" className="absolute inset-y-0 right-0 h-full w-[200%] max-w-none object-cover" />
+      <AnimatePresence initial={false}>
+        <motion.img key={atual} src={vestido(atual)} alt="" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7, ease: EASE }} className="absolute inset-y-0 right-0 h-full w-[200%] max-w-none object-cover" />
+      </AnimatePresence>
     </span>
     <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-white shadow" />
     <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[11px] text-[#141110] shadow-md">↔</span>
+    {rotulo && <AnimatePresence mode="wait" initial={false}>
+      <motion.span key={atual} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.35, ease: EASE }} className="sans absolute bottom-3 right-3 rounded-full bg-[rgba(255,255,255,.9)] px-3 py-1 text-[10px] uppercase tracking-[.12em] text-[#141110] shadow">{nome(atual)}</motion.span>
+    </AnimatePresence>}
   </span>;
 }
 
