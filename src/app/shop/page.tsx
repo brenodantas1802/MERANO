@@ -62,7 +62,7 @@ function ShopView({ inicial = {} }: { inicial?: Filtros }) {
     )}
   </div>
   {/* The pieces run edge to edge, three across. */}
-  {!showCollections && filtered.length > 0 && <div className="grid grid-cols-2 gap-1 px-1 pb-14 md:grid-cols-3">{filtered.map((product) => <ProductCard product={product} key={product.id} />)}</div>}
+  {!showCollections && filtered.length > 0 && <div className="grid grid-cols-2 gap-1 px-1 pb-14 md:grid-cols-3">{filtered.map((product, indice) => <ProductCard product={product} destaque={indice < 2} key={product.id} />)}</div>}
   </>;
 }
 

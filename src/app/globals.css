@@ -81,7 +81,8 @@ body {
 /* Sun-bleached sand running into shallow sea-glass, with a faint sand grain. */
 .grain { background-color: var(--areia-clara); }
 /* Season shirt section: warm paper with a soft pool of light behind the shirt. */
-.season-wash { background: radial-gradient(55% 60% at 27% 48%, #FBF7F0 0%, rgba(251, 247, 240, 0) 72%), linear-gradient(180deg, var(--paper) 0%, var(--areia-clara) 100%); }
+/* Neutral since the white/ice palette (2026-11-24): white fading to ice, no cream. */
+.season-wash { background: linear-gradient(180deg, var(--paper) 0%, var(--areia-clara) 100%); }
 
 /* Product photo morph between a card and the product page (React <ViewTransition share="morph">). */
 ::view-transition-group(.morph) { animation-duration: 520ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }

@@ -255,12 +255,8 @@ function TryOnViewer({ frames, index, onIndex, product }: { frames: Frame[]; ind
   );
 }
 
-function ProvadorContent() {
-  const searchParams = useSearchParams();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(() => {
-    const slug = searchParams.get("produto");
-    return (slug && getProduct(slug)) || null;
-  });
+function ProvadorContent({ produtoInicial }: { produtoInicial: string | null }) {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(() => (produtoInicial && getProduct(produtoInicial)) || null);
   const [pickerOpen, setPickerOpen] = useState(false);
   // The size to try on: the one Meranno Fit recommends, until the customer picks another.
   const { profile } = useBodyProfile();
@@ -417,10 +413,18 @@ function ProvadorContent() {
   );
 }
 
+// The shirt in the link (?produto=amore-black) comes in after the page loads. Meanwhile the page itself is already there
+// with no shirt picked (2026-11-24): with an empty fallback the server sent a blank page, the footer showed at the top
+// and then jumped down (layout shift of 0.54 on a slow phone).
+function ComProdutoDoLink() {
+  const produto = useSearchParams().get("produto");
+  return <ProvadorContent key={produto ?? ""} produtoInicial={produto} />;
+}
+
 export default function ProvadorPage() {
   return (
-    <Suspense fallback={null}>
-      <ProvadorContent />
+    <Suspense fallback={<ProvadorContent produtoInicial={null} />}>
+      <ComProdutoDoLink />
     </Suspense>
   );
 }

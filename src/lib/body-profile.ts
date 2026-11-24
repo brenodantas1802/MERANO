@@ -4,9 +4,8 @@ import { useSyncExternalStore } from "react";
 
 import { EMPTY_PROFILE, type BodyProfile, type ProfileField } from "./body-measure";
 
-// Client-side body profile until accounts and the database are wired up; mirrors the BodyProfile model in
-// prisma/schema.prisma so it can be synced to the customer's account later. The shape and the readers live in
-// body-measure.ts, shared with the server.
+// Body profile kept in this browser (localStorage); saving it to the customer's account is still to come. The shape
+// and the readers live in body-measure.ts, shared with the server.
 export { EMPTY_PROFILE, measure, RANGES, type BodyProfile, type ProfileField } from "./body-measure";
 
 const STORAGE_KEY = "merano-body-profile";

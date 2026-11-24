@@ -3,6 +3,7 @@
 Loja da MERANNO: coleção de camisetas, Personalizador com IA, Provador e pré-venda para um grupo fechado.
 
 - **O que falta e o passo a passo de cada item:** [`PENDENCIAS-LEIA-ME.md`](PENDENCIAS-LEIA-ME.md)
+- **Como o site foi feito** (ferramentas, passo a passo, histórico e notas técnicas): [`docs/COMO-FIZEMOS-O-SITE.md`](docs/COMO-FIZEMOS-O-SITE.md)
 - **Personalizador** (app do programador dentro do site): [`docs/PERSONALIZADOR.md`](docs/PERSONALIZADOR.md)
 
 ## Rodar no computador
@@ -23,10 +24,10 @@ Com o Claude Code: abra a pasta `merano` e peça o que precisa. As instruções 
 
 - **Next.js 16** (as regras mudaram em relação às versões antigas: leia `node_modules/next/dist/docs/` antes de mexer), React 19 e Tailwind 4.
 - **Supabase**: login, banco e arquivos. Tabelas principais: `pedidos`, `cupons`, `criacoes_estampa`, `pre_venda_autorizados`, `cadastros_cupom`, `avaliacoes`.
-- **Vercel**: hospedagem. Ela **não** publica sozinha quando o GitHub muda.
-- **Pagamento**: Asaas Checkout quando `ASAAS_API_KEY` está na Vercel (o Mercado Pago fica como alternativa, com `MERCADOPAGO_ACCESS_TOKEN`); sem nenhum, o pedido é registrado e fechado pelo WhatsApp. O preço, o cupom e o frete são sempre calculados de novo no servidor (`src/lib/pedidos.ts`); o provedor é escolhido em `src/lib/pagamento.ts`.
-- **Tamanhos**: P a XXG, da Remix On Demand (Camiseta Oversized Unissex). Tabela e composição em `src/lib/products.ts`.
-- **Frete**: SuperFrete (`src/lib/frete.ts`); sem token, mostra valores de exemplo.
+- **Vercel** (plano Pro): hospedagem e domínio `merannoclothing.com.br`. Ela **não** publica sozinha quando o GitHub muda.
+- **Pagamento**: Asaas Checkout (Pix e cartão até 3x) quando `ASAAS_API_KEY` está na Vercel, com o aviso de pagamento em `/api/pagamento/asaas`; sem a chave, o pedido vai pelo WhatsApp.
+- **Tamanhos**: P, M e G, camiseta regular da Remix (algodão 180 g/m²). Tabela, preço (R$ 180) e composição em `src/lib/products.ts`.
+- **Frete**: SuperFrete (`src/lib/frete.ts`): PAC, SEDEX e Jadlog pelo CEP; sem token, mostra valores de exemplo.
 - **Painel da equipe**: `/admin` (só os e-mails de `OWNER_EMAILS`, entrando com o Google): lista da pré-venda, pedidos, cupons, estampas do Personalizador e e-mails do pop-up.
 
 ## Publicar

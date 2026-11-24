@@ -8,7 +8,7 @@ import { useCart } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
 import { ShirtFan } from "@/components/try-on-visuals";
 import { PillLink } from "@/components/ui/pill-link";
-import { currentImage, formatPrice } from "@/lib/products";
+import { currentImage, formatPrice, parcelado } from "@/lib/products";
 import { CEP_KEY, prazoTexto, useFrete } from "@/lib/use-frete";
 
 const maskCep = (value: string) => value.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
@@ -46,7 +46,7 @@ function CartContent() {
       {items.map((item) => {
         const image = currentImage(item);
         return <li key={item.id} className="flex gap-4 rounded-[1.75rem] bg-[var(--paper)] p-4 shadow-[0_24px_50px_-40px_rgba(32,28,23,.6)] md:gap-7 md:p-5">
-          <Link href={item.productId ? `/produto/${item.productId}` : "/shop"} className="relative aspect-[.82] w-24 shrink-0 overflow-hidden rounded-2xl bg-[var(--cream)] md:w-36">
+          <Link href={item.productId ? `/produto/${item.productId}` : "/shop"} className="foto-gelo relative aspect-[.82] w-24 shrink-0 overflow-hidden rounded-2xl md:w-36">
             {image ? <Image src={image} alt={item.name} fill sizes="144px" className="object-cover" /> : <div className="product-wash h-full w-full" />}
           </Link>
           <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
@@ -67,18 +67,19 @@ function CartContent() {
       })}
     </ul>
 
-    <aside className="h-fit rounded-[2rem] bg-[var(--mar-fundo)] p-7 text-[var(--paper)] shadow-[0_30px_60px_-40px_rgba(15,61,68,.9)] md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)]">
-      <div className="mt-5 space-y-3 border-b border-white/15 pb-5 text-[15px]">
-        <div className="flex justify-between"><span className="text-white/75">{count} {count === 1 ? "peça" : "peças"}</span><span>{formatPrice(total)}</span></div>
-        <div className="flex justify-between"><span className="text-white/75">Frete</span><span className={maisBarato ? "" : "text-white/75"}>{frete.carregando ? "calculando…" : maisBarato ? formatPrice(maisBarato.preco) : "informe o CEP"}</span></div>
-        <label className="sans flex items-center gap-3 text-[12px] text-white/75">CEP
-          <input inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} placeholder="00000-000" aria-label="CEP para calcular o frete" className="h-11 min-w-0 flex-1 rounded-full border border-white/20 bg-white/10 px-4 text-[15px] text-[var(--paper)] outline-none placeholder:text-white/40 focus:border-[var(--latao)]" />
+    {/* Light summary (2026-11-24), like the checkout's ice column; the old wine block went with the new palette. */}
+    <aside className="h-fit rounded-[2rem] bg-[var(--gelo)] p-7 text-[var(--ink)] md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)]">
+      <div className="mt-5 space-y-3 border-b border-[var(--line)] pb-5 text-[15px]">
+        <div className="flex justify-between"><span className="text-[var(--muted)]">{count} {count === 1 ? "peça" : "peças"}</span><span>{formatPrice(total)}</span></div>
+        <div className="flex justify-between"><span className="text-[var(--muted)]">Frete</span><span className={maisBarato ? "" : "text-[var(--muted)]"}>{frete.carregando ? "calculando…" : maisBarato ? formatPrice(maisBarato.preco) : "informe o CEP"}</span></div>
+        <label className="sans flex items-center gap-3 text-[12px] text-[var(--muted)]">CEP
+          <input inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} placeholder="00000-000" aria-label="CEP para calcular o frete" className="h-11 min-w-0 flex-1 rounded-full border border-[var(--borda-campo)] bg-[var(--paper)] px-4 text-[15px] text-[var(--ink)] outline-none placeholder:text-[var(--muted)]/60 focus:border-[var(--vinho)]" />
         </label>
-        <p aria-live="polite" className="sans min-h-4 text-xs text-white/75">{frete.erro ?? (maisBarato ? `${maisBarato.nome} · ${prazoTexto(maisBarato)} após o envio${frete.opcoes.length > 1 ? ` · mais ${frete.opcoes.length - 1} ${frete.opcoes.length > 2 ? "opções" : "opção"} no pagamento` : ""}` : "")}{frete.exemplo && " · valores de exemplo"}</p>
+        <p aria-live="polite" className="sans min-h-4 text-xs text-[var(--muted)]">{frete.erro ?? (maisBarato ? `${maisBarato.nome} · ${prazoTexto(maisBarato)} após o envio${frete.opcoes.length > 1 ? ` · mais ${frete.opcoes.length - 1} ${frete.opcoes.length > 2 ? "opções" : "opção"} no pagamento` : ""}` : "")}{frete.exemplo && " · valores de exemplo"}</p>
       </div>
       <div className="mt-5 flex items-baseline justify-between"><span className="text-lg">Total</span><span className="display text-4xl">{formatPrice(totalComFrete)}</span></div>
-      <p className="sans mt-1 text-right text-xs text-white/75">ou 3x de {formatPrice(totalComFrete / 3)} sem juros</p>
-      <Link href="/pagamento" className="sans mt-7 block rounded-full bg-[var(--paper)] px-6 py-4 text-center text-[12px] font-medium uppercase tracking-[.16em] text-[var(--ink)] transition-colors hover:bg-[var(--sol-2)]">Finalizar compra</Link>
+      <p className="sans mt-1 text-right text-xs text-[var(--muted)]">ou {parcelado(totalComFrete)}</p>
+      <Link href="/pagamento" className="press label mt-7 flex h-14 items-center justify-center rounded-full bg-[var(--vinho)] text-[13px] tracking-[.14em] text-[var(--creme)] shadow-[0_14px_30px_-16px_rgba(85,30,43,.8)] hover:opacity-95">Finalizar compra</Link>
     </aside>
   </div>;
 }

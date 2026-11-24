@@ -7,7 +7,7 @@ import { escolherFrete, linkWhatsApp, mensagemWhatsApp, novoNumero, pedidoSchema
 import { origemDe } from "@/lib/origem";
 
 // Creates an order from the payment page. Prices, coupon, shipping and total are worked out here. Then either the
-// payment link (Asaas, or Mercado Pago; see lib/pagamento) or a WhatsApp message to close the sale by hand.
+// Asaas payment link (lib/pagamento) or, without Asaas, a WhatsApp message to close the sale by hand.
 const isRateLimited = createRateLimiter(12);
 
 export async function POST(request: Request) {

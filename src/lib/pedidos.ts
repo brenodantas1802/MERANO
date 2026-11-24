@@ -168,14 +168,13 @@ export const linkWhatsApp = (mensagem: string) => `https://wa.me/${WHATSAPP_NUME
 
 // Applies what the payment provider says (read straight from it, never from the browser) to its order. Only a paid
 // payment of the full amount marks the order as paid; anything else is just noted. `pago` is the provider's own
-// verdict (Asaas); without it, Mercado Pago's "approved".
-export async function registrarPagamento(admin: SupabaseClient, pagamento: { id: string; status: string; pedidoId: string; valor: number; metodo: string; pago?: boolean; provedor?: string }) {
+// verdict (Asaas: confirmed or received).
+export async function registrarPagamento(admin: SupabaseClient, pagamento: { id: string; status: string; pedidoId: string; valor: number; metodo: string; pago: boolean; provedor?: string }) {
   const { data: pedido } = await admin.from("pedidos").select("id, status, total, pagamento, cupom").eq("id", pagamento.pedidoId).maybeSingle();
   if (!pedido) return null;
-  const aprovado = pagamento.pago ?? pagamento.status === "approved";
-  const pago = aprovado && Math.abs(Number(pedido.total) - pagamento.valor) < 0.06;
+  const pago = pagamento.pago && Math.abs(Number(pedido.total) - pagamento.valor) < 0.06;
   const novoStatus = pago && pedido.status === "aguardando_pagamento" ? "pago" : pedido.status;
-  const registro = { ...pedido.pagamento, id: pagamento.id, ...(pagamento.provedor === "mercadopago" ? { mp_id: pagamento.id } : {}), provedor: pagamento.provedor ?? pedido.pagamento?.provedor, status: pagamento.status, metodo: pagamento.metodo, atualizado: new Date().toISOString() };
+  const registro = { ...pedido.pagamento, id: pagamento.id, provedor: pagamento.provedor ?? pedido.pagamento?.provedor, status: pagamento.status, metodo: pagamento.metodo, atualizado: new Date().toISOString() };
   await admin.from("pedidos").update({ status: novoStatus, pagamento: registro, atualizado_em: new Date().toISOString() }).eq("id", pedido.id);
   return novoStatus as StatusPedido;
 }

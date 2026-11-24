@@ -10,7 +10,9 @@ import { FavoriteButton } from "@/components/favorite-button";
 
 // A tall photo on the ice-white tile with the piece's other views behind side arrows; underneath, in the Saint Tropez
 // way the owners picked (2026-11-24), the name, the price and the price in 3 instalments.
-export function ProductCard({ product }: { product: Product }) {
+// `destaque`: one of the first cards on the screen, whose photo loads right away instead of lazily (2026-11-24: on the
+// shop the first photo is what the page waits on to look ready).
+export function ProductCard({ product, destaque = false }: { product: Product; destaque?: boolean }) {
   const discounted = product.salePrice && product.salePrice < product.price;
   const price = getProductPrice(product);
   const photos = product.gallery.length ? product.gallery : [product.image];
@@ -29,7 +31,7 @@ export function ProductCard({ product }: { product: Product }) {
     <Link href={`/produto/${product.id}`} aria-label={`Ver ${product.name}`} transitionTypes={["nav-forward"]}>
       <ViewTransition name={`produto-${product.id}`} share="morph" default="none">
         <div onPointerEnter={() => setWarm(true)} className="foto-gelo relative aspect-[.82] overflow-hidden">
-          {photos.map((src, photo) => (photo === index || warm) && <Image key={src} src={src} alt={photo ? `${product.name}, vista ${photo + 1}` : product.name} fill sizes="(min-width: 768px) 33vw, 50vw" className={`object-cover transition-opacity duration-500 ${photo === index ? "opacity-100" : "opacity-0"}`} />)}
+          {photos.map((src, photo) => (photo === index || warm) && <Image key={src} src={src} alt={photo ? `${product.name}, vista ${photo + 1}` : product.name} {...(destaque && photo === 0 ? { loading: "eager" as const, fetchPriority: "high" as const } : {})} fill sizes="(min-width: 768px) 33vw, 50vw" className={`object-cover transition-opacity duration-500 ${photo === index ? "opacity-100" : "opacity-0"}`} />)}
           <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-col items-start gap-1.5">
             {/* A lower price (salePrice, none since 2026-11-24) gets a badge; otherwise the launch one. */}
             {(discounted || product.lancamento) && <span className="rounded-full bg-[var(--vinho)] px-2.5 py-1 text-[11px] font-medium text-[var(--creme)]">{discounted ? "Pré-venda" : "Lançamento"}</span>}

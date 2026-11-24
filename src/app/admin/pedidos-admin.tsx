@@ -34,8 +34,8 @@ const cpfBonito = (cpf: string) => soDigitos(cpf).replace(/^(\d{3})(\d{3})(\d{3}
 const celularBonito = (celular: string) => soDigitos(celular).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
 const cepBonito = (cep: string) => soDigitos(cep).replace(/^(\d{5})(\d{3})$/, "$1-$2");
 const reais = (valor: unknown) => Number(valor ?? 0).toFixed(2).replace(".", ",");
-const NOMES_PROVEDOR: Record<string, string> = { asaas: "Asaas", mercadopago: "Mercado Pago" };
-const provedorDo = (pedido: Pedido) => NOMES_PROVEDOR[pedido.pagamento?.provedor ?? ""] ?? (pedido.pagamento?.mp_id || pedido.pagamento?.preferencia ? "Mercado Pago" : "on-line");
+const NOMES_PROVEDOR: Record<string, string> = { asaas: "Asaas" };
+const provedorDo = (pedido: Pedido) => NOMES_PROVEDOR[pedido.pagamento?.provedor ?? ""] ?? "on-line";
 const formaPagamento = (pedido: Pedido) => pedido.metodo === "whatsapp" ? "WhatsApp" : `${pedido.metodo === "pix" ? "Pix" : "Cartão"} (${provedorDo(pedido)})`;
 
 function dadosDeEnvio(pedido: Pedido) {

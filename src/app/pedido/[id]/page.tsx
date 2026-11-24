@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { createSecretClient } from "@/lib/supabase/publico";
@@ -28,9 +29,10 @@ const TITULO: Record<StatusPedido, [string, string]> = {
 // Orders keep their price for two days ("Pagar agora" opens a fresh payment link until then).
 const passouDeDoisDias = (criadoEm: string) => Date.now() - new Date(criadoEm).getTime() > 2 * 86400_000;
 
-export default async function PedidoPage({ params, searchParams }: PageProps<"/pedido/[id]">) {
+export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) {
   const { id } = await params;
-  const busca = await searchParams;
+  // Always read fresh at request time: an order's status changes, so the page must never be kept prerendered.
+  await connection();
   const admin = createSecretClient();
   if (!admin || !/^[0-9a-f-]{36}$/.test(id)) notFound();
 
@@ -39,7 +41,7 @@ export default async function PedidoPage({ params, searchParams }: PageProps<"/p
   if (!pedido) notFound();
 
   // Back from the payment: confirm it right away instead of waiting for the notification.
-  if (await conferirRetorno(admin, pedido, busca).catch(() => false)) pedido = (await ler()) ?? pedido;
+  if (await conferirRetorno(admin, pedido).catch(() => false)) pedido = (await ler()) ?? pedido;
 
   const status = pedido.status;
   const [linha1, linha2] = TITULO[status];

@@ -45,7 +45,10 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
   const [buyOffScreen, setBuyOffScreen] = useState(false);
   // While someone types in a form further down (e.g. a review), the floating bar would cover it.
   const [typing, setTyping] = useState(false);
-  const barOn = buyOffScreen && !typing;
+  // Phones: the bar waits until the page has scrolled a little. Right after the page opens, the name, the price and the
+  // instalments sit just under the photo, and the bar would cover them (2026-11-24).
+  const [rolou, setRolou] = useState(false);
+  const barOn = buyOffScreen && !typing && rolou;
 
   useEffect(() => {
     const element = buyRef.current;
@@ -53,6 +56,13 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
     const observer = new IntersectionObserver(([entry]) => setBuyOffScreen(!entry.isIntersecting));
     observer.observe(element);
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setRolou(window.scrollY > window.innerHeight * 0.3);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
