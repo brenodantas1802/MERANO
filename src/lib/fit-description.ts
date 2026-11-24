@@ -4,8 +4,12 @@ import type { SizeRow } from "./products";
 
 const SIZES = ["P", "M", "G"];
 
-// The cut itself, said in every try-on: the garment shots are mockups of an older dropped-shoulder cut.
-export const CORTE_REGULAR = "MODELAGEM DA PEÇA: camiseta REGULAR, de corte clássico e reto (NÃO é oversized, NÃO é boxy): a costura do ombro fica na ponta do ombro, as mangas são retas e terminam no meio do braço, e o corpo cai reto, com folga leve nas laterais. As fotos de referência da camiseta são mockups com ombro caído e corpo largo: copie delas só a cor, a estampa, a assinatura, a gola e o tecido, NUNCA o corte nem o caimento.";
+// The cut itself, said in every try-on. Since 2026-11-23 the garment shots are the owners' official photos of this
+// same regular tee (before, mockups of an older dropped-shoulder cut the model had to be told to ignore).
+// The proportions are measured on those photos (seen from the back, all five alike): body width 0.56-0.60 of the
+// length from collar to hem, sleeves ending at 0.44-0.50 of it. On a person the image model kept the silhouette of the
+// shirt they had on (a loose tee came out with dropped shoulders and elbow-length sleeves), hence the numbers.
+export const CORTE_REGULAR = "MODELAGEM DA PEÇA: camiseta REGULAR, de corte clássico e reto (NÃO é oversized, NÃO é boxy, NÃO tem ombro caído). As fotos de referência mostram esta mesma peça, nesse corte: siga delas o formato da camiseta (gola, ombro, mangas e corpo), além da cor, da estampa, da assinatura e do tecido. PROPORÇÕES DA PEÇA, as mesmas das fotos de referência: a costura do ombro fica na ponta do ombro da pessoa (num tamanho grande para ela, no máximo poucos centímetros além), nunca no ombro caído de uma camiseta oversized; as mangas são curtas e retas, cobrem só a metade de cima do braço e terminam bem acima do cotovelo, com a abertura a poucos centímetros do braço (nada de manga larga, comprida ou em sino); o corpo cai reto e é mais comprido do que largo: de costas, a largura da camiseta é pouco mais da metade do comprimento dela (cerca de 0,58 vez a distância da gola até a barra; uma camiseta quase tão larga quanto comprida está ERRADA). As laterais descem retas, só um pouco afastadas do tronco, sem volume sobrando, e abaixo das mangas os braços aparecem ao lado do corpo, com o tecido sem cobri-los.";
 
 // Without measurements, how each size sits next to the brand's usual regular fit (M on an average body).
 const RELATIVE: Record<number, string> = {

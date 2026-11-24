@@ -1,3 +1,4 @@
+import { CORTE_REGULAR } from "./fit-description";
 import type { Pose } from "./pose";
 import type { ShirtViews } from "./products";
 
@@ -20,10 +21,14 @@ const VIEW_DESCRIPTIONS: Record<ViewKey, string> = {
   right: "a LATERAL DIREITA da camiseta (o lado direito de quem a veste)",
 };
 
-// With a size to show, the garment shots give the design only; the fit comes from the size section.
+// The garment shots are the official photos of the regular tee (2026-11-23): they give the design and the shape of the
+// piece (MODELAGEM DA PEÇA, always at the end); with a size to show, how it sits on the body comes from the size section.
+// The shirt the person has on is to be redrawn, not reshaped: left to itself the model keeps its outline.
 const preservePersonPrompt = (sized: boolean) => `EDITAR A FOTO DA PESSOA, não criar uma pessoa nova. A imagem 1 é a foto-base e deve ser preservada: mantenha exatamente a mesma pessoa, rosto, identidade, expressão, tom de pele, cabelo, pose, ângulo do corpo, mãos, proporções corporais, enquadramento, câmera, iluminação e fundo. Faça somente uma troca virtual de roupa sobre a pessoa. Não substitua a pessoa, não mude a pose, não gire nem espelhe o corpo e não faça uma nova sessão de fotos.
 
-As demais imagens mostram a camiseta do produto, sem ninguém vestindo, cada uma de um ângulo. Use-as exclusivamente como referência exata da peça: ${sized ? "estampa, gola, costuras, textura, material, cores, etiquetas e todos os detalhes visuais. O corte, o tamanho e o caimento no corpo NÃO vêm dessas fotos: seguem a seção TAMANHO E CAIMENTO abaixo." : "estampa, gola, costuras, textura, material, cores, etiquetas e todos os detalhes visuais. O corte NÃO vem dessas fotos (são mockups com ombro caído): a peça real é uma camiseta REGULAR, de corte clássico, com a costura do ombro na ponta do ombro, mangas retas até o meio do braço e corpo reto com folga leve."} Reproduza textos e logotipos exatamente como estão, letra por letra. Não invente logotipos, textos, estampas ou detalhes que não estejam nessas imagens.
+A parte de cima que a pessoa veste na imagem 1 sai por inteiro: NÃO aproveite o contorno, o volume, a largura, o ombro, as mangas nem o comprimento dela. Desenhe a nova camiseta do zero sobre o corpo, com o formato e as proporções da peça descritos abaixo, mesmo que a roupa original seja mais larga, mais justa, mais curta ou mais comprida. Onde a roupa original cobria e a nova não cobre (por exemplo o braço abaixo de uma manga mais curta), mostre o corpo da pessoa de forma natural, com o mesmo tom de pele e a mesma luz.
+
+As demais imagens mostram a camiseta do produto, sem ninguém vestindo, cada uma de um ângulo. Use-as exclusivamente como referência exata da peça: estampa, gola, costuras, textura, material, cores, etiquetas, todos os detalhes visuais e o formato da peça (veja MODELAGEM DA PEÇA abaixo).${sized ? " O tamanho e o caimento no corpo da pessoa NÃO vêm dessas fotos: seguem a seção TAMANHO E CAIMENTO abaixo." : ""} Reproduza textos e logotipos exatamente como estão, letra por letra. Não invente logotipos, textos, estampas ou detalhes que não estejam nessas imagens.
 
 Resultado: uma edição fotográfica realista da imagem 1, com a camiseta trocada e todo o restante praticamente idêntico. Preserve a anatomia e evite mãos extras, membros deformados, rosto alterado, pessoa diferente, roupa genérica, estampa inventada ou fundo modificado.`;
 
@@ -81,7 +86,7 @@ function scaleInstruction(keys: ViewKey[], printScale?: { front?: string; back?:
   return parts.length ? `\n\n${parts.join("\n")}` : "";
 }
 
-// `fit` is the size-and-fit paragraph (lib/fit-description.ts); without it the shirt keeps the catalog's fit.
+// `fit` is the size-and-fit paragraph (lib/fit-description.ts, which opens with the cut); without it, the cut alone.
 export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject, fit?: string, printScale?: { front?: string; back?: string }): TryOnPlan {
   let keys = wantedViews(pose).filter((key) => views[key]);
   // The garment's plain colour/cut/fabric still has to come from somewhere when the catalog has no front shot.
@@ -98,6 +103,6 @@ export function planTryOn(views: ShirtViews, pose: Pose, subject?: Subject, fit?
 
   return {
     views: keys,
-    prompt: `${preservePersonPrompt(!!fit)}\n\n${subject ? `${subjectInstruction({ ...subject, cropImage })}\n\n` : ""}${imageList}\n\n${orientationInstruction(pose, has, imageOf)}${scaleInstruction(keys, printScale)}${fit ? `\n\n${fit}` : ""}`,
+    prompt: `${preservePersonPrompt(!!fit)}\n\n${subject ? `${subjectInstruction({ ...subject, cropImage })}\n\n` : ""}${imageList}\n\n${orientationInstruction(pose, has, imageOf)}${scaleInstruction(keys, printScale)}\n\n${fit ?? CORTE_REGULAR}`,
   };
 }

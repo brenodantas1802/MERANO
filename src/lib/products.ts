@@ -68,6 +68,11 @@ export const MATERIAL = "Camiseta regular unissex, 100% algodão penteado, malha
 export const PRECO_LANCAMENTO = 180;
 export const PRECO_PRE_VENDA = 160;
 
+// The back print's size and place, measured on the official photo (2026-11-23): width as a share of the shirt's back,
+// top and bottom as shares of its length from the collar down. Told to the try-on so the print keeps the photo's size
+// and place on any body (measured on the results: the Amore heart came out at 0.60-0.74 of the back, photo 0.66).
+const estampaCostas = (largura: number, de: number, ate: number) => `a arte ocupa cerca de ${largura}% da largura das costas da camiseta e vai de ${de}% a ${ate}% do comprimento dela, contando da gola para a barra, centralizada, exatamente como na foto de referência. É uma estampa GRANDE: não a diminua, não a afaste da gola e não deixe sobrar mais tecido liso em volta do que na foto.`;
+
 // Photos: the owners' official ones of 2026-11-23 (regular cut, studio white), re-framed so every shirt sits at the same
 // size and place (Amore White's back came later the same day).
 export const products: Product[] = [
@@ -81,6 +86,7 @@ export const products: Product[] = [
     image: "/imagens/merano-assets/produtos/amore-black-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/amore-black-verso.jpg", "/imagens/merano-assets/produtos/amore-black-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/amore-black-verso.jpg", front: "/imagens/merano-assets/produtos/amore-black-frente.jpg" },
+    printScale: { back: estampaCostas(80, 20, 66) },
     tags: ["amore", "amor", "coracao", "aquarela", "manuscrito", "preto", "black"],
     category: "Camisetas",
     collection: "colecao-01",
@@ -102,6 +108,7 @@ export const products: Product[] = [
     image: "/imagens/merano-assets/produtos/amore-white-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/amore-white-verso.jpg", "/imagens/merano-assets/produtos/amore-white-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/amore-white-verso.jpg", front: "/imagens/merano-assets/produtos/amore-white-frente.jpg" },
+    printScale: { back: estampaCostas(73, 19, 62) },
     tags: ["amore", "amor", "coracao", "aquarela", "manuscrito", "branco", "white"],
     category: "Camisetas",
     collection: "colecao-01",
@@ -123,6 +130,7 @@ export const products: Product[] = [
     image: "/imagens/merano-assets/produtos/riviera-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/riviera-verso.jpg", "/imagens/merano-assets/produtos/riviera-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/riviera-verso.jpg", front: "/imagens/merano-assets/produtos/riviera-frente.jpg" },
+    printScale: { back: estampaCostas(82, 17, 77) },
     tags: ["riviera", "mar", "limao", "cafe", "verao", "italia", "branco"],
     category: "Camisetas",
     collection: "colecao-01",
@@ -144,6 +152,7 @@ export const products: Product[] = [
     image: "/imagens/merano-assets/produtos/arancia-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/arancia-verso.jpg", "/imagens/merano-assets/produtos/arancia-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/arancia-verso.jpg", front: "/imagens/merano-assets/produtos/arancia-frente.jpg" },
+    printScale: { back: estampaCostas(67, 14, 76) },
     category: "Camisetas",
     tags: ["arancia", "laranja", "fruta", "botanico", "verao", "natureza", "azul"],
     collection: "colecao-01",
@@ -165,6 +174,7 @@ export const products: Product[] = [
     image: "/imagens/merano-assets/produtos/why-not-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/why-not-verso.jpg", "/imagens/merano-assets/produtos/why-not-frente.jpg"],
     views: { back: "/imagens/merano-assets/produtos/why-not-verso.jpg", front: "/imagens/merano-assets/produtos/why-not-frente.jpg" },
+    printScale: { back: estampaCostas(68, 19, 58) },
     category: "Camisetas",
     tags: ["frase", "vinho", "wine", "pintado-a-mao", "preto"],
     collection: "colecao-01",
