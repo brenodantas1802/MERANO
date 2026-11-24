@@ -12,8 +12,10 @@ export type OpcaoFrete = { id: number; nome: string; empresa: string; preco: num
 // (the carrier charges by the real weight or by the box volume, whichever is higher).
 export const PACOTE_CAMISETA = { weight: 0.3, height: 5, width: 20, length: 28 };
 
-// PAC, SEDEX and Mini Envios. Jadlog (3) and Loggi only show up when one of their drop-off points is near the origin.
-const SERVICOS = "1,2,17,3";
+// PAC and SEDEX (Correios) and Jadlog (3), which only shows up when one of its drop-off points is near the origin.
+// No Mini Envios (17) since 2026-11-24: it takes parcels of up to 300 g, 24 x 16 x 4 cm and R$ 100 declared, and one
+// R$ 180 tee is over that, so the label couldn't be bought after the customer picked the cheapest option.
+const SERVICOS = "1,2,3";
 
 type RespostaSuperFrete = { id: number; name: string; price?: number; delivery_range?: { min: number; max: number }; delivery_time?: number; company?: { name: string }; has_error?: boolean; error?: string };
 
@@ -59,7 +61,6 @@ export async function cotarFrete(cep: string, pecas: number): Promise<OpcaoFrete
 export function freteExemplo(pecas: number): OpcaoFrete[] {
   const extra = (pecas - 1) * 2.5;
   return [
-    { id: 17, nome: "Mini Envios", empresa: "Correios", preco: 12.9 + extra, prazoMin: 6, prazoMax: 9 },
     { id: 1, nome: "PAC", empresa: "Correios", preco: 18.4 + extra, prazoMin: 5, prazoMax: 8 },
     { id: 2, nome: "SEDEX", empresa: "Correios", preco: 29.9 + extra, prazoMin: 1, prazoMax: 3 },
   ];

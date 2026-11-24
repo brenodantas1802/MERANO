@@ -84,7 +84,7 @@ Chaves e senhas **nunca** vão no chat, no WhatsApp ou no código: só na Vercel
 
 ### 1.4 Frete de verdade pela SuperFrete · vocês + Claude · fácil · 30 min
 
-- **Para que serve:** calcular o frete real (PAC, SEDEX, Mini Envios) pelo CEP do cliente.
+- **Para que serve:** calcular o frete real (PAC e SEDEX; Mini Envios não serve, porque só aceita até R$ 100 declarados) pelo CEP do cliente.
 - **O que agrega:** o cliente vê o preço e o prazo certos, e vocês não perdem dinheiro no envio.
 - **Sem isso:** o site mostra **valores de exemplo** (marcados assim na tela). O cliente paga um frete que não é o real: ou vocês pagam a diferença, ou cobram a mais.
 - **Passo a passo (conferido na documentação da SuperFrete em 24/11):**
