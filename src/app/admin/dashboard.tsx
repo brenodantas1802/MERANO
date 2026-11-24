@@ -9,6 +9,7 @@ import { FinanceiroAdmin } from "./financeiro-admin";
 import { ListaPreVenda, type Admins, type Autorizado, type PedidoAcesso } from "./lista-pre-venda";
 import { PedidosAdmin } from "./pedidos-admin";
 import { CuponsAdmin, type CupomAdmin } from "./cupons-admin";
+import { ContasAdmin, type Conta } from "./contas-admin";
 import type { Pedido } from "@/lib/pedidos";
 
 export type CriacaoAdmin = {
@@ -105,11 +106,11 @@ function useTema() {
   return { tema, trocar };
 }
 
-const SECOES = [["financeiro", "Financeiro"], ["pedidos", "Pedidos"], ["pre-venda", "Pré-venda"], ["cupons", "Cupons"], ["estampas", "Estampas"], ["emails", "E-mails"]] as const;
+const SECOES = [["financeiro", "Financeiro"], ["pedidos", "Pedidos"], ["pre-venda", "Pré-venda"], ["contas", "Quem entrou"], ["cupons", "Cupons"], ["estampas", "Estampas"], ["emails", "E-mails"]] as const;
 
 export type Financeiro = { resumo: ResumoFinanceiro; config: ConfigFinanceira; despesas: Despesa[]; disponivel: boolean };
 
-export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, admins }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; admins: Admins }) {
+export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, contas, admins }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; contas: Conta[] | null; admins: Admins }) {
   const { tema, trocar } = useTema();
   return <div className="painel min-h-screen" data-tema={tema || undefined}>
     <header className="sans sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur">
@@ -131,6 +132,7 @@ export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, li
       <FinanceiroAdmin {...financeiro} />
       <div id="pedidos" className="scroll-mt-28"><PedidosAdmin pedidos={pedidos} /></div>
       <div id="pre-venda" className="scroll-mt-28"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} admins={admins} /></div>
+      <div id="contas" className="scroll-mt-28"><ContasAdmin contas={contas} admins={admins} /></div>
       <div id="cupons" className="scroll-mt-28"><CuponsAdmin cupons={descontos} /></div>
       <Criacoes criacoes={criacoes} />
       <Cupons cupons={cupons} />

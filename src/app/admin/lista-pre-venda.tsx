@@ -28,11 +28,13 @@ function CopiarLink({ link }: { link: string }) {
 }
 
 // Makes or unmakes an administrator: the person then sees "Painel da equipe" in the menu (signed in with Google).
-function BotaoAdmin({ email, admins }: { email: string; admins: Admins }) {
+// Used here and in "Quem já entrou" (contas-admin). Your own access can't be taken away from the panel.
+export function BotaoAdmin({ email, admins }: { email: string; admins: Admins }) {
   const [salvando, startTransition] = useTransition();
   const [resposta, setResposta] = useState<RespostaLista>(null);
   const alvo = email.toLowerCase();
   if (admins.fixos.includes(alvo)) return <span className="sans rounded-full bg-[var(--areia)] px-3 py-1.5 text-[11px] uppercase tracking-[.12em]">Dono</span>;
+  if (alvo === admins.voce) return <span className="sans rounded-full bg-[var(--areia)] px-3 py-1.5 text-[11px] uppercase tracking-[.12em]">Admin · você</span>;
   const ehAdmin = admins.painel.includes(alvo);
   return <span className="flex flex-col items-end">
     <button type="button" disabled={salvando} onClick={() => startTransition(async () => setResposta(await mudarAdmin(alvo, !ehAdmin)))} aria-pressed={ehAdmin} className={`press sans h-9 rounded-full px-3.5 text-[11px] uppercase tracking-[.12em] ${ehAdmin ? "bg-[var(--vinho)] text-[var(--creme)]" : "border border-[var(--line)] hover:bg-[var(--realce)]"} ${salvando ? "opacity-50" : ""}`}>{ehAdmin ? "Admin ✓" : "Tornar admin"}</button>
@@ -90,7 +92,7 @@ export function ListaPreVenda({ lista, pedidos, origem, cadeadoLigado, admins }:
     </div>
     <p className="sans mt-4 max-w-2xl text-sm text-[var(--muted)]">Mande este link no grupo. A pessoa entra com o Google ou cria a conta. Se o e-mail ou o WhatsApp dela estiver na lista abaixo, a conta é liberada na hora e para sempre; se não estiver, ela manda um pedido com o WhatsApp e aparece em “Pedidos de acesso” para vocês liberarem. Vocês, donos, já estão liberados. {cadeadoLigado ? "O site está trancado para quem não está na lista." : "O cadeado está desligado: o site está aberto para todo mundo (liga com PRE_VENDA=1 na Vercel)."}</p>
     <CopiarLink link={`${origem}/pre-venda`} />
-    <p className="sans mt-4 text-[13px] text-[var(--muted)]"><b className="font-medium text-[var(--ink)]">Administradores:</b> {[...admins.fixos.map((email) => `${email} (dono)`), ...admins.painel].join(" · ") || "nenhum"}. Para tornar alguém administrador, toque em “Tornar admin” ao lado da pessoa na lista. Ela precisa entrar com o Google, com esse mesmo e-mail.</p>
+    <p className="sans mt-4 text-[13px] text-[var(--muted)]"><b className="font-medium text-[var(--ink)]">Administradores:</b> {[...admins.fixos.map((email) => `${email} (dono)`), ...admins.painel].join(" · ") || "nenhum"}. Para tornar alguém administrador (ou tirar), use o botão ao lado da pessoa em <a href="#contas" className="underline underline-offset-4 hover:text-[var(--ink)]">Quem já entrou</a> ou na lista abaixo. Ela precisa entrar com o Google, com esse mesmo e-mail.</p>
 
     {lista === null ? <p className="sans mt-8 max-w-2xl text-sm text-[var(--muted)]">Para usar a lista, cadastre a variável <code>SUPABASE_SECRET_KEY</code> (chave secreta do Supabase) na Vercel.</p> : <>
       <div className={`mt-8 rounded-[20px] border px-5 py-2 ${pendentes.length ? "border-[var(--vinho)]/40 bg-[var(--vinho)]/[.04]" : "border-[var(--line)]"}`}>
