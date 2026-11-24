@@ -7,6 +7,6 @@ export default function PrivacyPage() {
     { title: "Cupom e novidades", text: "Se você deixar seu e-mail no aviso de cupom e marcar que aceita, guardamos esse e-mail para enviar o cupom e as novidades da Meranno. Você pode pedir para sair da lista a qualquer momento." },
     { title: "Avaliações", text: "Ao avaliar uma peça, publicamos o nome que você informar, a nota e o texto, depois de conferidos pela equipe." },
     { title: "Cookies de análise", text: "Só com a sua permissão, no aviso de cookies, usamos o Microsoft Clarity para ver de forma agregada onde as pessoas clicam e até onde rolam as páginas, para melhorar o site. Você pode recusar e o site funciona normalmente." },
-    { title: "Seus direitos", text: "Você pode pedir acesso, correção ou exclusão dos seus dados pelo e-mail equipe@merano.com." },
+    { title: "Seus direitos", text: "Você pode pedir acesso, correção ou exclusão dos seus dados pelo e-mail contato.meranno@gmail.com." },
   ]} />;
 }
