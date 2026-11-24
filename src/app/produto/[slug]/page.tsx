@@ -12,10 +12,10 @@ import { Avaliacoes } from "@/components/avaliacoes";
 
 export function generateStaticParams() { return products.map((product) => ({ slug: product.id })); }
 
-// The same print in other colours is its own product, named "<print> · <colour>".
+// The same tee in other colours is its own product, tied by `familia` (Amore Black and Amore White): each colour is a
+// swatch that opens that product, with its own photos.
 function colorwaysOf(product: Product): Colorway[] {
-  const base = product.name.split(" · ")[0];
-  const ways = products.filter((item) => item.name.split(" · ")[0] === base);
+  const ways = product.familia ? products.filter((item) => item.familia === product.familia) : [product];
   const seen = new Set<string>();
   return ways.filter((item) => !seen.has(item.colors[0]) && seen.add(item.colors[0])).map((item) => ({ id: item.id, color: item.colors[0] }));
 }

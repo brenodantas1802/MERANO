@@ -2,7 +2,8 @@
 //   SUPERFRETE_TOKEN     token from web.superfrete.com → Integrações → Desenvolvedores (server only)
 //   FRETE_CEP_ORIGEM     CEP the parcels leave from
 //   SUPERFRETE_URL       optional; https://sandbox.superfrete.com to test with a sandbox token
-//   SUPERFRETE_CONTATO   optional; e-mail for SuperFrete's technical contact (they ask for one in the User-Agent)
+//   SUPERFRETE_CONTATO   optional; e-mail for SuperFrete's technical contact, which their docs make mandatory in the
+//                        User-Agent. Defaults to the shop's public contact address.
 
 export type OpcaoFrete = { id: number; nome: string; empresa: string; preco: number; prazoMin: number; prazoMax: number };
 
@@ -20,12 +21,12 @@ export const freteConfigurado = () => Boolean(process.env.SUPERFRETE_TOKEN && pr
 
 export async function cotarFrete(cep: string, pecas: number): Promise<OpcaoFrete[]> {
   const base = process.env.SUPERFRETE_URL ?? "https://api.superfrete.com";
-  const contato = process.env.SUPERFRETE_CONTATO;
+  const contato = process.env.SUPERFRETE_CONTATO || "contato.meranno@gmail.com";
   const response = await fetch(`${base}/api/v0/calculator`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.SUPERFRETE_TOKEN}`,
-      "User-Agent": contato ? `Meranno Site 1.0 (${contato})` : "Meranno Site 1.0",
+      "User-Agent": `Meranno Site 1.0 (${contato})`,
       Accept: "application/json",
       "Content-Type": "application/json",
     },

@@ -5,6 +5,9 @@ export type ShirtViews = { front?: string; back: string; left?: string; right?: 
 export type Product = {
   id: string;
   name: string;
+  // The same tee in other colours: listed apart in the shop, switched by colour on the product page (owners, 2026-11-24:
+  // Amore Black and Amore White are one tee, shown as two because both did well in the validation).
+  familia?: string;
   description: string;
   price: number;
   salePrice?: number;
@@ -95,6 +98,7 @@ export const products: Product[] = [
     stock: 10,
     fits: [...TAMANHOS_LOJA],
     lancamento: true,
+    familia: "amore",
     colors: ["Preto"],
   },
   {
@@ -116,6 +120,7 @@ export const products: Product[] = [
     stock: 10,
     fits: [...TAMANHOS_LOJA],
     lancamento: true,
+    familia: "amore",
     colors: ["Branco"],
   },
   {

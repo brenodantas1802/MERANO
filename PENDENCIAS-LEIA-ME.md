@@ -87,16 +87,16 @@ Chaves e senhas **nunca** vão no chat, no WhatsApp ou no código: só na Vercel
 - **Para que serve:** calcular o frete real (PAC, SEDEX, Mini Envios) pelo CEP do cliente.
 - **O que agrega:** o cliente vê o preço e o prazo certos, e vocês não perdem dinheiro no envio.
 - **Sem isso:** o site mostra **valores de exemplo** (marcados assim na tela). O cliente paga um frete que não é o real: ou vocês pagam a diferença, ou cobram a mais.
-- **Passo a passo:**
-  1. Criem a conta em https://web.superfrete.com (com o CPF ou CNPJ de quem envia).
-  2. No painel → **Integrações** → **Desenvolvedores** → **Gerar token**. Ele aparece **uma vez só**: copiem na hora.
-  3. **Pesem uma camiseta já embalada** e meçam o envelope. Hoje o site usa 300 g e 28 × 20 × 5 cm. Se for diferente, passem os números ao Claude.
-  4. Cadastrem na Vercel (veja "Como cadastrar uma variável", acima):
-     - `SUPERFRETE_TOKEN`: o token do passo 2.
-     - `FRETE_CEP_ORIGEM`: o CEP de onde as camisetas saem.
-     - `SUPERFRETE_CONTATO` (opcional): o e-mail da loja.
-  5. Digam ao Claude "pode publicar". Ele publica e testa o frete com um CEP real.
-  6. **No dia a dia:** quando um pedido for pago, comprem a etiqueta no painel da SuperFrete (com saldo na conta), postem e colem o código de rastreio no pedido, no `/admin`.
+- **Passo a passo (conferido na documentação da SuperFrete em 24/11):**
+  1. **Conta:** https://web.superfrete.com → **Criar conta**, com o CNPJ do MEI e o e-mail `contato.meranno@gmail.com`. Cadastrem o endereço de onde as camisetas saem.
+  2. **Token:** abram https://web.superfrete.com/#/integrations → no cartão **Desenvolvedores**, cliquem em **Integrar** → **Confirmar**. O token aparece na tela: copiem na hora e colem direto na Vercel (não mandem no chat).
+  3. **Na Vercel** (https://vercel.com/brenodantas1802-2440s-projects/merano/settings/environment-variables → **Add Environment Variable**, ambiente **Production**):
+     - `SUPERFRETE_TOKEN` (tipo **Secret**): o token do passo 2.
+     - `FRETE_CEP_ORIGEM` (tipo **Config**): o CEP de onde as camisetas saem, só os números.
+     - O e-mail de contato que a SuperFrete exige já vai pelo código (`contato.meranno@gmail.com`): não precisa cadastrar.
+  4. **Medidas do pacote:** pesem uma camiseta já embalada e meçam a caixa (comprimento × largura × altura, em cm). Hoje o site usa 300 g e 28 × 20 × 5 cm. Se for diferente, passem os números ao Claude: a transportadora cobra pelo maior entre o peso real e o volume da caixa.
+  5. Digam ao Claude "pode publicar". Ele publica e testa o frete com um CEP real (o "Valores de exemplo" some da tela).
+  6. **No dia a dia:** quando um pedido for pago, comprem a etiqueta no painel da SuperFrete (com saldo, recarga por Pix), imprimam, postem e colem o código de rastreio no pedido, no `/admin`.
 
 ### 1.5 E-mail de confirmação de conta (SMTP) · vocês · médio · 20 min
 

@@ -87,13 +87,16 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
 
   return <div className="w-full">
     <p className="text-[13px]">Cor: {color}</p>
-    <div className="mt-3 flex gap-2">
+    {/* Each colour of the same tee (Amore: Preto and Branco) is a pill with its name; the other one opens that colour's
+        page, photos and all. */}
+    <div className="mt-3 flex flex-wrap gap-2">
       {colorways.map((way) => {
         const active = way.id === product.id;
-        const swatch = <span className="block h-8 w-8 rounded-full border border-[var(--ink)]/15" style={{ background: SWATCH[way.color] ?? "#ccc" }} />;
+        const conteudo = <><span className="block h-6 w-6 shrink-0 rounded-full border border-[var(--ink)]/20" style={{ background: SWATCH[way.color] ?? "#ccc" }} /><span>{way.color}</span></>;
+        const pilula = "flex min-h-11 items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-4 text-[13px]";
         return active
-          ? <span key={way.id} aria-label={`${way.color}, cor atual`} className="rounded-full p-0.5 ring-1 ring-[var(--ink)]">{swatch}</span>
-          : <Link key={way.id} href={`/produto/${way.id}`} aria-label={`Ver em ${way.color}`} className="press toque rounded-full p-0.5 ring-1 ring-transparent hover:ring-[var(--ink)]/40">{swatch}</Link>;
+          ? <span key={way.id} aria-current="true" aria-label={`${way.color}, cor escolhida`} className={`${pilula} shadow-[inset_0_0_0_1.5px_var(--ink)]`}>{conteudo}</span>
+          : <Link key={way.id} href={`/produto/${way.id}`} aria-label={`Ver em ${way.color}`} className={`press ${pilula} text-[var(--muted)] shadow-[inset_0_0_0_1px_var(--line)] hover:text-[var(--ink)] hover:shadow-[inset_0_0_0_1px_var(--ink)]`}>{conteudo}</Link>;
       })}
     </div>
 
