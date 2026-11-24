@@ -5,7 +5,7 @@ import { COOKIE_ACESSO, acessoValido, preVendaAtiva, rotaLivre } from "@/lib/pre
 
 // 1. Pre-sale lock: while PRE_VENDA is on, a visitor without the access cookie (given on /pre-venda to the people
 //    on the list) sees "Coming soon" on every page (same address, the content is swapped for /em-breve).
-// 2. On the routes that read the session (/admin, /conta, /pre-venda): keeps the Supabase session fresh (rotating its cookies, which pages can't do)
+// 2. On the routes that read the session (/admin, /conta, /pre-venda, /meus-pedidos): keeps the Supabase session fresh (rotating its cookies, which pages can't do)
 //    and turns away anyone not signed in with Google before /admin renders. The admin page checks the administrator.
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
     return trancado;
   }
 
-  if (!["/admin", "/conta", "/pre-venda"].some((rota) => path.startsWith(rota))) return NextResponse.next();
+  if (!["/admin", "/conta", "/pre-venda", "/meus-pedidos"].some((rota) => path.startsWith(rota))) return NextResponse.next();
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {

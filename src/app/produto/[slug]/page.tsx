@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { getCollection, getProduct, getSizeChart, products, formatPrice, getProductPrice, similarProducts, TOLERANCIA_CM, type Product } from "@/lib/products";
+import { getCollection, getProduct, getSizeChart, products, formatPrice, getProductPrice, parcelado, similarProducts, TOLERANCIA_CM, type Product } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
 import { ENTREGA_PRE_VENDA } from "@/lib/pedidos";
 import { ProductGallery3D } from "@/components/product-gallery-3d";
@@ -49,13 +49,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {product.lancamento && <p className="secao mb-1 text-[11px]">{getCollection(product.collection)?.name ?? "Lançamento"}</p>}
         <h1 className="text-[15px] font-medium">{product.name}</h1>
         <p className="mt-1 text-[15px]">{product.salePrice && <del className="mr-2 text-[var(--muted)]">{formatPrice(product.price)}</del>}{formatPrice(price)}</p>
+        <p className="sans mt-0.5 text-[13px] text-[var(--muted)]">{parcelado(price)}</p>
       </div>
 
       <div className="[grid-area:details] md:mt-6 md:border-t-0">
         <Detail title="Detalhes do produto">
           <p>{product.description}</p>
           <p className="mt-2">Modelagem regular, de corte clássico, de {product.fits[0]} a {product.fits[product.fits.length - 1]}. Escolha o tamanho que você costuma usar.</p>
-          <p className="mt-2">Pré-venda: entrega prevista para {ENTREGA_PRE_VENDA.longa}.</p>
+          <p className="mt-2">Pré-venda: entrega prevista {ENTREGA_PRE_VENDA.longa}.</p>
         </Detail>
         <Detail title="Composição e cuidados">
           <p>{product.material}.</p>

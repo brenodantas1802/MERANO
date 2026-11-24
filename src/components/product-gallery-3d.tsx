@@ -122,7 +122,7 @@ export function ProductGallery3D({ id, name, images, views }: { id: string; name
             className={count > 1 ? (dragging ? "cursor-grabbing select-none" : "cursor-grab") : undefined}
           >
             <Lens zoomFactor={2} lensSize={190} hovering={hovering && !dragging} setHovering={setHovering}>
-              <div className="relative aspect-[.9] w-full overflow-hidden bg-[var(--paper)]">
+              <div className="foto-gelo relative aspect-[.9] w-full overflow-hidden">
                 {frames.map((frame, order) => (
                   <Slide key={frame.src} frame={frame} alt={`${name}, ${frame.label.toLowerCase()}`} order={order} count={count} position={position} />
                 ))}

@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { avisoDeCookiesPendente, EVENTO_CONSENTIMENTO } from "@/lib/consentimento";
 
 const SEEN_KEY = "merano-discount-popup-seen";
@@ -11,6 +12,8 @@ const ACCOUNT_KEY = "merano-account-exists";
 export const CUPOM_KEY = "meranno-cupom";
 
 export function FirstPurchasePopup() {
+  // Never over the checkout: it waits for the next page.
+  const naCompra = usePathname().startsWith("/pagamento");
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -67,7 +70,7 @@ export function FirstPurchasePopup() {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && !naCompra && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

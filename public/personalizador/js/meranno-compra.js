@@ -9,7 +9,7 @@
   const FIT_NAMES = { regular: 'Regular', oversized: 'Oversized', boxy: 'Boxy' };
   const SIZES = ['P', 'M', 'G'];
   const MAX_UPLOAD = 25 * 1024 * 1024 - 64 * 1024; // the bucket's limit, with some room
-  const price = Number(window.frameElement?.dataset.preco) || 189;
+  const price = Number(window.frameElement?.dataset.preco) || 180;
   const money = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const $ = (selector, root = document) => root.querySelector(selector);
   const el = (tag, attrs = {}, text) => { const node = document.createElement(tag); for (const [key, value] of Object.entries(attrs)) { if (key === 'class') node.className = value; else node.setAttribute(key, value); } if (text !== undefined) node.textContent = text; return node; };

@@ -12,7 +12,7 @@ const ERRORS: Record<string, string> = {
 
 const MENU = [
   { href: "/meu-fit", title: "Meranno Fit", text: "Suas medidas, seu tamanho e suas peças." },
-  { href: "/meu-fit#pecas", title: "Meus pedidos", text: "O que você já escolheu na Meranno." },
+  { href: "/meus-pedidos", title: "Meus pedidos", text: "Seus pedidos na Meranno, do pagamento à entrega." },
   { href: "/provador", title: "Provador virtual", text: "Veja as estampas em você." },
 ];
 

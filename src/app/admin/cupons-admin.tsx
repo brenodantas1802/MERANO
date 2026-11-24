@@ -40,7 +40,7 @@ export function CuponsAdmin({ cupons }: { cupons: CupomAdmin[] | null }) {
 
     <form action={criar} className="mt-10 grid gap-4 md:grid-cols-[1fr_140px_2fr]">
       <label className="sans block text-[12px] text-[var(--muted)]">Código<input name="codigo" required minLength={3} maxLength={30} autoCapitalize="characters" autoComplete="off" spellCheck={false} placeholder="EX: AMIGO15" className={`${campo} uppercase tracking-[.06em]`} /></label>
-      <label className="sans block text-[12px] text-[var(--muted)]">Desconto (%)<input name="percentual" required type="number" min={1} max={90} step={1} inputMode="numeric" placeholder="10" className={campo} /></label>
+      <label className="sans block text-[12px] text-[var(--muted)]">Desconto (%)<input name="percentual" required type="number" min={1} max={99} step={1} inputMode="numeric" placeholder="10" className={campo} /></label>
       <label className="sans block text-[12px] text-[var(--muted)]">Para que é (só vocês veem)<input name="descricao" maxLength={200} placeholder="Ex: homenagem ao…" className={campo} /></label>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:col-span-3">
         <label className="sans flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" name="primeira_compra" className="h-5 w-5 accent-[var(--vinho)]" /> Só vale na primeira compra de cada e-mail</label>

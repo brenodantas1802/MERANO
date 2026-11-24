@@ -1,4 +1,5 @@
 import type { Pedido } from "@/lib/pedidos";
+import { PARCELAS_MAX } from "@/lib/products";
 
 // Asaas Checkout: the customer pays on Asaas's own page (Pix, or credit card in up to 3 instalments), so card data
 // never touches this site. Docs: https://docs.asaas.com/docs/checkout-asaas
@@ -71,7 +72,7 @@ export async function criarCheckout(pedido: Pedido, origem: string) {
   const corpo = {
     billingTypes: pix ? ["PIX"] : ["CREDIT_CARD"],
     chargeTypes: pix ? ["DETACHED"] : ["DETACHED", "INSTALLMENT"],
-    ...(pix ? {} : { installment: { maxInstallmentCount: 3 } }),
+    ...(pix ? {} : { installment: { maxInstallmentCount: PARCELAS_MAX } }),
     // A day to pay; after that "Pagar agora" on the order's page opens a new one.
     minutesToExpire: 1440,
     externalReference: pedido.id,

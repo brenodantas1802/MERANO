@@ -7,14 +7,17 @@
 	--latao: #BA9654;
 	--nogueira: #71452F;
 	--ink: #141110;
-	--muted: #6E6259;
-	--paper: #F6F1E8;
-	--cream: #EFE7DA;
+	--muted: #6B6560;
+	/* Light surfaces (owners, 2026-11-24, after the Saint Tropez site): a white page and an ice off-white behind the
+	   shirts (--gelo), in place of the cream paper (#F6F1E8) and beige (#EFE7DA) of the "Salão" palette. */
+	--paper: #FFFFFF;
+	--cream: #F4F4F2;
+	--gelo: #F4F4F2;
 	--moss: #536a57;
 	--clay: #b88768;
-	--line: #E3D9C9;
+	--line: #E5E5E2;
 	--origem: #000000;
-	--areia: #E3D9C9;
+	--areia: #E5E5E2;
 	--creme: #F6F1E8;
 	--terra-dark: #141110;
 	--terra: #551E2B;
@@ -23,13 +26,15 @@
 	--mar: #2f7f8a;
 	--mar-fundo: #551E2B;
 	--espuma: #d9e8e2;
-	--areia-clara: #F1EADF;
+	--areia-clara: #F5F5F3;
 	/* Surfaces that follow the theme: cards and form fields. */
-	--superficie: #F6F1E8;
+	--superficie: #F7F7F5;
 	--campo: rgba(255, 255, 255, .7);
+	/* Checkout field borders (Shopify-like grey). */
+	--borda-campo: #D6D6D3;
 }
 
-/* Dark theme (owners, 2026-11-22: "preto e bordô"), the default; html[data-tema] comes from lib/tema. */
+/* Dark theme (owners, 2026-11-22: "preto e bordô"), an option since light became the default (2026-11-24); html[data-tema] comes from lib/tema. */
 :root[data-tema="escuro"] {
 	color-scheme: dark;
 	--paper: #0C0909;
@@ -37,6 +42,7 @@
 	--muted: #A69689;
 	--line: #2A2120;
 	--cream: #1A1313;
+	--gelo: #1A1313;
 	--areia: #2A1D1F;
 	--areia-clara: #141010;
 	--terra-dark: #1A1212;
@@ -45,6 +51,7 @@
 	--mar-fundo: #6B1F30;
 	--superficie: #171112;
 	--campo: rgba(255, 255, 255, .06);
+	--borda-campo: #3A2E2C;
 }
 
 * { box-sizing: border-box; }
@@ -130,16 +137,16 @@ a, button, summary, label, select, [role="button"], input[type="checkbox"], inpu
 .carregando { opacity: 0; transition: none; animation: spin 1s linear infinite, carregando-surgir .2s .25s forwards; }
 @keyframes carregando-surgir { to { opacity: 1; } }
 .glass {
-	background: rgba(246, 241, 232, .66);
+	background: rgba(250, 250, 248, .7);
 	-webkit-backdrop-filter: blur(14px) saturate(1.4);
 	backdrop-filter: blur(14px) saturate(1.4);
 	border: 1px solid rgba(255, 255, 255, .6);
 	box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 18px 50px rgba(15, 18, 24, .16);
 }
 /* Cards inside a glass panel: a lighter frosted tile. */
-.glass-tile { background: rgba(251, 248, 242, .62); border: 1px solid rgba(255, 255, 255, .65); }
+.glass-tile { background: rgba(255, 255, 255, .72); border: 1px solid rgba(255, 255, 255, .7); }
 @media (prefers-reduced-transparency: reduce) {
-	.glass, .glass-tile { background: rgba(246, 241, 232, .98); -webkit-backdrop-filter: none; backdrop-filter: none; }
+	.glass, .glass-tile { background: rgba(250, 250, 248, .98); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 /* Instant feedback under the finger. */
 .press { transition: transform var(--dur-tap) var(--ease-out), opacity var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
@@ -243,3 +250,22 @@ html.entrada .veu-entrada { display: flex; }
 :root[data-tema="escuro"] .glass { background: rgba(16, 11, 11, .74); border-color: rgba(255, 255, 255, .08); box-shadow: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 18px 50px rgba(0, 0, 0, .5); }
 :root[data-tema="escuro"] .glass-tile { background: rgba(255, 255, 255, .05); border-color: rgba(255, 255, 255, .08); }
 @media (prefers-reduced-transparency: reduce) { :root[data-tema="escuro"] :is(.glass, .glass-tile) { background: #171112; } }
+
+/* Product photos on the ice tile: the studio-white background of the photos melts into the tile (multiply), so every
+   shirt sits on the same off-white as on the Saint Tropez site. In the dark theme the photos keep their own white. */
+.foto-gelo { background: var(--gelo); }
+:root:not([data-tema="escuro"]) .foto-gelo img { mix-blend-mode: multiply; }
+
+/* The bag (2026-11-24, after the Ermos cart): a grey frosted panel that lets the page show through, with white cards. */
+.vidro-carrinho {
+	background: rgba(226, 226, 224, .58);
+	-webkit-backdrop-filter: blur(26px) saturate(1.25);
+	backdrop-filter: blur(26px) saturate(1.25);
+	border: 1px solid rgba(255, 255, 255, .55);
+	box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 24px 60px rgba(15, 18, 24, .22);
+}
+:root[data-tema="escuro"] .vidro-carrinho { background: rgba(16, 11, 11, .78); border-color: rgba(255, 255, 255, .08); box-shadow: 0 24px 60px rgba(0, 0, 0, .55); }
+@media (prefers-reduced-transparency: reduce) {
+	.vidro-carrinho { background: #ECECEA; -webkit-backdrop-filter: none; backdrop-filter: none; }
+	:root[data-tema="escuro"] .vidro-carrinho { background: #171112; }
+}

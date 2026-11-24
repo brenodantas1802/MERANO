@@ -80,7 +80,7 @@ export default async function PedidoPage({ params, searchParams }: PageProps<"/p
         ? <p>O pagamento não foi aprovado. Você pode tentar de novo, com outro cartão ou com Pix.</p>
         : emAnalise ? <p>O pagamento está em análise no {provedor}. Assim que for aprovado, esta página muda sozinha quando você voltar a ela.</p>
           : <p>{primeiroNome ? `${primeiroNome}, falta` : "Falta"} só o pagamento para garantir as suas peças.</p>)}
-      {status === "pago" && <p>Recebemos o pagamento{primeiroNome ? `, ${primeiroNome}` : ""}. Seu pedido está na nossa lista, com entrega prevista para {ENTREGA_PRE_VENDA.longa}.</p>}
+      {status === "pago" && <p>Recebemos o pagamento{primeiroNome ? `, ${primeiroNome}` : ""}. Seu pedido está na nossa lista, com entrega prevista {ENTREGA_PRE_VENDA.longa}.</p>}
       {status === "em_separacao" && <p>As peças estão sendo separadas e embaladas. O código de rastreio aparece aqui quando o pedido sair.</p>}
       {status === "enviado" && <p>O pedido saiu{pedido.frete?.nome ? ` por ${pedido.frete.nome}` : ""}.{pedido.rastreio ? "" : " O código de rastreio aparece aqui em breve."}</p>}
       {status === "entregue" && <p>Esperamos que goste. Qualquer coisa, é só chamar no WhatsApp.</p>}

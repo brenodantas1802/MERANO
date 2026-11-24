@@ -1,11 +1,15 @@
 "use client";
 
-import { createContext, useContext, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { CartDrawer } from "./cart-drawer";
+import { PRECO_PERSONALIZADA } from "@/lib/estampa";
+import { getProductPrice, products } from "@/lib/products";
 
 // `criacaoId` marks a tee made in the Personalizador: its art is stored in Supabase (criacoes_estampa).
 export type CartItem = { id: string; productId?: string; criacaoId?: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
-type CartContextValue = { items: CartItem[]; addItem: (item: Omit<CartItem, "quantity">) => void; removeItem: (id: string) => void; updateQuantity: (id: string, quantity: number) => void; clear: () => void; total: number; count: number; drawerOpen: boolean; openDrawer: () => void; closeDrawer: () => void };
+type NovoItem = Omit<CartItem, "quantity">;
+type CartContextValue = { items: CartItem[]; addItem: (item: NovoItem) => void; adicionar: (item: NovoItem, aoConfirmar?: () => void) => boolean; removeItem: (id: string) => void; updateQuantity: (id: string, quantity: number) => void; clear: () => void; total: number; count: number; drawerOpen: boolean; openDrawer: () => void; closeDrawer: () => void };
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -15,10 +19,18 @@ let cachedItems: CartItem[] = EMPTY_CART;
 let initialized = false;
 const listeners = new Set<() => void>();
 
+// A cart kept in the browser shows today's price, the one the server charges (prices went from R$ 160 to R$ 180 on
+// 2026-11-24, and a cart saved before would still say R$ 160). Older entries without productId go by their id.
+function precoAtual(item: CartItem) {
+  if (item.criacaoId) return PRECO_PERSONALIZADA;
+  const produto = products.find((product) => product.id === item.productId) ?? products.find((product) => item.id.startsWith(`${product.id}-`));
+  return produto ? getProductPrice(produto) : item.price;
+}
+
 function readStorage(): CartItem[] {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
+    return saved ? (JSON.parse(saved) as CartItem[]).map((item) => ({ ...item, price: precoAtual(item) })) : [];
   } catch {
     return [];
   }
@@ -51,6 +63,7 @@ function getServerSnapshot() {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const items = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [repetida, setRepetida] = useState<{ item: NovoItem; aoConfirmar?: () => void } | null>(null);
 
   function setItems(updater: (current: CartItem[]) => CartItem[]) {
     writeStorage(updater(initialized ? cachedItems : readStorage()));
@@ -64,11 +77,54 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   function removeItem(id: string) { setItems((current) => current.filter((item) => item.id !== id)); }
   function updateQuantity(id: string, quantity: number) { setItems((current) => quantity < 1 ? current.filter((item) => item.id !== id) : current.map((item) => item.id === id ? { ...item, quantity } : item)); }
   function clear() { setItems(() => []); }
-  return <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clear, total: items.reduce((sum, item) => sum + item.price * item.quantity, 0), count: items.reduce((sum, item) => sum + item.quantity, 0), drawerOpen, openDrawer: () => setDrawerOpen(true), closeDrawer: () => setDrawerOpen(false) }}>{children}<CartDrawer /></CartContext.Provider>;
+  // The shop's add buttons (owners, 2026-11-24): a tee already in the cart in the same size asks first. "Sim" adds one
+  // more (then `aoConfirmar`, e.g. opening the bag), "Não" leaves the cart as it was. The + inside the cart adds straight
+  // away. Returns whether the piece went in now.
+  function adicionar(item: NovoItem, aoConfirmar?: () => void) {
+    if (getSnapshot().some((entry) => entry.id === item.id)) {
+      setRepetida({ item, aoConfirmar });
+      return false;
+    }
+    addItem(item);
+    return true;
+  }
+  function confirmarRepetida() {
+    if (!repetida) return;
+    addItem(repetida.item);
+    repetida.aoConfirmar?.();
+    setRepetida(null);
+  }
+  return <CartContext.Provider value={{ items, addItem, adicionar, removeItem, updateQuantity, clear, total: items.reduce((sum, item) => sum + item.price * item.quantity, 0), count: items.reduce((sum, item) => sum + item.quantity, 0), drawerOpen, openDrawer: () => setDrawerOpen(true), closeDrawer: () => setDrawerOpen(false) }}>{children}<CartDrawer /><AvisoRepetida item={repetida?.item ?? null} onSim={confirmarRepetida} onNao={() => setRepetida(null)} /></CartContext.Provider>;
 }
 
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) throw new Error("useCart must be used inside CartProvider");
   return context;
+}
+
+// "Essa camiseta já está no carrinho": a small card over the page, above the bag.
+function AvisoRepetida({ item, onSim, onNao }: { item: NovoItem | null; onSim: () => void; onNao: () => void }) {
+  useEffect(() => {
+    if (!item) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onNao(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [item, onNao]);
+
+  return <AnimatePresence>
+    {item && <>
+      <motion.div key="fundo" onClick={onNao} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="fixed inset-0 z-[96] bg-black/30" />
+      <div key="aviso" className="pointer-events-none fixed inset-0 z-[97] flex items-center justify-center p-4">
+        <motion.div role="alertdialog" aria-modal="true" aria-labelledby="aviso-repetida" initial={{ opacity: 0, y: 14, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }} className="glass pointer-events-auto w-full max-w-sm rounded-[24px] p-6 text-center">
+          <p id="aviso-repetida" className="display text-[30px] leading-none">Essa camiseta já está no carrinho.</p>
+          <p className="sans mt-3 text-[14px] text-[var(--muted)]">{item.name}, tamanho {item.size}. Quer adicionar mais uma?</p>
+          <div className="mt-6 grid grid-cols-2 gap-2.5">
+            <button type="button" onClick={onNao} className="press label h-12 rounded-full border border-[var(--ink)]/20 text-[12px] hover:bg-[var(--ink)]/5">Não</button>
+            <button type="button" onClick={onSim} autoFocus className="press label h-12 rounded-full bg-[var(--vinho)] text-[12px] text-[var(--creme)]">Sim, adicionar</button>
+          </div>
+        </motion.div>
+      </div>
+    </>}
+  </AnimatePresence>;
 }

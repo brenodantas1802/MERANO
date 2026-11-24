@@ -48,8 +48,8 @@ export const ESTAMPAS_CASA: { id: EstampaCasaId; nome: string; src: string; larg
 ];
 export const estampaCasaDe = (id: string) => ESTAMPAS_CASA.find((estampa) => estampa.id === id);
 
-// Price of a personalised tee, the same as the catalogue tees for now (owners to confirm).
-export const PRECO_PERSONALIZADA = 189;
+// Price of a personalised tee: the same R$ 180 as the catalogue tees (owners, 2026-11-24: "todas cravado R$ 180").
+export const PRECO_PERSONALIZADA = 180;
 export const TAMANHOS = ["P", "M", "G"] as const;
 export type Tamanho = (typeof TAMANHOS)[number];
 

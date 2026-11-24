@@ -45,7 +45,7 @@ export async function criarCupom(_anterior: Resposta, form: FormData): Promise<R
   const descricao = String(form.get("descricao") ?? "").trim().slice(0, 200) || null;
   const primeiraCompra = form.get("primeira_compra") === "on";
   if (!/^[A-Z0-9_-]{3,30}$/.test(codigo)) return { tipo: "erro", texto: "O código precisa ter de 3 a 30 letras ou números, sem espaço." };
-  if (!Number.isInteger(percentual) || percentual < 1 || percentual > 90) return { tipo: "erro", texto: "O desconto vai de 1% a 90%." };
+  if (!Number.isInteger(percentual) || percentual < 1 || percentual > 99) return { tipo: "erro", texto: "O desconto vai de 1% a 99%." };
   const sessao = await dono();
   if (!sessao) return { tipo: "erro", texto: "Só os donos podem criar cupons." };
   const { error } = await sessao.admin.from("cupons").insert({ codigo, percentual, descricao, primeira_compra: primeiraCompra, ativo: true });

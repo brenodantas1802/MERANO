@@ -4,24 +4,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, CreditCard, QrCode, X } from "lucide-react";
+import { motion } from "motion/react";
+import { ArrowRight, Check, ChevronDown, Lock, Search, ShoppingBag, X } from "lucide-react";
 import { useCart, type CartItem } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
+import { LogoNome, LogoSimbolo } from "@/components/logo-meranno";
 import { CUPOM_KEY } from "@/components/first-purchase-popup";
 import { saveOrder } from "@/lib/orders";
-import { formatPrice, products, currentImage } from "@/lib/products";
+import { formatPrice, products, currentImage, parcelado } from "@/lib/products";
 import { Illustration } from "@/components/illustration";
 import { CEP_KEY, prazoTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
 
-// Payment page. The order is created on the server (/api/pedidos), which prices everything again. With online payment
-// connected (Asaas, or Mercado Pago) the customer pays on the provider's page; until then the order goes out as a
-// WhatsApp message.
+// Payment page (owners, 2026-11-24: laid out like the Saint Tropez checkout, with the Ermos payment list): the brand on
+// top, the form on a white column, the order on an ice column beside it with a big photo of each piece, a wine button.
+// The order is created on the server (/api/pedidos), which prices everything again. With online payment connected
+// (Asaas) the customer pays on the provider's secure page, so card numbers never reach this site; until then the order
+// goes out as a WhatsApp message.
 
 type Method = "pix" | "cartao";
 type Cupom = { codigo: string; percentual: number };
 const PIX_DISCOUNT = 0; // same as PIX_DESCONTO on the server
 const centavos = (valor: number) => Math.round(valor * 100) / 100;
+const UFS = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
 
 function lerLocal(chave: string) {
   try {
@@ -31,16 +35,25 @@ function lerLocal(chave: string) {
   }
 }
 
-// Salão look: soft paper fields with a wine focus ring, brass-numbered sections, wine buttons.
-const field = "mt-2 block h-12 w-full rounded-[14px] border border-[var(--line)] bg-white/70 px-4 text-base text-[var(--ink)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-[var(--muted)]/60 focus:border-[var(--vinho)]/60 focus:shadow-[0_0_0_3px_rgba(85,30,43,.08)]";
-const label = "sans block text-[12px] text-[var(--muted)]";
-const titulo = "mb-5 flex items-baseline gap-3 text-[26px] leading-none display";
-const numero = "secao text-[12px]";
-
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 const maskCep = (value: string) => onlyDigits(value).slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
 const maskPhone = (value: string) => onlyDigits(value).slice(0, 11).replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{1,4})$/, "$1-$2");
 const maskCpf = (value: string) => onlyDigits(value).slice(0, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+// Checkout fields: the name sits inside the box and moves up once something is typed.
+const caixa = "peer h-[52px] w-full rounded-[10px] border border-[var(--borda-campo)] bg-[var(--paper)] px-3.5 pb-1.5 pt-5 text-[15px] text-[var(--ink)] outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--vinho)] focus:shadow-[0_0_0_1px_var(--vinho)]";
+const rotuloFlutuante = "pointer-events-none absolute left-3.5 top-2 text-[11px] leading-none text-[var(--muted)] transition-all duration-150 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[11px]";
+
+function Campo({ rotulo, className = "", icone, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { rotulo: string; icone?: React.ReactNode }) {
+  return <label className={`relative block ${className}`}>
+    <input {...props} placeholder=" " className={`${caixa} ${icone ? "pr-11" : ""}`} />
+    <span className={rotuloFlutuante}>{rotulo}</span>
+    {icone && <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]">{icone}</span>}
+  </label>;
+}
+
+const titulo = "text-[21px] font-semibold leading-tight";
+const Selo = ({ children }: { children: React.ReactNode }) => <span className="rounded-[4px] border border-black/10 bg-white/90 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[.06em] text-[var(--ink)]/75">{children}</span>;
 
 function CampoCupom({ cupom, email, onAplicar, onRemover }: { cupom: Cupom | null; email: string; onAplicar: (cupom: Cupom) => void; onRemover: () => void }) {
   const [codigo, setCodigo] = useState("");
@@ -80,43 +93,54 @@ function CampoCupom({ cupom, email, onAplicar, onRemover }: { cupom: Cupom | nul
     }
   }
 
-  if (cupom) return <div className="mt-5 flex items-center justify-between rounded-[14px] border border-dashed border-[var(--vinho)]/45 bg-white/50 px-4 py-3 text-sm">
-    <span><span className="sans text-[11px] uppercase tracking-[.12em] text-[var(--muted)]">Cupom</span> <b className="ml-1 tracking-[.06em] text-[var(--vinho)]">{cupom.codigo}</b> · {cupom.percentual}% off</span>
+  if (cupom) return <div className="flex items-center justify-between rounded-[10px] border border-dashed border-[var(--vinho)]/45 bg-[var(--paper)]/70 px-4 py-3 text-[14px]">
+    <span><span className="text-[12px] text-[var(--muted)]">Cupom</span> <b className="ml-1 font-semibold tracking-[.06em] text-[var(--vinho)]">{cupom.codigo}</b> · {cupom.percentual}% off</span>
     <button type="button" onClick={onRemover} aria-label="Tirar o cupom" className="press -mr-2 flex h-11 w-11 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)]"><X size={16} /></button>
   </div>;
 
-  return <div className="mt-5">
-    <label className={label} htmlFor="cupom">Cupom de desconto</label>
-    <div className="mt-2 flex gap-2">
-      <input id="cupom" value={codigo} onChange={(event) => { setCodigo(event.target.value.toUpperCase()); setErro(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); aplicar(); } }} autoCapitalize="characters" autoComplete="off" spellCheck={false} placeholder="CÓDIGO" className={`${field} mt-0 uppercase tracking-[.08em]`} />
-      <button type="button" onClick={aplicar} disabled={conferindo} className="press sans h-12 shrink-0 rounded-full border border-[var(--vinho)] px-5 text-[11px] uppercase tracking-[.14em] text-[var(--vinho)] hover:bg-[var(--vinho)] hover:text-[var(--creme)] disabled:opacity-60">{conferindo ? "…" : "Aplicar"}</button>
+  return <div>
+    <div className="flex gap-2.5">
+      <Campo rotulo="Código de desconto" value={codigo} onChange={(event) => { setCodigo(event.target.value.toUpperCase()); setErro(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); aplicar(); } }} autoCapitalize="characters" autoComplete="off" spellCheck={false} className="flex-1" />
+      <button type="button" onClick={aplicar} disabled={conferindo || !codigo.trim()} className="press h-[52px] shrink-0 rounded-[10px] border border-[var(--borda-campo)] bg-[var(--paper)] px-5 text-[14px] font-medium text-[var(--ink)] transition-colors hover:border-[var(--vinho)] hover:text-[var(--vinho)] disabled:text-[var(--muted)] disabled:hover:border-[var(--borda-campo)]">{conferindo ? "…" : "Aplicar"}</button>
     </div>
-    {erro && <p role="alert" className="sans mt-2 text-[12px] text-[#8a3a2c]">{erro}</p>}
+    {erro && <p role="alert" className="mt-2 text-[13px] text-[#8a3a2c]">{erro}</p>}
   </div>;
 }
 
-function Summary({ items, subtotal, shipping, cupom, descontoCupom, descontoPix, total, email, onCupom }: { items: CartItem[]; subtotal: number; shipping: OpcaoFrete | null; cupom: Cupom | null; descontoCupom: number; descontoPix: number; total: number; email: string; onCupom: (cupom: Cupom | null) => void }) {
-  return <aside className="glass h-fit rounded-[28px] p-6 md:sticky md:top-28 md:p-7">
-    <p className="secao mb-5 text-[12px]">Resumo do pedido</p>
-    <div className="space-y-4">{items.map((item) => <div key={item.id} className="flex gap-4">
-      <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-[12px] bg-white/70">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="64px" className="object-cover" unoptimized={currentImage(item)!.startsWith("data:")} />}<span className="sans absolute right-1 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--vinho)] px-1 text-[11px] text-[var(--creme)]">{item.quantity}</span></div>
-      <div className="flex flex-1 justify-between gap-3"><div><p className="leading-tight">{item.name}</p><p className="sans mt-1 text-[11px] uppercase tracking-[.1em] text-[var(--muted)]">Tam. {item.size}{item.color ? ` · ${item.color}` : ""}</p></div><span className="sans text-sm">{formatPrice(item.price * item.quantity)}</span></div>
-    </div>)}</div>
-    <CampoCupom cupom={cupom} email={email} onAplicar={onCupom} onRemover={() => { onCupom(null); try { window.localStorage.removeItem(CUPOM_KEY); } catch { /* nothing kept */ } }} />
-    <div className="sans mt-6 space-y-2 border-t border-black/10 pt-5 text-sm">
-      <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-      {descontoCupom > 0 && <div className="flex justify-between text-[var(--vinho)]"><span>Cupom {cupom?.codigo} ({cupom?.percentual}%)</span><span>− {formatPrice(descontoCupom)}</span></div>}
-      <div className="flex justify-between"><span>Frete</span><span>{shipping ? formatPrice(shipping.preco) : "—"}</span></div>
-      {descontoPix > 0 && <div className="flex justify-between text-[var(--vinho)]"><span>Desconto Pix</span><span>− {formatPrice(descontoPix)}</span></div>}
-    </div>
-    <div className="mt-4 flex items-baseline justify-between border-t border-black/10 pt-4"><span className="text-lg">Total</span><span className="text-2xl font-semibold tabular-nums text-[var(--vinho)]">{formatPrice(total)}</span></div>
-  </aside>;
+type Totais = { subtotal: number; shipping: OpcaoFrete | null; cupom: Cupom | null; descontoCupom: number; descontoPix: number; total: number };
+
+// The order, on the ice column (or under "Mostrar resumo do pedido" on a phone). Big photos: the owners want to see the
+// piece they are buying, where Saint Tropez's thumbnails are tiny.
+function Resumo({ items, totais, email, onCupom }: { items: CartItem[]; totais: Totais; email: string; onCupom: (cupom: Cupom | null) => void }) {
+  const { subtotal, shipping, cupom, descontoCupom, descontoPix, total } = totais;
+  const pecas = items.reduce((soma, item) => soma + item.quantity, 0);
+  return <div>
+    <ul className="space-y-5">{items.map((item) => <li key={item.id} className="flex items-center gap-5">
+      <div className="relative shrink-0">
+        <div className="foto-gelo relative h-[130px] w-[104px] overflow-hidden rounded-[12px] border border-[var(--line)] md:h-[160px] md:w-[128px]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="128px" className="object-cover" unoptimized={currentImage(item)!.startsWith("data:")} />}</div>
+        <span className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-[var(--ink)] px-1.5 text-[12px] font-semibold text-[var(--paper)]">{item.quantity}</span>
+      </div>
+      <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
+        <div className="min-w-0"><p className="text-[15px] font-medium uppercase leading-snug tracking-[.04em]">{item.name}</p><p className="mt-1 text-[13px] uppercase text-[var(--muted)]">{[item.color, item.size].filter(Boolean).join(" / ")}</p></div>
+        <span className="shrink-0 text-[15px] tabular-nums">{formatPrice(item.price * item.quantity)}</span>
+      </div>
+    </li>)}</ul>
+    <div className="mt-7"><CampoCupom cupom={cupom} email={email} onAplicar={onCupom} onRemover={() => { onCupom(null); try { window.localStorage.removeItem(CUPOM_KEY); } catch { /* nothing kept */ } }} /></div>
+    <dl className="mt-7 space-y-2.5 text-[14px]">
+      <div className="flex justify-between"><dt>Subtotal · {pecas} {pecas === 1 ? "item" : "itens"}</dt><dd className="tabular-nums">{formatPrice(subtotal)}</dd></div>
+      {descontoCupom > 0 && <div className="flex justify-between text-[var(--vinho)]"><dt>Cupom {cupom?.codigo} ({cupom?.percentual}%)</dt><dd className="tabular-nums">− {formatPrice(descontoCupom)}</dd></div>}
+      <div className="flex justify-between"><dt>Frete</dt><dd className={shipping ? "tabular-nums" : "text-[var(--muted)]"}>{shipping ? formatPrice(shipping.preco) : "Insira o CEP de entrega"}</dd></div>
+      {descontoPix > 0 && <div className="flex justify-between text-[var(--vinho)]"><dt>Desconto Pix</dt><dd className="tabular-nums">− {formatPrice(descontoPix)}</dd></div>}
+    </dl>
+    <div className="mt-5 flex items-baseline justify-between"><span className="text-[19px] font-semibold">Total</span><span className="flex items-baseline gap-2"><span className="text-[12px] text-[var(--muted)]">BRL</span><span className="text-[22px] font-semibold tabular-nums">{formatPrice(total)}</span></span></div>
+    <p className="mt-1 text-right text-[13px] text-[var(--muted)]">ou {parcelado(total)} no cartão</p>
+  </div>;
 }
 
 type Feito = { id: string; numero: string; total: number; whatsapp: string };
 
 export function Pagamento({ online, provedor, entrega }: { online: boolean; provedor: string; entrega: string }) {
-  const { items, total: subtotal, count, clear } = useCart();
+  const { items, total: subtotal, count, clear, openDrawer } = useCart();
   const router = useRouter();
   const [cep, setCep] = useState(() => lerLocal(CEP_KEY));
   const [address, setAddress] = useState({ street: "", district: "", city: "", uf: "" });
@@ -130,12 +154,14 @@ export function Pagamento({ online, provedor, entrega }: { online: boolean; prov
   const [status, setStatus] = useState<"form" | "processing" | "redirecting">("form");
   const [erro, setErro] = useState("");
   const [feito, setFeito] = useState<Feito | null>(null);
+  const [resumoAberto, setResumoAberto] = useState(false);
 
   // The cheapest option comes selected. These numbers are a preview: the server works them out again.
   const shipping = frete.opcoes.find((option) => option.id === shippingId) ?? frete.opcoes[0] ?? null;
   const descontoCupom = cupom ? centavos(subtotal * cupom.percentual / 100) : 0;
   const descontoPix = method === "pix" ? centavos((subtotal - descontoCupom) * PIX_DISCOUNT) : 0;
   const total = centavos(subtotal - descontoCupom - descontoPix + (shipping?.preco ?? 0));
+  const totais: Totais = { subtotal, shipping, cupom, descontoCupom, descontoPix, total };
 
   function updateCep(value: string) {
     const masked = maskCep(value);
@@ -163,12 +189,13 @@ export function Pagamento({ online, provedor, entrega }: { online: boolean; prov
     setErro("");
     // Older cart entries have no productId: recover it from the "<product>-<size>-<color>" id.
     const productIdOf = (item: CartItem) => item.productId ?? products.find((product) => item.id.startsWith(`${product.id}-`))?.id;
+    const nome = `${String(form.get("nome") ?? "").trim()} ${String(form.get("sobrenome") ?? "").trim()}`.trim();
     try {
       const resposta = await fetch("/api/pedidos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cliente: { nome: String(form.get("nome") ?? ""), email, celular: phone, cpf },
+          cliente: { nome, email, celular: phone, cpf },
           endereco: { cep, rua: address.street, numero: String(form.get("numero") ?? ""), complemento: String(form.get("complemento") ?? ""), bairro: address.district, cidade: address.city, uf: address.uf },
           itens: items.map((item) => ({ productId: item.criacaoId ? undefined : productIdOf(item), criacaoId: item.criacaoId, tamanho: item.size, cor: item.color, quantidade: item.quantity })),
           freteId: shipping.id,
@@ -218,74 +245,124 @@ export function Pagamento({ online, provedor, entrega }: { online: boolean; prov
 
   if (items.length === 0) return <main><SiteHeader /><div className="mx-auto max-w-3xl px-6 py-24 md:px-12"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><p className="mt-8 text-2xl">Seu carrinho está vazio.</p><Link href="/shop" className="sans mt-8 inline-flex min-h-11 items-center gap-2 border-b border-[var(--ink)] text-[11px] uppercase tracking-[.15em]">Ver coleção <ArrowRight size={14} /></Link></div></main>;
 
-  const botao = status === "redirecting" ? "Abrindo o pagamento…" : status === "processing" ? "Registrando o pedido…" : online ? (method === "pix" ? "Pagar com Pix" : "Pagar com cartão") : "Enviar pedido pelo WhatsApp";
+  const botao = status === "redirecting" ? "Abrindo o pagamento…" : status === "processing" ? "Registrando o pedido…" : online ? "Pagar agora" : "Enviar pedido pelo WhatsApp";
+  const formas: { id: Method; nome: string; selos: string[]; texto: string }[] = [
+    { id: "pix", nome: "Pix", selos: ["Pix"], texto: online ? `O QR Code e o Pix copia e cola aparecem na página segura do ${provedor}. A confirmação chega na hora.` : "O pedido vai para o nosso WhatsApp já escrito, e a equipe manda o Pix para você pagar." },
+    { id: "cartao", nome: "Cartão de crédito", selos: ["Visa", "Master", "Elo", "+3"], texto: online ? `Você digita o cartão na página segura do ${provedor}, à vista ou em ${parcelado(total)}. Os dados do cartão não passam pelo site da Meranno.` : "O pedido vai para o nosso WhatsApp já escrito, e a equipe manda o link do cartão para você pagar." },
+  ];
+  const freteSelecionado = (option: OpcaoFrete) => shipping?.id === option.id;
 
-  return <main><SiteHeader /><div className="mx-auto max-w-360 px-6 pb-24 pt-10 md:px-12">
-    <Link href="/shop" className="sans mb-10 flex min-h-11 w-fit items-center gap-2 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Continuar comprando</Link>
-    <div className="flex items-end gap-6"><h1 className="display text-6xl md:text-8xl">Pagamento.</h1><Illustration name="barco" className="hidden w-32 shrink-0 pb-1 sm:block md:w-48" /></div>
-    <form onSubmit={pay} className="mt-10 grid gap-10 md:grid-cols-[1fr_400px] md:gap-16">
-      <div className="space-y-10">
-        <section>
-          <h2 className={titulo}><span className={numero}>01 /</span>Seus dados</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className={`${label} md:col-span-2`}>Nome completo<input required name="nome" autoComplete="name" className={field} /></label>
-            <label className={label}>E-mail<input required name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className={field} /></label>
-            <label className={label}>Celular<input required inputMode="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} placeholder="(11) 90000-0000" className={field} /></label>
-            <label className={label}>CPF<input required inputMode="numeric" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} placeholder="000.000.000-00" className={field} /></label>
-          </div>
-        </section>
+  // A white column and an ice one, split down the middle of the screen like the Saint Tropez checkout.
+  return <main className="sans min-h-svh bg-[var(--paper)] text-[var(--ink)] md:bg-[linear-gradient(90deg,var(--paper)_50%,var(--line)_50%,var(--line)_calc(50%_+_1px),var(--gelo)_calc(50%_+_1px))]">
+    <div className="mx-auto max-w-[1180px] md:grid md:grid-cols-2">
+      <div className="md:pb-16 md:pr-12 md:pt-10 lg:pr-20">
+        <div className="md:ml-auto md:max-w-[560px]">
+          <header className="flex items-center justify-between border-b border-[var(--line)] px-5 py-3.5 md:border-0 md:px-0 md:pb-8 md:pt-0">
+            <Link href="/" aria-label="Meranno, página inicial" className="flex items-center gap-2.5 text-[var(--ink)]"><LogoSimbolo className="h-7 w-auto" /><LogoNome className="h-auto w-[128px]" /></Link>
+            <button type="button" onClick={openDrawer} aria-label="Abrir carrinho" className="press flex h-11 w-11 items-center justify-center rounded-full text-[var(--vinho)] hover:bg-[var(--gelo)]"><ShoppingBag size={22} strokeWidth={1.5} /></button>
+          </header>
 
-        <section>
-          <h2 className={titulo}><span className={numero}>02 /</span>Entrega</h2>
-          <p className="-mt-2 mb-5 max-w-xl text-[var(--muted)]">Pré-venda: entrega prevista para <b className="font-medium text-[var(--ink)]">{entrega}</b>.</p>
-          <div className="grid gap-4 md:grid-cols-[180px_1fr]">
-            <label className={label}>CEP<input required inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} placeholder="00000-000" className={field} /></label>
-            <label className={label}>Rua<input required autoComplete="address-line1" value={address.street} onChange={(event) => setAddress({ ...address, street: event.target.value })} className={field} /></label>
+          <div className="md:hidden">
+            <button type="button" onClick={() => setResumoAberto((aberto) => !aberto)} aria-expanded={resumoAberto} className="flex w-full items-center justify-between border-b border-[var(--line)] bg-[var(--gelo)] px-5 py-4">
+              <span className="flex items-center gap-1.5 text-[14px] text-[var(--vinho)]">{resumoAberto ? "Ocultar" : "Mostrar"} resumo do pedido <ChevronDown size={16} className={`transition-transform ${resumoAberto ? "rotate-180" : ""}`} /></span>
+              <span className="text-[17px] font-semibold tabular-nums">{formatPrice(total)}</span>
+            </button>
+            {resumoAberto && <div className="border-b border-[var(--line)] bg-[var(--gelo)] px-5 py-6"><Resumo items={items} totais={totais} email={email} onCupom={setCupom} /></div>}
           </div>
-          <div className="mt-4 grid gap-4 md:grid-cols-[120px_1fr_1fr]">
-            <label className={label}>Número<input required name="numero" className={field} /></label>
-            <label className={label}>Complemento<input name="complemento" autoComplete="address-line2" className={field} /></label>
-            <label className={label}>Bairro<input required value={address.district} onChange={(event) => setAddress({ ...address, district: event.target.value })} className={field} /></label>
-          </div>
-          <div className="mt-4 grid grid-cols-[1fr_90px] gap-4 md:grid-cols-[1fr_120px]">
-            <label className={label}>Cidade<input required autoComplete="address-level2" value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} className={field} /></label>
-            <label className={label}>UF<input required maxLength={2} autoComplete="address-level1" value={address.uf} onChange={(event) => setAddress({ ...address, uf: event.target.value.toUpperCase().replace(/[^A-Z]/g, "") })} className={`${field} uppercase`} /></label>
-          </div>
-          <AnimatePresence>{frete.pronto && <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-8 grid gap-3" aria-live="polite">
-            {frete.carregando && [0, 1].map((index) => <div key={index} className="h-[68px] animate-pulse rounded-[18px] border border-[var(--line)] bg-white/40" />)}
-            {frete.erro && <p className="rounded-[18px] border border-[var(--line)] bg-white/40 px-5 py-4 text-sm text-[var(--muted)]">{frete.erro}</p>}
-            {frete.opcoes.map((option) => <label key={option.id} className={`press flex min-h-14 cursor-pointer items-center justify-between rounded-[18px] border px-5 py-4 transition-colors ${shipping?.id === option.id ? "border-[var(--vinho)] bg-white/80 shadow-[0_0_0_3px_rgba(85,30,43,.06)]" : "border-[var(--line)] bg-white/40"}`}>
-              <span className="flex items-center gap-4"><input type="radio" name="frete" required checked={shipping?.id === option.id} onChange={() => setShippingId(option.id)} className="h-5 w-5 accent-[var(--vinho)]" /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{option.nome}{option.empresa && option.empresa !== "Correios" ? ` · ${option.empresa}` : ""}</span><span className="text-sm text-[var(--muted)]">{prazoTexto(option)} após o envio</span></span></span>
-              <span className="sans text-sm">{formatPrice(option.preco)}</span>
-            </label>)}
-            {frete.exemplo && <p className="sans text-[11px] uppercase tracking-[.12em] text-[var(--latao)]">Valores de exemplo</p>}
-          </motion.div>}</AnimatePresence>
-        </section>
 
-        <section>
-          <h2 className={titulo}><span className={numero}>03 /</span>Pagamento</h2>
-          <div role="radiogroup" aria-label="Forma de pagamento" className="grid grid-cols-2 gap-3">
-            {([["pix", "Pix", "na hora, com QR Code", QrCode], ["cartao", "Cartão de crédito", "até 3x sem juros", CreditCard]] as const).map(([id, name, hint, Icon]) => <button key={id} type="button" role="radio" aria-checked={method === id} onClick={() => setMethod(id)} className={`press flex min-h-16 items-center gap-3 rounded-[18px] border px-4 py-4 text-left transition-colors ${method === id ? "border-[var(--vinho)] bg-[var(--vinho)] text-[var(--creme)]" : "border-[var(--line)] bg-white/40 hover:border-[var(--vinho)]/50"}`}><Icon size={20} strokeWidth={1.5} /><span><span className="sans block text-[11px] uppercase tracking-[.12em]">{name}</span><span className={`text-sm ${method === id ? "text-[var(--creme)]/70" : "text-[var(--muted)]"}`}>{hint}</span></span></button>)}
-          </div>
-          <p className="mt-5 max-w-xl text-[var(--muted)]">{online
-            ? method === "pix" ? `Você paga no ambiente seguro do ${provedor}, com o QR Code ou o Pix copia e cola. A confirmação chega na hora.` : `Você paga no ambiente seguro do ${provedor}, em até 3x sem juros. Os dados do cartão não passam pelo site da Meranno.`
-            : `O pedido vai para o nosso WhatsApp já escrito, e a equipe manda ${method === "pix" ? "o Pix" : "o link do cartão"} para você pagar.`}</p>
-        </section>
+          <form onSubmit={pay} className="space-y-10 px-5 pb-16 pt-8 md:px-0 md:pb-0 md:pt-0">
+            <section>
+              <div className="mb-4 flex items-baseline justify-between"><h2 className={titulo}>Contato</h2><Link href="/conta?next=/pagamento" className="text-[14px] underline underline-offset-2 hover:text-[var(--vinho)]">Fazer login</Link></div>
+              <Campo rotulo="E-mail" required name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+            </section>
 
-        {/* No exchanges (owners, 2026-11-22): said plainly before paying, and the customer confirms it. */}
-        <label className="flex items-start gap-3 rounded-[18px] border border-[var(--vinho)]/30 bg-[var(--vinho)]/[.05] px-5 py-4 text-sm leading-relaxed">
-          <input type="checkbox" required name="sem-trocas" className="mt-1 h-5 w-5 shrink-0 accent-[var(--vinho)]" />
-          <span><b className="font-medium">A Meranno não faz trocas</b> de tamanho, cor ou modelo. Conferi o tamanho na tabela de medidas. Desistência em até 7 dias e peças com defeito: veja a <Link href="/trocas" target="_blank" className="underline underline-offset-2">página Trocas</Link>.</span>
-        </label>
-        {erro && <p role="alert" className="rounded-[18px] border border-[#8a3a2c]/30 bg-[#8a3a2c]/5 px-5 py-4 text-sm text-[#8a3a2c]">{erro}</p>}
-        <button type="submit" disabled={status !== "form"} className="press label flex h-14 w-full items-center justify-between rounded-full bg-[var(--vinho)] px-7 text-[var(--creme)] shadow-[0_14px_30px_-14px_rgba(85,30,43,.7)] transition-opacity hover:opacity-95 disabled:cursor-wait disabled:opacity-75">
-          <span className="text-[12px]">{botao}<span className="ml-2 tabular-nums text-[var(--latao)]">{formatPrice(total)}</span></span>
-          {status !== "form" ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--creme)] border-t-transparent" /> : <ArrowRight size={18} />}
-        </button>
-        <p className="sans -mt-6 text-center text-[11px] uppercase tracking-[.12em] text-[var(--muted)]">{online ? `Pagamento processado pelo ${provedor}` : "Sem cobrança automática: o pagamento é combinado no WhatsApp"}</p>
+            <section>
+              <h2 className={`${titulo} mb-4`}>Entrega</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <Campo rotulo="Nome" required name="nome" autoComplete="given-name" />
+                <Campo rotulo="Sobrenome" required name="sobrenome" autoComplete="family-name" />
+                <Campo rotulo="CPF" required inputMode="numeric" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} className="col-span-2" />
+                <Campo rotulo="CEP" required inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} icone={<Search size={17} />} className="col-span-2" />
+              </div>
+              <div className="mt-3 grid grid-cols-[1fr_120px] gap-3">
+                <Campo rotulo="Endereço" required autoComplete="address-line1" value={address.street} onChange={(event) => setAddress({ ...address, street: event.target.value })} />
+                <Campo rotulo="Número" required name="numero" />
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <Campo rotulo="Complemento (opcional)" name="complemento" autoComplete="address-line2" />
+                <Campo rotulo="Bairro" required value={address.district} onChange={(event) => setAddress({ ...address, district: event.target.value })} />
+                <Campo rotulo="Cidade" required autoComplete="address-level2" value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} />
+                <label className="relative block">
+                  <select required value={address.uf} onChange={(event) => setAddress({ ...address, uf: event.target.value })} autoComplete="address-level1" className={`${caixa} appearance-none pr-10`}>
+                    <option value="" disabled>Selecione</option>
+                    {UFS.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
+                  <span className="pointer-events-none absolute left-3.5 top-2 text-[11px] leading-none text-[var(--muted)]">Estado</span>
+                  <ChevronDown size={16} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+                </label>
+                <Campo rotulo="Celular com DDD" required type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(maskPhone(event.target.value))} className="col-span-2" />
+              </div>
+            </section>
+
+            <section>
+              <h2 className={`${titulo} mb-4`}>Forma de frete</h2>
+              {!frete.pronto ? <p className="rounded-[10px] bg-[var(--gelo)] px-5 py-5 text-center text-[14px] text-[var(--muted)]">Insira o CEP de entrega para ver as formas de frete disponíveis.</p>
+                : <div aria-live="polite">
+                  {frete.carregando && <div className="h-[60px] animate-pulse rounded-[10px] bg-[var(--gelo)]" />}
+                  {frete.erro && <p className="rounded-[10px] bg-[var(--gelo)] px-5 py-4 text-[14px] text-[var(--muted)]">{frete.erro}</p>}
+                  {frete.opcoes.length > 0 && <div className="overflow-hidden rounded-[10px] border border-[var(--borda-campo)]">
+                    {frete.opcoes.map((option, indice) => <label key={option.id} className={`flex min-h-[60px] cursor-pointer items-center justify-between gap-4 px-4 py-3 transition-colors ${indice ? "border-t border-[var(--borda-campo)]" : ""} ${freteSelecionado(option) ? "bg-[var(--vinho)]/[.05] shadow-[inset_0_0_0_1px_var(--vinho)]" : ""}`}>
+                      <span className="flex items-center gap-3.5"><input type="radio" name="frete" required checked={freteSelecionado(option)} onChange={() => setShippingId(option.id)} className="h-[18px] w-[18px] accent-[var(--vinho)]" /><span><span className="block text-[14px] font-medium">{option.nome}{option.empresa && option.empresa !== "Correios" ? ` · ${option.empresa}` : ""}</span><span className="block text-[13px] text-[var(--muted)]">{prazoTexto(option)} após o envio</span></span></span>
+                      <span className="text-[14px] font-medium tabular-nums">{formatPrice(option.preco)}</span>
+                    </label>)}
+                  </div>}
+                  {frete.exemplo && <p className="mt-2 text-[12px] uppercase tracking-[.12em] text-[var(--latao)]">Valores de exemplo</p>}
+                </div>}
+              <p className="mt-3 text-[13px] text-[var(--muted)]">Pré-venda: entrega prevista <b className="font-medium text-[var(--ink)]">{entrega}</b>.</p>
+            </section>
+
+            <section>
+              <h2 className={titulo}>Pagamento</h2>
+              <p className="mb-4 mt-1 flex items-center gap-1.5 text-[14px] text-[var(--muted)]"><Lock size={13} /> Todas as transações são seguras e criptografadas.</p>
+              <div role="radiogroup" aria-label="Forma de pagamento" className="overflow-hidden rounded-[10px] border border-[var(--borda-campo)]">
+                {formas.map((forma, indice) => {
+                  const ativa = method === forma.id;
+                  return <div key={forma.id} className={indice ? "border-t border-[var(--borda-campo)]" : ""}>
+                    <button type="button" role="radio" aria-checked={ativa} onClick={() => setMethod(forma.id)} className={`flex min-h-[56px] w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors ${ativa ? "bg-[var(--vinho)]/[.05] shadow-[inset_0_0_0_1px_var(--vinho)]" : "hover:bg-[var(--gelo)]/60"}`}>
+                      <span className="flex items-center gap-3.5"><span className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border ${ativa ? "border-[var(--vinho)] bg-[var(--vinho)]" : "border-[var(--borda-campo)] bg-[var(--paper)]"}`}>{ativa && <span className="h-1.5 w-1.5 rounded-full bg-[var(--paper)]" />}</span><span className="text-[15px] font-medium">{forma.nome}</span></span>
+                      <span className="flex gap-1">{forma.selos.map((selo) => <Selo key={selo}>{selo}</Selo>)}</span>
+                    </button>
+                    {ativa && <p className="border-t border-[var(--borda-campo)] bg-[var(--gelo)]/70 px-5 py-4 text-[14px] leading-relaxed text-[var(--ink)]/80">{forma.texto}</p>}
+                  </div>;
+                })}
+              </div>
+            </section>
+
+            {/* No exchanges (owners, 2026-11-22): said plainly before paying, and the customer confirms it. */}
+            <label className="flex cursor-pointer items-start gap-3 text-[14px] leading-relaxed">
+              <input type="checkbox" required name="sem-trocas" className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[var(--vinho)]" />
+              <span><b className="font-semibold">A Meranno não faz trocas</b> de tamanho, cor ou modelo. Confira o tamanho na tabela de medidas. Desistência em até 7 dias e peças com defeito: veja a <Link href="/trocas" target="_blank" className="underline underline-offset-2">página Trocas</Link>.</span>
+            </label>
+
+            {erro && <p role="alert" className="rounded-[10px] border border-[#8a3a2c]/30 bg-[#8a3a2c]/5 px-5 py-4 text-[14px] text-[#8a3a2c]">{erro}</p>}
+
+            <div>
+              <button type="submit" disabled={status !== "form"} className="press flex h-[58px] w-full items-center justify-center gap-3 rounded-[10px] bg-[var(--vinho)] text-[17px] font-semibold text-[var(--creme)] shadow-[0_14px_30px_-16px_rgba(85,30,43,.8)] transition-opacity hover:opacity-95 disabled:cursor-wait disabled:opacity-75">
+                {status !== "form" && <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--creme)] border-t-transparent" />}{botao}
+              </button>
+              <p className="mt-3 text-center text-[12px] text-[var(--muted)]">{online ? `Pagamento processado pelo ${provedor}` : "Sem cobrança automática: o pagamento é combinado no WhatsApp"}</p>
+            </div>
+
+            <nav aria-label="Políticas" className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[var(--line)] pt-5 text-[13px]">
+              {[["/trocas", "Trocas"], ["/entrega", "Entrega"], ["/privacidade", "Privacidade"], ["/termos", "Termos"]].map(([href, nome]) => <Link key={href} href={href} target="_blank" className="underline underline-offset-2 hover:text-[var(--vinho)]">{nome}</Link>)}
+            </nav>
+          </form>
+        </div>
       </div>
 
-      <Summary items={items} subtotal={subtotal} shipping={shipping} cupom={cupom} descontoCupom={descontoCupom} descontoPix={descontoPix} total={total} email={email} onCupom={setCupom} />
-    </form>
-  </div></main>;
+      <aside aria-label="Resumo do pedido" className="hidden md:block md:pl-12 md:pt-10 lg:pl-20">
+        <div className="sticky top-10 max-w-[460px] pb-16"><Resumo items={items} totais={totais} email={email} onCupom={setCupom} /></div>
+      </aside>
+    </div>
+  </main>;
 }

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { useCart } from "./cart-provider";
 import { ShareButton } from "./share-button";
@@ -38,8 +37,7 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
   const [chosen, setChosen] = useState<string | null>(null);
   const [missing, setMissing] = useState(0);
   const [state, setState] = useState<State>("idle");
-  const { addItem, openDrawer } = useCart();
-  const router = useRouter();
+  const { adicionar, openDrawer } = useCart();
   const size = chosen ?? recommended;
   const color = product.colors[0];
   const price = formatPrice(getProductPrice(product));
@@ -66,18 +64,16 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
     return () => { document.removeEventListener("focusin", onIn); document.removeEventListener("focusout", onOut); };
   }, []);
 
-  function put() {
+  // The only way to buy (owners, 2026-11-24: no "Comprar agora"; paying starts in the bag). The button answers at once
+  // ("Adicionando…"), then the bag slides in with the piece already there. A tee already in the cart in this size asks
+  // first (cart-provider), and "Sim" opens the bag.
+  function addToBag() {
+    if (state !== "idle") return;
     if (!size) {
       setMissing((count) => count + 1);
-      return false;
+      return;
     }
-    addItem({ id: `${product.id}-${size}-${color}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Regular", color, image: product.image });
-    return true;
-  }
-
-  // The button answers at once ("Adicionando…"), then the bag slides in with the piece already there.
-  function addToBag() {
-    if (state !== "idle" || !put()) return;
+    if (!adicionar({ id: `${product.id}-${size}-${color}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Regular", color, image: product.image }, openDrawer)) return;
     setState("adding");
     window.setTimeout(() => {
       setState("added");
@@ -116,7 +112,6 @@ export function ProductBuy({ product, colorways }: { product: Product; colorways
       <button type="button" onClick={addToBag} aria-live="polite" className={`press label flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-[12px] text-[var(--creme)] ${state === "adding" ? "bg-[var(--vinho)]/75" : "bg-[var(--vinho)]"}`}>
         {state === "added" && <Check size={15} />}{label}
       </button>
-      <button type="button" onClick={() => put() && router.push("/pagamento")} className="press label h-[52px] w-full rounded-full text-[12px] shadow-[inset_0_0_0_1px_rgba(85,30,43,.85)] text-[var(--vinho)] hover:bg-[var(--vinho)] hover:text-[var(--creme)]">Comprar agora</button>
     </div>
 
     <div className="mt-4 flex items-center justify-between text-[13px] text-[var(--muted)]">

@@ -20,10 +20,12 @@ const MENU_PRINCIPAL = [
   { href: "/provador", label: "Provador virtual" },
 ];
 
-// The quieter list under them, in the owners' order (2026-11-23): Coleções, Meranno Fit, then the rest.
+// The quieter list under them, in the owners' order (2026-11-23): Coleções, Meranno Fit, then the rest; "Meus pedidos"
+// between Meranno Fit and Sobre nós (2026-11-24).
 const NAV_LINKS = [
   { href: "/colecoes", label: "Coleções" },
   { href: "/meu-fit", label: "Meranno Fit" },
+  { href: "/meus-pedidos", label: "Meus pedidos" },
   { href: "/sobre-nos", label: "Sobre nós" },
 ];
 

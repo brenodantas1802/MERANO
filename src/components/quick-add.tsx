@@ -10,7 +10,7 @@ import { getProductPrice, type Product } from "@/lib/products";
 // Cart button on product cards: a size is required, so it opens a size picker over the photo first.
 export function QuickAdd({ product }: { product: Product }) {
   const [open, setOpen] = useState(false);
-  const { addItem, openDrawer } = useCart();
+  const { adicionar, openDrawer } = useCart();
   const recommended = useSizeRecommendation(product).recommendation?.size;
 
   function stop(event: React.MouseEvent) {
@@ -20,13 +20,13 @@ export function QuickAdd({ product }: { product: Product }) {
 
   function add(event: React.MouseEvent, size: string) {
     stop(event);
-    addItem({ id: `${product.id}-${size}-${product.colors[0]}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Regular", color: product.colors[0], image: product.image });
     setOpen(false);
-    openDrawer();
+    // Already in the cart in this size: the cart asks first, and "Sim" opens the bag.
+    if (adicionar({ id: `${product.id}-${size}-${product.colors[0]}`, productId: product.id, name: product.name, price: getProductPrice(product), size, fit: "Regular", color: product.colors[0], image: product.image }, openDrawer)) openDrawer();
   }
 
   // Sits over the card photo (same aspect ratio) so the picker lines up with it. Computers only, on hover: on a phone
-  // it covered every shirt, and the product page already has "Comprar" and the cart button.
+  // it covered every shirt, and the product page already has the cart button.
   return <div className="pointer-events-none absolute inset-x-0 top-0 hidden aspect-[.82] md:block">
     <button type="button" onClick={(event) => { stop(event); setOpen((value) => !value); }} aria-label={`Adicionar ${product.name} ao carrinho`} aria-expanded={open} className="pointer-events-auto absolute right-2.5 top-[3.25rem] z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--superficie)]/90 opacity-0 shadow-sm transition-all hover:bg-[var(--ink)] hover:text-[var(--paper)] focus-visible:opacity-100 group-hover:opacity-100">
       {open ? <X size={16} strokeWidth={1.5} /> : <ShoppingCart size={16} strokeWidth={1.5} />}

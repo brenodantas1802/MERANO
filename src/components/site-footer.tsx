@@ -21,7 +21,8 @@ const LINKS = [
 
 export function SiteFooter() {
   const pathname = usePathname();
-  if (pathname.startsWith("/admin")) return null;
+  // No footer on the checkout (2026-11-24, like the Saint Tropez one): its own links sit under the pay button.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/pagamento")) return null;
   // A brass line with the ace in the middle opens the footer (the sea waves that sat here went on 2026-11-17: the
   // owners no longer want sea imagery).
   return <footer className="bg-black text-white">

@@ -15,8 +15,8 @@ Atualizado em **24/11/2026**. **Pré-venda: esta semana. Venda aberta: semana qu
 | 1.3 | Criar o e-mail da Meranno | vocês + Claude | fácil | 15 min | **feito** (24/11): `contato.meranno@gmail.com` |
 | 1.4 | Frete de verdade (SuperFrete) | vocês + Claude | fácil | 30 min | **falta**: o site mostra frete de exemplo |
 | 1.5 | E-mail de confirmação de conta (SMTP) | vocês | médio | 20 min | **conferir** |
-| 1.6 | Pagamento on-line (Asaas) | vocês + Claude | o mais difícil | 1 h, mais a aprovação da conta (pode levar dias) | **falta** |
-| 1.7 | Compra de teste, do começo ao fim | vocês + Claude | fácil | 20 min | depois do 1.4 e do 1.6 |
+| 1.6 | Pagamento on-line (Asaas) | vocês + Claude | o mais difícil | 1 h, mais a aprovação da conta (pode levar dias) | **funcionando (24/11)**: Pix testado de ponta a ponta (pedido virou Pago sozinho pelo aviso do Asaas) |
+| 1.7 | Compra de teste, do começo ao fim | vocês + Claude | fácil | 20 min | **Pix ok (24/11, MR-5AAVYQ)**; falta testar o cartão e refazer o frete depois do 1.4 |
 | | **PRIORIDADE 2: antes da venda aberta (semana que vem)** | | | | |
 | 2.1 | Recarga automática do OpenRouter (IA do Provador e do Personalizador) | vocês | muito fácil | 5 min | conferir |
 | 2.2 | Assinar o Supabase Pro | vocês | fácil | 10 min | **falta** |
@@ -244,8 +244,9 @@ Chaves e senhas **nunca** vão no chat, no WhatsApp ou no código: só na Vercel
 - **O que agrega:** é o lançamento.
 - **Sem isso:** o site continua em "Coming soon" para quem não está na lista.
 - **O que vocês decidem antes:**
-  1. **Preço depois da pré-venda:** volta para R$ 180 (o Claude tira o "R$ 180 riscado")?
-  2. **Prazo de entrega** de quem comprar na venda aberta (hoje está "7 de dezembro", que é o da pré-venda).
+  1. ~~Preço depois da pré-venda~~ **decidido (24/11):** todas as camisetas a R$ 180 desde já, inclusive a personalizada, sem preço riscado.
+  2. **Prazo de entrega** de quem comprar na venda aberta (hoje está "até 7 de dezembro", que é o da pré-venda).
+  3. **Data da abertura:** o painel Financeiro conta como pré-venda os pedidos feitos antes de 1º/12 (`ABERTURA_VENDA` em `src/lib/financeiro.ts`). Se a venda abrir em outro dia, avisem o Claude.
 - **Passo a passo:** no dia, digam ao Claude "abre a venda": ele desliga o `PRE_VENDA` na Vercel, ajusta preço e prazo, publica e testa numa janela anônima.
 
 ---
