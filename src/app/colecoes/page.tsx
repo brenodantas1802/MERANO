@@ -6,14 +6,15 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { ESPADAS } from "@/lib/naipes";
 import { collections, products } from "@/lib/products";
 
-// The pieces are grouped by collection (the owners asked on 2026-11-17 for "Summer Collection 01" here). The card is a
+// The pieces are grouped by collection (the owners asked on 2026-11-17 for "Summer Collection 01" here). The page was
+// "Categorias" (/categorias) until 2026-11-23, when the owners renamed it "Coleções". The card is a
 // strong wine in both themes (owners, 2026-11-22: the pale one looked washed out behind the orange tee).
-export default function CategoriesPage() {
+export default function ColecoesPage() {
   const cards = collections.map((collection) => ({ ...collection, count: products.filter((product) => product.collection === collection.id).length })).filter((collection) => collection.count > 0);
 
   return <main className="sunset-glow"><SiteHeader />
     <div className="mx-auto max-w-360 px-6 pb-20 pt-10 md:px-12 md:pt-14">
-      <h1 className="display mb-8 text-5xl md:text-6xl">Categorias</h1>
+      <h1 className="display mb-8 text-5xl md:text-6xl">Coleções</h1>
 
       <div className="grid gap-6 md:grid-cols-3">
         {cards.map((collection, index) => (

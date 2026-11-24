@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -11,6 +11,8 @@ import { autorizacao, pedidoDaConta } from "@/lib/pre-venda-lista";
 import { AbrirCadeado, Aguardando, Entrando, FormTelefone } from "./formularios";
 
 export const metadata: Metadata = { title: "MERANNO | Pré-venda", robots: { index: false, follow: false } };
+// The phone's browser bars in the same wine as the page (.feltro).
+export const viewport: Viewport = { themeColor: "#39000F" };
 
 // The link sent to the WhatsApp group. Sign in (or create the account the first time); if the account's e-mail or
 // WhatsApp is on the pre-sale list, "Abrir o cadeado" lets this browser in. Covers the whole screen, like /em-breve.
@@ -32,7 +34,7 @@ export default async function PreVenda() {
       <p className="label text-[13px] tracking-[.55em] text-[var(--latao)]">Meranno</p>
       <Cadeado id="cadeado-pre-venda" className="cadeado-balanco mt-10 w-[clamp(80px,18vw,108px)]" />
       <h1 className="display mt-8 text-[clamp(3rem,12vw,5.2rem)] leading-[.9]">Pré-venda.</h1>
-      <p className="mt-3 text-[16px] text-[var(--creme)]/80">Summer Collection 01, só para quem está no grupo.</p>
+      <p className="mt-3 text-[16px] text-[var(--creme)]/90">Summer Collection 01, só para quem está no grupo.</p>
 
       <div className="mt-8 w-full rounded-[2rem] bg-[var(--superficie)] p-6 text-left text-[var(--ink)] shadow-[0_30px_60px_-30px_rgba(12,2,6,.8)] md:p-8">
         {jaLiberado ? <Entrando /> : !user ? <>

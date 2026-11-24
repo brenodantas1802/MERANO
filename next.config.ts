@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
       { source: "/sobre-mim", destination: "/meu-fit", permanent: true },
       { source: "/meu-perfil", destination: "/meu-fit", permanent: true },
       { source: "/a-marca", destination: "/sobre-nos", permanent: true },
+      // "Categorias" became "Coleções" (owners, 2026-11-23).
+      { source: "/categorias", destination: "/colecoes", permanent: true },
       // The old manual-confirmation checkout (before the payment page); 2026-11-21.
       { source: "/checkout", destination: "/carrinho", permanent: true },
       // The pieces renamed by the owners on 2026-11-23 (IDS_ANTIGOS in src/lib/products.ts).

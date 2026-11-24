@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Search, ShoppingCart, X } from "lucide-react";
+import { ArrowLeft, Menu, Search, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,12 +20,11 @@ const MENU_PRINCIPAL = [
   { href: "/provador", label: "Provador virtual" },
 ];
 
+// The quieter list under them, in the owners' order (2026-11-23): Coleções, Meranno Fit, then the rest.
 const NAV_LINKS = [
-  { href: "/sobre-nos", label: "Sobre nós" },
-  { href: "/shop", label: "Shop" },
-  { href: "/categorias", label: "Categorias" },
+  { href: "/colecoes", label: "Coleções" },
   { href: "/meu-fit", label: "Meranno Fit" },
-  { href: "/provador", label: "Provador" },
+  { href: "/sobre-nos", label: "Sobre nós" },
 ];
 
 // The account mark: a head over a rounded body, drawn to match the search and cart icons.
@@ -64,6 +63,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const searchInput = useRef<HTMLInputElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
+  const naInicial = pathname === "/";
   const term = query.trim().toLowerCase();
   // With nothing typed yet the panel suggests a few pieces instead of showing an empty box.
   const matches = buscarProdutos(products, term).slice(0, 4);
@@ -114,7 +114,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const clear = overlay && !scrolled && !menuOpen && !searchOpen;
   const outline = clear ? OUTLINE_CLEAR : OUTLINE;
 
-  return <header ref={headerRef} data-clear={clear || undefined} className={`${overlay ? "fixed inset-x-0" : "sticky"} top-0 z-50 text-[var(--ink)]`}>
+  return <><header ref={headerRef} data-clear={clear || undefined} className={`${overlay ? "fixed inset-x-0" : "sticky"} top-0 z-50 text-[var(--ink)]`}>
     <div className={`sans grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b px-3 transition-colors duration-300 md:px-6 ${clear ? "border-transparent bg-transparent" : "border-[var(--line)] bg-[var(--paper)]"}`}>
       <div className="flex items-center">
         <button type="button" onClick={toggleMenu} aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} className={outline}>
@@ -166,13 +166,15 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
             <LogoNome title="MERANNO" className="h-auto w-[112px] text-[var(--ink)]" />
             <span />
           </div>
-          <div className="px-6 pb-2 pt-6">
+          {/* Off the home page, the way back comes first (owners, 2026-11-23: people got lost with only the logo). */}
+          {!naInicial && <Link href="/" onClick={() => setMenuOpen(false)} className="press mx-6 mt-4 flex min-h-11 items-center gap-2 text-[14px] text-[var(--muted)] hover:text-[var(--ink)]"><ArrowLeft size={16} strokeWidth={1.6} aria-hidden />Voltar para a página inicial</Link>}
+          <div className={`px-6 pb-2 ${naInicial ? "pt-6" : "pt-2"}`}>
             {MENU_PRINCIPAL.map((link, index) => <motion.div key={link.href} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.22, delay: 0.03 * index, ease: [0.2, 0.8, 0.2, 1] }}>
               <Link onClick={() => setMenuOpen(false)} href={link.href} aria-current={pathname === link.href ? "page" : undefined} className="press block py-1.5 text-[26px] leading-tight hover:opacity-70">{link.label}</Link>
             </motion.div>)}
           </div>
           <div className="mx-6 mt-3 border-t border-black/10 pt-3">
-            {NAV_LINKS.filter((link) => !MENU_PRINCIPAL.some((item) => item.href === link.href)).map((link) => <Link key={link.href} onClick={() => setMenuOpen(false)} href={link.href} className="press flex min-h-11 items-center justify-between text-[15px]">{link.label}<span aria-hidden className="text-black/30">›</span></Link>)}
+            {NAV_LINKS.map((link) => <Link key={link.href} onClick={() => setMenuOpen(false)} href={link.href} aria-current={pathname === link.href ? "page" : undefined} className="press flex min-h-11 items-center justify-between text-[15px]">{link.label}<span aria-hidden className="text-black/30">›</span></Link>)}
           </div>
           <div className="px-6 pb-6 pt-4">
             {/* The collection's name opens it in the shop; its shirts follow as pills. */}
@@ -193,5 +195,11 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
         </motion.nav>
       </>}
     </AnimatePresence>, document.body)}
-  </header>;
+  </header>
+  {/* Phones, off the home page: a quiet way back under the bar (owners, 2026-11-23: only the logo led home, and people
+      got lost). The bar itself is full on a phone, so it sits below it and scrolls away with the page. */}
+  {!naInicial && <div className="px-6 md:hidden">
+    <Link href="/" className="sans flex min-h-10 w-fit items-center gap-2 pt-1 text-[11px] uppercase tracking-[.15em] text-[var(--muted)] active:text-[var(--ink)]"><ArrowLeft size={14} strokeWidth={1.6} aria-hidden />Voltar para o início</Link>
+  </div>}
+  </>;
 }

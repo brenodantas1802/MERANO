@@ -34,7 +34,7 @@ export type Collection = { id: string; name: string; tagline: string; image: str
 
 export const collections: Collection[] = [
   // Named by the owners on 2026-11-17. `image` is a shirt cutout (the old beach banner no longer fits the brand).
-  { id: "colecao-01", name: "Summer Collection 01", tagline: "A primeira coleção da Meranno", image: "/imagens/merano-assets/recortes/verao-em-boa-companhia-1400.webp" },
+  { id: "colecao-01", name: "Summer Collection 01", tagline: "A primeira coleção da Meranno", image: "/imagens/merano-assets/recortes/arancia-1200.webp" },
 ];
 
 export function getCollection(id: string) {
@@ -68,6 +68,8 @@ export const MATERIAL = "Camiseta regular unissex, 100% algodão penteado, malha
 export const PRECO_LANCAMENTO = 180;
 export const PRECO_PRE_VENDA = 160;
 
+// Photos: the owners' official ones of 2026-11-23 (regular cut, studio white), re-framed so every shirt sits at the same
+// size and place (Amore White's back came later the same day).
 export const products: Product[] = [
   {
     id: "amore-black",
@@ -76,9 +78,9 @@ export const products: Product[] = [
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
     note: "Estampa Amore",
-    image: "/imagens/merano-assets/produtos/coracao-preto-verso.jpg",
-    gallery: ["/imagens/merano-assets/produtos/coracao-preto-verso.jpg", "/imagens/merano-assets/produtos/coracao-preto-frente.jpg"],
-    views: { back: "/imagens/merano-assets/produtos/coracao-preto-verso.jpg", front: "/imagens/merano-assets/produtos/coracao-preto-frente.jpg" },
+    image: "/imagens/merano-assets/produtos/amore-black-verso.jpg",
+    gallery: ["/imagens/merano-assets/produtos/amore-black-verso.jpg", "/imagens/merano-assets/produtos/amore-black-frente.jpg"],
+    views: { back: "/imagens/merano-assets/produtos/amore-black-verso.jpg", front: "/imagens/merano-assets/produtos/amore-black-frente.jpg" },
     tags: ["amore", "amor", "coracao", "aquarela", "manuscrito", "preto", "black"],
     category: "Camisetas",
     collection: "colecao-01",
@@ -97,9 +99,9 @@ export const products: Product[] = [
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
     note: "Estampa Amore",
-    image: "/imagens/merano-assets/produtos/coracao-branco-verso.jpg",
-    gallery: ["/imagens/merano-assets/produtos/coracao-branco-verso.jpg", "/imagens/merano-assets/produtos/coracao-branco-frente.jpg"],
-    views: { back: "/imagens/merano-assets/produtos/coracao-branco-verso.jpg", front: "/imagens/merano-assets/produtos/coracao-branco-frente.jpg" },
+    image: "/imagens/merano-assets/produtos/amore-white-verso.jpg",
+    gallery: ["/imagens/merano-assets/produtos/amore-white-verso.jpg", "/imagens/merano-assets/produtos/amore-white-frente.jpg"],
+    views: { back: "/imagens/merano-assets/produtos/amore-white-verso.jpg", front: "/imagens/merano-assets/produtos/amore-white-frente.jpg" },
     tags: ["amore", "amor", "coracao", "aquarela", "manuscrito", "branco", "white"],
     category: "Camisetas",
     collection: "colecao-01",
@@ -118,9 +120,9 @@ export const products: Product[] = [
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
     note: "Estampa Riviera · Va tutto bene",
-    image: "/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg",
-    gallery: ["/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg", "/imagens/merano-assets/produtos/va-tutto-bene-frente.jpg"],
-    views: { back: "/imagens/merano-assets/produtos/va-tutto-bene-verso.jpg", front: "/imagens/merano-assets/produtos/va-tutto-bene-frente.jpg" },
+    image: "/imagens/merano-assets/produtos/riviera-verso.jpg",
+    gallery: ["/imagens/merano-assets/produtos/riviera-verso.jpg", "/imagens/merano-assets/produtos/riviera-frente.jpg"],
+    views: { back: "/imagens/merano-assets/produtos/riviera-verso.jpg", front: "/imagens/merano-assets/produtos/riviera-frente.jpg" },
     tags: ["riviera", "mar", "limao", "cafe", "verao", "italia", "branco"],
     category: "Camisetas",
     collection: "colecao-01",
@@ -135,13 +137,13 @@ export const products: Product[] = [
   {
     id: "arancia",
     name: "Arancia",
-    description: "Laranjeira em flor, sol e boa comida — lugares simples, dias inesquecíveis.",
+    description: "Laranjeira em flor num verão brasileiro, com MERANNO no peito. Em boa companhia.",
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
     note: "Estampa Arancia",
-    image: "/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg",
-    gallery: ["/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg"],
-    views: { back: "/imagens/merano-assets/produtos/verao-em-boa-companhia-verso.jpg" },
+    image: "/imagens/merano-assets/produtos/arancia-verso.jpg",
+    gallery: ["/imagens/merano-assets/produtos/arancia-verso.jpg", "/imagens/merano-assets/produtos/arancia-frente.jpg"],
+    views: { back: "/imagens/merano-assets/produtos/arancia-verso.jpg", front: "/imagens/merano-assets/produtos/arancia-frente.jpg" },
     category: "Camisetas",
     tags: ["arancia", "laranja", "fruta", "botanico", "verao", "natureza", "azul"],
     collection: "colecao-01",
@@ -160,9 +162,9 @@ export const products: Product[] = [
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
     note: "Estampa Why not",
-    image: "/imagens/merano-assets/produtos/wine-not-verso.jpg",
-    gallery: ["/imagens/merano-assets/produtos/wine-not-verso.jpg", "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg"],
-    views: { back: "/imagens/merano-assets/produtos/wine-not-verso.jpg", front: "/imagens/merano-assets/camiseta preta e vermelha frente.jpeg" },
+    image: "/imagens/merano-assets/produtos/why-not-verso.jpg",
+    gallery: ["/imagens/merano-assets/produtos/why-not-verso.jpg", "/imagens/merano-assets/produtos/why-not-frente.jpg"],
+    views: { back: "/imagens/merano-assets/produtos/why-not-verso.jpg", front: "/imagens/merano-assets/produtos/why-not-frente.jpg" },
     category: "Camisetas",
     tags: ["frase", "vinho", "wine", "pintado-a-mao", "preto"],
     collection: "colecao-01",

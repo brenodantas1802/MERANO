@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Cadeado } from "@/components/cadeado";
@@ -6,6 +6,8 @@ import Link from "next/link";
 import { COOKIE_ACESSO, acessoValido, preVendaAtiva } from "@/lib/pre-venda";
 
 export const metadata: Metadata = { title: "MERANNO | Coming soon", robots: { index: false, follow: false } };
+// The phone's browser bars in the same wine as the page (.feltro).
+export const viewport: Viewport = { themeColor: "#39000F" };
 
 const INSTAGRAM = "https://www.instagram.com/merannoclothing/";
 
@@ -26,13 +28,13 @@ export default async function EmBreve({ searchParams }: { searchParams: Promise<
       <Cadeado id="cadeado-tela" className="cadeado-balanco w-[clamp(104px,20vw,150px)]" />
       <h1 className="display mt-10 text-[clamp(3.4rem,12vw,8.5rem)] leading-[.88]">Coming soon.</h1>
       <div className="mt-7 h-px w-24 bg-[linear-gradient(90deg,transparent,var(--latao),transparent)]" />
-      <p className="mt-6 max-w-sm text-[17px] leading-snug text-[var(--creme)]/80">A pré-venda da Summer Collection 01 é só para quem está no grupo.</p>
+      <p className="mt-6 max-w-sm text-[17px] leading-snug text-[var(--creme)]/90">A pré-venda da Summer Collection 01 é só para quem está no grupo.</p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link href="/pre-venda" className="btn-ouro press label inline-flex h-12 items-center rounded-full px-7 text-[13px] text-[var(--vinho)]">Está na lista? Entrar</Link>
         {grupo && <a href={grupo} target="_blank" rel="noopener noreferrer" className="press label inline-flex h-12 items-center rounded-full border border-[var(--creme)]/40 px-7 text-[13px] text-[var(--creme)]">Quero entrar no grupo</a>}
       </div>
     </div>
 
-    <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="label inline-flex min-h-11 items-center text-[12px] text-[var(--creme)]/70 transition-colors hover:text-[var(--latao)]">Instagram</a>
+    <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="label inline-flex min-h-11 items-center text-[12px] text-[var(--creme)]/85 transition-colors hover:text-[var(--latao)]">Instagram</a>
   </main>;
 }

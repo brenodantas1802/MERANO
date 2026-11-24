@@ -18,7 +18,7 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 
 ## Onde as coisas estão agora
 
-- **Site no ar** (https://merano-xi.vercel.app): ainda é a versão de 17/11. **Nada do que foi feito de 20 a 22/11 está publicado.**
+- **Site no ar** (https://merano-xi.vercel.app): versão de 23/11 à noite, com as fotos oficiais das cinco camisetas.
 - **Trabalho novo**: no branch `lancamento-pre-venda`. O de 22/11 foi testado no computador (produto → tamanho → carrinho com duas peças → pagamento → pedido) e o build de produção passa.
 - **Banco (Supabase)**: tabelas de pedidos, cupons, lista da pré-venda e pedidos de acesso prontas. Ficou um pedido de teste, `MR-FFHAK2` ("Teste Claude"), marcado como **cancelado**. Pode apagar.
 
@@ -74,11 +74,18 @@ Sem os itens 3 e 4 o site funciona assim mesmo: o frete aparece como "valores de
 
 **Nomes novos (23/11)**: Arancia (a da laranja, azul-marinho), Amore Black e Amore White (as do coração), Riviera (a do café no terraço, antiga Va tutto bene) e Why not (a do vinho). Os endereços também mudaram (`/produto/arancia`, `/produto/amore-black`, `/produto/amore-white`, `/produto/riviera`, `/produto/why-not`); os antigos redirecionam, e carrinhos, favoritos e pedidos de antes continuam valendo (`IDS_ANTIGOS` em `src/lib/products.ts`).
 
+**Fotos oficiais e ajustes (23/11, tarde):**
+- **Fotos novas** (modelagem regular, fundo branco de estúdio) no lugar das antigas, em todas as peças: verso e frente da Amore Black, Riviera, Arancia (que ganhou foto de frente), Why not e Amore White (o verso chegou à noite). Todas reenquadradas para a camiseta ficar do mesmo tamanho e na mesma posição nos cards e na página do produto (sem recortar a manga). O verso da Arancia veio em fundo cinza-lavanda e foi passado para o mesmo branco.
+- **Carrossel 3D**: recortes novos das cinco (Amore Black, Amore White, Riviera, Arancia e Why not), feitos contra o fundo liso da foto em 4x (borda no meio do contraste da própria camiseta, sem halo branco nas escuras, gola da Riviera lisa), em 1200 px. O script fica fora do site; para refazer com fotos novas, é só pedir ao Claude.
+- **Sobre nós**: texto novo de vocês, palavra por palavra, fechando com "Meranno. Vista suas ideias.".
+- **Categorias virou Coleções** (`/colecoes`; o endereço antigo redireciona). No menu: Coleções, Meranno Fit e Sobre nós, nessa ordem.
+- **Voltar para a página inicial**: no topo do menu (fora da inicial) e, no celular, uma seta discreta "Voltar para o início" logo abaixo da barra (a barra do celular não tem espaço para mais um botão).
+- **Cadeado** (Coming soon, pré-venda e a abertura do convite): bordô forte e liso (`#39000F`, sem a textura e a luz que apagavam a cor), dourado mais vivo no cadeado, no botão e no nome, texto do botão em bordô quase preto, e as barras do Safari na mesma cor.
+
 **Falta (com vocês):**
 | Item | O que preciso |
 |---|---|
 | Estampa nova | Qual estampa troca e o arquivo. |
-| Fotos das camisetas | As versões em modelagem regular (o Speaker 1 vai refazer no ChatGPT). Corrigem também o recorte e a sombra do carrossel 3D. |
 | Contato | O número duplo (Yuri) e o e-mail novo. |
 | Detalhes do produto | O que exatamente ajustar. |
 | Microsoft Clarity | Criar a conta em clarity.microsoft.com e me passar o ID do projeto. |

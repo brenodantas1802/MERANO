@@ -17,24 +17,28 @@ const faqs = [
   { question: "E se eu precisar trocar o tamanho depois?", answer: "Não fazemos trocas. Por isso a tabela de medidas e o Meranno Fit estão em cada peça: confira antes de comprar." },
 ];
 
-// The owners' story (2026-11-22). The shirts that turned with the scroll (ShirtChapters) left this page the same day:
-// heavy on phones, and the owners prefer the page short.
+// The owners' text (2026-11-23), word for word. The shirts that turned with the scroll (ShirtChapters) left this page
+// on 2026-11-22: heavy on phones, and the owners prefer the page short.
+const ABERTURA = "A Meranno nasceu da ideia de que vestir-se é mais do que escolher uma roupa: é uma forma de expressar quem somos.";
 const HISTORIA = [
-  "Decidimos empreender juntos e começamos pelo que mais faz parte do nosso dia a dia: o estilo, o jeito de se vestir.",
-  "Pesquisando, vimos como era difícil achar estampas boas, mesmo nas lojas mais famosas.",
-  "Daí veio a Meranno: um personalizador para você criar a sua própria estampa, e coleções com estampas que têm a nossa cara.",
+  "Acreditamos em uma moda que valoriza a autenticidade, a criatividade e a individualidade. Por isso, desenvolvemos coleções que combinam identidade, estilo e originalidade, com estampas que contam histórias e traduzem diferentes formas de enxergar o mundo.",
+  "Mas queremos ir além das nossas próprias criações.",
+  "Com nosso provador virtual e sistema de personalização, oferecemos a liberdade de transformar ideias em peças únicas. Cada pessoa pode criar sua própria estampa, explorando possibilidades e desenvolvendo algo que realmente represente seu estilo.",
+  "Mais do que uma marca de roupas, a Meranno é um espaço para a expressão individual, onde a criatividade não se limita às nossas coleções.",
 ];
 
 export default function BrandPage() {
   return <main><SiteHeader />
-    <article className="mx-auto max-w-360 px-6 pb-16 md:px-12 md:pb-20">
-      <Link href="/" className="sans mb-16 flex items-center gap-2 pt-8 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar para o início</Link>
+    <article className="mx-auto max-w-360 px-6 pb-16 max-md:pt-8 md:px-12 md:pb-20">
+      {/* On phones the header's own "Voltar para o início" sits just above, so this one is for wider screens. */}
+      <Link href="/" className="sans mb-16 flex items-center gap-2 pt-8 text-[11px] uppercase tracking-[.15em] text-[var(--muted)] max-md:hidden"><ArrowLeft size={14} /> Voltar para o início</Link>
 
       <ScrollReveal><p className="serif-note text-2xl text-[var(--sol-1)] md:text-3xl">quem a gente é</p><h1 className="display mt-3 max-w-4xl text-7xl md:text-9xl">Sobre <i>nós.</i></h1></ScrollReveal>
 
       <div className="mt-12 max-w-2xl md:mt-16">
-        <p className="text-2xl leading-snug md:text-3xl">Somos cinco amigos: Breno, Yuri, Mateus, Pedro e Enzo.</p>
+        <p className="text-2xl leading-snug md:text-3xl">{ABERTURA}</p>
         {HISTORIA.map((paragrafo) => <p key={paragrafo} className="mt-6 text-lg leading-relaxed text-[var(--muted)] md:text-xl">{paragrafo}</p>)}
+        <p className="display mt-12 text-4xl leading-tight md:text-5xl">Meranno. <i>Vista suas ideias.</i></p>
       </div>
     </article>
 
