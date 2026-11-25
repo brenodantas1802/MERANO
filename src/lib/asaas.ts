@@ -99,7 +99,7 @@ export async function criarCheckout(pedido: Pedido, origem: string) {
   return { link: typeof dados.link === "string" && dados.link ? dados.link : `https://${base() === SANDBOX ? "sandbox." : ""}asaas.com/checkoutSession/show?id=${id}`, checkout: id };
 }
 
-export type CobrancaAsaas = { id: string; status: string; value: number; billingType: string; checkoutSession: string | null; externalReference: string | null };
+export type CobrancaAsaas = { id: string; status: string; value: number; billingType: string; checkoutSession: string | null; externalReference: string | null; installment: string | null };
 
 const cobranca = (dados: Record<string, unknown>): CobrancaAsaas => ({
   id: String(dados.id),
@@ -108,6 +108,7 @@ const cobranca = (dados: Record<string, unknown>): CobrancaAsaas => ({
   billingType: String(dados.billingType ?? ""),
   checkoutSession: dados.checkoutSession ? String(dados.checkoutSession) : null,
   externalReference: dados.externalReference ? String(dados.externalReference) : null,
+  installment: dados.installment ? String(dados.installment) : null,
 });
 
 // Paid, money on its way or already in the account.
@@ -140,4 +141,27 @@ export function resumoDoCheckout(cobrancas: CobrancaAsaas[], total: number) {
     status: principal?.status ?? "",
     metodo: principal?.billingType === "CREDIT_CARD" ? "cartao" : principal?.billingType === "PIX" ? "pix" : (principal?.billingType ?? "").toLowerCase(),
   };
+}
+
+// Gives the money back for an order (owners, 2026-11-25: cancelling refunds automatically). Every paid charge of the
+// order's checkouts goes back to where it came from: Pix to the same account, card as a credit on the same card. A card
+// paid in instalments is refunded once, as a whole. Throws with Asaas's reason if a refund is refused (for a Pix refund
+// the Asaas balance must cover it). Returns the amount refunded.
+export async function estornarCheckouts(checkouts: string[], descricao: string) {
+  let estornado = 0;
+  const parcelamentos = new Set<string>();
+  for (const checkout of checkouts) {
+    for (const item of await cobrancasDoCheckout(checkout)) {
+      if (!PAGO_ASAAS.has(item.status)) continue;
+      if (item.installment) {
+        if (parcelamentos.has(item.installment)) { estornado += item.value; continue; }
+        parcelamentos.add(item.installment);
+        await chamar(`/installments/${encodeURIComponent(item.installment)}/refund`, { method: "POST", body: {} });
+      } else {
+        await chamar(`/payments/${encodeURIComponent(item.id)}/refund`, { method: "POST", body: { description: descricao.slice(0, 200) } });
+      }
+      estornado += item.value;
+    }
+  }
+  return Math.round(estornado * 100) / 100;
 }

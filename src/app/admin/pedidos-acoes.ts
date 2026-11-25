@@ -2,7 +2,9 @@
 
 import { refresh } from "next/cache";
 import { dono } from "./dono";
-import { STATUS_PEDIDO, normalizarCupom, type StatusPedido } from "@/lib/pedidos";
+import { STATUS_PEDIDO, TAMANHOS_PERSONALIZADA, cpfValido, normalizarCupom, type Pedido, type StatusPedido } from "@/lib/pedidos";
+import { cancelarPedido } from "@/lib/cancelamento";
+import { formatPrice, getProduct } from "@/lib/products";
 
 // Orders and coupons, edited from the owners' panel. Every action checks the owner again (see dono).
 export type Resposta = { tipo: "ok" | "erro"; texto: string } | null;
@@ -124,4 +126,50 @@ export async function cupomDoPopup(codigo: string): Promise<Resposta> {
   }
   refresh();
   return { tipo: "ok", texto: `O pop-up agora mostra o ${alvo}.` };
+}
+
+// Cancels and, if it was paid through Asaas, refunds right away (lib/cancelamento). For any status: after delivery it
+// is the 7-day return (CDC, art. 49), once the piece is back.
+export async function cancelarPedidoEquipe(id: string): Promise<Resposta> {
+  if (!UUID.test(id)) return { tipo: "erro", texto: "Pedido inválido." };
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só os donos podem cancelar pedidos." };
+  const { data } = await sessao.admin.from("pedidos").select("*").eq("id", id).maybeSingle();
+  if (!data) return { tipo: "erro", texto: "Pedido não encontrado." };
+  const resultado = await cancelarPedido(sessao.admin, data as Pedido, sessao.email);
+  if (!resultado.ok) return { tipo: "erro", texto: resultado.erro };
+  refresh();
+  return { tipo: "ok", texto: resultado.estornado ? `Cancelado e estornado: ${formatPrice(resultado.estornado)} voltaram para o cliente.` : "Cancelado." };
+}
+
+// Fixes an order's customer and delivery data and the size of each piece (a wrong address, a size change). Prices,
+// pieces and quantities don't change here: that would change what was charged.
+export async function editarPedido(id: string, _anterior: Resposta, form: FormData): Promise<Resposta> {
+  if (!UUID.test(id)) return { tipo: "erro", texto: "Pedido inválido." };
+  const texto = (nome: string, maximo = 120) => String(form.get(nome) ?? "").trim().slice(0, maximo);
+  const digitos = (nome: string) => texto(nome).replace(/\D/g, "");
+  const cliente = { nome: texto("nome"), email: texto("email", 160).toLowerCase(), celular: digitos("celular"), cpf: digitos("cpf") };
+  const endereco = { cep: digitos("cep"), rua: texto("rua"), numero: texto("numero", 20), complemento: texto("complemento", 80), bairro: texto("bairro", 80), cidade: texto("cidade", 80), uf: texto("uf", 2).toUpperCase() };
+  if (cliente.nome.length < 2) return { tipo: "erro", texto: "Escreva o nome do cliente." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cliente.email)) return { tipo: "erro", texto: "E-mail inválido." };
+  if (cliente.celular.length < 10 || cliente.celular.length > 11) return { tipo: "erro", texto: "Celular com DDD: 10 ou 11 números." };
+  if (!cpfValido(cliente.cpf)) return { tipo: "erro", texto: "CPF inválido." };
+  if (endereco.cep.length !== 8) return { tipo: "erro", texto: "O CEP tem 8 números." };
+  if (!endereco.rua || !endereco.numero || !endereco.bairro || !endereco.cidade || !/^[A-Z]{2}$/.test(endereco.uf)) return { tipo: "erro", texto: "Preencha rua, número, bairro, cidade e estado." };
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só os donos podem mexer nos pedidos." };
+  const { data } = await sessao.admin.from("pedidos").select("itens").eq("id", id).maybeSingle();
+  if (!data) return { tipo: "erro", texto: "Pedido não encontrado." };
+  const itens = (data.itens as Pedido["itens"]).map((item, indice) => {
+    const tamanho = texto(`tamanho_${indice}`, 4).toUpperCase();
+    const validos: readonly string[] = item.criacaoId ? TAMANHOS_PERSONALIZADA : (item.productId ? getProduct(item.productId)?.fits : undefined) ?? [item.tamanho];
+    return validos.includes(tamanho) ? { ...item, tamanho } : item;
+  });
+  const { error } = await sessao.admin.from("pedidos").update({ cliente, email: cliente.email, endereco, itens, atualizado_em: new Date().toISOString() }).eq("id", id);
+  if (error) {
+    console.error("editarPedido failed:", error.message);
+    return { tipo: "erro", texto: "Não consegui salvar. Tente de novo." };
+  }
+  refresh();
+  return { tipo: "ok", texto: "Dados do pedido salvos." };
 }

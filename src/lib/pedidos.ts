@@ -66,7 +66,9 @@ export type PedidoEntrada = z.infer<typeof pedidoSchema>;
 export type ItemPedido = { productId: string | null; criacaoId: string | null; nome: string; tamanho: string; cor: string; preco: number; quantidade: number };
 export type CupomAplicado = { codigo: string; percentual: number };
 // What the order keeps about its online payment. `checkouts` are all the Asaas checkouts opened for it.
-export type PagamentoRegistro = { forma?: string; provedor?: string; id?: string; mp_id?: string; status?: string; metodo?: string; atualizado?: string; link?: string; preferencia?: string; checkout?: string; checkouts?: string[] };
+export type PagamentoRegistro = { forma?: string; provedor?: string; id?: string; mp_id?: string; status?: string; metodo?: string; atualizado?: string; link?: string; preferencia?: string; checkout?: string; checkouts?: string[];
+  // Set when the order is cancelled (lib/cancelamento): who did it, when, and the money given back through Asaas.
+  estorno?: { valor: number; em: string; por: string }; cancelado_em?: string; cancelado_por?: string };
 
 export type Pedido = {
   id: string; numero: string; criado_em: string; status: StatusPedido; metodo: Metodo; email: string;

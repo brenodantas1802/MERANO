@@ -108,14 +108,14 @@ function useTema() {
   return { tema, trocar };
 }
 
-const SECOES = [["financeiro", "Financeiro"], ["pedidos", "Pedidos"], ["pre-venda", "Pré-venda"], ["contas", "Quem entrou"], ["precos", "Preços"], ["cupons", "Cupons"], ["estampas", "Estampas"], ["emails", "E-mails"]] as const;
+const SECOES = [["pedidos", "Pedidos"], ["financeiro", "Financeiro"], ["pre-venda", "Pré-venda"], ["contas", "Quem entrou"], ["precos", "Preços"], ["cupons", "Cupons"], ["estampas", "Estampas"], ["emails", "E-mails"]] as const;
 
 export type Financeiro = { resumo: ResumoFinanceiro; config: ConfigFinanceira; despesas: Despesa[]; disponivel: boolean };
 
 export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, contas, precos, admins }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; contas: Conta[] | null; precos: PrecoAdmin[]; admins: Admins }) {
   const { tema, trocar } = useTema();
   return <div className="painel min-h-screen" data-tema={tema || undefined}>
-    <header className="sans sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur">
+    <header className="sans sticky top-0 z-40 bg-[var(--paper)]/85 backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4 px-6 py-4 md:px-12">
         <Link href="/" className="font-bold tracking-[.28em]">MERANNO / equipe</Link>
         <div className="flex items-center gap-2 text-[13px] text-[var(--muted)] sm:gap-4">
@@ -127,18 +127,19 @@ export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, li
         </div>
       </div>
       <nav aria-label="Seções do painel" className="shelf gap-1 px-4 pb-3 md:px-10">
-        {SECOES.map(([id, nome]) => <a key={id} href={`#${id}`} className="shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] uppercase tracking-[.12em] text-[var(--muted)] hover:bg-[var(--realce)] hover:text-[var(--ink)]">{nome}</a>)}
+        {SECOES.map(([id, nome]) => <a key={id} href={`#${id}`} className="shrink-0 whitespace-nowrap rounded-full bg-[var(--cartao)] px-3.5 py-2 text-[12px] uppercase tracking-[.12em] text-[var(--muted)] hover:text-[var(--ink)]">{nome}</a>)}
       </nav>
     </header>
-    <main className="mx-auto max-w-360 px-6 py-14 md:px-12">
-      <FinanceiroAdmin {...financeiro} />
-      <div id="pedidos" className="scroll-mt-28"><PedidosAdmin pedidos={pedidos} /></div>
-      <div id="pre-venda" className="scroll-mt-28"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} admins={admins} /></div>
-      <div id="contas" className="scroll-mt-28"><ContasAdmin contas={contas} admins={admins} /></div>
-      <div id="precos" className="scroll-mt-28"><PrecosAdmin precos={precos} /></div>
-      <div id="cupons" className="scroll-mt-28"><CuponsAdmin cupons={descontos} /></div>
-      <Criacoes criacoes={criacoes} />
-      <Cupons cupons={cupons} />
+    {/* Each part in its own ice card, like the cart and the checkout summary (owners, 2026-11-25); orders first. */}
+    <main className="mx-auto max-w-360 space-y-4 px-3 pb-16 pt-4 md:px-8">
+      <div id="pedidos" className="painel-bloco"><PedidosAdmin pedidos={pedidos} /></div>
+      <div className="painel-bloco"><FinanceiroAdmin {...financeiro} /></div>
+      <div id="pre-venda" className="painel-bloco"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} admins={admins} /></div>
+      <div id="contas" className="painel-bloco"><ContasAdmin contas={contas} admins={admins} /></div>
+      <div id="precos" className="painel-bloco"><PrecosAdmin precos={precos} /></div>
+      <div id="cupons" className="painel-bloco"><CuponsAdmin cupons={descontos} /></div>
+      <div className="painel-bloco"><Criacoes criacoes={criacoes} /></div>
+      <div className="painel-bloco"><Cupons cupons={cupons} /></div>
     </main>
   </div>;
 }

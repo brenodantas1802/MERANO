@@ -10,6 +10,8 @@ import { ENTREGA_PRE_VENDA, linkWhatsApp, mensagemWhatsApp, type Pedido, type St
 import { cheioPersonalizada, formatPrice, getPrecoCheio, getProduct } from "@/lib/products";
 import { usarPrecos } from "@/lib/precos-servidor";
 import { PagarAgora } from "./pagar-agora";
+import { CancelarPedido } from "./cancelar";
+import { clientePodeCancelar, PRAZO_CANCELAMENTO_HORAS } from "@/lib/pedido-status";
 
 export const metadata: Metadata = { title: "Seu pedido | MERANNO", robots: { index: false, follow: false } };
 
@@ -56,6 +58,10 @@ export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) 
   const provedor = NOME_PROVEDOR[pedido.pagamento?.provedor as Provedor] ?? "pagamento";
   // Pre-sale buyers who paid: the owners' thank-you note (2026-11-22), with the discount they really got, if any.
   const comprou = ["pago", "em_separacao"].includes(status);
+  // Cancelling on their own, with the money back automatically: 24 hours, before shipping (lib/pedido-status).
+  const podeCancelar = clientePodeCancelar(pedido);
+  const prazoCancelar = new Date(Date.parse(pedido.criado_em) + PRAZO_CANCELAMENTO_HORAS * 3600e3).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }).replace(", ", " às ");
+  const estorno = pedido.pagamento?.estorno;
   await usarPrecos();
   // Pre-sale price under the launch price (personalised tees too), plus coupon and Pix discounts.
   const precoCheio = pedido.itens.reduce((total, item) => {
@@ -89,7 +95,7 @@ export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) 
       {status === "em_separacao" && <p>As peças estão sendo separadas e embaladas. O código de rastreio aparece aqui quando o pedido sair.</p>}
       {status === "enviado" && <p>O pedido saiu{pedido.frete?.nome ? ` por ${pedido.frete.nome}` : ""}.{pedido.rastreio ? "" : " O código de rastreio aparece aqui em breve."}</p>}
       {status === "entregue" && <p>Esperamos que goste. Qualquer coisa, é só chamar no WhatsApp.</p>}
-      {status === "cancelado" && <p>Este pedido foi cancelado. Se foi engano, fale com a gente pelo WhatsApp.</p>}
+      {status === "cancelado" && <p>Este pedido foi cancelado.{estorno ? ` O valor de ${formatPrice(estorno.valor)} voltou para onde você pagou (no cartão, como crédito na fatura).` : ""} Se foi engano, fale com a gente pelo WhatsApp.</p>}
     </div>
 
     {comprou && <section className="mt-10 max-w-2xl rounded-[28px] bg-[var(--vinho)] px-7 py-8 text-[var(--creme)] shadow-[0_24px_50px_-30px_rgba(85,30,43,.8)] md:px-9">
@@ -106,6 +112,7 @@ export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) 
       <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={`press label inline-flex min-h-12 items-center gap-2 rounded-full px-7 text-[12px] ${status === "aguardando_pagamento" && pedido.metodo === "whatsapp" ? "bg-[#1f9e55] text-white" : "border border-[var(--line)] text-[var(--ink)]"}`}>
         {status === "aguardando_pagamento" && pedido.metodo === "whatsapp" ? "Enviar pelo WhatsApp" : "Falar no WhatsApp"} <ArrowRight size={14} />
       </a>
+      {podeCancelar && <CancelarPedido id={pedido.id} pago={status !== "aguardando_pagamento"} prazo={prazoCancelar} />}
     </div>
 
     <section className="glass mt-14 rounded-[28px] p-6 md:p-8">

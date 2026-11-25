@@ -229,6 +229,12 @@ html.entrada .veu-entrada { display: flex; }
 .painel[data-tema="escuro"] { color-scheme: dark; --paper: #141110; --ink: #EFE8DD; --muted: #A3978C; --line: #302926; --areia: #2A2320; --cream: #1E1917; --vinho: #A64A5E; --cartao: #1B1715; --campo: #110E0D; --realce: #2A231F; --trilho: #2E2622; --ganho: #6FC59A; --perda: #E8907D; }
 .painel[data-tema="escuro"] .tema-sol { display: block; }
 .painel[data-tema="escuro"] .tema-lua { display: none; }
+/* The panel's parts as ice cards with round corners, like the cart drawer and the checkout summary; the sections inside
+   lose their old page-length spacing and the titles get a size that fits a card (2026-11-25). */
+.painel .painel-bloco { background: var(--cartao); border-radius: 28px; padding: 1.5rem 1.1rem; scroll-margin-top: 7.5rem; }
+@media (min-width: 768px) { .painel .painel-bloco { padding: 2.5rem; } }
+.painel .painel-bloco > section { margin-top: 0; margin-bottom: 0; }
+.painel .painel-bloco h2.display { font-size: clamp(2.4rem, 7vw, 3.75rem); line-height: .95; }
 
 /* Home cover (components/hero-topo.tsx, capa-video.tsx): the darkened poker video over its own first frame (a still in
    a <picture>). Computers: the whole screen. Phones: a 4:5 frame with its own crop of the video (owners, 2026-11-23:
