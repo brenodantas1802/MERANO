@@ -42,12 +42,20 @@ const maskCpf = (value: string) => onlyDigits(value).slice(0, 11).replace(/(\d{3
 
 // Checkout fields: the name sits inside the box and moves up once something is typed.
 const caixa = "peer h-[52px] w-full rounded-[10px] border border-[var(--borda-campo)] bg-[var(--paper)] px-3.5 pb-1.5 pt-5 text-[15px] text-[var(--ink)] outline-none transition-[border-color,box-shadow] duration-150 focus:border-[var(--vinho)] focus:shadow-[0_0_0_1px_var(--vinho)]";
-const rotuloFlutuante = "pointer-events-none absolute left-3.5 top-2 text-[11px] leading-none text-[var(--muted)] transition-all duration-150 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[11px]";
+// The label sits small at the top when the field has text, and in the middle when it is empty and not focused. Whether
+// it has text is tracked here, not with :placeholder-shown: iPhone Safari doesn't re-check that rule when the page fills
+// a field by itself (street, district and city from the CEP), so the label stayed over the text (2026-11-25).
+const rotuloFlutuante = "pointer-events-none absolute left-3.5 max-w-[calc(100%-1.75rem)] truncate leading-none text-[var(--muted)] transition-all duration-150";
+const rotuloEmCima = "top-2 text-[11px]";
+const rotuloNoMeio = "top-1/2 -translate-y-1/2 text-[15px] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[11px] peer-autofill:top-2 peer-autofill:translate-y-0 peer-autofill:text-[11px]";
 
-function Campo({ rotulo, className = "", icone, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { rotulo: string; icone?: React.ReactNode }) {
+function Campo({ rotulo, className = "", icone, onInput, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { rotulo: string; icone?: React.ReactNode }) {
+  // Fields the page controls (value) say it themselves; the others (like "Número") are followed as the customer types.
+  const [digitado, setDigitado] = useState(Boolean(props.defaultValue));
+  const temTexto = props.value !== undefined ? String(props.value) !== "" : digitado;
   return <label className={`relative block ${className}`}>
-    <input {...props} placeholder=" " className={`${caixa} ${icone ? "pr-11" : ""}`} />
-    <span className={rotuloFlutuante}>{rotulo}</span>
+    <input {...props} onInput={(event) => { setDigitado(event.currentTarget.value !== ""); onInput?.(event); }} className={`${caixa} ${icone ? "pr-11" : ""}`} />
+    <span className={`${rotuloFlutuante} ${temTexto ? rotuloEmCima : rotuloNoMeio}`}>{rotulo}</span>
     {icone && <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]">{icone}</span>}
   </label>;
 }
@@ -291,7 +299,7 @@ export function Pagamento({ online, provedor, entrega }: { online: boolean; prov
                 <Campo rotulo="Número" required name="numero" />
               </div>
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <Campo rotulo="Complemento (opcional)" name="complemento" autoComplete="address-line2" />
+                <Campo rotulo="Complemento" name="complemento" autoComplete="address-line2" />
                 <Campo rotulo="Bairro" required value={address.district} onChange={(event) => setAddress({ ...address, district: event.target.value })} />
                 <Campo rotulo="Cidade" required autoComplete="address-level2" value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} />
                 <label className="relative block">
