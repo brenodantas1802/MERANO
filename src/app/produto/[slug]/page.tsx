@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { getCollection, getProduct, getSizeChart, products, formatPrice, getProductPrice, parcelado, similarProducts, TOLERANCIA_CM, type Product } from "@/lib/products";
+import { getCollection, getProduct, getSizeChart, products, formatPrice, getProductPrice, parcelado, similarProducts, PRECO_ESPECIAL, PRECO_LANCAMENTO, PRECO_PRE_VENDA, TOLERANCIA_CM, type Product } from "@/lib/products";
 import { SiteHeader } from "@/components/site-header";
 import { ENTREGA_PRE_VENDA } from "@/lib/pedidos";
 import { ProductGallery3D } from "@/components/product-gallery-3d";
@@ -50,6 +50,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <h1 className="text-[15px] font-medium">{product.name}</h1>
         <p className="mt-1 text-[15px]">{product.salePrice && <del className="mr-2 text-[var(--muted)]">{formatPrice(product.price)}</del>}{formatPrice(price)}</p>
         <p className="sans mt-0.5 text-[13px] text-[var(--muted)]">{parcelado(price)}</p>
+        {PRECO_ESPECIAL && <p className="sans mt-2 text-[13px] leading-snug text-[var(--vinho)]">Preço de pré-venda, só para quem está na lista: {formatPrice(PRECO_LANCAMENTO - PRECO_PRE_VENDA)} a menos. Na venda aberta, volta para {formatPrice(PRECO_LANCAMENTO)}.</p>}
       </div>
 
       <div className="[grid-area:details] md:mt-6 md:border-t-0">

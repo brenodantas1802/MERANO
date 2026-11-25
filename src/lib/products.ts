@@ -66,10 +66,15 @@ export const TOLERANCIA_CM = 2;
 // Composition of the Remix regular blank.
 export const MATERIAL = "Camiseta regular unissex, 100% algodão penteado, malha de 180 g/m²";
 
-// Prices (owners, 2026-11-24): every tee costs R$ 180, in the pre-sale too (no more R$ 160 with R$ 180 crossed out).
-// `salePrice` is still supported for a future promotion.
+// Prices (owners, 2026-11-24, evening): a tee costs R$ 180, and the pre-sale list pays R$ 160 for every one of them
+// (the personalised tee too, lib/estampa). The catalogue shows R$ 180 crossed out, a "Pré-venda" badge, the top bar
+// and the savings in the cart. When the open sale starts, set PRECO_PRE_VENDA back to PRECO_LANCAMENTO: all of that
+// goes away by itself (PRECO_ESPECIAL turns false).
 export const PRECO_LANCAMENTO = 180;
-export const PRECO_PRE_VENDA = PRECO_LANCAMENTO;
+export const PRECO_PRE_VENDA = 160;
+export const PRECO_ESPECIAL = PRECO_PRE_VENDA < PRECO_LANCAMENTO;
+// How much a cart saves against the open-sale price (every piece under R$ 180, the personalised one included).
+export const economiaPreVenda = (itens: readonly { price: number; quantity: number }[]) => itens.reduce((soma, item) => soma + Math.max(0, PRECO_LANCAMENTO - item.price) * item.quantity, 0);
 
 // The back print's size and place, measured on the official photo (2026-11-23): width as a share of the shirt's back,
 // top and bottom as shares of its length from the collar down. Told to the try-on so the print keeps the photo's size
@@ -84,6 +89,7 @@ export const products: Product[] = [
     name: "Amore Black",
     description: "Um coração vermelho em aquarela, rabiscado com anotações à mão nas costas, e a assinatura Meranno discreta no peito.",
     price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Amore",
     image: "/imagens/merano-assets/produtos/amore-black-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/amore-black-verso.jpg", "/imagens/merano-assets/produtos/amore-black-frente.jpg"],
@@ -106,6 +112,7 @@ export const products: Product[] = [
     name: "Amore White",
     description: "O mesmo coração em aquarela, com as anotações em preto sobre a malha branca, e a assinatura Meranno no peito.",
     price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Amore",
     image: "/imagens/merano-assets/produtos/amore-white-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/amore-white-verso.jpg", "/imagens/merano-assets/produtos/amore-white-frente.jpg"],
@@ -128,6 +135,7 @@ export const products: Product[] = [
     name: "Riviera",
     description: "Um terraço com limoeiros sobre o mar, numa tarde sem pressa. Va tutto bene, un passo alla volta: tudo bem, um passo de cada vez.",
     price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Riviera · Va tutto bene",
     image: "/imagens/merano-assets/produtos/riviera-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/riviera-verso.jpg", "/imagens/merano-assets/produtos/riviera-frente.jpg"],
@@ -149,6 +157,7 @@ export const products: Product[] = [
     name: "Arancia",
     description: "Laranjeira em flor num verão brasileiro, com MERANNO no peito. Em boa companhia.",
     price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Arancia",
     image: "/imagens/merano-assets/produtos/arancia-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/arancia-verso.jpg", "/imagens/merano-assets/produtos/arancia-frente.jpg"],
@@ -170,6 +179,7 @@ export const products: Product[] = [
     name: "Why not",
     description: "Uma garrafa aberta e a melhor resposta para qualquer convite — por que não?",
     price: PRECO_LANCAMENTO,
+    salePrice: PRECO_PRE_VENDA,
     note: "Estampa Why not",
     image: "/imagens/merano-assets/produtos/why-not-verso.jpg",
     gallery: ["/imagens/merano-assets/produtos/why-not-verso.jpg", "/imagens/merano-assets/produtos/why-not-frente.jpg"],

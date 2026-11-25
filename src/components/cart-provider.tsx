@@ -19,8 +19,9 @@ let cachedItems: CartItem[] = EMPTY_CART;
 let initialized = false;
 const listeners = new Set<() => void>();
 
-// A cart kept in the browser shows today's price, the one the server charges (prices went from R$ 160 to R$ 180 on
-// 2026-11-24, and a cart saved before would still say R$ 160). Older entries without productId go by their id.
+// A cart kept in the browser shows today's price, the one the server charges (prices changed twice on 2026-11-24,
+// R$ 160 → R$ 180 → R$ 160 for the pre-sale, and a saved cart would still show the old one). Older entries without
+// productId go by their id.
 function precoAtual(item: CartItem) {
   if (item.criacaoId) return PRECO_PERSONALIZADA;
   const produto = products.find((product) => product.id === item.productId) ?? products.find((product) => item.id.startsWith(`${product.id}-`));

@@ -27,7 +27,7 @@ O site está no ar em https://merannoclothing.com.br, com pagamento (Asaas), fre
 - [ ] **Recarga automática do OpenRouter** · https://openrouter.ai → **Settings** → **Credits** → **Auto top-up** (ex.: US$ 20 quando cair abaixo de US$ 5).
 - [ ] **Supabase Pro** (~US$ 25/mês, backup diário) · antes, se o projeto campos-del-plata não for da Meranno, transferir o MERANO para uma organização só dele (**Project Settings** → **General** → **Transfer project**); depois **Billing** → **Change subscription plan** → **Pro**.
 - [ ] **Limite de provas contado no banco** · Claude.
-- [ ] **Abrir a venda** · decidir o **prazo de entrega** da venda aberta e confirmar a **data** (hoje 1º/12, `ABERTURA_VENDA` em `src/lib/financeiro.ts`); no dia o Claude desliga o `PRE_VENDA`, ajusta o prazo (`ENTREGA_PRE_VENDA` em `src/lib/pedidos.ts`), publica e testa.
+- [ ] **Abrir a venda** · decidir o **prazo de entrega** da venda aberta e confirmar a **data** (hoje 1º/12, `ABERTURA_VENDA` em `src/lib/financeiro.ts`); no dia o Claude desliga o `PRE_VENDA`, volta o preço de R$ 160 para R$ 180 (`PRECO_PRE_VENDA` em `src/lib/products.ts`; a faixa do topo e o preço riscado somem sozinhos), ajusta o prazo (`ENTREGA_PRE_VENDA` em `src/lib/pedidos.ts`), publica e testa.
 
 ## Depois do lançamento (sem pressa)
 

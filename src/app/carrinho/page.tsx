@@ -8,7 +8,7 @@ import { useCart } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
 import { ShirtFan } from "@/components/try-on-visuals";
 import { PillLink } from "@/components/ui/pill-link";
-import { currentImage, formatPrice, parcelado } from "@/lib/products";
+import { currentImage, economiaPreVenda, formatPrice, parcelado } from "@/lib/products";
 import { CEP_KEY, prazoTexto, useFrete } from "@/lib/use-frete";
 
 const maskCep = (value: string) => value.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
@@ -71,6 +71,7 @@ function CartContent() {
     <aside className="h-fit rounded-[2rem] bg-[var(--gelo)] p-7 text-[var(--ink)] md:sticky md:top-[calc(var(--header-h,72px)+1.5rem)]">
       <div className="mt-5 space-y-3 border-b border-[var(--line)] pb-5 text-[15px]">
         <div className="flex justify-between"><span className="text-[var(--muted)]">{count} {count === 1 ? "peça" : "peças"}</span><span>{formatPrice(total)}</span></div>
+        {economiaPreVenda(items) > 0 && <p className="-mt-1.5 text-[12px] text-[var(--vinho)]">Preço de pré-venda: você economiza {formatPrice(economiaPreVenda(items))}.</p>}
         <div className="flex justify-between"><span className="text-[var(--muted)]">Frete</span><span className={maisBarato ? "" : "text-[var(--muted)]"}>{frete.carregando ? "calculando…" : maisBarato ? formatPrice(maisBarato.preco) : "informe o CEP"}</span></div>
         <label className="sans flex items-center gap-3 text-[12px] text-[var(--muted)]">CEP
           <input inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} placeholder="00000-000" aria-label="CEP para calcular o frete" className="h-11 min-w-0 flex-1 rounded-full border border-[var(--borda-campo)] bg-[var(--paper)] px-4 text-[15px] text-[var(--ink)] outline-none placeholder:text-[var(--muted)]/60 focus:border-[var(--vinho)]" />

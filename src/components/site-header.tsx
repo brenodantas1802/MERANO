@@ -10,7 +10,7 @@ import { createPortal } from "react-dom";
 import { useCart } from "./cart-provider";
 import { LogoNome, LogoSimbolo } from "./logo-meranno";
 import { TemaBotao } from "./tema-botao";
-import { products } from "@/lib/products";
+import { PRECO_ESPECIAL, PRECO_LANCAMENTO, PRECO_PRE_VENDA, products } from "@/lib/products";
 import { buscarProdutos } from "@/lib/busca";
 
 // The big links at the top of the menu; the rest of NAV_LINKS follow in a quieter list.
@@ -59,6 +59,9 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dono, setDono] = useState(false);
+  // The account button opens a small menu: "Minha conta" and "Meus pedidos" (owners, 2026-11-24).
+  const [contaAberta, setContaAberta] = useState(false);
+  const contaRef = useRef<HTMLDivElement>(null);
   // The menu is portalled to <body> so it sits above every floating button; only once the page runs in the browser.
   const noNavegador = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [query, setQuery] = useState("");
@@ -105,9 +108,20 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [overlay]);
 
+  // The account menu closes on a tap outside it and on Escape.
+  useEffect(() => {
+    if (!contaAberta) return;
+    const fora = (event: PointerEvent) => { if (!contaRef.current?.contains(event.target as Node)) setContaAberta(false); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setContaAberta(false); };
+    document.addEventListener("pointerdown", fora);
+    window.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("pointerdown", fora); window.removeEventListener("keydown", onKey); };
+  }, [contaAberta]);
+
   const closeSearch = () => { setSearchOpen(false); setQuery(""); };
-  const toggleSearch = () => { setMenuOpen(false); if (searchOpen) closeSearch(); else setSearchOpen(true); };
+  const toggleSearch = () => { setMenuOpen(false); setContaAberta(false); if (searchOpen) closeSearch(); else setSearchOpen(true); };
   const toggleMenu = () => {
+    setContaAberta(false);
     closeSearch();
     if (!menuOpen) perguntarSeDono().then(setDono);
     setMenuOpen((open) => !open);
@@ -117,6 +131,12 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const outline = clear ? OUTLINE_CLEAR : OUTLINE;
 
   return <><header ref={headerRef} data-clear={clear || undefined} className={`${overlay ? "fixed inset-x-0" : "sticky"} top-0 z-50 text-[var(--ink)]`}>
+    {/* The pre-sale price, on every page while it lasts (owners, 2026-11-24: "deixe isso bem claro"). The header
+        measures its own height (--header-h), so the bar pushes nothing out of place. */}
+    {PRECO_ESPECIAL && <Link href="/shop" className="sans flex h-8 items-center justify-center gap-1.5 bg-[var(--vinho)] px-3 text-[10px] uppercase tracking-[.16em] text-[var(--creme)] min-[400px]:text-[11px]">
+      <span className="md:hidden">Pré-venda:</span><span className="max-md:hidden">Pré-venda só para quem está na lista ·</span>
+      <span>todas as camisetas por <del className="opacity-60">R$ {PRECO_LANCAMENTO}</del> <b className="font-semibold">R$ {PRECO_PRE_VENDA}</b></span>
+    </Link>}
     <div className={`sans grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b px-3 transition-colors duration-300 md:px-6 ${clear ? "border-transparent bg-transparent" : "border-[var(--line)] bg-[var(--paper)]"}`}>
       <div className="flex items-center">
         <button type="button" onClick={toggleMenu} aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} className={outline}>
@@ -139,7 +159,12 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
           <ShoppingCart size={17} strokeWidth={1.6} />
           {count > 0 && <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--sol-1)] px-1 text-[11px] font-semibold text-white ring-2 ring-[var(--paper)]">{count}</span>}
         </button>
-        <Link href="/conta" aria-label="Minha conta" aria-current={pathname === "/conta" ? "page" : undefined} className={`${ROUND} ${clear ? "bg-white text-[#141110]" : "bg-[var(--ink)] text-[var(--paper)] hover:bg-[var(--mar-fundo)]"}`}><AccountIcon /></Link>
+        <div ref={contaRef} className="relative">
+          <button type="button" onClick={() => { setMenuOpen(false); closeSearch(); setContaAberta((aberta) => !aberta); }} aria-label="Minha conta e meus pedidos" aria-haspopup="menu" aria-expanded={contaAberta} className={`${ROUND} ${clear ? "bg-white text-[#141110]" : "bg-[var(--ink)] text-[var(--paper)] hover:bg-[var(--mar-fundo)]"}`}><AccountIcon /></button>
+          {contaAberta && <nav aria-label="Conta" className="glass absolute right-0 top-[calc(100%+.5rem)] z-[60] w-56 overflow-hidden rounded-[22px] p-1.5 text-[var(--ink)]">
+            {[["/conta", "Minha conta"], ["/meus-pedidos", "Meus pedidos"]].map(([href, nome]) => <Link key={href} href={href} onClick={() => setContaAberta(false)} aria-current={pathname === href ? "page" : undefined} className="flex min-h-11 items-center rounded-[16px] px-4 text-[14px] hover:bg-[var(--realce)] aria-[current=page]:font-semibold">{nome}</Link>)}
+          </nav>}
+        </div>
       </div>
     </div>
 

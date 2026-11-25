@@ -32,7 +32,8 @@ export type CategoriaDespesa = keyof typeof CATEGORIAS_DESPESA;
 export type Despesa = { id: string; data: string; descricao: string; categoria: CategoriaDespesa; valor: number; criado_por: string | null };
 
 // The owners' plan for the first collection (image "Planejamento Financeiro – 1ª Coleção", 2026-11-22), worked out
-// from the current prices and targets: every tee at R$ 180 (the pre-sale too, since 2026-11-24; it was R$ 160),
+// from the current prices and targets: pre-sale tees at PRECO_PRE_VENDA (R$ 160 again since 2026-11-24 evening),
+// the rest at R$ 180,
 // each costing production + accessories, plus the shipping boxes (R$ 805) and one month of MEI (R$ 92).
 export const DESPESAS_PLANO = 805 + 92;
 

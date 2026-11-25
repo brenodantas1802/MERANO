@@ -39,23 +39,67 @@ export async function salvarRastreio(id: string, codigo: string): Promise<Respos
   return { tipo: "ok", texto: rastreio ? (status === "enviado" && pedido.status !== "enviado" ? "Rastreio salvo e pedido marcado como enviado." : "Rastreio salvo.") : "Rastreio apagado." };
 }
 
-export async function criarCupom(_anterior: Resposta, form: FormData): Promise<Resposta> {
+// The coupon form (create and edit): code, discount, note and "first purchase only", checked the same way the
+// database does (table cupons).
+function lerCupom(form: FormData): { erro: string } | { erro: null; dados: { codigo: string; percentual: number; descricao: string | null; primeira_compra: boolean } } {
   const codigo = normalizarCupom(String(form.get("codigo") ?? ""));
   const percentual = Number(form.get("percentual"));
   const descricao = String(form.get("descricao") ?? "").trim().slice(0, 200) || null;
-  const primeiraCompra = form.get("primeira_compra") === "on";
-  if (!/^[A-Z0-9_-]{3,30}$/.test(codigo)) return { tipo: "erro", texto: "O código precisa ter de 3 a 30 letras ou números, sem espaço." };
-  if (!Number.isInteger(percentual) || percentual < 1 || percentual > 99) return { tipo: "erro", texto: "O desconto vai de 1% a 99%." };
+  const primeira_compra = form.get("primeira_compra") === "on";
+  if (!/^[A-Z0-9_-]{3,30}$/.test(codigo)) return { erro: "O código precisa ter de 3 a 30 letras ou números, sem espaço." };
+  if (!Number.isInteger(percentual) || percentual < 1 || percentual > 99) return { erro: "O desconto vai de 1% a 99%." };
+  return { erro: null, dados: { codigo, percentual, descricao, primeira_compra } };
+}
+
+export async function criarCupom(_anterior: Resposta, form: FormData): Promise<Resposta> {
+  const lido = lerCupom(form);
+  if (lido.erro !== null) return { tipo: "erro", texto: lido.erro };
+  const { dados } = lido;
   const sessao = await dono();
   if (!sessao) return { tipo: "erro", texto: "Só os donos podem criar cupons." };
-  const { error } = await sessao.admin.from("cupons").insert({ codigo, percentual, descricao, primeira_compra: primeiraCompra, ativo: true });
+  const { error } = await sessao.admin.from("cupons").insert({ ...dados, ativo: true });
   if (error) {
-    if (error.code === "23505") return { tipo: "erro", texto: `Já existe um cupom ${codigo}.` };
+    if (error.code === "23505") return { tipo: "erro", texto: `Já existe um cupom ${dados.codigo}.` };
     console.error("criarCupom failed:", error.message);
     return { tipo: "erro", texto: "Não consegui criar o cupom. Tente de novo." };
   }
   refresh();
-  return { tipo: "ok", texto: `Cupom ${codigo} criado: ${percentual}% de desconto${primeiraCompra ? ", só na primeira compra" : ""}.` };
+  return { tipo: "ok", texto: `Cupom ${dados.codigo} criado: ${dados.percentual}% de desconto${dados.primeira_compra ? ", só na primeira compra" : ""}.` };
+}
+
+// Edits a coupon, code included. Orders that used it follow the new code (the foreign key cascades) and keep the
+// discount they got; the old code stops working.
+export async function editarCupom(codigoAtual: string, _anterior: Resposta, form: FormData): Promise<Resposta> {
+  const lido = lerCupom(form);
+  if (lido.erro !== null) return { tipo: "erro", texto: lido.erro };
+  const { dados } = lido;
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só os donos podem mexer nos cupons." };
+  const { data, error } = await sessao.admin.from("cupons").update(dados).eq("codigo", normalizarCupom(codigoAtual)).select("codigo").maybeSingle();
+  if (error) {
+    if (error.code === "23505") return { tipo: "erro", texto: `Já existe um cupom ${dados.codigo}.` };
+    console.error("editarCupom failed:", error.message);
+    return { tipo: "erro", texto: "Não consegui salvar. Tente de novo." };
+  }
+  if (!data) return { tipo: "erro", texto: "Esse cupom não existe mais." };
+  refresh();
+  return { tipo: "ok", texto: `Cupom ${dados.codigo} salvo.` };
+}
+
+// Deletes a coupon for good. Orders that used it keep their discount (desconto_cupom) but lose the code
+// (the foreign key sets it to null).
+export async function excluirCupom(codigo: string): Promise<Resposta> {
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só os donos podem mexer nos cupons." };
+  const alvo = normalizarCupom(codigo);
+  const { data, error } = await sessao.admin.from("cupons").delete().eq("codigo", alvo).select("codigo").maybeSingle();
+  if (error) {
+    console.error("excluirCupom failed:", error.message);
+    return { tipo: "erro", texto: "Não consegui excluir. Tente de novo." };
+  }
+  if (!data) return { tipo: "erro", texto: "Esse cupom já tinha sido excluído." };
+  refresh();
+  return { tipo: "ok", texto: `Cupom ${alvo} excluído.` };
 }
 
 export async function ligarCupom(codigo: string, ativo: boolean): Promise<Resposta> {
