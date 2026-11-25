@@ -15,7 +15,8 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export function SeasonShirt({ products }: { products: Product[] }) {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion() ?? false;
-  const stories = SHIRT_STORIES.filter((story) => products.some((product) => product.id === story.id));
+  // In the order given (the home opens on Why not, owners 2026-11-24).
+  const stories = products.flatMap((product) => SHIRT_STORIES.filter((story) => story.id === product.id));
   const [index, setIndex] = useState(0);
   const story = stories[index];
   const product = products.find((item) => item.id === story.id)!;
