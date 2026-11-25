@@ -10,6 +10,7 @@ import { ListaPreVenda, type Admins, type Autorizado, type PedidoAcesso } from "
 import { PedidosAdmin } from "./pedidos-admin";
 import { CuponsAdmin, type CupomAdmin } from "./cupons-admin";
 import { ContasAdmin, type Conta } from "./contas-admin";
+import { PrecosAdmin, type PrecoAdmin } from "./precos-admin";
 import type { Pedido } from "@/lib/pedidos";
 
 export type CriacaoAdmin = {
@@ -84,7 +85,8 @@ function Cupons({ cupons }: { cupons: CadastroCupom[] | null }) {
   </section>;
 }
 
-// Light or dark: follows the device until an owner picks one with the button; the pick stays in this browser.
+// Light by default, like the shop (owners, 2026-11-24); dark when an owner picks it with the button. The pick stays in
+// this browser.
 const TEMA_KEY = "meranno-admin-tema";
 type Tema = "claro" | "escuro" | "";
 const ouvintesTema = new Set<() => void>();
@@ -99,18 +101,18 @@ function lerTema(): Tema {
 function useTema() {
   const tema = useSyncExternalStore((avisar) => { ouvintesTema.add(avisar); return () => { ouvintesTema.delete(avisar); }; }, lerTema, (): Tema => "");
   const trocar = () => {
-    const escuroAgora = tema ? tema === "escuro" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const escuroAgora = tema === "escuro";
     try { window.localStorage.setItem(TEMA_KEY, escuroAgora ? "claro" : "escuro"); } catch { /* the pick just won't be remembered */ }
     ouvintesTema.forEach((avisar) => avisar());
   };
   return { tema, trocar };
 }
 
-const SECOES = [["financeiro", "Financeiro"], ["pedidos", "Pedidos"], ["pre-venda", "Pré-venda"], ["contas", "Quem entrou"], ["cupons", "Cupons"], ["estampas", "Estampas"], ["emails", "E-mails"]] as const;
+const SECOES = [["financeiro", "Financeiro"], ["pedidos", "Pedidos"], ["pre-venda", "Pré-venda"], ["contas", "Quem entrou"], ["precos", "Preços"], ["cupons", "Cupons"], ["estampas", "Estampas"], ["emails", "E-mails"]] as const;
 
 export type Financeiro = { resumo: ResumoFinanceiro; config: ConfigFinanceira; despesas: Despesa[]; disponivel: boolean };
 
-export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, contas, admins }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; contas: Conta[] | null; admins: Admins }) {
+export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, contas, precos, admins }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; contas: Conta[] | null; precos: PrecoAdmin[]; admins: Admins }) {
   const { tema, trocar } = useTema();
   return <div className="painel min-h-screen" data-tema={tema || undefined}>
     <header className="sans sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur">
@@ -118,8 +120,8 @@ export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, li
         <Link href="/" className="font-bold tracking-[.28em]">MERANNO / equipe</Link>
         <div className="flex items-center gap-2 text-[13px] text-[var(--muted)] sm:gap-4">
           <span className="hidden truncate md:inline">{email}</span>
-          <button type="button" onClick={trocar} aria-label="Trocar entre modo claro e modo noturno" title="Modo claro / noturno" className="press flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] text-[var(--ink)] hover:bg-[var(--realce)]">
-            <Moon size={16} className="tema-lua" /><Sun size={16} className="tema-sol" />
+          <button type="button" onClick={trocar} aria-label={tema === "escuro" ? "Mudar para o modo claro" : "Mudar para o modo escuro"} className="press flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] px-3 text-[var(--ink)] hover:bg-[var(--realce)] sm:px-4">
+            <Moon size={16} className="tema-lua" /><Sun size={16} className="tema-sol" /><span className="max-sm:hidden">{tema === "escuro" ? "Modo claro" : "Modo escuro"}</span>
           </button>
           <SignOutButton className="rounded-full border border-[var(--line)] px-4 py-2 text-[var(--ink)] transition-colors hover:bg-[var(--realce)]" />
         </div>
@@ -133,6 +135,7 @@ export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, li
       <div id="pedidos" className="scroll-mt-28"><PedidosAdmin pedidos={pedidos} /></div>
       <div id="pre-venda" className="scroll-mt-28"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} admins={admins} /></div>
       <div id="contas" className="scroll-mt-28"><ContasAdmin contas={contas} admins={admins} /></div>
+      <div id="precos" className="scroll-mt-28"><PrecosAdmin precos={precos} /></div>
       <div id="cupons" className="scroll-mt-28"><CuponsAdmin cupons={descontos} /></div>
       <Criacoes criacoes={criacoes} />
       <Cupons cupons={cupons} />

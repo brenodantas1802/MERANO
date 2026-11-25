@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useCart } from "@/components/cart-provider";
-import { PRECO_PERSONALIZADA } from "@/lib/estampa";
+import { precoPersonalizada } from "@/lib/products";
 import { TAMANHOS_LOJA } from "@/lib/products";
 
 // The programmer's Personalizador in an iframe. "Comprar esta peça" in there (js/meranno-compra.js) saves the
@@ -58,7 +58,7 @@ export function PersonalizadorFrame() {
       if (event.origin !== window.location.origin || event.source !== frame.current?.contentWindow || !valida(event.data)) return;
       const { criacaoId, tamanho, modelagem, cor, imagem } = event.data.item;
       // The price shown is the catalogue's; the order is priced again on the server either way.
-      addItem({ id: `criacao-${criacaoId}`, criacaoId, name: `Personalizada · ${modelagem}`, price: PRECO_PERSONALIZADA, size: tamanho, fit: modelagem, color: cor, image: imagem });
+      addItem({ id: `criacao-${criacaoId}`, criacaoId, name: `Personalizada · ${modelagem}`, price: precoPersonalizada(), size: tamanho, fit: modelagem, color: cor, image: imagem });
       openDrawer();
     }
     window.addEventListener("message", receber);
@@ -89,6 +89,6 @@ export function PersonalizadorFrame() {
       <span className="h-9 w-9 animate-spin rounded-full border-2 border-[var(--latao)] border-t-transparent" aria-hidden />
       <span className="sans text-[12px] uppercase tracking-[.16em]">Abrindo o Personalizador…</span>
     </div>}
-    <iframe ref={frame} src="/personalizador/index.html" onLoad={() => setPronto(true)} data-preco={PRECO_PERSONALIZADA} title="Personalizador MERANNO" allow="fullscreen; clipboard-write" className={`block h-full w-full border-0 transition-opacity duration-300 ${pronto ? "opacity-100" : "opacity-0"}`} />
+    <iframe ref={frame} src="/personalizador/index.html" onLoad={() => setPronto(true)} data-preco={precoPersonalizada()} title="Personalizador MERANNO" allow="fullscreen; clipboard-write" className={`block h-full w-full border-0 transition-opacity duration-300 ${pronto ? "opacity-100" : "opacity-0"}`} />
   </div>;
 }

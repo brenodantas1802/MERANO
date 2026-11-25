@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { abrirPagamento, pagamentoOnline } from "@/lib/pagamento";
 import { escolherFrete, linkWhatsApp, mensagemWhatsApp, novoNumero, pedidoSchema, precificarItens, totais, validarCupom, type Pedido } from "@/lib/pedidos";
 import { origemDe } from "@/lib/origem";
+import { usarPrecos } from "@/lib/precos-servidor";
 
 // Creates an order from the payment page. Prices, coupon, shipping and total are worked out here. Then either the
 // Asaas payment link (lib/pagamento) or, without Asaas, a WhatsApp message to close the sale by hand.
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não consegui registrar o pedido agora. Fale com a gente pelo WhatsApp." }, { status: 503 });
   }
 
+  await usarPrecos();
   const precificado = await precificarItens(admin, entrada.itens);
   if ("erro" in precificado) return NextResponse.json({ error: precificado.erro }, { status: 409 });
   const pecas = precificado.itens.reduce((soma, item) => soma + item.quantidade, 0);

@@ -1,6 +1,6 @@
 import type { Pedido } from "@/lib/pedidos";
 import type { StatusPedido } from "@/lib/pedido-status";
-import { PRECO_LANCAMENTO, PRECO_PRE_VENDA } from "@/lib/products";
+import { getPrecoCheio, getProductPrice, products } from "@/lib/products";
 
 // The owners' money view (/admin). Unit costs and fees live in the table financeiro_config, the one-off expenses in
 // despesas; the numbers start from the owners' plan for the first collection (2026-11-22).
@@ -32,8 +32,8 @@ export type CategoriaDespesa = keyof typeof CATEGORIAS_DESPESA;
 export type Despesa = { id: string; data: string; descricao: string; categoria: CategoriaDespesa; valor: number; criado_por: string | null };
 
 // The owners' plan for the first collection (image "Planejamento Financeiro – 1ª Coleção", 2026-11-22), worked out
-// from the current prices and targets: pre-sale tees at PRECO_PRE_VENDA (R$ 160 again since 2026-11-24 evening),
-// the rest at R$ 180,
+// from the current prices and targets: pre-sale tees at the owners' price (/admin "Preços", R$ 160 on 2026-11-24),
+// the rest at the crossed-out one (R$ 180),
 // each costing production + accessories, plus the shipping boxes (R$ 805) and one month of MEI (R$ 92).
 export const DESPESAS_PLANO = 805 + 92;
 
@@ -43,8 +43,11 @@ export const ABERTURA_VENDA = new Date("2026-12-01T00:00:00-03:00");
 
 export function planoDaColecao(config: ConfigFinanceira) {
   const custoUnidade = config.custo_camiseta + config.custo_acessorios;
-  const preVenda = { camisetas: config.meta_pre_venda, preco: PRECO_PRE_VENDA, receita: config.meta_pre_venda * PRECO_PRE_VENDA };
-  const lancamento = { camisetas: config.meta_lancamento, preco: PRECO_LANCAMENTO, receita: config.meta_lancamento * PRECO_LANCAMENTO };
+  // The first tee's prices stand for the collection (the owners set one price for all of them so far).
+  const precoPreVenda = getProductPrice(products[0]);
+  const precoLancamento = getPrecoCheio(products[0]) ?? precoPreVenda;
+  const preVenda = { camisetas: config.meta_pre_venda, preco: precoPreVenda, receita: config.meta_pre_venda * precoPreVenda };
+  const lancamento = { camisetas: config.meta_lancamento, preco: precoLancamento, receita: config.meta_lancamento * precoLancamento };
   const faturamento = preVenda.receita + lancamento.receita;
   const custos = (preVenda.camisetas + lancamento.camisetas) * custoUnidade + DESPESAS_PLANO;
   const lucro = faturamento - custos;

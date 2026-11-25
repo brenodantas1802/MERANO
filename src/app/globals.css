@@ -222,17 +222,13 @@ html.entrada .veu-entrada { display: flex; }
 	.veu-entrada.abrindo { -webkit-mask: none; mask: none; animation: veu-sair .4s forwards; }
 }
 
-/* Owners' panel (/admin): light by default, dark when the device asks for it or an owner picks it (data-tema). */
-.painel { --paper: #F6F1E8; --ink: #141110; --muted: #6E6259; --line: #E3D9C9; --areia: #E3D9C9; --cream: #EFE7DA; --vinho: #551E2B; --cartao: #FBF8F2; --campo: #FFFFFF; --realce: #EFE7DA; --trilho: #E8DFD0; --ganho: #1F6E4A; --perda: #8A3A2C; background: var(--paper); color: var(--ink); }
+/* Owners' panel (/admin): light by default, white and ice like the shop (owners, 2026-11-24); dark only when an owner
+   picks it with the button (data-tema="escuro", kept in this browser). */
+.painel { --paper: #FFFFFF; --ink: #141110; --muted: #6B6560; --line: #E6E4E0; --areia: #EEEDEA; --cream: #F4F4F2; --vinho: #551E2B; --cartao: #F4F4F2; --campo: #FFFFFF; --realce: #F1F0ED; --trilho: #ECEBE8; --ganho: #1F6E4A; --perda: #8A3A2C; background: var(--paper); color: var(--ink); }
 .painel .tema-sol { display: none; }
 .painel[data-tema="escuro"] { color-scheme: dark; --paper: #141110; --ink: #EFE8DD; --muted: #A3978C; --line: #302926; --areia: #2A2320; --cream: #1E1917; --vinho: #A64A5E; --cartao: #1B1715; --campo: #110E0D; --realce: #2A231F; --trilho: #2E2622; --ganho: #6FC59A; --perda: #E8907D; }
 .painel[data-tema="escuro"] .tema-sol { display: block; }
 .painel[data-tema="escuro"] .tema-lua { display: none; }
-@media (prefers-color-scheme: dark) {
-  .painel:not([data-tema="claro"]) { color-scheme: dark; --paper: #141110; --ink: #EFE8DD; --muted: #A3978C; --line: #302926; --areia: #2A2320; --cream: #1E1917; --vinho: #A64A5E; --cartao: #1B1715; --campo: #110E0D; --realce: #2A231F; --trilho: #2E2622; --ganho: #6FC59A; --perda: #E8907D; }
-  .painel:not([data-tema="claro"]) .tema-sol { display: block; }
-  .painel:not([data-tema="claro"]) .tema-lua { display: none; }
-}
 
 /* Home cover (components/hero-topo.tsx, capa-video.tsx): the darkened poker video over its own first frame (a still in
    a <picture>). Computers: the whole screen. Phones: a 4:5 frame with its own crop of the video (owners, 2026-11-23:

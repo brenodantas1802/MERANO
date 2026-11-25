@@ -7,7 +7,8 @@ import { SiteHeader } from "@/components/site-header";
 import { createSecretClient } from "@/lib/supabase/publico";
 import { conferirRetorno, NOME_PROVEDOR, pagamentoOnline, type Provedor } from "@/lib/pagamento";
 import { ENTREGA_PRE_VENDA, linkWhatsApp, mensagemWhatsApp, type Pedido, type StatusPedido } from "@/lib/pedidos";
-import { formatPrice, getProduct, PRECO_LANCAMENTO } from "@/lib/products";
+import { cheioPersonalizada, formatPrice, getPrecoCheio, getProduct } from "@/lib/products";
+import { usarPrecos } from "@/lib/precos-servidor";
 import { PagarAgora } from "./pagar-agora";
 
 export const metadata: Metadata = { title: "Seu pedido | MERANNO", robots: { index: false, follow: false } };
@@ -55,10 +56,11 @@ export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) 
   const provedor = NOME_PROVEDOR[pedido.pagamento?.provedor as Provedor] ?? "pagamento";
   // Pre-sale buyers who paid: the owners' thank-you note (2026-11-22), with the discount they really got, if any.
   const comprou = ["pago", "em_separacao"].includes(status);
+  await usarPrecos();
   // Pre-sale price under the launch price (personalised tees too), plus coupon and Pix discounts.
   const precoCheio = pedido.itens.reduce((total, item) => {
     const produto = item.productId ? getProduct(item.productId) : undefined;
-    const cheio = produto ? produto.price : item.criacaoId ? PRECO_LANCAMENTO : item.preco;
+    const cheio = (item.criacaoId ? cheioPersonalizada() : produto ? getPrecoCheio(produto) : null) ?? item.preco;
     return total + Math.max(0, cheio - item.preco) * item.quantidade;
   }, 0);
   const economia = precoCheio + Number(pedido.desconto_cupom ?? 0) + Number(pedido.desconto_pix ?? 0);

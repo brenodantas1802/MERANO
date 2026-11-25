@@ -10,6 +10,9 @@ import { AdminDashboard, type CriacaoAdmin, type CadastroCupom } from "./dashboa
 import type { Autorizado, PedidoAcesso } from "./lista-pre-venda";
 import type { CupomAdmin } from "./cupons-admin";
 import { carregarContas } from "./carregar-contas";
+import type { PrecoAdmin } from "./precos-admin";
+import { usarPrecos } from "@/lib/precos-servidor";
+import { cheioPersonalizada, getPrecoCheio, getProductPrice, precoPersonalizada, products } from "@/lib/products";
 import type { Pedido, StatusPedido } from "@/lib/pedidos";
 
 const PAGOS: StatusPedido[] = ["pago", "em_separacao", "enviado", "entregue"];
@@ -110,7 +113,13 @@ export default async function AdminPage() {
   const cabecalhos = await headers();
   const host = cabecalhos.get("x-forwarded-host") ?? cabecalhos.get("host") ?? "";
   const origem = `${cabecalhos.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
+  // The owners' prices first: the finance plan and the "Preços" list read them.
+  await usarPrecos();
+  const precos: PrecoAdmin[] = [
+    ...products.map((product) => ({ id: product.id, nome: product.name, imagem: product.image, preco: getProductPrice(product), cheio: getPrecoCheio(product) })),
+    { id: "personalizada", nome: "Personalizada (Personalizador)", imagem: null, preco: precoPersonalizada(), cheio: cheioPersonalizada() },
+  ];
   const [pedidos, descontos, criacoes, cadastros, lista, pedidosAcesso, { config, despesas }, admins, contas] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista(), carregarPedidosAcesso(), carregarFinanceiro(), carregarAdmins(), carregarContas()]);
   const financeiro = { resumo: resumoFinanceiro(pedidos ?? [], config, despesas), config, despesas, disponivel: pedidos !== null };
-  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} contas={contas} admins={{ fixos: donosFixos(), painel: admins, voce: user.email.toLowerCase() }} />;
+  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} contas={contas} precos={precos} admins={{ fixos: donosFixos(), painel: admins, voce: user.email.toLowerCase() }} />;
 }

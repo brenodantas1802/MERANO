@@ -1,5 +1,3 @@
-import { PRECO_PRE_VENDA } from "@/lib/products";
-
 // Personalizador MERANNO: the customer builds a tee — a fixed MERANNO lettering on the front, a print of their own on the back.
 // The chat fills the briefing (Ficha); the image prompt is built here from it, never written freely by the model,
 // so the customer can read and confirm every detail before anything paid is generated.
@@ -50,8 +48,7 @@ export const ESTAMPAS_CASA: { id: EstampaCasaId; nome: string; src: string; larg
 ];
 export const estampaCasaDe = (id: string) => ESTAMPAS_CASA.find((estampa) => estampa.id === id);
 
-// Price of a personalised tee: the same as the catalogue tees, pre-sale price included (lib/products).
-export const PRECO_PERSONALIZADA = PRECO_PRE_VENDA;
+// Price of a personalised tee: precoPersonalizada() in lib/products (owners' table, /admin "Preços").
 export const TAMANHOS = ["P", "M", "G"] as const;
 export type Tamanho = (typeof TAMANHOS)[number];
 

@@ -3,8 +3,7 @@
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { CartDrawer } from "./cart-drawer";
-import { PRECO_PERSONALIZADA } from "@/lib/estampa";
-import { getProductPrice, products } from "@/lib/products";
+import { getProductPrice, precoPersonalizada, produtoDoItem } from "@/lib/products";
 
 // `criacaoId` marks a tee made in the Personalizador: its art is stored in Supabase (criacoes_estampa).
 export type CartItem = { id: string; productId?: string; criacaoId?: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
@@ -23,8 +22,8 @@ const listeners = new Set<() => void>();
 // R$ 160 → R$ 180 → R$ 160 for the pre-sale, and a saved cart would still show the old one). Older entries without
 // productId go by their id.
 function precoAtual(item: CartItem) {
-  if (item.criacaoId) return PRECO_PERSONALIZADA;
-  const produto = products.find((product) => product.id === item.productId) ?? products.find((product) => item.id.startsWith(`${product.id}-`));
+  if (item.criacaoId) return precoPersonalizada();
+  const produto = produtoDoItem(item);
   return produto ? getProductPrice(produto) : item.price;
 }
 

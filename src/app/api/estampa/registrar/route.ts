@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
 import { createSecretClient } from "@/lib/supabase/publico";
-import { PRECO_PERSONALIZADA } from "@/lib/estampa";
+import { precoPersonalizada } from "@/lib/products";
+import { usarPrecos } from "@/lib/precos-servidor";
 import { TAMANHOS_PERSONALIZADA } from "@/lib/pedidos";
 
 // "Comprar esta peça" in the Personalizador, step 2: records the creation (choices, size and where each production
@@ -59,5 +60,6 @@ export async function POST(request: Request) {
     console.error("registrar_criacao failed:", error?.message);
     return NextResponse.json({ error: error?.message?.includes("arte não encontrada") ? "A arte não chegou. Tente de novo." : "Não consegui registrar a peça agora. Tente de novo." }, { status: 502 });
   }
-  return NextResponse.json({ id, preco: PRECO_PERSONALIZADA });
+  await usarPrecos();
+  return NextResponse.json({ id, preco: precoPersonalizada() });
 }

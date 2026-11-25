@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ViewTransition, useState, type MouseEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatPrice, getProductPrice, parcelado, type Product } from "@/lib/products";
+import { formatPrice, getProductPrice, parcelado, type Product, getPrecoCheio } from "@/lib/products";
 import { QuickAdd } from "@/components/quick-add";
 import { FavoriteButton } from "@/components/favorite-button";
 
@@ -13,7 +13,7 @@ import { FavoriteButton } from "@/components/favorite-button";
 // `destaque`: one of the first cards on the screen, whose photo loads right away instead of lazily (2026-11-24: on the
 // shop the first photo is what the page waits on to look ready).
 export function ProductCard({ product, destaque = false }: { product: Product; destaque?: boolean }) {
-  const discounted = product.salePrice && product.salePrice < product.price;
+  const cheio = getPrecoCheio(product);
   const price = getProductPrice(product);
   const photos = product.gallery.length ? product.gallery : [product.image];
   const [index, setIndex] = useState(0);
@@ -33,8 +33,8 @@ export function ProductCard({ product, destaque = false }: { product: Product; d
         <div onPointerEnter={() => setWarm(true)} className="foto-gelo relative aspect-[.82] overflow-hidden">
           {photos.map((src, photo) => (photo === index || warm) && <Image key={src} src={src} alt={photo ? `${product.name}, vista ${photo + 1}` : product.name} {...(destaque && photo === 0 ? { loading: "eager" as const, fetchPriority: "high" as const } : {})} fill sizes="(min-width: 768px) 33vw, 50vw" className={`object-cover transition-opacity duration-500 ${photo === index ? "opacity-100" : "opacity-0"}`} />)}
           <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-col items-start gap-1.5">
-            {/* A lower price (salePrice, none since 2026-11-24) gets a badge; otherwise the launch one. */}
-            {(discounted || product.lancamento) && <span className="rounded-full bg-[var(--vinho)] px-2.5 py-1 text-[11px] font-medium text-[var(--creme)]">{discounted ? "Pré-venda" : "Lançamento"}</span>}
+            {/* A crossed-out price (the owners' pre-sale price, /admin "Preços") gets a badge; otherwise the launch one. */}
+            {(cheio || product.lancamento) && <span className="rounded-full bg-[var(--vinho)] px-2.5 py-1 text-[11px] font-medium text-[var(--creme)]">{cheio ? "Pré-venda" : "Lançamento"}</span>}
             <span className="glass rounded-full px-2.5 py-1 text-[11px] font-medium shadow-none">{product.colors[0]}</span>
           </div>
           {photos.length > 1 && <>
@@ -48,7 +48,7 @@ export function ProductCard({ product, destaque = false }: { product: Product; d
       </ViewTransition>
       <div className="px-1 pb-6 pt-3.5">
         <h3 className="sans line-clamp-2 text-[11px] font-semibold uppercase leading-snug tracking-[.2em] text-[var(--ink)]">{product.name}</h3>
-        <p className="sans mt-1.5 text-[11px] uppercase tracking-[.16em] text-[var(--ink)]">{discounted && <del className="mr-2 text-[var(--muted)]">{formatPrice(product.price)}</del>}{formatPrice(price)}</p>
+        <p className="sans mt-1.5 text-[11px] uppercase tracking-[.16em] text-[var(--ink)]">{cheio && <del className="mr-2 text-[var(--muted)]">{formatPrice(cheio)}</del>}{formatPrice(price)}</p>
         <p className="sans mt-1 text-[12px] text-[var(--muted)]">{parcelado(price)}</p>
       </div>
     </Link>

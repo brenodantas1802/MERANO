@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart-provider";
+import { PrecosDoSite } from "@/components/precos-do-site";
+import { usarPrecos } from "@/lib/precos-servidor";
 import { FirstPurchasePopupTardio } from "@/components/first-purchase-popup-tardio";
 import { SiteFooter } from "@/components/site-footer";
 import { WhatsAppButton } from "@/components/whatsapp-button";
@@ -21,11 +23,13 @@ export const metadata: Metadata = {
   description: "Moda brasileira para quem entende de exclusividade.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // The owners' prices (/admin, "Preços"), cached; handed to the browser before the cart and the pages read them.
+  const precos = await usarPrecos();
   return (
     // suppressHydrationWarning: SCRIPT_TEMA and SCRIPT_ENTRADA may change <html> before React hydrates.
     <html lang="pt-BR" data-tema={TEMA_PADRAO} data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
-      <body><script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA + SCRIPT_ENTRADA }} /><EntradaPreVenda /><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopupTardio /><ConsentimentoAnalise /></CartProvider></body>
+      <body><script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA + SCRIPT_ENTRADA }} /><EntradaPreVenda /><PrecosDoSite precos={precos}><CartProvider>{children}<SiteFooter /><WhatsAppButton /><FirstPurchasePopupTardio /><ConsentimentoAnalise /></CartProvider></PrecosDoSite></body>
     </html>
   );
 }

@@ -9,7 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 import { COOKIE_ACESSO, acessoValido, preVendaAtiva } from "@/lib/pre-venda";
 import { autorizacao, pedidoDaConta } from "@/lib/pre-venda-lista";
 import { AbrirCadeado, Aguardando, Entrando, FormTelefone } from "./formularios";
-import { PRECO_ESPECIAL, PRECO_LANCAMENTO, PRECO_PRE_VENDA } from "@/lib/products";
+import { ofertaGeral, precoCurto } from "@/lib/products";
+import { usarPrecos } from "@/lib/precos-servidor";
 
 export const metadata: Metadata = { title: "MERANNO | Pré-venda", robots: { index: false, follow: false } };
 // The phone's browser bars in the same wine as the page (.feltro).
@@ -28,6 +29,8 @@ export default async function PreVenda() {
   const pedido = user && !situacao?.liberado ? await pedidoDaConta(user.id) : null;
   const telefoneBonito = (telefone: string) => telefone.slice(2).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
   const nome = ((user?.user_metadata.full_name ?? user?.user_metadata.name ?? "") as string).split(" ")[0];
+  await usarPrecos();
+  const oferta = ofertaGeral();
 
   return <main className="feltro fixed inset-0 z-[1000] overflow-y-auto text-[var(--creme)]">
     <style>{"html,body{overflow:hidden}"}</style>
@@ -36,8 +39,8 @@ export default async function PreVenda() {
       <Cadeado id="cadeado-pre-venda" className="cadeado-balanco mt-10 w-[clamp(80px,18vw,108px)]" />
       <h1 className="display mt-8 text-[clamp(3rem,12vw,5.2rem)] leading-[.9]">Pré-venda.</h1>
       <p className="mt-3 text-[16px] text-[var(--creme)]/90">Summer Collection 01, só para quem está no grupo.</p>
-      {PRECO_ESPECIAL && <p className="sans mt-4 inline-flex rounded-full border border-[var(--latao)]/50 px-4 py-2 text-[12px] uppercase tracking-[.16em] text-[var(--creme)]">Todas as camisetas por&nbsp;<del className="opacity-60">R$ {PRECO_LANCAMENTO}</del>&nbsp;<b className="font-semibold text-[var(--latao)]">R$ {PRECO_PRE_VENDA}</b></p>}
-      {PRECO_ESPECIAL && <p className="mt-3 text-[14px] text-[var(--creme)]/75">Preço só da pré-venda. Na venda aberta, volta para R$ {PRECO_LANCAMENTO}.</p>}
+      {oferta && <p className="sans mt-4 inline-flex rounded-full border border-[var(--latao)]/50 px-4 py-2 text-[12px] uppercase tracking-[.16em] text-[var(--creme)]">{oferta === "varios" ? "Preço especial em todas as camisetas" : <>Todas as camisetas por&nbsp;<del className="opacity-60">{precoCurto(oferta.cheio)}</del>&nbsp;<b className="font-semibold text-[var(--latao)]">{precoCurto(oferta.preco)}</b></>}</p>}
+      {oferta && <p className="mt-3 text-[14px] text-[var(--creme)]/75">Preço só da pré-venda{oferta === "varios" ? "" : `. Na venda aberta, volta para ${precoCurto(oferta.cheio)}`}.</p>}
 
       <div className="mt-8 w-full rounded-[2rem] bg-[var(--superficie)] p-6 text-left text-[var(--ink)] shadow-[0_30px_60px_-30px_rgba(12,2,6,.8)] md:p-8">
         {jaLiberado ? <Entrando /> : !user ? <>

@@ -1,8 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { cotarFrete, freteConfigurado, freteExemplo, type OpcaoFrete } from "@/lib/frete";
-import { PRECO_PERSONALIZADA } from "@/lib/estampa";
-import { formatPrice, getProduct, getProductPrice, TAMANHOS_LOJA } from "@/lib/products";
+import { formatPrice, getProduct, getProductPrice, TAMANHOS_LOJA, precoPersonalizada } from "@/lib/products";
 import type { StatusPedido } from "@/lib/pedido-status";
 
 // Orders from the payment page (table `pedidos`, server only through the secret key). Everything that costs money is
@@ -108,7 +107,7 @@ export async function precificarItens(admin: SupabaseClient, itens: PedidoEntrad
     if (item.criacaoId) {
       const criacao = encontradas.get(item.criacaoId);
       if (!criacao) return { erro: "Uma peça do Personalizador não está mais disponível. Crie de novo ou tire do carrinho." };
-      linhas.push({ productId: null, criacaoId: item.criacaoId, nome: `Personalizada${criacao.painel.fitName ? ` · ${criacao.painel.fitName}` : ""}`, tamanho: criacao.tamanho, cor: criacao.painel.fabricName ?? "", preco: PRECO_PERSONALIZADA, quantidade: item.quantidade });
+      linhas.push({ productId: null, criacaoId: item.criacaoId, nome: `Personalizada${criacao.painel.fitName ? ` · ${criacao.painel.fitName}` : ""}`, tamanho: criacao.tamanho, cor: criacao.painel.fabricName ?? "", preco: precoPersonalizada(), quantidade: item.quantidade });
       continue;
     }
     const produto = item.productId ? getProduct(item.productId) : undefined;

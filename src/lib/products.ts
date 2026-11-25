@@ -66,15 +66,25 @@ export const TOLERANCIA_CM = 2;
 // Composition of the Remix regular blank.
 export const MATERIAL = "Camiseta regular unissex, 100% algodão penteado, malha de 180 g/m²";
 
-// Prices (owners, 2026-11-24, evening): a tee costs R$ 180, and the pre-sale list pays R$ 160 for every one of them
-// (the personalised tee too, lib/estampa). The catalogue shows R$ 180 crossed out, a "Pré-venda" badge, the top bar
-// and the savings in the cart. When the open sale starts, set PRECO_PRE_VENDA back to PRECO_LANCAMENTO: all of that
-// goes away by itself (PRECO_ESPECIAL turns false).
+// Prices. Since 2026-11-24 the owners set each tee's price in /admin → "Preços" (table precos_produto: the price charged
+// and an optional crossed-out price). The server reads the table (lib/precos-servidor) and hands it to the browser in
+// the root layout (<PrecosDoSite>); everything below reads it through getProductPrice / getPrecoCheio.
+// These constants are only the fallback, used if the table can't be read: the pre-sale's R$ 160 with R$ 180 crossed out.
 export const PRECO_LANCAMENTO = 180;
 export const PRECO_PRE_VENDA = 160;
-export const PRECO_ESPECIAL = PRECO_PRE_VENDA < PRECO_LANCAMENTO;
-// How much a cart saves against the open-sale price (every piece under R$ 180, the personalised one included).
-export const economiaPreVenda = (itens: readonly { price: number; quantity: number }[]) => itens.reduce((soma, item) => soma + Math.max(0, PRECO_LANCAMENTO - item.price) * item.quantity, 0);
+export const ID_PERSONALIZADA = "personalizada";
+
+export type PrecoDefinido = { preco: number; cheio: number | null };
+export type TabelaPrecos = Record<string, PrecoDefinido>;
+let tabelaPrecos: TabelaPrecos = {};
+// Replaces the price table (server: lib/precos-servidor usarPrecos; browser: <PrecosDoSite>).
+export function definirPrecos(tabela: TabelaPrecos) {
+  tabelaPrecos = tabela;
+}
+const padraoPersonalizada: PrecoDefinido = { preco: PRECO_PRE_VENDA, cheio: PRECO_LANCAMENTO };
+const cheioValido = (definido: PrecoDefinido) => (definido.cheio && definido.cheio > definido.preco ? definido.cheio : null);
+export const precoPersonalizada = () => (tabelaPrecos[ID_PERSONALIZADA] ?? padraoPersonalizada).preco;
+export const cheioPersonalizada = () => cheioValido(tabelaPrecos[ID_PERSONALIZADA] ?? padraoPersonalizada);
 
 // The back print's size and place, measured on the official photo (2026-11-23): width as a share of the shirt's back,
 // top and bottom as shares of its length from the collar down. Told to the try-on so the print keeps the photo's size
@@ -235,8 +245,43 @@ export function formatPrice(price: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 }
 
+// "R$ 160" for whole prices (the top bar and badges), "R$ 159,90" otherwise.
+export const precoCurto = (price: number) => (Number.isInteger(price) ? `R$ ${price}` : formatPrice(price));
+
+// What the piece sells for: the owners' price, or the catalogue's when the table has none.
 export function getProductPrice(product: Product) {
-  return product.salePrice ?? product.price;
+  return tabelaPrecos[product.id]?.preco ?? product.salePrice ?? product.price;
+}
+
+// The crossed-out price, only when it is above the selling price (null: show just the price).
+export function getPrecoCheio(product: Product) {
+  const definido = tabelaPrecos[product.id];
+  const cheio = definido ? definido.cheio : product.salePrice ? product.price : null;
+  return cheio && cheio > getProductPrice(product) ? cheio : null;
+}
+
+// The pre-sale offer for the top bar: one price for every tee (with the crossed-out one), "varios" when the tees have
+// different special prices, or null when nothing is crossed out.
+export function ofertaGeral(): { preco: number; cheio: number } | "varios" | null {
+  const lista = products.map((product) => ({ preco: getProductPrice(product), cheio: getPrecoCheio(product) }));
+  if (!lista.some((item) => item.cheio)) return null;
+  const [primeiro] = lista;
+  return primeiro.cheio && lista.every((item) => item.preco === primeiro.preco && item.cheio === primeiro.cheio) ? { preco: primeiro.preco, cheio: primeiro.cheio } : "varios";
+}
+
+// The catalogue piece behind a cart or order line (older lines without productId carry it in "<product>-<size>-…").
+export function produtoDoItem(item: { id?: string; productId?: string | null }) {
+  const { id = "" } = item;
+  return (item.productId ? getProduct(item.productId) : undefined) ?? products.filter((product) => id === product.id || id.startsWith(`${product.id}-`)).sort((a, b) => b.id.length - a.id.length)[0];
+}
+
+// How much a cart saves against the crossed-out prices (the personalised tee included).
+export function economiaPreVenda(itens: readonly { id: string; productId?: string; criacaoId?: string; price: number; quantity: number }[]) {
+  return itens.reduce((soma, item) => {
+    const produto = item.criacaoId ? undefined : produtoDoItem(item);
+    const cheio = item.criacaoId ? cheioPersonalizada() : produto ? getPrecoCheio(produto) : null;
+    return soma + (cheio ? Math.max(0, cheio - item.price) * item.quantity : 0);
+  }, 0);
 }
 
 // Card payments in up to 3 interest-free instalments (the Asaas checkout offers the same; lib/asaas.ts).

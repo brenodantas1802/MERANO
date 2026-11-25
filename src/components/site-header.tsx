@@ -10,7 +10,7 @@ import { createPortal } from "react-dom";
 import { useCart } from "./cart-provider";
 import { LogoNome, LogoSimbolo } from "./logo-meranno";
 import { TemaBotao } from "./tema-botao";
-import { PRECO_ESPECIAL, PRECO_LANCAMENTO, PRECO_PRE_VENDA, products } from "@/lib/products";
+import { ofertaGeral, precoCurto, products } from "@/lib/products";
 import { buscarProdutos } from "@/lib/busca";
 
 // The big links at the top of the menu; the rest of NAV_LINKS follow in a quieter list.
@@ -128,14 +128,17 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   };
   const panel = "glass mx-2 mt-2 overflow-hidden rounded-[28px]";
   const clear = overlay && !scrolled && !menuOpen && !searchOpen;
+  // The pre-sale price on every page while it lasts (owners' prices: /admin, "Preços").
+  const oferta = ofertaGeral();
   const outline = clear ? OUTLINE_CLEAR : OUTLINE;
 
   return <><header ref={headerRef} data-clear={clear || undefined} className={`${overlay ? "fixed inset-x-0" : "sticky"} top-0 z-50 text-[var(--ink)]`}>
     {/* The pre-sale price, on every page while it lasts (owners, 2026-11-24: "deixe isso bem claro"). The header
         measures its own height (--header-h), so the bar pushes nothing out of place. */}
-    {PRECO_ESPECIAL && <Link href="/shop" className="sans flex h-8 items-center justify-center gap-1.5 bg-[var(--vinho)] px-3 text-[10px] uppercase tracking-[.16em] text-[var(--creme)] min-[400px]:text-[11px]">
+    {oferta && <Link href="/shop" className="sans flex h-8 items-center justify-center gap-1.5 bg-[var(--vinho)] px-3 text-[10px] uppercase tracking-[.16em] text-[var(--creme)] min-[400px]:text-[11px]">
       <span className="md:hidden">Pré-venda:</span><span className="max-md:hidden">Pré-venda só para quem está na lista ·</span>
-      <span>todas as camisetas por <del className="opacity-60">R$ {PRECO_LANCAMENTO}</del> <b className="font-semibold">R$ {PRECO_PRE_VENDA}</b></span>
+      {oferta === "varios" ? <span>preço especial em todas as camisetas</span>
+        : <span>todas as camisetas por <del className="opacity-60">{precoCurto(oferta.cheio)}</del> <b className="font-semibold">{precoCurto(oferta.preco)}</b></span>}
     </Link>}
     <div className={`sans grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b px-3 transition-colors duration-300 md:px-6 ${clear ? "border-transparent bg-transparent" : "border-[var(--line)] bg-[var(--paper)]"}`}>
       <div className="flex items-center">
