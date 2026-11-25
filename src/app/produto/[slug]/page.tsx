@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { getCollection, getProduct, getPrecoCheio, getSizeChart, products, formatPrice, getProductPrice, parcelado, similarProducts, TOLERANCIA_CM, type Product } from "@/lib/products";
+import { getCollection, getProduct, getPrecoCheio, getSizeChart, products, formatPrice, getProductPrice, parcelado, percentualDesconto, similarProducts, TOLERANCIA_CM, type Product } from "@/lib/products";
 import { usarPrecos } from "@/lib/precos-servidor";
 import { SiteHeader } from "@/components/site-header";
 import { ENTREGA_PRE_VENDA } from "@/lib/pedidos";
@@ -53,7 +53,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <h1 className="text-[15px] font-medium">{product.name}</h1>
         <p className="mt-1 text-[15px]">{cheio && <del className="mr-2 text-[var(--muted)]">{formatPrice(cheio)}</del>}{formatPrice(price)}</p>
         <p className="sans mt-0.5 text-[13px] text-[var(--muted)]">{parcelado(price)}</p>
-        {cheio && <p className="sans mt-2 text-[13px] leading-snug text-[var(--vinho)]">Preço de pré-venda, só para quem está na lista: {formatPrice(cheio - price)} a menos que o preço normal ({formatPrice(cheio)}).</p>}
+        {cheio && <p className="sans mt-2 text-[13px] leading-snug text-[var(--vinho)]">Preço de pré-venda, só para quem está na lista: {percentualDesconto(cheio, price)}% de desconto.</p>}
       </div>
 
       <div className="[grid-area:details] md:mt-6 md:border-t-0">

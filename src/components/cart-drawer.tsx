@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, Trash2, X } from "lucide-react";
 import { useCart } from "./cart-provider";
-import { currentImage, economiaPreVenda, formatPrice, getProductPrice, parcelado, similarProducts, type Product } from "@/lib/products";
+import { currentImage, percentualPreVenda, formatPrice, getProductPrice, parcelado, similarProducts, type Product } from "@/lib/products";
 
 // Free shipping above this subtotal (R$). null hides the progress bar: the owners haven't set a threshold yet.
 export const FRETE_GRATIS_ACIMA: number | null = null;
@@ -126,7 +126,7 @@ export function CartDrawer() {
                 <span><span className="block text-[16px]">Subtotal</span><span className="block text-[12px] text-[var(--muted)]">{count} {count === 1 ? "item" : "itens"}</span></span>
                 <span className="text-[20px] tabular-nums">{formatPrice(total)}</span>
               </div>
-              {economiaPreVenda(items) > 0 && <p className="mt-1 px-1 text-[12px] text-[var(--vinho)]">Preço de pré-venda: você economiza {formatPrice(economiaPreVenda(items))}.</p>}
+              {percentualPreVenda(items) > 0 && <p className="mt-1 px-1 text-[12px] text-[var(--vinho)]">Preço de pré-venda: {percentualPreVenda(items)}% de desconto.</p>}
               <Link href="/pagamento" onClick={closeDrawer} className="press label mt-3.5 flex h-14 items-center justify-center rounded-full bg-[var(--vinho)] text-[13px] tracking-[.14em] text-[var(--creme)] shadow-[0_14px_30px_-16px_rgba(85,30,43,.8)] hover:opacity-95">Finalizar compra</Link>
               <p className="mt-2.5 text-center text-[12px] text-[var(--muted)]">Frete calculado no pagamento</p>
               <div className="mt-2 flex flex-wrap justify-center gap-1.5" aria-label="Formas de pagamento">

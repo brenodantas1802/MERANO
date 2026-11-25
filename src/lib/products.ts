@@ -275,13 +275,23 @@ export function produtoDoItem(item: { id?: string; productId?: string | null }) 
   return (item.productId ? getProduct(item.productId) : undefined) ?? products.filter((product) => id === product.id || id.startsWith(`${product.id}-`)).sort((a, b) => b.id.length - a.id.length)[0];
 }
 
-// How much a cart saves against the crossed-out prices (the personalised tee included).
-export function economiaPreVenda(itens: readonly { id: string; productId?: string; criacaoId?: string; price: number; quantity: number }[]) {
-  return itens.reduce((soma, item) => {
+// The pre-sale discount as a whole percentage ("11%" for R$ 160 instead of R$ 180), as the owners want it shown
+// (2026-11-24: a percentage, not "R$ 20 a menos").
+export const percentualDesconto = (cheio: number, preco: number) => Math.round((1 - preco / cheio) * 100);
+
+// The same for a cart: what its crossed-out pieces save, over what they would cost (the personalised tee included).
+// 0 when nothing in it has a crossed-out price.
+export function percentualPreVenda(itens: readonly { id: string; productId?: string; criacaoId?: string; price: number; quantity: number }[]) {
+  let cheios = 0;
+  let pagos = 0;
+  for (const item of itens) {
     const produto = item.criacaoId ? undefined : produtoDoItem(item);
     const cheio = item.criacaoId ? cheioPersonalizada() : produto ? getPrecoCheio(produto) : null;
-    return soma + (cheio ? Math.max(0, cheio - item.price) * item.quantity : 0);
-  }, 0);
+    if (!cheio || cheio <= item.price) continue;
+    cheios += cheio * item.quantity;
+    pagos += item.price * item.quantity;
+  }
+  return cheios ? percentualDesconto(cheios, pagos) : 0;
 }
 
 // Card payments in up to 3 interest-free instalments (the Asaas checkout offers the same; lib/asaas.ts).

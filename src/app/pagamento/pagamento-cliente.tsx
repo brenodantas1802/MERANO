@@ -11,7 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { LogoNome, LogoSimbolo } from "@/components/logo-meranno";
 import { CUPOM_KEY } from "@/components/first-purchase-popup";
 import { saveOrder } from "@/lib/orders";
-import { economiaPreVenda, formatPrice, products, currentImage, parcelado } from "@/lib/products";
+import { percentualPreVenda, formatPrice, products, currentImage, parcelado } from "@/lib/products";
 import { Illustration } from "@/components/illustration";
 import { CEP_KEY, prazoTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
 
@@ -114,7 +114,7 @@ type Totais = { subtotal: number; shipping: OpcaoFrete | null; cupom: Cupom | nu
 function Resumo({ items, totais, email, onCupom }: { items: CartItem[]; totais: Totais; email: string; onCupom: (cupom: Cupom | null) => void }) {
   const { subtotal, shipping, cupom, descontoCupom, descontoPix, total } = totais;
   const pecas = items.reduce((soma, item) => soma + item.quantity, 0);
-  const economia = economiaPreVenda(items);
+  const desconto = percentualPreVenda(items);
   return <div>
     <ul className="space-y-5">{items.map((item) => <li key={item.id} className="flex items-center gap-5">
       <div className="relative shrink-0">
@@ -129,7 +129,7 @@ function Resumo({ items, totais, email, onCupom }: { items: CartItem[]; totais: 
     <div className="mt-7"><CampoCupom cupom={cupom} email={email} onAplicar={onCupom} onRemover={() => { onCupom(null); try { window.localStorage.removeItem(CUPOM_KEY); } catch { /* nothing kept */ } }} /></div>
     <dl className="mt-7 space-y-2.5 text-[14px]">
       <div className="flex justify-between"><dt>Subtotal · {pecas} {pecas === 1 ? "item" : "itens"}</dt><dd className="tabular-nums">{formatPrice(subtotal)}</dd></div>
-      {economia > 0 && <p className="-mt-1 text-[12px] text-[var(--vinho)]">Já com o preço de pré-venda: você economiza {formatPrice(economia)}.</p>}
+      {desconto > 0 && <p className="-mt-1 text-[12px] text-[var(--vinho)]">Já com o preço de pré-venda: {desconto}% de desconto.</p>}
       {descontoCupom > 0 && <div className="flex justify-between text-[var(--vinho)]"><dt>Cupom {cupom?.codigo} ({cupom?.percentual}%)</dt><dd className="tabular-nums">− {formatPrice(descontoCupom)}</dd></div>}
       <div className="flex justify-between"><dt>Frete</dt><dd className={shipping ? "tabular-nums" : "text-[var(--muted)]"}>{shipping ? formatPrice(shipping.preco) : "Insira o CEP de entrega"}</dd></div>
       {descontoPix > 0 && <div className="flex justify-between text-[var(--vinho)]"><dt>Desconto Pix</dt><dd className="tabular-nums">− {formatPrice(descontoPix)}</dd></div>}
