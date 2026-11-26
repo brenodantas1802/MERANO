@@ -12,19 +12,30 @@ require.extensions['.ts'] = (module, filename) => {
   });
   module._compile(outputText, filename);
 };
-const { dataChegada, dataPostagem, diaEmSaoPaulo, formatarDia, somarDiasUteis } = require('../src/lib/entrega.ts');
+const { avisoPostagem, dataChegada, dataPostagem, diaEmSaoPaulo, esperaProducao, formatarDia, PRIMEIRA_POSTAGEM, somarDiasUteis } = require('../src/lib/entrega.ts');
 
-// Thursday 26 November 2026, 15h in Brasília.
+// Thursday 26 November 2026, 15h in Brasília (pre-sale), and Thursday 7 January 2027 (shirts in hand).
 const quinta = new Date('2026-11-26T18:00:00Z');
+const janeiro = new Date('2027-01-07T18:00:00Z');
 
-test('posts within two business days, skipping the weekend', () => {
-  assert.equal(dataPostagem(quinta), '2026-11-30');
+test('pre-sale orders are posted on the first posting day, after Remix makes the shirts', () => {
+  assert.equal(PRIMEIRA_POSTAGEM, '2026-12-16');
+  assert.equal(dataPostagem(quinta), '2026-12-16');
+  assert.equal(esperaProducao(quinta), true);
+  assert.match(avisoPostagem(quinta), /a partir de quarta, 16\/12/);
 });
 
-test('adds the carrier deadline after the posting day', () => {
-  assert.equal(dataChegada(1, quinta), '2026-12-01');
-  assert.equal(dataChegada(7, quinta), '2026-12-09');
-  assert.equal(dataChegada(12, quinta), '2026-12-16');
+test('with the shirts in hand, posts within two business days, skipping the weekend', () => {
+  assert.equal(dataPostagem(janeiro), '2027-01-11');
+  assert.equal(esperaProducao(janeiro), false);
+  assert.match(avisoPostagem(janeiro), /até 2 dias úteis/);
+});
+
+test('adds the carrier deadline after the posting day, skipping Christmas and New Year', () => {
+  assert.equal(dataChegada(1, quinta), '2026-12-17');
+  assert.equal(dataChegada(7, quinta), '2026-12-28');
+  assert.equal(dataChegada(12, quinta), '2027-01-05');
+  assert.equal(dataChegada(2, janeiro), '2027-01-13');
 });
 
 test('no deadline in the quote means no date', () => {

@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { getCollection, getProduct, getPrecoCheio, getSizeChart, products, formatPrice, getProductPrice, parcelado, percentualDesconto, similarProducts, TOLERANCIA_CM, type Product } from "@/lib/products";
 import { usarPrecos } from "@/lib/precos-servidor";
 import { SiteHeader } from "@/components/site-header";
-import { POSTAGEM_DIAS_UTEIS } from "@/lib/entrega";
+import { avisoPostagem } from "@/lib/entrega";
 import { ProductGallery3D } from "@/components/product-gallery-3d";
 import { ProductBuy, type Colorway } from "@/components/product-buy";
 import { RelatedRow } from "@/components/related-row";
@@ -68,7 +68,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <Detail title="Detalhes do produto">
           <p>{product.description}</p>
           <p className="mt-2">Modelagem regular, de corte clássico, de {product.fits[0]} a {product.fits[product.fits.length - 1]}. Escolha o tamanho que você costuma usar.</p>
-          <p className="mt-2">Postamos em até {POSTAGEM_DIAS_UTEIS} dias úteis depois do pagamento. A data de chegada aparece no carrinho, pelo seu CEP.</p>
+          <p className="mt-2">{avisoPostagem()} Ela aparece no carrinho, pelo seu CEP.</p>
         </Detail>
         <Detail title="Composição e cuidados">
           <p>{product.material}.</p>

@@ -14,7 +14,7 @@ import { saveOrder } from "@/lib/orders";
 import { percentualPreVenda, formatPrice, products, currentImage, parcelado } from "@/lib/products";
 import { Illustration } from "@/components/illustration";
 import { CEP_KEY, chegadaTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
-import { POSTAGEM_DIAS_UTEIS } from "@/lib/entrega";
+import { avisoPostagem } from "@/lib/entrega";
 
 // Payment page (owners, 2026-11-24: laid out like the Saint Tropez checkout, with the Ermos payment list): the brand on
 // top, the form on a white column, the order on an ice column beside it with a big photo of each piece, a wine button.
@@ -331,7 +331,7 @@ export function Pagamento({ online, provedor }: { online: boolean; provedor: str
                   </div>}
                   {frete.exemplo && <p className="mt-2 text-[12px] uppercase tracking-[.12em] text-[var(--latao)]">Valores de exemplo</p>}
                 </div>}
-              <p className="mt-3 text-[13px] text-[var(--muted)]">Postamos em até {POSTAGEM_DIAS_UTEIS} dias úteis depois do pagamento; a data de chegada já conta com isso.</p>
+              <p className="mt-3 text-[13px] text-[var(--muted)]">{avisoPostagem()}</p>
             </section>
 
             <section>
