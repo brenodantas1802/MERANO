@@ -19,10 +19,11 @@ const quinta = new Date('2026-11-26T18:00:00Z');
 const janeiro = new Date('2027-01-07T18:00:00Z');
 
 test('pre-sale orders are posted on the first posting day, after Remix makes the shirts', () => {
-  assert.equal(PRIMEIRA_POSTAGEM, '2026-12-07');
-  assert.equal(dataPostagem(quinta), '2026-12-07');
+  // Remix order on Mon 30/11 + up to 5 business days to make + 1 to reach the team = Tue 8/12.
+  assert.equal(PRIMEIRA_POSTAGEM, '2026-12-08');
+  assert.equal(dataPostagem(quinta), '2026-12-08');
   assert.equal(esperaProducao(quinta), true);
-  assert.match(avisoPostagem(quinta), /estimativa é postar a partir de segunda, 7\/12/);
+  assert.match(avisoPostagem(quinta), /até segunda, 7\/12, elas chegam até nós na terça, 8\/12 e postamos no mesmo dia/);
 });
 
 test('with the shirts in hand, posts within two business days, skipping the weekend', () => {
@@ -32,10 +33,10 @@ test('with the shirts in hand, posts within two business days, skipping the week
 });
 
 test('adds the carrier deadline after the posting day', () => {
-  assert.equal(dataChegada(1, quinta), '2026-12-08');
-  assert.equal(dataChegada(2, quinta), '2026-12-09');
-  assert.equal(dataChegada(7, quinta), '2026-12-16');
-  assert.equal(dataChegada(12, quinta), '2026-12-23');
+  assert.equal(dataChegada(1, quinta), '2026-12-09');
+  assert.equal(dataChegada(2, quinta), '2026-12-10');
+  assert.equal(dataChegada(7, quinta), '2026-12-17');
+  assert.equal(dataChegada(12, quinta), '2026-12-24');
   assert.equal(dataChegada(2, janeiro), '2027-01-13');
 });
 

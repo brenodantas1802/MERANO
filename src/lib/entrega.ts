@@ -6,12 +6,6 @@
 // Business days the team has to post a paid order once the shirts are in hand.
 export const POSTAGEM_DIAS_UTEIS = 2;
 
-// Pre-sale (owners, 2026-11-26): the shirts aren't made yet. The pre-sale money pays the first order at Remix On Demand,
-// so nothing is posted before this day. Owners, 2026-11-26: the Remix order goes in on Tue 1/12, the stock reaches the
-// team on Mon 7/12 and the pre-sale orders are posted that same day. If those dates move, change only this one: the
-// cart, the payment page, the order page and the panel's "Postar até" follow it. Shown as an estimate (esperaProducao).
-export const PRIMEIRA_POSTAGEM = "2026-12-07";
-
 // National holidays, plus Carnival and Corpus Christi (optional days on which the Correios don't run as usual), so the
 // date shown is never earlier than the real one.
 const FERIADOS = new Set([
@@ -40,6 +34,17 @@ export function somarDiasUteis(dia: string, dias: number) {
   return data.toISOString().slice(0, 10);
 }
 
+// Pre-sale (owners, 2026-11-26): the shirts aren't made yet. The pre-sale money pays the whole stock order at Remix On
+// Demand, placed on Mon 30/11. Remix's site (read on 2026-11-26): "produção de até 5 dias úteis" once their design team
+// validates the art, and "entrega em São Paulo em 1 dia útil". So the shirts are ready by 7/12, reach the team by 8/12
+// and the pre-sale orders are posted that same day. Change these and everything follows: the cart, the payment page,
+// the order page and the panel's "Postar até". Always shown as an estimate (esperaProducao).
+export const PEDIDO_REMIX = "2026-11-30";
+const PRODUCAO_REMIX_DIAS = 5;
+const ENTREGA_REMIX_DIAS = 1;
+export const PRONTAS_NA_FABRICA = somarDiasUteis(PEDIDO_REMIX, PRODUCAO_REMIX_DIAS);
+export const PRIMEIRA_POSTAGEM = somarDiasUteis(PRONTAS_NA_FABRICA, ENTREGA_REMIX_DIAS);
+
 // Last day the team has to post an order paid at `pagoEm`: never before the first posting day of the pre-sale.
 export function dataPostagem(pagoEm: Date = new Date()) {
   const normal = somarDiasUteis(diaEmSaoPaulo(pagoEm), POSTAGEM_DIAS_UTEIS);
@@ -49,9 +54,10 @@ export function dataPostagem(pagoEm: Date = new Date()) {
 // While an order paid now still waits for the shirts to be made (pre-sale).
 export const esperaProducao = (agora: Date = new Date()) => somarDiasUteis(diaEmSaoPaulo(agora), POSTAGEM_DIAS_UTEIS) < PRIMEIRA_POSTAGEM;
 
-// The posting line shown next to the shipping options and on the product page.
+// The posting line shown next to the shipping options and on the product page. During the pre-sale it walks through
+// the whole way, as an estimate (owners, 2026-11-26): factory, the team, then the carrier to the customer's door.
 export const avisoPostagem = (agora: Date = new Date()) => esperaProducao(agora)
-  ? `Pré-venda: as camisetas são produzidas depois que ela fecha. Nossa estimativa é postar a partir de ${formatarDia(PRIMEIRA_POSTAGEM)}, e a data de chegada também é uma estimativa.`
+  ? `Pré-venda, por estimativa: a fábrica termina as camisetas até ${formatarDia(PRONTAS_NA_FABRICA)}, elas chegam até nós na ${formatarDia(PRIMEIRA_POSTAGEM)} e postamos no mesmo dia. A data de chegada soma também o caminho da transportadora até a sua casa.`
   : `Postamos em até ${POSTAGEM_DIAS_UTEIS} dias úteis depois do pagamento. A data de chegada já conta com isso.`;
 
 // Latest arrival day for a carrier taking up to `prazoMax` business days; null when the quote has no deadline.
