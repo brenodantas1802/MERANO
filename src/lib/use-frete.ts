@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { OpcaoFrete } from "@/lib/frete";
-import { dataChegada, formatarDia } from "@/lib/entrega";
+import { dataChegada, esperaProducao, formatarDia } from "@/lib/entrega";
 
 export type { OpcaoFrete };
 type Estado = { cep: string; pecas: number; opcoes: OpcaoFrete[]; exemplo: boolean; erro: string | null };
@@ -12,10 +12,11 @@ export const CEP_KEY = "meranno-cep";
 
 export const prazoTexto = (opcao: OpcaoFrete) => opcao.prazoMin === opcao.prazoMax ? `${opcao.prazoMax} ${opcao.prazoMax === 1 ? "dia útil" : "dias úteis"}` : `${opcao.prazoMin} a ${opcao.prazoMax} dias úteis`;
 
-// "Chega até quinta, 3/12" if paid today (lib/entrega); the carrier's own deadline when the quote has no date.
+// "Chega até quinta, 3/12" if paid today (lib/entrega); during the pre-sale the date is said as an estimate (owners,
+// 2026-11-26), since it depends on Remix making the shirts. The carrier's own deadline when the quote has no date.
 export const chegadaTexto = (opcao: OpcaoFrete) => {
   const dia = dataChegada(opcao.prazoMax);
-  return dia ? `Chega até ${formatarDia(dia)}` : `${prazoTexto(opcao)} após o envio`;
+  return dia ? `${esperaProducao() ? "Estimativa: chega até" : "Chega até"} ${formatarDia(dia)}` : `${prazoTexto(opcao)} após o envio`;
 };
 
 // Quotes the shipping once the CEP is complete (8 digits) and again when the number of pieces changes.

@@ -53,7 +53,7 @@ export const esperaProducao = (agora: Date = new Date()) => somarDiasUteis(diaEm
 
 // The posting line shown next to the shipping options and on the product page.
 export const avisoPostagem = (agora: Date = new Date()) => esperaProducao(agora)
-  ? `Pré-venda: as camisetas são produzidas depois que ela fecha, e postamos a partir de ${formatarDia(PRIMEIRA_POSTAGEM)}. A data de chegada já conta com isso.`
+  ? `Pré-venda: as camisetas são produzidas depois que ela fecha. Nossa estimativa é postar a partir de ${formatarDia(PRIMEIRA_POSTAGEM)}, e a data de chegada também é uma estimativa.`
   : `Postamos em até ${POSTAGEM_DIAS_UTEIS} dias úteis depois do pagamento. A data de chegada já conta com isso.`;
 
 // Latest arrival day for a carrier taking up to `prazoMax` business days; null when the quote has no deadline.
