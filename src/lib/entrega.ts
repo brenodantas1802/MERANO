@@ -7,12 +7,10 @@
 export const POSTAGEM_DIAS_UTEIS = 2;
 
 // Pre-sale (owners, 2026-11-26): the shirts aren't made yet. The pre-sale money pays the first order at Remix On Demand,
-// so nothing is posted before this day. The sum, from Remix's site (read on 2026-11-26: "produção de até 5 dias úteis"
-// after their design team validates the art, "entrega em São Paulo em 1 dia útil"): order at Remix on Tue 1/12, when the
-// pre-sale closes; up to 3 business days to validate the art (a buffer: first order) -> 4/12; up to 5 to produce -> 11/12;
-// 1 to reach the team in São Paulo -> 14/12; up to 2 for the team to post -> Wed 16/12. If the Remix order moves, change
-// only this date: the cart, the payment page, the order page and the panel's "Postar até" follow it.
-export const PRIMEIRA_POSTAGEM = "2026-12-16";
+// so nothing is posted before this day. Owners, 2026-11-26: the Remix order goes in on Tue 1/12, the stock reaches the
+// team on Mon 7/12 and the pre-sale orders are posted that same day. If those dates move, change only this one: the
+// cart, the payment page, the order page and the panel's "Postar até" follow it. Shown as an estimate (esperaProducao).
+export const PRIMEIRA_POSTAGEM = "2026-12-07";
 
 // National holidays, plus Carnival and Corpus Christi (optional days on which the Correios don't run as usual), so the
 // date shown is never earlier than the real one.
