@@ -99,7 +99,9 @@ export async function criarCheckout(pedido: Pedido, origem: string) {
   return { link: typeof dados.link === "string" && dados.link ? dados.link : `https://${base() === SANDBOX ? "sandbox." : ""}asaas.com/checkoutSession/show?id=${id}`, checkout: id };
 }
 
-export type CobrancaAsaas = { id: string; status: string; value: number; billingType: string; checkoutSession: string | null; externalReference: string | null; installment: string | null };
+export type CobrancaAsaas = { id: string; status: string; value: number; billingType: string; checkoutSession: string | null; externalReference: string | null; installment: string | null;
+  // What lands in the Asaas account after fees, when (estimatedCreditDate; creditDate once it did), and the card used.
+  netValue: number; estimatedCreditDate: string | null; creditDate: string | null; bandeira: string | null; final: string | null };
 
 const cobranca = (dados: Record<string, unknown>): CobrancaAsaas => ({
   id: String(dados.id),
@@ -109,6 +111,11 @@ const cobranca = (dados: Record<string, unknown>): CobrancaAsaas => ({
   checkoutSession: dados.checkoutSession ? String(dados.checkoutSession) : null,
   externalReference: dados.externalReference ? String(dados.externalReference) : null,
   installment: dados.installment ? String(dados.installment) : null,
+  netValue: Number(dados.netValue ?? 0),
+  estimatedCreditDate: typeof dados.estimatedCreditDate === "string" ? dados.estimatedCreditDate : null,
+  creditDate: typeof dados.creditDate === "string" ? dados.creditDate : null,
+  bandeira: (dados.creditCard as { creditCardBrand?: string } | undefined)?.creditCardBrand ?? null,
+  final: (dados.creditCard as { creditCardNumber?: string } | undefined)?.creditCardNumber ?? null,
 });
 
 // Paid, money on its way or already in the account.
@@ -134,7 +141,21 @@ export function resumoDoCheckout(cobrancas: CobrancaAsaas[], total: number) {
   const cobre = (valor: number) => Math.abs(valor - total) <= 0.05;
   const cartaoParcelado = pagas.some((item) => item.billingType === "CREDIT_CARD") && cobre(soma(cobrancas));
   const principal = pagas[0] ?? cobrancas[0];
+  const cartao = principal?.billingType === "CREDIT_CARD";
+  // For the panel (owners, 2026-11-26: "como o cliente pagou"): instalments, what lands after fees, and when the first
+  // money is credited (a card is approved at once but credited about 32 days later; Pix lands at once).
+  const datas = pagas.map((item) => item.creditDate ?? item.estimatedCreditDate).filter((dia): dia is string => !!dia).sort();
+  const detalhes = {
+    parcelas: cartao ? Math.max(1, cobrancas.length) : 1,
+    liquido: Math.round((cartaoParcelado ? cobrancas : pagas).reduce((total, item) => total + item.netValue, 0) * 100) / 100,
+    credito: datas[0] ?? null,
+    credito_final: datas.length > 1 ? datas[datas.length - 1] : null,
+    recebido: pagas.length > 0 && pagas.every((item) => item.status !== "CONFIRMED"),
+    bandeira: principal?.bandeira ?? null,
+    final: principal?.final ?? null,
+  };
   return {
+    detalhes,
     pago: pagas.length > 0 && (cobre(soma(pagas)) || cartaoParcelado),
     valor: cartaoParcelado ? soma(cobrancas) : soma(pagas),
     id: principal?.id ?? "",

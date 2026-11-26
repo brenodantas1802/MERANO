@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { donosFixos, ehAdmin } from "@/lib/admins";
 import { createSecretClient } from "@/lib/supabase/publico";
 import { preVendaAtiva } from "@/lib/pre-venda";
+import { asaasConfigurado } from "@/lib/asaas";
+import { conciliarCheckoutAsaas } from "@/lib/pagamento";
 import { CONFIG_PADRAO, resumoFinanceiro, type ConfigFinanceira, type Despesa } from "@/lib/financeiro";
 import { AdminDashboard, type CriacaoAdmin, type CadastroCupom } from "./dashboard";
 import type { Autorizado, PedidoAcesso } from "./lista-pre-venda";
@@ -23,7 +25,15 @@ async function carregarPedidos(): Promise<Pedido[] | null> {
   const supabase = createSecretClient();
   if (!supabase) return null;
   const { data } = await supabase.from("pedidos").select("*").order("criado_em", { ascending: false }).limit(1000);
-  return (data ?? []) as Pedido[];
+  const pedidos = (data ?? []) as Pedido[];
+  // Paid through Asaas before 2026-11-26, the orders don't have the payment details yet (card, instalments, when the
+  // money lands): read them from Asaas once, so the panel can say how each one was paid. Later payments bring them.
+  const semDetalhes = pedidos.filter((pedido) => pedido.pagamento?.provedor === "asaas" && pedido.pagamento.checkout && !pedido.pagamento.detalhes && PAGOS.includes(pedido.status)).slice(0, 20);
+  if (!semDetalhes.length || !asaasConfigurado()) return pedidos;
+  await Promise.all(semDetalhes.map((pedido) => conciliarCheckoutAsaas(supabase, pedido, pedido.pagamento.checkout as string).catch(() => null)));
+  const { data: atualizados } = await supabase.from("pedidos").select("id, pagamento").in("id", semDetalhes.map((pedido) => pedido.id));
+  const novos = new Map((atualizados ?? []).map((linha) => [linha.id as string, linha.pagamento as Pedido["pagamento"]]));
+  return pedidos.map((pedido) => novos.has(pedido.id) ? { ...pedido, pagamento: novos.get(pedido.id)! } : pedido);
 }
 
 // The discount coupons, with how many paid orders used each one.

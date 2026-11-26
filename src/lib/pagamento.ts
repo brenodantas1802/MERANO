@@ -23,7 +23,7 @@ export async function abrirPagamento(pedido: Pedido, origem: string) {
 export async function conciliarCheckoutAsaas(admin: SupabaseClient, pedido: Pick<Pedido, "id" | "total">, checkout: string) {
   const resumo = resumoDoCheckout(await cobrancasDoCheckout(checkout), Number(pedido.total));
   if (!resumo.id) return null;
-  return registrarPagamento(admin, { id: resumo.id, status: resumo.status, pedidoId: pedido.id, valor: resumo.valor, metodo: resumo.metodo, pago: resumo.pago, provedor: "asaas" });
+  return registrarPagamento(admin, { id: resumo.id, status: resumo.status, pedidoId: pedido.id, valor: resumo.valor, metodo: resumo.metodo, pago: resumo.pago, provedor: "asaas", detalhes: resumo.detalhes });
 }
 
 // The customer is back on the order's page from the payment: confirm right away instead of waiting for the notification.

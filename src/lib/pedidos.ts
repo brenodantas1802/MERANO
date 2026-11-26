@@ -67,7 +67,11 @@ export type PagamentoRegistro = { forma?: string; provedor?: string; id?: string
   // When the order became paid: the delivery estimate (lib/entrega) counts from here.
   pago_em?: string;
   // Set when the order is cancelled (lib/cancelamento): who did it, when, and the money given back through Asaas.
-  estorno?: { valor: number; em: string; por: string }; cancelado_em?: string; cancelado_por?: string };
+  estorno?: { valor: number; em: string; por: string }; cancelado_em?: string; cancelado_por?: string;
+  // How it was paid, from Asaas (lib/asaas resumoDoCheckout): instalments, net value, when the money is credited
+  // (credito; credito_final for the last instalment), whether it already was, and the card.
+  detalhes?: DetalhesPagamento };
+export type DetalhesPagamento = { parcelas: number; liquido: number; credito: string | null; credito_final: string | null; recebido: boolean; bandeira: string | null; final: string | null };
 
 export type Pedido = {
   id: string; numero: string; criado_em: string; status: StatusPedido; metodo: Metodo; email: string;
@@ -169,13 +173,13 @@ export const linkWhatsApp = (mensagem: string) => `https://wa.me/${WHATSAPP_NUME
 // Applies what the payment provider says (read straight from it, never from the browser) to its order. Only a paid
 // payment of the full amount marks the order as paid; anything else is just noted. `pago` is the provider's own
 // verdict (Asaas: confirmed or received).
-export async function registrarPagamento(admin: SupabaseClient, pagamento: { id: string; status: string; pedidoId: string; valor: number; metodo: string; pago: boolean; provedor?: string }) {
+export async function registrarPagamento(admin: SupabaseClient, pagamento: { id: string; status: string; pedidoId: string; valor: number; metodo: string; pago: boolean; provedor?: string; detalhes?: DetalhesPagamento }) {
   const { data: pedido } = await admin.from("pedidos").select("id, status, total, pagamento, cupom").eq("id", pagamento.pedidoId).maybeSingle();
   if (!pedido) return null;
   const pago = pagamento.pago && Math.abs(Number(pedido.total) - pagamento.valor) < 0.06;
   const novoStatus = pago && pedido.status === "aguardando_pagamento" ? "pago" : pedido.status;
   const agora = new Date().toISOString();
-  const registro = { ...pedido.pagamento, id: pagamento.id, provedor: pagamento.provedor ?? pedido.pagamento?.provedor, status: pagamento.status, metodo: pagamento.metodo, atualizado: agora,
+  const registro = { ...pedido.pagamento, id: pagamento.id, provedor: pagamento.provedor ?? pedido.pagamento?.provedor, status: pagamento.status, metodo: pagamento.metodo, atualizado: agora, ...(pagamento.detalhes ? { detalhes: pagamento.detalhes } : {}),
     ...(novoStatus === "pago" && pedido.status !== "pago" ? { pago_em: agora } : {}) };
   await admin.from("pedidos").update({ status: novoStatus, pagamento: registro, atualizado_em: agora }).eq("id", pedido.id);
   return novoStatus as StatusPedido;

@@ -50,6 +50,26 @@ const reais = (valor: unknown) => Number(valor ?? 0).toFixed(2).replace(".", ","
 const NOMES_PROVEDOR: Record<string, string> = { asaas: "Asaas" };
 const provedorDo = (pedido: Pedido) => NOMES_PROVEDOR[pedido.pagamento?.provedor ?? ""] ?? "on-line";
 const formaPagamento = (pedido: Pedido) => pedido.metodo === "whatsapp" ? "WhatsApp" : `${pedido.metodo === "pix" ? "Pix" : "Cartão"} (${provedorDo(pedido)})`;
+const diaCurto = (dia: string) => dia.slice(0, 10).split("-").reverse().slice(0, 2).join("/");
+const BANDEIRAS: Record<string, string> = { VISA: "Visa", MASTERCARD: "Mastercard", ELO: "Elo", AMEX: "Amex", HIPERCARD: "Hipercard", DINERS: "Diners", DISCOVER: "Discover" };
+
+// How the customer paid, said plainly (owners, 2026-11-26): Pix lands in the Asaas balance at once; a card is approved
+// at once but Asaas credits it about 32 days later (each instalment a month apart), so it isn't in the statement yet.
+function comoPagou(pedido: Pedido) {
+  const pagamento = pedido.pagamento ?? {};
+  const pix = (pagamento.metodo ?? pedido.metodo) === "pix";
+  if (pedido.metodo === "whatsapp") return "Pagamento combinado no WhatsApp";
+  if (pedido.status === "aguardando_pagamento") return `Escolheu ${pix ? "Pix" : "cartão"} · ainda não pagou`;
+  const detalhes = pagamento.detalhes;
+  const recebido = detalhes?.recebido || pagamento.status === "RECEIVED" || pagamento.status === "RECEIVED_IN_CASH";
+  const liquido = detalhes?.liquido ? ` · ${formatPrice(detalhes.liquido)} líquido` : "";
+  if (pix) return `Pagou no Pix${liquido} · ${recebido ? "já está no saldo do Asaas" : "confirmando"}`;
+  const cartao = detalhes?.bandeira ? ` ${BANDEIRAS[detalhes.bandeira] ?? detalhes.bandeira}${detalhes.final ? ` •••• ${detalhes.final}` : ""}` : "";
+  const parcelas = detalhes ? (detalhes.parcelas > 1 ? ` em ${detalhes.parcelas}x` : " à vista") : "";
+  const quando = recebido ? "já está no saldo do Asaas"
+    : `aprovado; o Asaas libera o dinheiro ${detalhes?.credito ? `em ${diaCurto(detalhes.credito)}` : "cerca de 32 dias depois"}${detalhes?.credito_final ? ` (a última parcela em ${diaCurto(detalhes.credito_final)})` : ""}`;
+  return `Pagou no cartão${cartao}${parcelas}${liquido} · ${quando}`;
+}
 const pecasDo = (pedido: Pedido) => pedido.itens.reduce((soma, item) => soma + item.quantidade, 0);
 const botao = "sans press inline-flex h-10 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--paper)] px-4 text-[11px] uppercase tracking-[.12em] hover:bg-[var(--realce)]";
 const campo = "mt-1 block h-11 w-full rounded-[10px] border border-[var(--line)] bg-[var(--campo)] px-3 text-sm normal-case tracking-normal text-[var(--ink)] outline-none focus:border-[var(--vinho)]";
@@ -156,7 +176,7 @@ function Linha({ pedido, comCliente = true }: { pedido: Pedido; comCliente?: boo
       </span>
       <span className="sans flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted)]">
         <span className="font-semibold tracking-[.06em] text-[var(--ink)]">{pedido.numero}</span>
-        <span>Feito em {data(pedido.criado_em)}{comCliente ? ` · ${pecas} ${pecas === 1 ? "peça" : "peças"}` : ""}</span>
+        <span>Feito em {data(pedido.criado_em)}{comCliente ? ` · ${pecas} ${pecas === 1 ? "peça" : "peças"} · ${pedido.metodo === "pix" ? "Pix" : pedido.metodo === "cartao" ? `Cartão${(pedido.pagamento?.detalhes?.parcelas ?? 1) > 1 ? ` ${pedido.pagamento?.detalhes?.parcelas}x` : ""}` : "WhatsApp"}` : ""}</span>
         <span className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[.1em] ${COR[pedido.status]}`}>{STATUS_PEDIDO[pedido.status]}</span>
       </span>
     </summary>
@@ -165,7 +185,7 @@ function Linha({ pedido, comCliente = true }: { pedido: Pedido; comCliente?: boo
         <p className="mb-2 text-[11px] uppercase tracking-[.14em] text-[var(--muted)]">Peças</p>
         {pedido.itens.map((item, indice) => <p key={indice}>{item.quantidade}× {item.nome} · <b>{item.tamanho}</b>{item.cor ? ` · ${item.cor}` : ""}{item.criacaoId ? " · personalizada" : ""} · {formatPrice(Number(item.preco))}</p>)}
         <p className="pt-3 text-[var(--muted)]">Subtotal {formatPrice(Number(pedido.subtotal))}{pedido.cupom ? ` · cupom ${pedido.cupom} −${formatPrice(Number(pedido.desconto_cupom))}` : ""}{Number(pedido.desconto_pix) > 0 ? ` · Pix −${formatPrice(Number(pedido.desconto_pix))}` : ""} · {pedido.frete?.nome} {formatPrice(Number(pedido.frete?.preco ?? 0))}</p>
-        <p className="text-[var(--muted)]">{formaPagamento(pedido)}{pedido.pagamento?.status ? ` · ${provedorDo(pedido)}: ${pedido.pagamento.status}` : ""}</p>
+        <p className="text-[var(--ink)]">{comoPagou(pedido)}</p>
         {["pago", "em_separacao"].includes(pedido.status) && <Prazos pedido={pedido} />}
         {pedido.status === "cancelado" && <p className="pt-2 text-[var(--vinho)]">Cancelado{pedido.pagamento?.cancelado_em ? ` em ${data(pedido.pagamento.cancelado_em)}` : ""}{pedido.pagamento?.cancelado_por ? ` por ${pedido.pagamento.cancelado_por === "cliente" ? "o cliente" : pedido.pagamento.cancelado_por}` : ""}{estorno ? ` · estorno de ${formatPrice(estorno.valor)} pelo Asaas` : ""}.</p>}
       </div>
