@@ -16,13 +16,13 @@ Revisão do site inteiro, primeiro no celular e depois no computador: cada pági
 | Menu, busca e navegação | 92 | 90 | Tudo funcionou, inclusive busca sem resultado e página que não existe |
 | Produto e tamanhos | 90 | 90 | Trava sem tamanho, avisa peça repetida, Meranno Fit recusa medidas absurdas |
 | Carrinho | 88 | 90 | Era 70: deixava pôr 33 peças e o pagamento recusava; cortava o nome. Corrigido |
-| Frete | 78 | 78 | Cota o Brasil todo e esconde a opção pior; mas a promessa "até 7/12" não bate com os prazos longos |
+| Frete | 88 | 88 | Era 78: cota o Brasil todo, esconde a opção pior e mostra a data de chegada pelo CEP (26/11) |
 | Pagamento (formulário) | 82 | 85 | CEP preenche o endereço, cupom errado avisa, campos validam. Pagamento real não foi refeito nesta revisão |
 | Pré-venda (cadeado + WhatsApp) | 85 | 85 | Testada no banco de verdade; o número não é confirmado por SMS |
 | Cancelamento e estorno | 65 | 65 | Existe e está no ar, mas nunca foi usado com dinheiro de verdade |
 | Termos e Privacidade | 55 | 55 | Falta razão social e endereço, que a lei exige |
 | Velocidade | 80 | 88 | Fotos chegam leves (25 a 47 KB), mas a biblioteca de animação carrega em todas as páginas |
-| **Média** | **81** | **82** | |
+| **Média** | **82** | **83** | |
 
 Não deu para testar nesta revisão: entrar com uma conta de verdade, o e-mail de confirmação, o Provador (gasta crédito) e o visual novo do `/admin` (precisa do login Google). Estão na lista abaixo.
 
@@ -30,9 +30,14 @@ Não deu para testar nesta revisão: entrar com uma conta de verdade, o e-mail d
 
 Pontos da revisão, na ordem que eu faria.
 
-- [ ] **Decidir a promessa de entrega** · Breno decide, Claude faz (10 min a opção a, uns 40 min a b)
-  - O site diz "entrega prevista até 7 de dezembro" no produto, no pagamento e no pedido (`ENTREGA_PRE_VENDA` em `src/lib/pedidos.ts`). Pelo frete de hoje, Fortaleza leva 7 dias úteis no Jadlog e Rio Branco 12 (9 no PAC): quem pagar a partir de 28/11 pode não receber até 7/12.
-  - Opções: (a) trocar para "**enviamos até X**" e deixar o prazo do frete à parte; (b) mostrar no pagamento a **data estimada para o CEP** da pessoa; (c) manter "até 7/12" e mandar por SEDEX quem estiver longe (a Meranno paga a diferença).
+- [ ] **Confirmar o prazo de postagem: 2 dias úteis** · Breno · 1 min
+  - Desde 26/11 o site não promete mais "até 7 de dezembro": cada opção de frete mostra a data de chegada para o CEP da pessoa (ex.: "Chega até terça, 1/12"), contando **até 2 dias úteis para postar** depois do pagamento + o prazo da transportadora. No `/admin`, cada pedido pago mostra **"Postar até"**. Se a equipe precisar de mais dias, ou for postar a pré-venda toda numa data só, avisar o Claude (`POSTAGEM_DIAS_UTEIS` em `src/lib/entrega.ts`).
+- [ ] **Termos e Privacidade completos** (obrigatório: Decreto 7.962/2013 e LGPD) · Breno manda os dados, Claude escreve e publica · 1 h
+  - Mandar: o **CNPJ** que vende (é o do MEI 70.103.814/0001-37?), o **nome empresarial** e o **endereço** que pode aparecer no site (o do MEI costuma ser a casa do dono; pode ser outro).
+  - O Claude reescreve os dois: quem vende, atendimento e prazo de resposta, pré-venda, Personalizador, bases legais, por quanto tempo os dados ficam, quem recebe os dados (Asaas, SuperFrete, Vercel, Supabase, Google, inteligência artificial do Provador) e os direitos da LGPD.
+- [ ] **Supabase Pro** (~US$ 25/mês, backup diário) · Breno · 10 min
+  - O banco (pedidos, contas, lista da pré-venda) está no plano **grátis**, sem backup diário. Com dinheiro entrando, vale passar antes de abrir a pré-venda.
+  - Antes, se o projeto campos-del-plata não for da Meranno, transferir o MERANO para uma organização só dele (**Project Settings** → **General** → **Transfer project**); depois **Billing** → **Change subscription plan** → **Pro**.
 - [ ] **Testar um estorno de verdade** · Breno · 10 min
   1. `/admin` → **Cupons** → criar um de 90%.
   2. Comprar uma camiseta no Pix com ele (R$ 16 mais o frete).
@@ -45,7 +50,7 @@ Pontos da revisão, na ordem que eu faria.
   - Abrir o link da pré-venda no celular → **Criar conta** → confirmar o e-mail → ver se entra direto com o WhatsApp. Depois, **Esqueci minha senha**.
 - [ ] **Gerar uma prova no Provador** · Breno · 2 min (gasta 1 crédito)
 - [ ] **Ver a cobrança da Vercel** · Breno · 3 min
-  - Debitaram R$ 3 no cartão, mas o relatório da Vercel mostra **zero cobrado** de 23 a 26/11. Os registros só começam em 23/11 e têm uma assinatura que bate com o plano **Pro** (US$ 20/mês): https://vercel.com → **Settings** → **Billing** → ver o **plano** e as **Invoices**. Se for o teste do Pro e ninguém pediu, voltar para o **Hobby** (grátis dá conta). Aproveitar e ligar o **aviso de gastos** (item abaixo).
+  - Debitaram R$ 3 no cartão, mas o relatório da Vercel mostra **zero cobrado** de 23 a 26/11. A Vercel está no plano **Pro** de propósito (o grátis, Hobby, proíbe uso comercial, e a pré-venda já é venda): **não** voltar para o Hobby. Os R$ 3 devem ser um ajuste do Pro ou a verificação do cartão. Para conferir: https://vercel.com → **Settings** → **Billing** → **Invoices**. Aproveitar e ligar o **aviso de gastos** (item abaixo).
 - [ ] **CEP que a transportadora não aceita** · Claude · 15 min
   - Um CEP genérico (ex.: 69900-000) mostra "Não deu para calcular o frete agora. Tente de novo", como se fosse instabilidade. Trocar para "Confira o CEP".
 - [ ] **Animações mais leves no celular** · Claude · 1 h, só se sobrar tempo antes da pré-venda
@@ -63,11 +68,9 @@ Pontos da revisão, na ordem que eu faria.
 
 ## Antes da venda aberta (semana que vem)
 
-- [ ] **Dados da empresa, Privacidade e Termos** (obrigatório: Decreto 7.962/2013 e LGPD) · sócios mandam a **razão social** e o **endereço**; o Claude reescreve; vocês aprovam.
 - [ ] **Recarga automática do OpenRouter** · https://openrouter.ai → **Settings** → **Credits** → **Auto top-up** (ex.: US$ 20 quando cair abaixo de US$ 5).
-- [ ] **Supabase Pro** (~US$ 25/mês, backup diário) · antes, se o projeto campos-del-plata não for da Meranno, transferir o MERANO para uma organização só dele (**Project Settings** → **General** → **Transfer project**); depois **Billing** → **Change subscription plan** → **Pro**.
 - [ ] **Limite de provas contado no banco** · Claude.
-- [ ] **Abrir a venda** · decidir o **prazo de entrega** da venda aberta e confirmar a **data** (hoje 1º/12, `ABERTURA_VENDA` em `src/lib/financeiro.ts`); no dia o Claude desliga o `PRE_VENDA`, volta o preço de R$ 160 para R$ 180 (`PRECO_PRE_VENDA` em `src/lib/products.ts`; a faixa do topo e o preço riscado somem sozinhos), ajusta o prazo (`ENTREGA_PRE_VENDA` em `src/lib/pedidos.ts`), publica e testa.
+- [ ] **Abrir a venda** · decidir o **prazo de entrega** da venda aberta e confirmar a **data** (hoje 1º/12, `ABERTURA_VENDA` em `src/lib/financeiro.ts`); no dia o Claude desliga o `PRE_VENDA`, volta o preço de R$ 160 para R$ 180 (`PRECO_PRE_VENDA` em `src/lib/products.ts`; a faixa do topo e o preço riscado somem sozinhos), ajusta o prazo de postagem se mudar (`POSTAGEM_DIAS_UTEIS` em `src/lib/entrega.ts`), publica e testa.
 
 ## Depois do lançamento (sem pressa)
 
