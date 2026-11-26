@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, Trash2, X } from "lucide-react";
 import { MAX_POR_PECA, useCart } from "./cart-provider";
@@ -14,11 +14,15 @@ export const FRETE_GRATIS_ACIMA: number | null = null;
 const PANEL = { type: "spring", stiffness: 420, damping: 38, mass: 0.9 } as const;
 const FORMAS = ["Pix", "Visa", "Mastercard", "Elo", "Amex"];
 
-// "Talvez você goste": a row that slides sideways. On a phone the finger drags it; on a computer the arrows (a mouse
-// wheel only scrolls down, which is why the old row seemed stuck), and the bar under it shows where you are.
+// "Talvez você goste": a row that slides sideways. On a phone the finger drags it. On a computer (a mouse wheel only
+// scrolls down) there are three ways (owners, 2026-11-26: "tem que dar dos dois jeitos"): the arrows, dragging the bar
+// under the row (or clicking a point of it), and dragging the row itself with the mouse.
 function Sugestoes({ produtos, onAbrir }: { produtos: Product[]; onAbrir: () => void }) {
   const trilho = useRef<HTMLDivElement>(null);
+  const idFileira = useId();
   const [barra, setBarra] = useState({ inicio: 0, tamanho: 1 });
+  // A mouse drag on the row: where it started, and whether it moved enough to be a drag rather than a click.
+  const arrasto = useRef<{ x: number; scroll: number; moveu: boolean } | null>(null);
   const medir = () => {
     const el = trilho.current;
     if (el) setBarra({ inicio: el.scrollLeft / el.scrollWidth, tamanho: Math.min(1, el.clientWidth / el.scrollWidth) });
@@ -32,6 +36,52 @@ function Sugestoes({ produtos, onAbrir }: { produtos: Product[]; onAbrir: () => 
     return () => observador.disconnect();
   }, []);
   const passar = (lado: number) => trilho.current?.scrollBy({ left: lado * trilho.current.clientWidth * 0.8, behavior: "smooth" });
+  // While the mouse holds the row, the snapping to each card is off (it would fight the drag); back on when let go.
+  const encaixe = (ligado: boolean) => { if (trilho.current) trilho.current.style.scrollSnapType = ligado ? "" : "none"; };
+
+  // The bar: pressing on it puts the thumb's middle under the pointer (or keeps the grip if it was on the thumb), and
+  // moving with the button down slides the row.
+  function segurarBarra(evento: React.PointerEvent<HTMLDivElement>) {
+    const el = trilho.current;
+    if (!el || evento.button !== 0) return;
+    const faixa = evento.currentTarget.getBoundingClientRect();
+    const pegada = evento.clientX - faixa.left - barra.inicio * faixa.width;
+    const larguraPolegar = barra.tamanho * faixa.width;
+    const desvio = pegada >= 0 && pegada <= larguraPolegar ? pegada : larguraPolegar / 2;
+    const irPara = (x: number) => { el.scrollLeft = ((x - faixa.left - desvio) / faixa.width) * el.scrollWidth; };
+    evento.currentTarget.setPointerCapture(evento.pointerId);
+    encaixe(false);
+    irPara(evento.clientX);
+    const alvo = evento.currentTarget;
+    const mover = (e: PointerEvent) => irPara(e.clientX);
+    const soltar = () => { encaixe(true); alvo.removeEventListener("pointermove", mover); alvo.removeEventListener("pointerup", soltar); alvo.removeEventListener("pointercancel", soltar); };
+    alvo.addEventListener("pointermove", mover);
+    alvo.addEventListener("pointerup", soltar);
+    alvo.addEventListener("pointercancel", soltar);
+  }
+
+  // The row itself, dragged with the mouse (touch already scrolls it natively). The pointer is only captured once it has
+  // moved a few pixels, so a plain click still opens the piece; after a real drag, that click is swallowed.
+  function segurarFileira(evento: React.PointerEvent<HTMLDivElement>) {
+    if (evento.pointerType !== "mouse" || evento.button !== 0 || !trilho.current) return;
+    arrasto.current = { x: evento.clientX, scroll: trilho.current.scrollLeft, moveu: false };
+  }
+  function moverFileira(evento: React.PointerEvent<HTMLDivElement>) {
+    const atual = arrasto.current;
+    const el = trilho.current;
+    if (!atual || !el || evento.buttons !== 1) return;
+    const dx = evento.clientX - atual.x;
+    if (!atual.moveu && Math.abs(dx) > 5) {
+      atual.moveu = true;
+      encaixe(false);
+      el.setPointerCapture(evento.pointerId);
+    }
+    if (atual.moveu) el.scrollLeft = atual.scroll - dx;
+  }
+  function soltarFileira() {
+    if (arrasto.current?.moveu) encaixe(true);
+    else arrasto.current = null;
+  }
   const seta = "press flex h-9 w-9 items-center justify-center rounded-full bg-white/80 shadow-[inset_0_0_0_1px_rgba(0,0,0,.06)] disabled:opacity-35";
 
   return <div className="glass-tile rounded-[22px] py-4">
@@ -42,15 +92,23 @@ function Sugestoes({ produtos, onAbrir }: { produtos: Product[]; onAbrir: () => 
         <button type="button" onClick={() => passar(1)} disabled={barra.inicio + barra.tamanho >= 0.999} aria-label="Ver mais" className={seta}><ChevronRight size={16} strokeWidth={1.6} /></button>
       </div>}
     </div>
-    <div ref={trilho} onScroll={medir} className="shelf mt-3 auto-cols-[40%] gap-2.5 px-4 scroll-px-4">
-      {produtos.map((product) => <Link key={product.id} href={`/produto/${product.id}`} onClick={onAbrir} className="press block min-w-0">
-        <span className="foto-gelo relative block aspect-[.82] overflow-hidden rounded-[14px]"><Image src={product.image} alt={product.name} fill quality={90} sizes="170px" className="object-cover" /></span>
+    <div ref={trilho} id={idFileira} onScroll={medir} onPointerDown={segurarFileira} onPointerMove={moverFileira} onPointerUp={soltarFileira} onPointerCancel={soltarFileira}
+      onClickCapture={(evento) => { if (arrasto.current?.moveu) { evento.preventDefault(); evento.stopPropagation(); } arrasto.current = null; }}
+      className="shelf mt-3 auto-cols-[40%] gap-2.5 px-4 scroll-px-4 md:cursor-grab md:active:cursor-grabbing">
+      {produtos.map((product) => <Link key={product.id} href={`/produto/${product.id}`} onClick={onAbrir} draggable={false} className="press block min-w-0">
+        <span className="foto-gelo relative block aspect-[.82] overflow-hidden rounded-[14px]"><Image src={product.image} alt={product.name} fill quality={90} sizes="170px" draggable={false} className="object-cover" /></span>
         <span className="mt-2 block truncate text-[13px]">{product.name}</span>
         <span className="block text-[13px] text-[var(--muted)]">{formatPrice(getProductPrice(product))}</span>
       </Link>)}
     </div>
-    {barra.tamanho < 1 && <div className="mx-4 mt-3.5 h-[3px] overflow-hidden rounded-full bg-black/10">
-      <div className="h-full rounded-full bg-[var(--ink)]/55 transition-[margin] duration-150" style={{ width: `${barra.tamanho * 100}%`, marginLeft: `${barra.inicio * 100}%` }} />
+    {/* The thin bar sits in a taller strip, so it is easy to grab with the mouse. */}
+    {barra.tamanho < 1 && <div role="scrollbar" aria-controls={idFileira} aria-label="Passar as sugestões" aria-orientation="horizontal" aria-valuemin={0} aria-valuemax={100}
+      aria-valuenow={Math.round((barra.inicio / Math.max(0.0001, 1 - barra.tamanho)) * 100)} tabIndex={0}
+      onPointerDown={segurarBarra} onKeyDown={(evento) => { if (evento.key === "ArrowLeft" || evento.key === "ArrowRight") { evento.preventDefault(); passar(evento.key === "ArrowLeft" ? -1 : 1); } }}
+      className="group mx-4 mt-1.5 cursor-pointer touch-none py-2 outline-none">
+      <div className="h-[3px] overflow-hidden rounded-full bg-black/10 transition-[height] group-hover:h-[5px] group-focus-visible:h-[5px]">
+        <div className="h-full rounded-full bg-[var(--ink)]/55" style={{ width: `${barra.tamanho * 100}%`, marginLeft: `${barra.inicio * 100}%` }} />
+      </div>
     </div>}
   </div>;
 }

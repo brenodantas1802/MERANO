@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ChevronDown, ImagePlus } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, ImagePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { products } from "@/lib/products";
 import { SHIRT_STORIES, thumbOf } from "@/lib/shirt-stories";
@@ -51,7 +51,7 @@ export function BeforeAfter({ className = "", vestidos = ["amore-black"], rotulo
       </AnimatePresence>
     </span>
     <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-white shadow" />
-    <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[11px] text-[#141110] shadow-md">↔</span>
+    <span className="absolute left-1/2 top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[11px] text-[#141110] shadow-md"><ArrowLeftRight size={13} strokeWidth={1.8} aria-hidden /></span>
     {rotulo && <AnimatePresence mode="wait" initial={false}>
       <motion.span key={atual} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.35, ease: EASE }} className="sans absolute bottom-3 right-3 rounded-full bg-[rgba(255,255,255,.9)] px-3 py-1 text-[10px] uppercase tracking-[.12em] text-[#141110] shadow">{nome(atual)}</motion.span>
     </AnimatePresence>}

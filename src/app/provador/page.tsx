@@ -397,9 +397,9 @@ function ProvadorContent({ produtoInicial }: { produtoInicial: string | null }) 
           </section>
 
           <section className="mt-14">
-            <button type="submit" disabled={loading || analyzing} className="btn-dive sans flex w-full items-center justify-between rounded-full px-7 py-5 text-[13px] font-semibold uppercase tracking-[.12em] text-white disabled:cursor-wait disabled:opacity-70">
+            {/* No arrow beside the words: the iPhone drew the "↗" as an emoji (owners, 2026-11-26). */}
+            <button type="submit" disabled={loading || analyzing} className="btn-dive sans flex w-full items-center justify-center rounded-full px-7 py-5 text-[13px] font-semibold uppercase tracking-[.12em] text-white disabled:cursor-wait disabled:opacity-70">
               <span>{loading ? "Vestindo você…" : analyzing ? "Analisando a foto…" : "Gerar provador virtual"}</span>
-              <span aria-hidden>↗</span>
             </button>
             {error && <p role="alert" className="sans mt-4 w-fit -rotate-1 rounded-full bg-[#8a3a2c] px-4 py-2 text-xs text-white">{error}</p>}
           </section>

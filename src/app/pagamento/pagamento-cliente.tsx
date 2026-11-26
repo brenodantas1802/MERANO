@@ -165,7 +165,9 @@ export function Pagamento({ online, provedor }: { online: boolean; provedor: str
   const [status, setStatus] = useState<"form" | "processing" | "redirecting">("form");
   const [erro, setErro] = useState("");
   const [feito, setFeito] = useState<Feito | null>(null);
-  const [resumoAberto, setResumoAberto] = useState(false);
+  // On a phone the order summary starts open every time the payment page opens; the customer can close it (owners,
+  // 2026-11-26). On a computer it is always beside the form.
+  const [resumoAberto, setResumoAberto] = useState(true);
 
   // The cheapest option comes selected. These numbers are a preview: the server works them out again.
   const shipping = frete.opcoes.find((option) => option.id === shippingId) ?? frete.opcoes[0] ?? null;

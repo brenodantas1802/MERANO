@@ -37,7 +37,7 @@ export type Collection = { id: string; name: string; tagline: string; image: str
 
 export const collections: Collection[] = [
   // Named by the owners on 2026-11-17. `image` is a shirt cutout (the old beach banner no longer fits the brand).
-  { id: "colecao-01", name: "Summer Collection 01", tagline: "A primeira coleção da Meranno", image: "/imagens/merano-assets/recortes/arancia-v2-1000.webp" },
+  { id: "colecao-01", name: "Summer Collection 01", tagline: "A primeira coleção da Meranno", image: "/imagens/merano-assets/recortes/arancia-v2-recorte-1000.webp" },
 ];
 
 export function getCollection(id: string) {
@@ -171,9 +171,9 @@ export const products: Product[] = [
     price: PRECO_LANCAMENTO,
     salePrice: PRECO_PRE_VENDA,
     note: "Estampa Arancia",
-    image: "/imagens/merano-assets/produtos/arancia-verso-v2.png",
-    gallery: ["/imagens/merano-assets/produtos/arancia-verso-v2.png", "/imagens/merano-assets/produtos/arancia-frente.jpg"],
-    views: { back: "/imagens/merano-assets/produtos/arancia-verso-v2.png", front: "/imagens/merano-assets/produtos/arancia-frente.jpg" },
+    image: "/imagens/merano-assets/produtos/arancia-verso-v2-branco.png",
+    gallery: ["/imagens/merano-assets/produtos/arancia-verso-v2-branco.png", "/imagens/merano-assets/produtos/arancia-frente.jpg"],
+    views: { back: "/imagens/merano-assets/produtos/arancia-verso-v2-branco.png", front: "/imagens/merano-assets/produtos/arancia-frente.jpg" },
     printScale: { back: estampaCostas(67, 14, 76) },
     category: "Camisetas",
     tags: ["arancia", "laranja", "fruta", "botanico", "verao", "natureza", "azul"],

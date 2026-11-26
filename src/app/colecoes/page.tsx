@@ -23,7 +23,7 @@ export default function ColecoesPage() {
         {cards.map((collection, index) => (
           <ScrollReveal key={collection.id} delay={index * 0.08}>
             <Link href={`/shop?colecao=${collection.id}`} className="group relative flex aspect-[.9] flex-col justify-end overflow-hidden bg-[radial-gradient(75%_65%_at_50%_38%,#8A2A40_0%,#5E1A2B_58%,#3E1019_100%)] p-7 transition-transform duration-500 ease-out hover:-translate-y-1">
-              <Image src={collection.image} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain p-[10%] pb-[30%] transition-transform duration-700 ease-out group-hover:scale-105" />
+              <Image src={collection.image} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain p-[10%] pb-[44%] md:pb-[30%] transition-transform duration-700 ease-out group-hover:scale-105" />
               <span className="sans relative text-[11px] uppercase tracking-[.14em] text-[var(--latao)]">{collection.count} peça{collection.count > 1 ? "s" : ""}</span>
               <h2 className="relative mt-2 flex items-center gap-2 text-3xl text-[#F6F1E8]">{collection.name} <ArrowUpRight size={20} className="opacity-0 transition-opacity duration-300 group-hover:opacity-100" /></h2>
             </Link>

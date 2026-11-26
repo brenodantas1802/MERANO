@@ -13,7 +13,10 @@ export const SHIRT_STORIES: ShirtStory[] = [
   { id: "amore-black", title: ["Amore", "Black."], print: "Um coração vermelho em aquarela, rabiscado com anotações à mão.", cutout: cutout("amore-black", 600, 1200, 1303) },
   { id: "amore-white", title: ["Amore", "White."], print: "O mesmo coração em aquarela, com as anotações em preto sobre o algodão branco.", cutout: cutout("amore-white", 600, 1200, 1273) },
   { id: "riviera", title: ["Riviera", "."], print: "Um terraço com limoeiros numa tarde sem pressa: tudo bem, um passo de cada vez.", cutout: cutout("riviera", 600, 1200, 1338) },
-  { id: "arancia", title: ["Arancia", "."], print: "Laranjas e flores sobre o azul-marinho. Um verão brasileiro.", cutout: { ...cutout("arancia-v2", 600, 1000, 1090), studio: true } },
+  // Arancia v2 (2026-11-25) came as a studio photo on grey; cut out on 2026-11-26 (rembg isnet, edge un-mixed from the
+  // grey; new file names so no image cache keeps the grey one) so it sits like the others, also on the wine card of
+  // Coleções.
+  { id: "arancia", title: ["Arancia", "."], print: "Laranjas e flores sobre o azul-marinho. Um verão brasileiro.", cutout: cutout("arancia-v2-recorte", 600, 1000, 1090) },
   { id: "why-not", title: ["Why", "not."], print: "Uma garrafa de vinho no meio das letras pintadas à mão.", cutout: cutout("why-not", 600, 1200, 1295) },
 ];
 
