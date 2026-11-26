@@ -19,20 +19,20 @@ const original = { ...EMPTY_PROFILE, altura: '180', peso: '79', busto: '91', cin
 const tall = { ...original, altura: '194', peso: '89', busto: '93', cintura: '92', quadril: '90' };
 const labels = result => result.fits.map(({ size, label }) => [size, label]);
 
-test('uses the supplied garment chart and only sells P, M and G', () => {
+test('uses the supplied garment chart and sells P, M, G and GG', () => {
   assert.deepEqual(SIZE_CHART.map(({ size, largura, barra, comprimento }) => [size, largura, barra, comprimento]), [
-    ['P', 50, 51, 70], ['M', 53, 54, 73], ['G', 56, 57, 76],
+    ['P', 50, 51, 70], ['M', 53, 54, 73], ['G', 56, 57, 76], ['GG', 59, 60, 79],
   ]);
 });
 test('180 cm / 79 kg: P closer, M ideal, G too large', () => {
   const result = recommendSize(original, SIZE_CHART);
   assert.equal(result.size, 'M');
-  assert.deepEqual(labels(result), [['P', 'Justo'], ['M', 'Ideal'], ['G', 'Não indicado']]);
+  assert.deepEqual(labels(result), [['P', 'Justo'], ['M', 'Ideal'], ['G', 'Não indicado'], ['GG', 'Não indicado']]);
 });
 test('194 cm / 89 kg with circumferences increased 2 cm: P short, M closer, G ideal', () => {
   const result = recommendSize(tall, SIZE_CHART);
   assert.equal(result.size, 'G');
-  assert.deepEqual(labels(result), [['P', 'Não indicado'], ['M', 'Justo'], ['G', 'Ideal']]);
+  assert.deepEqual(labels(result), [['P', 'Não indicado'], ['M', 'Justo'], ['G', 'Ideal'], ['GG', 'Não indicado']]);
   assert.match(result.fits[0].description, /curta/);
   assert.match(result.reason, /194 cm.*89 kg/);
   assert.match(result.reason, /comprimento/);
@@ -61,13 +61,18 @@ test('length follows each product chart rather than a fixed height-to-size looku
   assert.equal(result.comfortLimited, true);
   assert.equal(result.fits.some(fit => fit.label === 'Ideal'), false);
 });
-test('does not invent GG or an ideal size beyond the available chart', () => {
-  for (const profile of [{ ...original, busto: '103' }, { ...tall, altura: '230' }, { ...original, busto: '150' }]) {
+test('does not invent XXG or an ideal size beyond the available chart', () => {
+  for (const profile of [{ ...original, busto: '115' }, { ...tall, altura: '230' }, { ...original, busto: '150' }]) {
     const result = recommendSize(profile, SIZE_CHART);
-    assert.equal(result.size, 'G');
+    assert.equal(result.size, 'GG');
     assert.equal(result.comfortLimited, true);
     assert.equal(result.fits.some(fit => fit.label === 'Ideal'), false);
   }
+});
+test('a 103 cm chest gets the GG as ideal instead of a tight G', () => {
+  const result = recommendSize({ ...original, busto: '103' }, SIZE_CHART);
+  assert.equal(result.size, 'GG');
+  assert.equal(result.fits.find(fit => fit.size === 'GG').label, 'Ideal');
 });
 test('does not recommend from empty measurements, height alone or an empty chart', () => {
   assert.equal(recommendSize(EMPTY_PROFILE, SIZE_CHART), null);
@@ -94,7 +99,7 @@ test('changing only the product length can change the ideal for the same person'
   assert.equal(recommendSize(tall, longer).size, 'M');
 });
 test('size names and chart order do not decide the fit', () => {
-  const renamed = SIZE_CHART.map((row, i) => ({ ...row, size: ['A', 'B', 'C'][i] })).reverse();
+  const renamed = SIZE_CHART.map((row, i) => ({ ...row, size: ['A', 'B', 'C', 'D'][i] })).reverse();
   assert.equal(recommendSize(original, renamed).size, 'B');
   assert.equal(recommendSize(tall, renamed).size, 'C');
 });

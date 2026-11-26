@@ -2,7 +2,7 @@ import { measure, type BodyProfile } from "./body-measure";
 import { bodyModel, ombroDa, OPENING_PER_WIDTH, SLEEVE_PER_LENGTH, wearTee } from "./body-model";
 import type { SizeRow } from "./products";
 
-const SIZES = ["P", "M", "G"];
+const SIZES = ["P", "M", "G", "GG"];
 
 // The cut itself, said in every try-on. Since 2026-11-23 the garment shots are the owners' official photos of this
 // same regular tee (before, mockups of an older dropped-shoulder cut the model had to be told to ignore).

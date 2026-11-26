@@ -58,8 +58,9 @@ export const REMIX_REGULAR: SizeRow[] = [
   { size: "GG", largura: 59, barra: 60, comprimento: 79 },
   { size: "XXG", largura: 62, barra: 63, comprimento: 82 },
 ];
-// What the shop sells (owners, 2026-11-22): P, M and G only. The chart, the Meranno Fit and the try-on show just these.
-export const TAMANHOS_LOJA = ["P", "M", "G"] as const;
+// What the shop sells: P, M and G since 2026-11-22, plus GG on every tee since 2026-11-26 (owners). The chart, the
+// Meranno Fit, the try-on and the Personalizador show just these.
+export const TAMANHOS_LOJA = ["P", "M", "G", "GG"] as const;
 export const SIZE_CHART: SizeRow[] = REMIX_REGULAR.filter((row) => (TAMANHOS_LOJA as readonly string[]).includes(row.size));
 export const TOLERANCIA_CM = 2;
 

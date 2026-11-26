@@ -7,7 +7,7 @@
   const S = window.MerannoStudio, P = window.MerannoProduction, M = window.MERANNO;
   if (!S || !P || !M) return;
   const FIT_NAMES = { regular: 'Regular', oversized: 'Oversized', boxy: 'Boxy' };
-  const SIZES = ['P', 'M', 'G'];
+  const SIZES = ['P', 'M', 'G', 'GG'];
   const MAX_UPLOAD = 25 * 1024 * 1024 - 64 * 1024; // the bucket's limit, with some room
   const price = Number(window.frameElement?.dataset.preco) || 180;
   const money = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

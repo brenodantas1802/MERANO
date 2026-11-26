@@ -49,7 +49,7 @@ export const ESTAMPAS_CASA: { id: EstampaCasaId; nome: string; src: string; larg
 export const estampaCasaDe = (id: string) => ESTAMPAS_CASA.find((estampa) => estampa.id === id);
 
 // Price of a personalised tee: precoPersonalizada() in lib/products (owners' table, /admin "Preços").
-export const TAMANHOS = ["P", "M", "G"] as const;
+export const TAMANHOS = ["P", "M", "G", "GG"] as const;
 export type Tamanho = (typeof TAMANHOS)[number];
 
 export const MAX_PALETA = 5; // the shirt colour plus up to four print colours

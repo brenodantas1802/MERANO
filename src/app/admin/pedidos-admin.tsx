@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Copy, Download, Package, Search } from "lucide-react";
 import { STATUS_PEDIDO, type StatusPedido } from "@/lib/pedido-status";
 import type { Pedido } from "@/lib/pedidos";
-import { formatPrice, getProduct } from "@/lib/products";
+import { formatPrice, getProduct, TAMANHOS_LOJA } from "@/lib/products";
 import { dataChegada, dataPostagem, formatarDia } from "@/lib/entrega";
 import { cancelarPedidoEquipe, editarPedido, mudarStatusPedido, salvarRastreio, type Resposta } from "./pedidos-acoes";
 
@@ -97,7 +97,7 @@ function EditarPedido({ pedido, fechar }: { pedido: Pedido; fechar: (resposta: R
   }, null);
   const c = pedido.cliente;
   const e = pedido.endereco;
-  const tamanhos = (item: Pedido["itens"][number]) => (item.productId ? getProduct(item.productId)?.fits : undefined) ?? ["P", "M", "G"];
+  const tamanhos = (item: Pedido["itens"][number]) => (item.productId ? getProduct(item.productId)?.fits : undefined) ?? [...TAMANHOS_LOJA];
   return <form action={salvar} className="sans mt-2 grid gap-3 rounded-[18px] bg-[var(--cartao)] p-4 md:grid-cols-6">
     <label className={`${rotulo} md:col-span-3`}>Nome<input name="nome" defaultValue={c.nome} required className={campo} /></label>
     <label className={`${rotulo} md:col-span-3`}>E-mail<input name="email" type="email" defaultValue={pedido.email} required className={campo} /></label>
