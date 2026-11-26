@@ -69,9 +69,11 @@ export const MATERIAL = "Camiseta regular unissex, 100% algodão penteado, malha
 // Prices. Since 2026-11-24 the owners set each tee's price in /admin → "Preços" (table precos_produto: the price charged
 // and an optional crossed-out price). The server reads the table (lib/precos-servidor) and hands it to the browser in
 // the root layout (<PrecosDoSite>); everything below reads it through getProductPrice / getPrecoCheio.
-// These constants are only the fallback, used if the table can't be read: the pre-sale's R$ 160 with R$ 180 crossed out.
+// These constants are only the fallback, used if the table can't be read. Since 2026-11-26 every tee is back at R$ 180
+// with nothing crossed out (owners: "voltarem a ser 180 reais"; the pre-sale was R$ 160), so the top bar and the
+// "preço de pré-venda" notes are gone; a lower PRECO_PRE_VENDA would bring them back.
 export const PRECO_LANCAMENTO = 180;
-export const PRECO_PRE_VENDA = 160;
+export const PRECO_PRE_VENDA = PRECO_LANCAMENTO;
 export const ID_PERSONALIZADA = "personalizada";
 
 export type PrecoDefinido = { preco: number; cheio: number | null };
