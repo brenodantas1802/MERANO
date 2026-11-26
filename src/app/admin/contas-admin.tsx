@@ -4,21 +4,40 @@ import { useState } from "react";
 import { BotaoAdmin, type Admins } from "./lista-pre-venda";
 
 // Every account on the site (Supabase Auth), last access first. Read with the secret key in page.tsx.
-export type Conta = { id: string; email: string | null; nome: string | null; google: boolean; senha: boolean; criado_em: string; ultimo_acesso: string | null; semana: boolean; lista?: NaLista | null };
+export type Conta = { id: string; email: string | null; nome: string | null; google: boolean; senha: boolean; criado_em: string; ultimo_acesso: string | null; semana: boolean; lista?: NaLista | null; pedido?: "pendente" | "recusado" | null };
 // The pre-sale list row tied to the account (name and group as the owners wrote them, and the WhatsApp).
 export type NaLista = { nome: string | null; grupo: string | null; telefone: string | null };
 
 const telefoneBonito = (telefone: string) => telefone.slice(2).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
 
 const MOSTRAR = 40;
+
+const daEquipe = (conta: Conta, admins: Admins) => {
+  const email = conta.email?.toLowerCase() ?? "";
+  return admins.fixos.includes(email) || admins.painel.includes(email);
+};
+// Signed in but not let in yet (owners, 2026-11-26): not the team and no list row with a WhatsApp. The site asks the
+// number right after the sign-in, so this is someone halfway through, who left before typing it, or who typed a
+// number that isn't on the list (then it is an access request).
+const semWhatsApp = (conta: Conta, admins: Admins) => !daEquipe(conta, admins) && !conta.lista?.telefone;
+
+function Pendencia({ conta }: { conta: Conta }) {
+  const [rotulo, texto] = conta.pedido === "pendente" ? ["Pediu acesso", "digitou um número que não está na lista: libere ou recuse em"]
+    : conta.pedido === "recusado" ? ["Recusado", "vocês recusaram o pedido; se mudar de ideia, libere em"]
+    : conta.lista ? ["Falta o WhatsApp", "está na lista pelo e-mail, só falta digitar o número para entrar"]
+    : ["Falta o WhatsApp", "entrou, mas ainda não digitou o número. Se ele estiver na lista, a conta é liberada sozinha quando digitar"];
+  return <p className="sans mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+    <span className="rounded-full border border-[var(--vinho)] px-2.5 py-0.5 text-[10px] uppercase tracking-[.12em] text-[var(--vinho)]">{rotulo}</span>
+    <span className="text-[var(--muted)]">{texto}{conta.pedido && <> <a href="#pre-venda" className="underline underline-offset-4 hover:text-[var(--ink)]">Pedidos de acesso</a></>}.</span>
+  </p>;
+}
 const SP = "America/Sao_Paulo";
 const dia = (iso: string) => new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", timeZone: SP });
 const diaHora = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: SP });
 
 function Linha({ conta, admins }: { conta: Conta; admins: Admins }) {
   const entra = [conta.google && "Google", conta.senha && "e-mail e senha"].filter(Boolean).join(" ou ") || "outro jeito";
-  const email = conta.email?.toLowerCase() ?? "";
-  const ehAdmin = admins.fixos.includes(email) || admins.painel.includes(email);
+  const ehAdmin = daEquipe(conta, admins);
   return <li className="flex flex-wrap items-center justify-between gap-3 py-3">
     <div className="min-w-0">
       <p className="truncate text-[16px]">{conta.nome || conta.email || "Sem e-mail"}</p>
@@ -26,6 +45,7 @@ function Linha({ conta, admins }: { conta: Conta; admins: Admins }) {
         <span className="rounded-full bg-[var(--vinho)] px-2.5 py-0.5 text-[10px] uppercase tracking-[.12em] text-[var(--creme)]">Na lista{conta.lista.grupo ? ` · ${conta.lista.grupo}` : ""}</span>
         <span className="text-[var(--ink)]">{[conta.lista.nome, conta.lista.telefone && telefoneBonito(conta.lista.telefone)].filter(Boolean).join(" · ")}</span>
       </p> : null}
+      {semWhatsApp(conta, admins) && <Pendencia conta={conta} />}
       <p className="sans text-xs leading-relaxed text-[var(--muted)] [overflow-wrap:anywhere]">{conta.nome && conta.email ? `${conta.email} · ` : ""}entra com {entra} · conta de {dia(conta.criado_em)} · {conta.ultimo_acesso ? `último acesso ${diaHora(conta.ultimo_acesso)}` : "nunca entrou"}</p>
       {ehAdmin && !conta.google && <p className="sans mt-0.5 text-xs text-[var(--vinho)]">Para abrir o painel, essa pessoa precisa entrar com o Google.</p>}
     </div>
@@ -42,13 +62,14 @@ export function ContasAdmin({ contas, admins }: { contas: Conta[] | null; admins
   const naLista = (contas ?? []).filter((conta) => conta.lista).length;
   const visiveis = todas || termo ? achadas : achadas.slice(0, MOSTRAR);
   const semana = (contas ?? []).filter((conta) => conta.semana).length;
+  const faltam = (contas ?? []).filter((conta) => semWhatsApp(conta, admins)).length;
   return <section className="mb-24">
     <p className="sans mb-4 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">Contas e administradores</p>
     <h2 className="display text-6xl">Quem já entrou.</h2>
     <p className="sans mt-4 max-w-2xl text-sm text-[var(--muted)]">Todas as contas criadas no site, de quem entrou por último para o primeiro. “Tornar admin” libera o Painel da equipe para a pessoa; “Admin ✓” tira. Os donos fixos só mudam na Vercel (<code>OWNER_EMAILS</code>).</p>
     {contas === null ? <p className="sans mt-8 max-w-2xl text-sm text-[var(--muted)]">Para ver as contas, cadastre <code>SUPABASE_SECRET_KEY</code> na Vercel.</p> : <>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-        <p className="sans text-xs uppercase tracking-[.14em] text-[var(--muted)]">{contas.length} {contas.length === 1 ? "conta" : "contas"} · {semana} {semana === 1 ? "entrou" : "entraram"} nos últimos 7 dias · {naLista} da lista da pré-venda · {admins.fixos.length + admins.painel.length} com acesso ao painel</p>
+        <p className="sans text-xs uppercase tracking-[.14em] text-[var(--muted)]">{contas.length} {contas.length === 1 ? "conta" : "contas"} · {semana} {semana === 1 ? "entrou" : "entraram"} nos últimos 7 dias · {naLista} da lista da pré-venda{faltam ? ` · ${faltam} sem WhatsApp` : ""} · {admins.fixos.length + admins.painel.length} com acesso ao painel</p>
         <input type="search" value={busca} onChange={(evento) => setBusca(evento.target.value)} placeholder="Buscar nome, e-mail ou WhatsApp" aria-label="Buscar conta por nome, e-mail ou WhatsApp" className="sans h-11 w-full rounded-full border border-[var(--line)] bg-[var(--campo)] px-4 text-[14px] outline-none focus:border-[var(--vinho)]/60 sm:w-72" />
       </div>
       {visiveis.length ? <ul className="mt-2 divide-y divide-[var(--line)] border-y border-[var(--line)]">{visiveis.map((conta) => <Linha key={conta.id} conta={conta} admins={admins} />)}</ul>

@@ -6,7 +6,7 @@ import { adicionarNaLista, liberarPedido, mudarAdmin, recusarPedido, removerDaLi
 
 export type Autorizado = { id: string; nome: string | null; email: string | null; telefone: string | null; grupo: string | null; usuario_id: string | null; liberado_em: string | null; criado_em: string; conta_email?: string | null };
 export type Admins = { fixos: string[]; painel: string[]; voce: string };
-export type PedidoAcesso = { id: string; nome: string | null; email: string | null; telefone: string | null; status: "pendente" | "recusado"; criado_em: string };
+export type PedidoAcesso = { id: string; usuario_id?: string | null; nome: string | null; email: string | null; telefone: string | null; status: "pendente" | "recusado"; criado_em: string };
 
 const telefoneBonito = (telefone: string) => telefone.slice(2).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
 

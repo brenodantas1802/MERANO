@@ -52,7 +52,7 @@ async function carregarLista(): Promise<Autorizado[] | null> {
 async function carregarPedidosAcesso(): Promise<PedidoAcesso[] | null> {
   const supabase = createSecretClient();
   if (!supabase) return null;
-  const { data } = await supabase.from("pre_venda_pedidos").select("id, nome, email, telefone, status, criado_em").in("status", ["pendente", "recusado"]).order("criado_em", { ascending: false }).limit(500);
+  const { data } = await supabase.from("pre_venda_pedidos").select("id, usuario_id, nome, email, telefone, status, criado_em").in("status", ["pendente", "recusado"]).order("criado_em", { ascending: false }).limit(500);
   return (data ?? []) as PedidoAcesso[];
 }
 
@@ -122,14 +122,17 @@ export default async function AdminPage() {
   ];
   const [pedidos, descontos, criacoes, cadastros, lista, pedidosAcesso, { config, despesas }, admins, contas] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista(), carregarPedidosAcesso(), carregarFinanceiro(), carregarAdmins(), carregarContas()]);
   const financeiro = { resumo: resumoFinanceiro(pedidos ?? [], config, despesas), config, despesas, disponivel: pedidos !== null };
-  const { contasComLista, listaComConta, quem } = identificar(lista, contas);
+  const { contasComLista, listaComConta, quem } = identificar(lista, contas, pedidosAcesso);
   return <AdminDashboard email={user.email} pedidos={pedidos} quem={quem} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={listaComConta} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} contas={contasComLista} precos={precos} admins={{ fixos: donosFixos(), painel: admins, voce: user.email.toLowerCase() }} />;
 }
 
 // Who is who (owners, 2026-11-26): the pre-sale list's name and group shown next to each account, each list row shows
 // the account that used it, and orders get the list name through the buyer's account e-mail or WhatsApp.
-function identificar(lista: Autorizado[] | null, contas: Conta[] | null) {
+function identificar(lista: Autorizado[] | null, contas: Conta[] | null, pedidosAcesso: PedidoAcesso[] | null) {
   const porConta = new Map<string, NaLista>();
+  // The access request each account sent (pending or refused), so "Quem já entrou" can tell it apart from an account
+  // that just hasn't typed its WhatsApp yet.
+  const pedidoDaConta = new Map((pedidosAcesso ?? []).filter((pedido) => pedido.usuario_id).map((pedido) => [pedido.usuario_id as string, pedido.status]));
   const porTelefone = new Map<string, NaLista>();
   for (const pessoa of lista ?? []) {
     const naLista: NaLista = { nome: pessoa.nome, grupo: pessoa.grupo, telefone: pessoa.telefone };
@@ -138,7 +141,7 @@ function identificar(lista: Autorizado[] | null, contas: Conta[] | null) {
     if (pessoa.telefone) porTelefone.set(pessoa.telefone, naLista);
   }
   const emailDaConta = new Map((contas ?? []).map((conta) => [conta.id, conta.email]));
-  const contasComLista = contas && contas.map((conta) => ({ ...conta, lista: porConta.get(conta.id) ?? null }));
+  const contasComLista = contas && contas.map((conta) => ({ ...conta, lista: porConta.get(conta.id) ?? null, pedido: pedidoDaConta.get(conta.id) ?? null }));
   const listaComConta = lista && lista.map((pessoa) => ({ ...pessoa, conta_email: pessoa.usuario_id ? emailDaConta.get(pessoa.usuario_id) ?? null : null }));
   // Keys: account e-mail (lowercase) and WhatsApp with the country code ("5511987654321").
   const quem: Record<string, string> = {};
