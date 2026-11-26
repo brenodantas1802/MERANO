@@ -10,6 +10,7 @@ import { AdminDashboard, type CriacaoAdmin, type CadastroCupom } from "./dashboa
 import type { Autorizado, PedidoAcesso } from "./lista-pre-venda";
 import type { CupomAdmin } from "./cupons-admin";
 import { carregarContas } from "./carregar-contas";
+import type { Conta, NaLista } from "./contas-admin";
 import type { PrecoAdmin } from "./precos-admin";
 import { usarPrecos } from "@/lib/precos-servidor";
 import { cheioPersonalizada, getPrecoCheio, getProductPrice, precoPersonalizada, products } from "@/lib/products";
@@ -43,8 +44,8 @@ async function carregarCuponsDesconto(): Promise<Omit<CupomAdmin, "usos">[] | nu
 async function carregarLista(): Promise<Autorizado[] | null> {
   const supabase = createSecretClient();
   if (!supabase) return null;
-  const { data } = await supabase.from("pre_venda_autorizados").select("id, nome, email, telefone, liberado_em, criado_em").order("criado_em", { ascending: false }).limit(2000);
-  return data ?? [];
+  const { data } = await supabase.from("pre_venda_autorizados").select("id, nome, email, telefone, grupo, usuario_id, liberado_em, criado_em").order("criado_em", { ascending: false }).limit(2000);
+  return (data ?? []) as Autorizado[];
 }
 
 // Access requests waiting for an answer, plus the refused ones (they can still be let in).
@@ -121,5 +122,31 @@ export default async function AdminPage() {
   ];
   const [pedidos, descontos, criacoes, cadastros, lista, pedidosAcesso, { config, despesas }, admins, contas] = await Promise.all([carregarPedidos(), carregarCuponsDesconto(), carregarCriacoes(), carregarCupons(), carregarLista(), carregarPedidosAcesso(), carregarFinanceiro(), carregarAdmins(), carregarContas()]);
   const financeiro = { resumo: resumoFinanceiro(pedidos ?? [], config, despesas), config, despesas, disponivel: pedidos !== null };
-  return <AdminDashboard email={user.email} pedidos={pedidos} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={lista} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} contas={contas} precos={precos} admins={{ fixos: donosFixos(), painel: admins, voce: user.email.toLowerCase() }} />;
+  const { contasComLista, listaComConta, quem } = identificar(lista, contas);
+  return <AdminDashboard email={user.email} pedidos={pedidos} quem={quem} descontos={descontos && cuponsComUsos(pedidos, descontos)} criacoes={criacoes} cupons={cadastros} lista={listaComConta} pedidosAcesso={pedidosAcesso ?? []} origem={origem} cadeadoLigado={preVendaAtiva()} financeiro={financeiro} contas={contasComLista} precos={precos} admins={{ fixos: donosFixos(), painel: admins, voce: user.email.toLowerCase() }} />;
+}
+
+// Who is who (owners, 2026-11-26): the pre-sale list's name and group shown next to each account, each list row shows
+// the account that used it, and orders get the list name through the buyer's account e-mail or WhatsApp.
+function identificar(lista: Autorizado[] | null, contas: Conta[] | null) {
+  const porConta = new Map<string, NaLista>();
+  const porTelefone = new Map<string, NaLista>();
+  for (const pessoa of lista ?? []) {
+    const naLista: NaLista = { nome: pessoa.nome, grupo: pessoa.grupo, telefone: pessoa.telefone };
+    // An account tied to two rows (its e-mail and its number): the one with the number names it.
+    if (pessoa.usuario_id && (!porConta.has(pessoa.usuario_id) || (pessoa.telefone && !porConta.get(pessoa.usuario_id)?.telefone))) porConta.set(pessoa.usuario_id, naLista);
+    if (pessoa.telefone) porTelefone.set(pessoa.telefone, naLista);
+  }
+  const emailDaConta = new Map((contas ?? []).map((conta) => [conta.id, conta.email]));
+  const contasComLista = contas && contas.map((conta) => ({ ...conta, lista: porConta.get(conta.id) ?? null }));
+  const listaComConta = lista && lista.map((pessoa) => ({ ...pessoa, conta_email: pessoa.usuario_id ? emailDaConta.get(pessoa.usuario_id) ?? null : null }));
+  // Keys: account e-mail (lowercase) and WhatsApp with the country code ("5511987654321").
+  const quem: Record<string, string> = {};
+  const rotulo = (naLista: NaLista) => [naLista.nome, naLista.grupo].filter(Boolean).join(" · ");
+  for (const conta of contas ?? []) {
+    const naLista = porConta.get(conta.id);
+    if (naLista && conta.email && rotulo(naLista)) quem[conta.email.toLowerCase()] = rotulo(naLista);
+  }
+  for (const [telefone, naLista] of porTelefone) if (rotulo(naLista)) quem[telefone] = rotulo(naLista);
+  return { contasComLista, listaComConta, quem };
 }

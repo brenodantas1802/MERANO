@@ -16,8 +16,9 @@ export const metadata: Metadata = { title: "MERANNO | Pré-venda", robots: { ind
 // The phone's browser bars in the same wine as the page (.feltro).
 export const viewport: Viewport = { themeColor: "#39000F" };
 
-// The link sent to the WhatsApp group. Sign in (or create the account the first time); if the account's e-mail or
-// WhatsApp is on the pre-sale list, "Abrir o cadeado" lets this browser in. Covers the whole screen, like /em-breve.
+// The link sent to the WhatsApp group. Sign in (or create the account the first time), then the WhatsApp is required
+// (owners, 2026-11-26): a number on the pre-sale list lets the account in at once ("Abrir o cadeado" gives this
+// browser the cookie); any other number becomes a request for the team. Covers the whole screen, like /em-breve.
 export default async function PreVenda() {
   const [jar, supabase] = await Promise.all([cookies(), createClient()]);
   if (!preVendaAtiva()) redirect("/");
@@ -28,7 +29,9 @@ export default async function PreVenda() {
   // Not on the list: the access request this account sent the team, if any.
   const pedido = user && !situacao?.liberado ? await pedidoDaConta(user.id) : null;
   const telefoneBonito = (telefone: string) => telefone.slice(2).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
-  const nome = ((user?.user_metadata.full_name ?? user?.user_metadata.name ?? "") as string).split(" ")[0];
+  const nome = ((user?.user_metadata.full_name ?? user?.user_metadata.name ?? situacao?.nome ?? "") as string).split(" ")[0];
+  // The number typed when the account was created, to save typing it again.
+  const telefoneConta = typeof user?.user_metadata.phone === "string" ? user.user_metadata.phone : "";
   await usarPrecos();
   const oferta = ofertaGeral();
 
@@ -45,7 +48,7 @@ export default async function PreVenda() {
       <div className="mt-8 w-full rounded-[2rem] bg-[var(--superficie)] p-6 text-left text-[var(--ink)] shadow-[0_30px_60px_-30px_rgba(12,2,6,.8)] md:p-8">
         {jaLiberado ? <Entrando /> : !user ? <>
           <p className="display text-3xl">Entre para liberar</p>
-          <p className="sans mt-2 text-[14px] text-[var(--muted)]">Use a conta com o e-mail ou o WhatsApp que está no grupo. Na primeira vez, crie a sua conta; depois é só entrar.</p>
+          <p className="sans mt-2 text-[14px] text-[var(--muted)]">Entre com o Google ou com o seu e-mail. Na primeira vez, crie a sua conta. Depois, é só confirmar o seu WhatsApp: se ele estiver na lista, libera na hora.</p>
           <div className="mt-6"><GoogleButton next="/pre-venda" /></div>
           <div className="my-5 flex items-center gap-3 text-[12px] text-[var(--muted)]"><span className="h-px flex-1 bg-[var(--line)]" />ou com e-mail<span className="h-px flex-1 bg-[var(--line)]" /></div>
           <SignInForm next="/pre-venda" />
@@ -60,16 +63,16 @@ export default async function PreVenda() {
           <Aguardando />
           <details className="sans mt-5 text-[13px] text-[var(--muted)]">
             <summary className="cursor-pointer underline underline-offset-4">Digitei o número errado</summary>
-            <FormTelefone rotulo="Enviar de novo" />
+            <FormTelefone rotulo="Enviar de novo" inicial={telefoneConta} />
           </details>
         </> : pedido?.status === "recusado" ? <>
           <p className="display text-3xl">Acesso não liberado.</p>
           <p className="sans mt-2 text-[14px] text-[var(--muted)]">A equipe não liberou a conta <strong className="text-[var(--ink)]">{user.email}</strong>. Se acha que é engano, fale com quem te mandou o link.</p>
           <div className="sans mt-5 flex justify-center text-[13px] text-[var(--muted)]"><SignOutButton className="underline underline-offset-4 hover:text-[var(--ink)]" /><span className="ml-1">e entrar com outra conta</span></div>
         </> : <>
-          <p className="display text-3xl">Quase lá.</p>
-          <p className="sans mt-2 text-[14px] text-[var(--muted)]">O e-mail <strong className="text-[var(--ink)]">{user.email}</strong> não está na lista. Digite o WhatsApp que você usa no grupo: se ele estiver na lista, libera na hora; se não, o pedido vai para a equipe liberar.</p>
-          <FormTelefone />
+          <p className="display text-3xl">Falta o seu WhatsApp{nome ? `, ${nome}` : ""}.</p>
+          <p className="sans mt-2 text-[14px] text-[var(--muted)]">{situacao?.naLista ? "Sua conta está na lista. Para entrar na pré-venda, confirme o seu número de WhatsApp." : "Para entrar na pré-venda, é obrigatório informar o WhatsApp que você usa no grupo. Se ele estiver na lista, libera na hora; se não, o pedido vai para a equipe liberar."}</p>
+          <FormTelefone inicial={telefoneConta} />
           <div className="sans mt-5 flex justify-center text-[13px] text-[var(--muted)]"><SignOutButton className="underline underline-offset-4 hover:text-[var(--ink)]" /><span className="ml-1">e entrar com outra conta</span></div>
         </>}
       </div>

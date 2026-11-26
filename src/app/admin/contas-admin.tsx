@@ -4,7 +4,11 @@ import { useState } from "react";
 import { BotaoAdmin, type Admins } from "./lista-pre-venda";
 
 // Every account on the site (Supabase Auth), last access first. Read with the secret key in page.tsx.
-export type Conta = { id: string; email: string | null; nome: string | null; google: boolean; senha: boolean; criado_em: string; ultimo_acesso: string | null; semana: boolean };
+export type Conta = { id: string; email: string | null; nome: string | null; google: boolean; senha: boolean; criado_em: string; ultimo_acesso: string | null; semana: boolean; lista?: NaLista | null };
+// The pre-sale list row tied to the account (name and group as the owners wrote them, and the WhatsApp).
+export type NaLista = { nome: string | null; grupo: string | null; telefone: string | null };
+
+const telefoneBonito = (telefone: string) => telefone.slice(2).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
 
 const MOSTRAR = 40;
 const SP = "America/Sao_Paulo";
@@ -18,6 +22,10 @@ function Linha({ conta, admins }: { conta: Conta; admins: Admins }) {
   return <li className="flex flex-wrap items-center justify-between gap-3 py-3">
     <div className="min-w-0">
       <p className="truncate text-[16px]">{conta.nome || conta.email || "Sem e-mail"}</p>
+      {conta.lista ? <p className="sans mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+        <span className="rounded-full bg-[var(--vinho)] px-2.5 py-0.5 text-[10px] uppercase tracking-[.12em] text-[var(--creme)]">Na lista{conta.lista.grupo ? ` · ${conta.lista.grupo}` : ""}</span>
+        <span className="text-[var(--ink)]">{[conta.lista.nome, conta.lista.telefone && telefoneBonito(conta.lista.telefone)].filter(Boolean).join(" · ")}</span>
+      </p> : null}
       <p className="sans text-xs leading-relaxed text-[var(--muted)] [overflow-wrap:anywhere]">{conta.nome && conta.email ? `${conta.email} · ` : ""}entra com {entra} · conta de {dia(conta.criado_em)} · {conta.ultimo_acesso ? `último acesso ${diaHora(conta.ultimo_acesso)}` : "nunca entrou"}</p>
       {ehAdmin && !conta.google && <p className="sans mt-0.5 text-xs text-[var(--vinho)]">Para abrir o painel, essa pessoa precisa entrar com o Google.</p>}
     </div>
@@ -29,7 +37,9 @@ export function ContasAdmin({ contas, admins }: { contas: Conta[] | null; admins
   const [busca, setBusca] = useState("");
   const [todas, setTodas] = useState(false);
   const termo = busca.trim().toLowerCase();
-  const achadas = (contas ?? []).filter((conta) => !termo || `${conta.nome ?? ""} ${conta.email ?? ""}`.toLowerCase().includes(termo));
+  const digitos = termo.replace(/\D/g, "");
+  const achadas = (contas ?? []).filter((conta) => !termo || `${conta.nome ?? ""} ${conta.email ?? ""} ${conta.lista?.nome ?? ""} ${conta.lista?.grupo ?? ""}`.toLowerCase().includes(termo) || (digitos.length >= 4 && !!conta.lista?.telefone?.includes(digitos)));
+  const naLista = (contas ?? []).filter((conta) => conta.lista).length;
   const visiveis = todas || termo ? achadas : achadas.slice(0, MOSTRAR);
   const semana = (contas ?? []).filter((conta) => conta.semana).length;
   return <section className="mb-24">
@@ -38,8 +48,8 @@ export function ContasAdmin({ contas, admins }: { contas: Conta[] | null; admins
     <p className="sans mt-4 max-w-2xl text-sm text-[var(--muted)]">Todas as contas criadas no site, de quem entrou por último para o primeiro. “Tornar admin” libera o Painel da equipe para a pessoa; “Admin ✓” tira. Os donos fixos só mudam na Vercel (<code>OWNER_EMAILS</code>).</p>
     {contas === null ? <p className="sans mt-8 max-w-2xl text-sm text-[var(--muted)]">Para ver as contas, cadastre <code>SUPABASE_SECRET_KEY</code> na Vercel.</p> : <>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-        <p className="sans text-xs uppercase tracking-[.14em] text-[var(--muted)]">{contas.length} {contas.length === 1 ? "conta" : "contas"} · {semana} {semana === 1 ? "entrou" : "entraram"} nos últimos 7 dias · {admins.fixos.length + admins.painel.length} com acesso ao painel</p>
-        <input type="search" value={busca} onChange={(evento) => setBusca(evento.target.value)} placeholder="Buscar nome ou e-mail" aria-label="Buscar conta por nome ou e-mail" className="sans h-11 w-full rounded-full border border-[var(--line)] bg-[var(--campo)] px-4 text-[14px] outline-none focus:border-[var(--vinho)]/60 sm:w-72" />
+        <p className="sans text-xs uppercase tracking-[.14em] text-[var(--muted)]">{contas.length} {contas.length === 1 ? "conta" : "contas"} · {semana} {semana === 1 ? "entrou" : "entraram"} nos últimos 7 dias · {naLista} da lista da pré-venda · {admins.fixos.length + admins.painel.length} com acesso ao painel</p>
+        <input type="search" value={busca} onChange={(evento) => setBusca(evento.target.value)} placeholder="Buscar nome, e-mail ou WhatsApp" aria-label="Buscar conta por nome, e-mail ou WhatsApp" className="sans h-11 w-full rounded-full border border-[var(--line)] bg-[var(--campo)] px-4 text-[14px] outline-none focus:border-[var(--vinho)]/60 sm:w-72" />
       </div>
       {visiveis.length ? <ul className="mt-2 divide-y divide-[var(--line)] border-y border-[var(--line)]">{visiveis.map((conta) => <Linha key={conta.id} conta={conta} admins={admins} />)}</ul>
         : <p className="sans mt-4 text-sm text-[var(--muted)]">{termo ? "Ninguém com esse nome ou e-mail." : "Ninguém criou conta ainda."}</p>}

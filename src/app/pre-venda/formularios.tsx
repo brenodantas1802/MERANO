@@ -43,13 +43,13 @@ export function Aguardando() {
   return <p className="sans mt-5 flex items-center gap-3 text-[13px] text-[var(--muted)]"><span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-[var(--latao)]" />Esperando a equipe liberar. Pode deixar esta página aberta.</p>;
 }
 
-export function FormTelefone({ rotulo = "Liberar meu acesso" }: { rotulo?: string }) {
+export function FormTelefone({ rotulo = "Liberar meu acesso", inicial = "" }: { rotulo?: string; inicial?: string }) {
   const [resultado, enviar, enviando] = useActionState(entrarComTelefone, null);
-  const [telefone, setTelefone] = useState("");
+  const [telefone, setTelefone] = useState(() => mascara(inicial.replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, "")));
   useEntrar(resultado);
   return <form action={enviar} className="mt-5">
-    <label className="sans block text-[12px] text-[var(--muted)]">WhatsApp que está no grupo
-      <input name="telefone" required inputMode="tel" autoComplete="tel" value={telefone} onChange={(event) => setTelefone(mascara(event.target.value))} placeholder="(11) 90000-0000" className="mt-2 block h-12 w-full rounded-[14px] border border-[var(--line)] bg-white/70 px-4 text-base text-[var(--ink)] outline-none focus:border-[var(--vinho)]/60" />
+    <label className="sans block text-[12px] text-[var(--muted)]">Seu WhatsApp, com DDD (obrigatório)
+      <input name="telefone" required minLength={14} inputMode="tel" autoComplete="tel-national" value={telefone} onChange={(event) => setTelefone(mascara(event.target.value))} placeholder="(11) 90000-0000" className="mt-2 block h-12 w-full rounded-[14px] border border-[var(--line)] bg-white/70 px-4 text-base text-[var(--ink)] outline-none focus:border-[var(--vinho)]/60" />
     </label>
     <button type="submit" disabled={enviando || resultado?.ok} className={`${botao} mt-4`}>{enviando || resultado?.ok ? "Conferindo…" : rotulo}</button>
     {resultado && "erro" in resultado && <p role="alert" className={aviso}>{resultado.erro}</p>}

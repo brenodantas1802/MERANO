@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState, useTransition } from "react";
+import { createContext, useActionState, useContext, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { Check, Copy, Download, Package, Search } from "lucide-react";
 import { STATUS_PEDIDO, type StatusPedido } from "@/lib/pedido-status";
@@ -32,6 +32,16 @@ const PAGOS: StatusPedido[] = ["pago", "em_separacao", "enviado", "entregue"];
 const SP = "America/Sao_Paulo";
 const data = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: SP }).replace(", ", " às ");
 const soDigitos = (valor: string) => valor.replace(/\D/g, "");
+
+// Who the buyer is on the pre-sale list ("Felipe Brasil · Amigos"), by the account e-mail or the WhatsApp. Built in
+// page.tsx; keys are lowercase e-mails and numbers with the country code.
+const Quem = createContext<Record<string, string>>({});
+function useQuem(pedido: Pedido) {
+  const quem = useContext(Quem);
+  const celular = soDigitos(pedido.cliente.celular);
+  return quem[pedido.email.toLowerCase()] ?? quem[celular.length >= 12 && celular.startsWith("55") ? celular : `55${celular}`] ?? null;
+}
+const SeloLista = ({ texto }: { texto: string | null }) => texto ? <span className="sans inline-block rounded-full bg-[var(--vinho)] px-2.5 py-0.5 align-middle text-[10px] uppercase tracking-[.1em] text-[var(--creme)]">{texto}</span> : null;
 const cpfBonito = (cpf: string) => soDigitos(cpf).replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
 const celularBonito = (celular: string) => soDigitos(celular).replace(/^(\d{2})(\d{4,5})(\d{4})$/, "($1) $2-$3");
 const cepBonito = (cep: string) => soDigitos(cep).replace(/^(\d{5})(\d{3})$/, "$1-$2");
@@ -128,11 +138,12 @@ function Linha({ pedido, comCliente = true }: { pedido: Pedido; comCliente?: boo
   const pecas = pecasDo(pedido);
   const agir = (acao: () => Promise<Resposta>) => startTransition(async () => setResposta(await acao()));
   const estorno = pedido.pagamento?.estorno;
+  const naLista = useQuem(pedido);
 
   return <details className={`group rounded-[20px] bg-[var(--paper)] px-4 shadow-[0_10px_30px_-24px_rgba(20,17,16,.5)] md:px-6 ${salvando ? "opacity-60" : ""}`}>
     <summary className="flex cursor-pointer list-none flex-col gap-1.5 py-4 [&::-webkit-details-marker]:hidden">
       <span className="flex items-baseline justify-between gap-3">
-        <span className="min-w-0 truncate text-[17px]">{comCliente ? pedido.cliente.nome : `${pecas} ${pecas === 1 ? "peça" : "peças"} · ${formaPagamento(pedido)}`}</span>
+        <span className="min-w-0 truncate text-[17px]">{comCliente ? <>{pedido.cliente.nome} <SeloLista texto={naLista} /></> : `${pecas} ${pecas === 1 ? "peça" : "peças"} · ${formaPagamento(pedido)}`}</span>
         <span className="sans shrink-0 text-[15px] tabular-nums">{formatPrice(Number(pedido.total))}</span>
       </span>
       <span className="sans flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted)]">
@@ -184,12 +195,13 @@ function Linha({ pedido, comCliente = true }: { pedido: Pedido; comCliente?: boo
 // One customer (same e-mail): who they are, what they bought, and each of their orders.
 function Cliente({ pedidos }: { pedidos: Pedido[] }) {
   const [primeiro] = pedidos;
+  const naLista = useQuem(primeiro);
   const pagos = pedidos.filter((pedido) => PAGOS.includes(pedido.status));
   const gasto = pagos.reduce((soma, pedido) => soma + Number(pedido.total), 0);
   const pecas = pagos.reduce((soma, pedido) => soma + pecasDo(pedido), 0);
   return <div className="rounded-[24px] bg-[var(--paper)] p-4 shadow-[0_10px_30px_-24px_rgba(20,17,16,.5)] md:p-6">
     <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <p className="text-xl">{primeiro.cliente.nome}</p>
+      <p className="text-xl">{primeiro.cliente.nome} <SeloLista texto={naLista} /></p>
       <p className="sans text-sm tabular-nums">{formatPrice(gasto)} <span className="text-[var(--muted)]">em {pecas} {pecas === 1 ? "peça paga" : "peças pagas"}</span></p>
     </div>
     <p className="sans mt-1 text-xs text-[var(--muted)]">{primeiro.email} · {celularBonito(primeiro.cliente.celular)} · CPF {cpfBonito(primeiro.cliente.cpf)} · {primeiro.endereco.cidade}/{primeiro.endereco.uf} · {pedidos.length} {pedidos.length === 1 ? "pedido" : "pedidos"}</p>
@@ -197,7 +209,7 @@ function Cliente({ pedidos }: { pedidos: Pedido[] }) {
   </div>;
 }
 
-export function PedidosAdmin({ pedidos }: { pedidos: Pedido[] | null }) {
+export function PedidosAdmin({ pedidos, quem = {} }: { pedidos: Pedido[] | null; quem?: Record<string, string> }) {
   const [filtro, setFiltro] = useState("todos");
   const [busca, setBusca] = useState("");
   const [porCliente, setPorCliente] = useState(false);
@@ -246,7 +258,7 @@ export function PedidosAdmin({ pedidos }: { pedidos: Pedido[] | null }) {
       <button type="button" onClick={() => baixarCsv(lista)} disabled={!lista.length} className={`${botao} disabled:opacity-40`}><Download size={13} /> Planilha</button>
     </div>
     {lista.length === 0 ? <p className="sans mt-8 text-sm text-[var(--muted)]">{pedidos.length ? "Nenhum pedido com esse filtro." : "Nenhum pedido ainda."}</p>
-      : porCliente ? <div className="mt-5 space-y-3">{clientes.map((grupo) => <Cliente key={grupo[0].email} pedidos={grupo} />)}</div>
-      : <div className="mt-5 space-y-2.5">{lista.map((pedido) => <Linha key={pedido.id} pedido={pedido} />)}</div>}
+      : <Quem.Provider value={quem}>{porCliente ? <div className="mt-5 space-y-3">{clientes.map((grupo) => <Cliente key={grupo[0].email} pedidos={grupo} />)}</div>
+      : <div className="mt-5 space-y-2.5">{lista.map((pedido) => <Linha key={pedido.id} pedido={pedido} />)}</div>}</Quem.Provider>}
   </section>;
 }

@@ -115,7 +115,7 @@ const SECOES = [["pedidos", "Pedidos"], ["financeiro", "Financeiro"], ["pre-vend
 
 export type Financeiro = { resumo: ResumoFinanceiro; config: ConfigFinanceira; despesas: Despesa[]; disponivel: boolean };
 
-export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, contas, precos, admins }: { email: string; pedidos: Pedido[] | null; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; contas: Conta[] | null; precos: PrecoAdmin[]; admins: Admins }) {
+export function AdminDashboard({ email, pedidos, quem, descontos, criacoes, cupons, lista, pedidosAcesso, origem, cadeadoLigado, financeiro, contas, precos, admins }: { email: string; pedidos: Pedido[] | null; quem: Record<string, string>; descontos: CupomAdmin[] | null; criacoes: CriacaoAdmin[] | null; cupons: CadastroCupom[] | null; lista: Autorizado[] | null; pedidosAcesso: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; financeiro: Financeiro; contas: Conta[] | null; precos: PrecoAdmin[]; admins: Admins }) {
   const { tema, trocar } = useTema();
   return <div className="painel min-h-screen" data-tema={tema || undefined}>
     <header className="sans sticky top-0 z-40 bg-[var(--paper)]/85 backdrop-blur-xl">
@@ -135,7 +135,7 @@ export function AdminDashboard({ email, pedidos, descontos, criacoes, cupons, li
     </header>
     {/* Each part in its own ice card, like the cart and the checkout summary (owners, 2026-11-25); orders first. */}
     <main className="mx-auto max-w-360 space-y-4 px-3 pb-16 pt-4 md:px-8">
-      <div id="pedidos" className="painel-bloco"><PedidosAdmin pedidos={pedidos} /></div>
+      <div id="pedidos" className="painel-bloco"><PedidosAdmin pedidos={pedidos} quem={quem} /></div>
       <div className="painel-bloco"><FinanceiroAdmin {...financeiro} /></div>
       <div id="pre-venda" className="painel-bloco"><ListaPreVenda lista={lista} pedidos={pedidosAcesso} origem={origem} cadeadoLigado={cadeadoLigado} admins={admins} /></div>
       <div id="contas" className="painel-bloco"><ContasAdmin contas={contas} admins={admins} /></div>

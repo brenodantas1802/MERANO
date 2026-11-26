@@ -4,7 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import { Check, Copy, X } from "lucide-react";
 import { adicionarNaLista, liberarPedido, mudarAdmin, recusarPedido, removerDaLista, type RespostaLista } from "./lista-acoes";
 
-export type Autorizado = { id: string; nome: string | null; email: string | null; telefone: string | null; liberado_em: string | null; criado_em: string };
+export type Autorizado = { id: string; nome: string | null; email: string | null; telefone: string | null; grupo: string | null; usuario_id: string | null; liberado_em: string | null; criado_em: string; conta_email?: string | null };
 export type Admins = { fixos: string[]; painel: string[]; voce: string };
 export type PedidoAcesso = { id: string; nome: string | null; email: string | null; telefone: string | null; status: "pendente" | "recusado"; criado_em: string };
 
@@ -48,7 +48,8 @@ function Pessoa({ pessoa, admins }: { pessoa: Autorizado; admins: Admins }) {
   return <li className={`flex flex-wrap items-center justify-between gap-3 py-3 ${removendo ? "opacity-40" : ""}`}>
     <div className="min-w-0">
       <p className="truncate text-[16px]">{pessoa.nome || contato}</p>
-      <p className="sans truncate text-xs text-[var(--muted)]">{pessoa.nome ? `${contato} · ` : ""}{pessoa.liberado_em ? `entrou em ${new Date(pessoa.liberado_em).toLocaleDateString("pt-BR")}` : "ainda não entrou"}</p>
+      <p className="sans truncate text-xs text-[var(--muted)]">{pessoa.nome ? `${contato} · ` : ""}{pessoa.liberado_em ? `entrou em ${new Date(pessoa.liberado_em).toLocaleDateString("pt-BR")}` : pessoa.usuario_id ? "tem conta, ainda não abriu o cadeado" : "ainda não entrou"}</p>
+      {pessoa.conta_email && pessoa.conta_email !== pessoa.email && <p className="sans truncate text-xs text-[var(--ink)]">Conta: {pessoa.conta_email}</p>}
     </div>
     <div className="flex items-center gap-2">
     {pessoa.email && <BotaoAdmin email={pessoa.email} admins={admins} />}
@@ -78,7 +79,18 @@ function Pedido({ pedido }: { pedido: PedidoAcesso }) {
   </li>;
 }
 
-// Pre-sale: the link for the WhatsApp group and the list of who may enter (e-mail or WhatsApp of each person).
+// The list split by group ("Amigos", "Familiares"…, from the pasted titles), in the order the groups were added;
+// people without a group last. Inside a group, in the order they were pasted.
+function grupos(lista: Autorizado[]) {
+  const mapa = new Map<string, Autorizado[]>();
+  for (const pessoa of [...lista].sort((a, b) => Date.parse(a.criado_em) - Date.parse(b.criado_em))) {
+    const grupo = pessoa.grupo || "Sem grupo";
+    mapa.set(grupo, [...(mapa.get(grupo) ?? []), pessoa]);
+  }
+  return [...mapa].sort(([a], [b]) => Number(a === "Sem grupo") - Number(b === "Sem grupo"));
+}
+
+// Pre-sale: the link for the WhatsApp group and the list of who may enter (WhatsApp, required since 2026-11-26).
 export function ListaPreVenda({ lista, pedidos, origem, cadeadoLigado, admins }: { lista: Autorizado[] | null; pedidos: PedidoAcesso[]; origem: string; cadeadoLigado: boolean; admins: Admins }) {
   const pendentes = pedidos.filter((pedido) => pedido.status === "pendente");
   const recusados = pedidos.filter((pedido) => pedido.status === "recusado");
@@ -90,7 +102,7 @@ export function ListaPreVenda({ lista, pedidos, origem, cadeadoLigado, admins }:
       <h2 className="display text-6xl">Quem pode entrar.</h2>
       <span className={`sans rounded-full px-4 py-2 text-[11px] uppercase tracking-[.14em] ${cadeadoLigado ? "bg-[var(--vinho)] text-[var(--creme)]" : "bg-[var(--areia)] text-[var(--ink)]"}`}>Cadeado {cadeadoLigado ? "ligado" : "desligado"}</span>
     </div>
-    <p className="sans mt-4 max-w-2xl text-sm text-[var(--muted)]">Mande este link no grupo. A pessoa entra com o Google ou cria a conta. Se o e-mail ou o WhatsApp dela estiver na lista abaixo, a conta é liberada na hora e para sempre; se não estiver, ela manda um pedido com o WhatsApp e aparece em “Pedidos de acesso” para vocês liberarem. Vocês, donos, já estão liberados. {cadeadoLigado ? "O site está trancado para quem não está na lista." : "O cadeado está desligado: o site está aberto para todo mundo (liga com PRE_VENDA=1 na Vercel)."}</p>
+    <p className="sans mt-4 max-w-2xl text-sm text-[var(--muted)]">Mande este link no grupo. A pessoa entra com o Google ou cria a conta e, depois, é obrigada a informar o WhatsApp. Se o número estiver na lista abaixo, a conta é liberada na hora e para sempre, e aparece aqui com o nome da lista; se não estiver, vira um pedido em “Pedidos de acesso” para vocês liberarem. Vocês, da equipe, já estão liberados. {cadeadoLigado ? "O site está trancado para quem não está na lista." : "O cadeado está desligado: o site está aberto para todo mundo (liga com PRE_VENDA=1 na Vercel)."}</p>
     <CopiarLink link={`${origem}/pre-venda`} />
     <p className="sans mt-4 text-[13px] text-[var(--muted)]"><b className="font-medium text-[var(--ink)]">Administradores:</b> {[...admins.fixos.map((email) => `${email} (dono)`), ...admins.painel].join(" · ") || "nenhum"}. Para tornar alguém administrador (ou tirar), use o botão ao lado da pessoa em <a href="#contas" className="underline underline-offset-4 hover:text-[var(--ink)]">Quem já entrou</a> ou na lista abaixo. Ela precisa entrar com o Google, com esse mesmo e-mail.</p>
 
@@ -105,8 +117,8 @@ export function ListaPreVenda({ lista, pedidos, origem, cadeadoLigado, admins }:
         </details>}
       </div>
       <form action={adicionar} className="mt-8 border-y border-[var(--line)] py-6">
-        <label className="sans block text-[12px] text-[var(--muted)]">Adicionar pessoas · uma por linha, com e-mail ou WhatsApp (o nome é opcional)
-          <textarea name="lista" required rows={5} placeholder={"Ana Souza, 11 98765-4321\npedro@gmail.com\nMateus - (21) 99999-0000"} className="sans mt-3 block w-full rounded-[14px] border border-[var(--line)] bg-[var(--campo)] p-4 text-[15px] leading-relaxed outline-none focus:border-[var(--vinho)]/60" />
+        <label className="sans block text-[12px] text-[var(--muted)]">Adicionar pessoas · uma por linha, com nome e WhatsApp. Pode colar a lista do WhatsApp do jeito que está: um título entre asteriscos, como *Pré-venda AMIGOS*, vira o grupo das pessoas abaixo dele.
+          <textarea name="lista" required rows={5} placeholder={"*Pré-venda AMIGOS*\n1- Ana Souza +55 11 98765-4321\n2- Mateus (21) 99999-0000"} className="sans mt-3 block w-full rounded-[14px] border border-[var(--line)] bg-[var(--campo)] p-4 text-[15px] leading-relaxed outline-none focus:border-[var(--vinho)]/60" />
         </label>
         <div className="mt-4 flex flex-wrap items-center gap-4">
           <button type="submit" disabled={salvando} className="sans press h-12 rounded-full bg-[var(--vinho)] px-7 text-[12px] uppercase tracking-[.14em] text-[var(--creme)] disabled:opacity-60">{salvando ? "Salvando…" : "Adicionar à lista"}</button>
@@ -114,7 +126,13 @@ export function ListaPreVenda({ lista, pedidos, origem, cadeadoLigado, admins }:
         </div>
       </form>
       <p className="sans mt-6 text-xs uppercase tracking-[.14em] text-[var(--muted)]">{lista.length} na lista · {entraram} já {entraram === 1 ? "entrou" : "entraram"}</p>
-      {lista.length > 0 && <ul className="mt-2 divide-y divide-[var(--line)] border-b border-[var(--line)]">{lista.map((pessoa) => <Pessoa key={pessoa.id} pessoa={pessoa} admins={admins} />)}</ul>}
+      {grupos(lista).map(([grupo, pessoas]) => {
+        const dentro = pessoas.filter((pessoa) => pessoa.liberado_em).length;
+        return <div key={grupo} className="mt-6">
+          <p className="sans text-[11px] uppercase tracking-[.16em] text-[var(--vinho)]">{grupo} · {pessoas.length} · {dentro} já {dentro === 1 ? "entrou" : "entraram"}</p>
+          <ul className="mt-1 divide-y divide-[var(--line)] border-b border-[var(--line)]">{pessoas.map((pessoa) => <Pessoa key={pessoa.id} pessoa={pessoa} admins={admins} />)}</ul>
+        </div>;
+      })}
     </>}
   </section>;
 }
