@@ -30,7 +30,7 @@ Não deu para testar nesta revisão: entrar com uma conta de verdade, o e-mail d
 
 Pontos da revisão, na ordem que eu faria.
 
-- [ ] **Decidir a promessa de entrega** · Breno decide, Claude troca em 10 min
+- [ ] **Decidir a promessa de entrega** · Breno decide, Claude faz (10 min a opção a, uns 40 min a b)
   - O site diz "entrega prevista até 7 de dezembro" no produto, no pagamento e no pedido (`ENTREGA_PRE_VENDA` em `src/lib/pedidos.ts`). Pelo frete de hoje, Fortaleza leva 7 dias úteis no Jadlog e Rio Branco 12 (9 no PAC): quem pagar a partir de 28/11 pode não receber até 7/12.
   - Opções: (a) trocar para "**enviamos até X**" e deixar o prazo do frete à parte; (b) mostrar no pagamento a **data estimada para o CEP** da pessoa; (c) manter "até 7/12" e mandar por SEDEX quem estiver longe (a Meranno paga a diferença).
 - [ ] **Testar um estorno de verdade** · Breno · 10 min
