@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { GoogleButton, RememberAccount, SignOutButton } from "@/components/auth-buttons";
 import { SignInForm } from "@/components/auth-forms";
 import { createClient } from "@/lib/supabase/server";
 import { ehAdmin } from "@/lib/admins";
+
+export const metadata: Metadata = { title: "Minha conta | MERANNO" };
 
 const ERRORS: Record<string, string> = {
   login: "Não deu pra concluir a entrada. Tente de novo; se veio do e-mail de confirmação, abra o link no mesmo aparelho em que criou a conta.",

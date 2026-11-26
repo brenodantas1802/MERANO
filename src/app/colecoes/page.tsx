@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -5,6 +6,8 @@ import { SiteHeader } from "@/components/site-header";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { ESPADAS } from "@/lib/naipes";
 import { collections, products } from "@/lib/products";
+
+export const metadata: Metadata = { title: "Coleções | MERANNO" };
 
 // The pieces are grouped by collection (the owners asked on 2026-11-17 for "Summer Collection 01" here). The page was
 // "Categorias" (/categorias) until 2026-11-23, when the owners renamed it "Coleções". The card is a

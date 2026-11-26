@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { ContentPage } from "@/components/content-page";
+
+export const metadata: Metadata = { title: "Termos | MERANNO" };
 
 // Updated 2026-11-24 to what the shop does now (Asaas, SuperFrete, no exchanges). The full rewrite with the company's
 // name, CNPJ and address is still to come (PENDENCIAS: dados da empresa, Privacidade e Termos).

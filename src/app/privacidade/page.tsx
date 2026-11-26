@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { ContentPage } from "@/components/content-page";
+
+export const metadata: Metadata = { title: "Privacidade | MERANNO" };
 
 export default function PrivacyPage() {
   return <ContentPage title="Privacidade" sections={[

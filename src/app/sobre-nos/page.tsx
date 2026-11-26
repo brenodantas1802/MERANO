@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { PillLink } from "@/components/ui/pill-link";
+
+export const metadata: Metadata = { title: "Sobre nós | MERANNO" };
 
 const steps = [
   { n: "01", title: "Você escolhe", text: "Você escolhe a estampa e o tamanho na página do produto. O Meranno Fit ajuda a acertar o tamanho." },

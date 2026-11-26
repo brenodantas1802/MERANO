@@ -1,2 +1,5 @@
+import type { Metadata } from "next";
 import { ContentPage } from "@/components/content-page";
+
+export const metadata: Metadata = { title: "Contato | MERANNO" };
 export default function ContactPage() { return <ContentPage title="Contato" sections={[{ title: "WhatsApp", text: "Fale com a gente pelo +55 (11) 98646-4056 — é o jeito mais rápido de tirar dúvidas sobre peças, tamanhos e pedidos." }, { title: "Atendimento", text: "Escreva para contato.meranno@gmail.com. Respondemos em até 2 dias úteis." }, { title: "Redes", text: "Acompanhe a Meranno no Instagram, @merannoclothing, para ver novidades, processos e próximos lançamentos." }]}/>; }

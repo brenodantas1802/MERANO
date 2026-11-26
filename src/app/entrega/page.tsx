@@ -1,2 +1,5 @@
+import type { Metadata } from "next";
 import { ContentPage } from "@/components/content-page";
+
+export const metadata: Metadata = { title: "Entrega | MERANNO" };
 export default function DeliveryPage() { return <ContentPage title="Entrega" sections={[{ title: "Prazo", text: "Despachamos o pedido depois da confirmação do pagamento. O prazo e o valor do frete variam conforme o CEP e aparecem no pagamento." }, { title: "Acompanhamento", text: "Enviamos o código de rastreio por e-mail assim que o pedido for despachado." }, { title: "Trocas", text: "Não fazemos trocas. A desistência em até 7 dias e as peças com defeito estão explicadas na página Trocas." }]}/>; }

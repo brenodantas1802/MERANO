@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
@@ -12,6 +13,13 @@ import { RelatedRow } from "@/components/related-row";
 import { Avaliacoes } from "@/components/avaliacoes";
 
 export function generateStaticParams() { return products.map((product) => ({ slug: product.id })); }
+
+// Each tee's own tab title and link preview (WhatsApp, Instagram): its name, description and photo.
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const product = getProduct((await params).slug);
+  if (!product) return { title: "Página não encontrada | MERANNO" };
+  return { title: `${product.name} | MERANNO`, description: product.description, openGraph: { title: `${product.name} | MERANNO`, description: product.description, images: [product.image] } };
+}
 
 // The same tee in other colours is its own product, tied by `familia` (Amore Black and Amore White): each colour is a
 // swatch that opens that product, with its own photos.

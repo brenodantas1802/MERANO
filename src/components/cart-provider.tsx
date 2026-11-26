@@ -13,6 +13,10 @@ type CartContextValue = { items: CartItem[]; addItem: (item: NovoItem) => void; 
 const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "merano-cart";
+// The most of one piece (same tee, size and colour) per order: the server refuses more (pedidoSchema in lib/pedidos),
+// so the cart stops there instead of letting the checkout fail (found in the 2026-11-26 phone review).
+export const MAX_POR_PECA = 10;
+const limitar = (quantidade: number) => Math.min(MAX_POR_PECA, Math.max(1, Math.floor(quantidade) || 1));
 const EMPTY_CART: CartItem[] = [];
 let cachedItems: CartItem[] = EMPTY_CART;
 let initialized = false;
@@ -30,7 +34,7 @@ function precoAtual(item: CartItem) {
 function readStorage(): CartItem[] {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved ? (JSON.parse(saved) as CartItem[]).map((item) => ({ ...item, price: precoAtual(item) })) : [];
+    return saved ? (JSON.parse(saved) as CartItem[]).map((item) => ({ ...item, price: precoAtual(item), quantity: limitar(item.quantity) })) : [];
   } catch {
     return [];
   }
@@ -71,11 +75,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   function addItem(item: Omit<CartItem, "quantity">) {
     setItems((current) => {
       const match = current.find((entry) => entry.id === item.id);
-      return match ? current.map((entry) => entry.id === item.id ? { ...entry, quantity: entry.quantity + 1 } : entry) : [...current, { ...item, quantity: 1 }];
+      return match ? current.map((entry) => entry.id === item.id ? { ...entry, quantity: limitar(entry.quantity + 1) } : entry) : [...current, { ...item, quantity: 1 }];
     });
   }
   function removeItem(id: string) { setItems((current) => current.filter((item) => item.id !== id)); }
-  function updateQuantity(id: string, quantity: number) { setItems((current) => quantity < 1 ? current.filter((item) => item.id !== id) : current.map((item) => item.id === id ? { ...item, quantity } : item)); }
+  function updateQuantity(id: string, quantity: number) { setItems((current) => quantity < 1 ? current.filter((item) => item.id !== id) : current.map((item) => item.id === id ? { ...item, quantity: limitar(quantity) } : item)); }
   function clear() { setItems(() => []); }
   // The shop's add buttons (owners, 2026-11-24): a tee already in the cart in the same size asks first. "Sim" adds one
   // more (then `aoConfirmar`, e.g. opening the bag), "Não" leaves the cart as it was. The + inside the cart adds straight

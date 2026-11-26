@@ -246,7 +246,8 @@ export function formatPrice(price: number) {
 }
 
 // "R$ 160" for whole prices (the top bar and badges), "R$ 159,90" otherwise.
-export const precoCurto = (price: number) => (Number.isInteger(price) ? `R$ ${price}` : formatPrice(price));
+// A non-breaking space keeps "R$" and the number on the same line on narrow phones.
+export const precoCurto = (price: number) => (Number.isInteger(price) ? `R$\u00a0${price}` : formatPrice(price));
 
 // What the piece sells for: the owners' price, or the catalogue's when the table has none.
 export function getProductPrice(product: Product) {

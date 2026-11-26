@@ -167,6 +167,9 @@ export function SignUpForm({ next }: { next?: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sentTo, setSentTo] = useState("");
+  // Coming from the pre-sale link: the WhatsApp is required there (owners, 2026-11-26), so it is asked here already and
+  // a number on the list lets the account in as soon as the e-mail is confirmed.
+  const preVenda = safeNext(next).startsWith("/pre-venda");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -174,6 +177,7 @@ export function SignUpForm({ next }: { next?: string }) {
     const fullName = name.trim().replace(/\s+/g, " ");
     const digits = phone.replace(/\D/g, "");
     if (fullName.split(" ").length < 2) return setError("Escreva seu nome e sobrenome.");
+    if (preVenda && !digits) return setError("Coloque o seu WhatsApp: é com ele que a pré-venda libera.");
     if (digits && digits.length < 10) return setError("Confira o telefone: com DDD, são 10 ou 11 números.");
     setBusy(true);
     const { data, error } = await createClient().auth.signUp({
@@ -203,7 +207,7 @@ export function SignUpForm({ next }: { next?: string }) {
     <Field label="Nome e sobrenome" required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} />
     <Field label="E-mail" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
     <PasswordField label="Senha" hint="Pelo menos 8 caracteres." autoComplete="new-password" value={password} onChange={setPassword} />
-    <Field label="Telefone (opcional)" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="(11) 98765-4321" value={phone} onChange={(event) => setPhone(formatPhone(event.target.value))} />
+    <Field label={preVenda ? "WhatsApp (o mesmo do grupo)" : "Telefone (opcional)"} required={preVenda} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="(11) 98765-4321" value={phone} onChange={(event) => setPhone(formatPhone(event.target.value))} />
     {error && <p role="alert" className={ALERT}>{error}</p>}
     <button type="submit" disabled={busy} className={SUBMIT}>{busy ? "Criando sua conta…" : "Criar conta"}</button>
   </form>;

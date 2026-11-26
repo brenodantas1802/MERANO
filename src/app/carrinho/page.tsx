@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, Minus, Plus, Trash2 } from "lucide-react";
-import { useCart } from "@/components/cart-provider";
+import { MAX_POR_PECA, useCart } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
 import { ShirtFan } from "@/components/try-on-visuals";
 import { PillLink } from "@/components/ui/pill-link";
@@ -51,14 +51,14 @@ function CartContent() {
           </Link>
           <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
             <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0"><h2 className="truncate text-2xl md:text-3xl">{item.name}</h2><p className="sans mt-1 text-sm text-[var(--muted)]">Tamanho {item.size} · {item.color}</p></div>
+              <div className="min-w-0"><h2 className="text-2xl leading-tight [overflow-wrap:anywhere] md:text-3xl">{item.name}</h2><p className="sans mt-1 text-sm text-[var(--muted)]">Tamanho {item.size} · {item.color}</p></div>
               <button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><Trash2 size={16} strokeWidth={1.6} /></button>
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
               <div className="sans flex items-center gap-1 rounded-full border border-[var(--ink)]/15 p-1">
                 <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><Minus size={13} /></button>
                 <span className="w-7 text-center text-sm">{item.quantity}</span>
-                <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><Plus size={13} /></button>
+                <button onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= MAX_POR_PECA} aria-label={`Aumentar quantidade de ${item.name}`} title={item.quantity >= MAX_POR_PECA ? `Até ${MAX_POR_PECA} por pedido` : undefined} className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-current"><Plus size={13} /></button>
               </div>
               <span className="display text-xl md:text-2xl">{formatPrice(item.price * item.quantity)}</span>
             </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, Trash2, X } from "lucide-react";
-import { useCart } from "./cart-provider";
+import { MAX_POR_PECA, useCart } from "./cart-provider";
 import { currentImage, percentualPreVenda, formatPrice, getProductPrice, parcelado, similarProducts, type Product } from "@/lib/products";
 
 // Free shipping above this subtotal (R$). null hides the progress bar: the owners haven't set a threshold yet.
@@ -107,7 +107,7 @@ export function CartDrawer() {
                     <div className="flex items-center rounded-full bg-white/90 shadow-[inset_0_0_0_1px_rgba(0,0,0,.07)]">
                       <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="press flex h-10 w-10 items-center justify-center rounded-full"><Minus size={13} /></button>
                       <span className="w-5 text-center text-[14px] tabular-nums">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="press flex h-10 w-10 items-center justify-center rounded-full"><Plus size={13} /></button>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= MAX_POR_PECA} aria-label={`Aumentar quantidade de ${item.name}`} title={item.quantity >= MAX_POR_PECA ? `Até ${MAX_POR_PECA} por pedido` : undefined} className="press flex h-10 w-10 items-center justify-center rounded-full disabled:opacity-30"><Plus size={13} /></button>
                     </div>
                     <button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="press flex h-11 w-11 items-center justify-center rounded-full text-[var(--muted)] hover:text-[var(--ink)]"><Trash2 size={16} strokeWidth={1.5} /></button>
                   </div>

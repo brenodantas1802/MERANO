@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { ContentPage } from "@/components/content-page";
+
+export const metadata: Metadata = { title: "Trocas | MERANNO" };
 
 // No exchanges (owners' meeting, 2026-11-22). What the law guarantees to online buyers stays: 7 days to give up the
 // purchase (Código de Defesa do Consumidor, art. 49) and defects (art. 26).
