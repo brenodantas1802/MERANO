@@ -21,6 +21,17 @@ type RespostaSuperFrete = { id: number; name: string; price?: number; delivery_r
 
 export const freteConfigurado = () => Boolean(process.env.SUPERFRETE_TOKEN && process.env.FRETE_CEP_ORIGEM);
 
+// Drops an option when another one costs the same or less and arrives just as fast or faster (owners, 2026-11-26: in
+// São Paulo SEDEX came out cheaper than PAC, so PAC was pricier and slower at once). Options tied on both stay.
+export function semOpcoesPiores(opcoes: OpcaoFrete[]): OpcaoFrete[] {
+  return opcoes.filter((opcao) => !opcoes.some((outra) =>
+    outra !== opcao
+    && outra.preco <= opcao.preco
+    && outra.prazoMin <= opcao.prazoMin
+    && outra.prazoMax <= opcao.prazoMax
+    && (outra.preco < opcao.preco || outra.prazoMin < opcao.prazoMin || outra.prazoMax < opcao.prazoMax)));
+}
+
 export async function cotarFrete(cep: string, pecas: number): Promise<OpcaoFrete[]> {
   const base = process.env.SUPERFRETE_URL ?? "https://api.superfrete.com";
   const contato = process.env.SUPERFRETE_CONTATO || "contato.meranno@gmail.com";
@@ -44,7 +55,7 @@ export async function cotarFrete(cep: string, pecas: number): Promise<OpcaoFrete
   });
   if (!response.ok) throw new Error(`SuperFrete ${response.status}`);
   const data = (await response.json()) as RespostaSuperFrete[];
-  return data
+  const opcoes = data
     .filter((opcao) => !opcao.has_error && !opcao.error && typeof opcao.price === "number")
     .map((opcao) => ({
       id: opcao.id,
@@ -53,8 +64,10 @@ export async function cotarFrete(cep: string, pecas: number): Promise<OpcaoFrete
       preco: opcao.price!,
       prazoMin: opcao.delivery_range?.min ?? opcao.delivery_time ?? 0,
       prazoMax: opcao.delivery_range?.max ?? opcao.delivery_time ?? 0,
-    }))
-    .sort((a, b) => a.preco - b.preco);
+    }));
+  // The same list feeds the quote on the page and the check when the order is placed (escolherFrete), so both hide the
+  // same options.
+  return semOpcoesPiores(opcoes).sort((a, b) => a.preco - b.preco);
 }
 
 // Shown while SuperFrete isn't connected yet (no token), always labelled "valores de exemplo" on the page.
