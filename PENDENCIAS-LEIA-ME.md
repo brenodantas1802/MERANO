@@ -1,6 +1,6 @@
 # MERANNO: o que falta fazer
 
-Atualizado em **26/11/2026, à noite**. Só o que ainda falta; o que já foi feito, as ferramentas e o passo a passo de como o site foi construído estão em [`docs/COMO-FIZEMOS-O-SITE.md`](docs/COMO-FIZEMOS-O-SITE.md).
+Atualizado em **26/11/2026, à noite** (desde 26/11 todas as camisetas custam **R$ 180**, sem a faixa de pré-venda). Só o que ainda falta; o que já foi feito, as ferramentas e o passo a passo de como o site foi construído estão em [`docs/COMO-FIZEMOS-O-SITE.md`](docs/COMO-FIZEMOS-O-SITE.md).
 
 A lista para os sócios (https://claude.ai/artifact/RY1MhFLonRU9TCcXNYsbQ7) ainda está na versão de 24/11: este arquivo é o mais novo.
 
@@ -20,9 +20,9 @@ Revisão do site inteiro, primeiro no celular e depois no computador: cada pági
 | Pagamento (formulário) | 82 | 85 | CEP preenche o endereço, cupom errado avisa, campos validam. Pagamento real não foi refeito nesta revisão |
 | Pré-venda (cadeado + WhatsApp) | 85 | 85 | Testada no banco de verdade; o número não é confirmado por SMS |
 | Cancelamento e estorno | 65 | 65 | Existe e está no ar, mas nunca foi usado com dinheiro de verdade |
-| Termos e Privacidade | 55 | 55 | Falta razão social e endereço, que a lei exige |
+| Termos e Privacidade | 88 | 88 | Era 55: reescritos em 26/11 com nome, CNPJ e endereço do MEI (também no rodapé), atendimento, pré-venda, Personalizador e LGPD completa |
 | Velocidade | 80 | 88 | Fotos chegam leves (25 a 47 KB), mas a biblioteca de animação carrega em todas as páginas |
-| **Média** | **82** | **83** | |
+| **Média** | **85** | **86** | |
 
 Não deu para testar nesta revisão: entrar com uma conta de verdade, o e-mail de confirmação, o Provador (gasta crédito) e o visual novo do `/admin` (precisa do login Google). Estão na lista abaixo.
 
@@ -32,9 +32,6 @@ Pontos da revisão, na ordem que eu faria.
 
 - [ ] **Confirmar o prazo de postagem: 2 dias úteis** · Breno · 1 min
   - Desde 26/11 o site não promete mais "até 7 de dezembro": cada opção de frete mostra a data de chegada para o CEP da pessoa (ex.: "Chega até terça, 1/12"), contando **até 2 dias úteis para postar** depois do pagamento + o prazo da transportadora. No `/admin`, cada pedido pago mostra **"Postar até"**. Se a equipe precisar de mais dias, ou for postar a pré-venda toda numa data só, avisar o Claude (`POSTAGEM_DIAS_UTEIS` em `src/lib/entrega.ts`).
-- [ ] **Termos e Privacidade completos** (obrigatório: Decreto 7.962/2013 e LGPD) · Breno manda os dados, Claude escreve e publica · 1 h
-  - Mandar: o **CNPJ** que vende (é o do MEI 70.103.814/0001-37?), o **nome empresarial** e o **endereço** que pode aparecer no site (o do MEI costuma ser a casa do dono; pode ser outro).
-  - O Claude reescreve os dois: quem vende, atendimento e prazo de resposta, pré-venda, Personalizador, bases legais, por quanto tempo os dados ficam, quem recebe os dados (Asaas, SuperFrete, Vercel, Supabase, Google, inteligência artificial do Provador) e os direitos da LGPD.
 - [ ] **Supabase Pro** (~US$ 25/mês, backup diário) · Breno · 10 min
   - O banco (pedidos, contas, lista da pré-venda) está no plano **grátis**, sem backup diário. Com dinheiro entrando, vale passar antes de abrir a pré-venda.
   - Antes, se o projeto campos-del-plata não for da Meranno, transferir o MERANO para uma organização só dele (**Project Settings** → **General** → **Transfer project**); depois **Billing** → **Change subscription plan** → **Pro**.
@@ -70,7 +67,7 @@ Pontos da revisão, na ordem que eu faria.
 
 - [ ] **Recarga automática do OpenRouter** · https://openrouter.ai → **Settings** → **Credits** → **Auto top-up** (ex.: US$ 20 quando cair abaixo de US$ 5).
 - [ ] **Limite de provas contado no banco** · Claude.
-- [ ] **Abrir a venda** · decidir o **prazo de entrega** da venda aberta e confirmar a **data** (hoje 1º/12, `ABERTURA_VENDA` em `src/lib/financeiro.ts`); no dia o Claude desliga o `PRE_VENDA`, volta o preço de R$ 160 para R$ 180 (`PRECO_PRE_VENDA` em `src/lib/products.ts`; a faixa do topo e o preço riscado somem sozinhos), ajusta o prazo de postagem se mudar (`POSTAGEM_DIAS_UTEIS` em `src/lib/entrega.ts`), publica e testa.
+- [ ] **Abrir a venda** · decidir o **prazo de entrega** da venda aberta e confirmar a **data** (hoje 1º/12, `ABERTURA_VENDA` em `src/lib/financeiro.ts`); no dia o Claude desliga o `PRE_VENDA` (o cadeado: hoje só entra quem está na lista), ajusta o prazo de postagem se mudar (`POSTAGEM_DIAS_UTEIS` em `src/lib/entrega.ts`), publica e testa.
 
 ## Depois do lançamento (sem pressa)
 
@@ -83,6 +80,7 @@ Pontos da revisão, na ordem que eu faria.
 | Conteúdo | Estampa nova, número de contato (Yuri), detalhes do produto, conferir o vídeo da capa, nome da cor branca (Off White?) | Sócios mandam |
 | Provador em duas etapas | Vestir uma camiseta regular lisa antes da estampa (cada prova custa o dobro) | Claude |
 | GG/XXG e estoque visível | `TAMANHOS_LOJA` em `src/lib/products.ts` | Claude, quando decidirem |
+| Revisão jurídica dos Termos e da Privacidade | Os textos seguem o CDC, o Decreto 7.962/2013 e a LGPD, mas não foram revisados por advogado | Sócios, se quiserem |
 | Confirmar o WhatsApp | Hoje quem digita primeiro um número da lista fica com a vaga (o `/admin` mostra qual conta usou). Dá para confirmar por código no WhatsApp | Claude, se virar problema |
 
 ## Como enviar um pedido (a etiqueta)
