@@ -18,7 +18,8 @@ export type Colorway = { id: string; color: string };
 type State = "idle" | "adding" | "added";
 
 function SizePills({ fits, size, recommended, onPick, small = false }: { fits: string[]; size: string | null; recommended: string | null; onPick: (value: string) => void; small?: boolean }) {
-  return <div role="radiogroup" aria-label="Tamanho" className={`flex gap-2 ${small ? "flex-nowrap" : "flex-wrap"}`}>
+  // gap-1.5: the four sizes (P to GG) stay on one line in the narrow buy column of a 1024 px screen.
+  return <div role="radiogroup" aria-label="Tamanho" className={`flex gap-1.5 ${small ? "flex-nowrap" : "flex-wrap"}`}>
     {fits.map((value) => {
       const active = size === value;
       return <button key={value} type="button" role="radio" aria-checked={active} onClick={() => onPick(value)} className={`press relative rounded-full text-[13px] font-medium ${small ? "h-11 min-w-11 px-2.5" : "h-11 min-w-11 px-3"} ${active ? "bg-[var(--vinho)] text-[var(--creme)]" : "text-[var(--ink)] shadow-[inset_0_0_0_1px_rgba(17,17,17,.18)] hover:shadow-[inset_0_0_0_1px_rgba(17,17,17,.6)]"}`}>
