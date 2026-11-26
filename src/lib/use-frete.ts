@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { OpcaoFrete } from "@/lib/frete";
+import { dataChegada, formatarDia } from "@/lib/entrega";
 
 export type { OpcaoFrete };
 type Estado = { cep: string; pecas: number; opcoes: OpcaoFrete[]; exemplo: boolean; erro: string | null };
@@ -10,6 +11,12 @@ type Estado = { cep: string; pecas: number; opcoes: OpcaoFrete[]; exemplo: boole
 export const CEP_KEY = "meranno-cep";
 
 export const prazoTexto = (opcao: OpcaoFrete) => opcao.prazoMin === opcao.prazoMax ? `${opcao.prazoMax} ${opcao.prazoMax === 1 ? "dia útil" : "dias úteis"}` : `${opcao.prazoMin} a ${opcao.prazoMax} dias úteis`;
+
+// "Chega até quinta, 3/12" if paid today (lib/entrega); the carrier's own deadline when the quote has no date.
+export const chegadaTexto = (opcao: OpcaoFrete) => {
+  const dia = dataChegada(opcao.prazoMax);
+  return dia ? `Chega até ${formatarDia(dia)}` : `${prazoTexto(opcao)} após o envio`;
+};
 
 // Quotes the shipping once the CEP is complete (8 digits) and again when the number of pieces changes.
 export function useFrete(cep: string, pecas: number) {

@@ -6,7 +6,8 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { createSecretClient } from "@/lib/supabase/publico";
 import { conferirRetorno, NOME_PROVEDOR, pagamentoOnline, type Provedor } from "@/lib/pagamento";
-import { ENTREGA_PRE_VENDA, linkWhatsApp, mensagemWhatsApp, type Pedido, type StatusPedido } from "@/lib/pedidos";
+import { linkWhatsApp, mensagemWhatsApp, type Pedido, type StatusPedido } from "@/lib/pedidos";
+import { dataChegada, formatarDia } from "@/lib/entrega";
 import { cheioPersonalizada, formatPrice, getPrecoCheio, getProduct } from "@/lib/products";
 import { usarPrecos } from "@/lib/precos-servidor";
 import { PagarAgora } from "./pagar-agora";
@@ -72,6 +73,8 @@ export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) 
   const economia = precoCheio + Number(pedido.desconto_cupom ?? 0) + Number(pedido.desconto_pix ?? 0);
   const expirado = passouDeDoisDias(pedido.criado_em);
   const primeiroNome = pedido.cliente?.nome?.split(" ")[0] ?? "";
+  // Latest arrival for the shipping they chose, counted from the payment (lib/entrega).
+  const chegada = dataChegada(pedido.frete?.prazoMax, new Date(pedido.pagamento?.pago_em ?? pedido.criado_em));
 
   return <main><SiteHeader /><div className="mx-auto max-w-5xl px-6 pb-24 pt-10 md:px-12">
     <Link href="/shop" className="sans mb-10 flex min-h-11 w-fit items-center gap-2 text-[11px] uppercase tracking-[.15em] text-[var(--muted)]"><ArrowLeft size={14} /> Voltar à loja</Link>
@@ -91,7 +94,7 @@ export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) 
         ? <p>O pagamento não foi aprovado. Você pode tentar de novo, com outro cartão ou com Pix.</p>
         : emAnalise ? <p>O pagamento está em análise no {provedor}. Assim que for aprovado, esta página muda sozinha quando você voltar a ela.</p>
           : <p>{primeiroNome ? `${primeiroNome}, falta` : "Falta"} só o pagamento para garantir as suas peças.</p>)}
-      {status === "pago" && <p>Recebemos o pagamento{primeiroNome ? `, ${primeiroNome}` : ""}. Seu pedido está na nossa lista, com entrega prevista {ENTREGA_PRE_VENDA.longa}.</p>}
+      {status === "pago" && <p>Recebemos o pagamento{primeiroNome ? `, ${primeiroNome}` : ""}. Seu pedido está na nossa lista{chegada ? `, com entrega prevista até ${formatarDia(chegada)}` : ""}.</p>}
       {status === "em_separacao" && <p>As peças estão sendo separadas e embaladas. O código de rastreio aparece aqui quando o pedido sair.</p>}
       {status === "enviado" && <p>O pedido saiu{pedido.frete?.nome ? ` por ${pedido.frete.nome}` : ""}.{pedido.rastreio ? "" : " O código de rastreio aparece aqui em breve."}</p>}
       {status === "entregue" && <p>Esperamos que goste. Qualquer coisa, é só chamar no WhatsApp.</p>}
@@ -102,7 +105,7 @@ export default async function PedidoPage({ params }: PageProps<"/pedido/[id]">) 
       <p className="sans text-[11px] uppercase tracking-[.2em] text-[var(--latao)]">Cliente VIP · pré-venda</p>
       <p className="display mt-3 text-3xl leading-tight md:text-4xl">Obrigado pela preferência{primeiroNome ? `, ${primeiroNome}` : ""}.</p>
       <p className="mt-4 text-lg leading-snug text-[var(--creme)]/85">Você comprou na pré-venda{economia > 0 ? <>, garantiu {formatPrice(economia)} de desconto</> : null} e agora é cliente VIP da Meranno.</p>
-      <p className="sans mt-6 inline-flex rounded-full border border-[var(--latao)]/60 px-4 py-2 text-[12px] uppercase tracking-[.14em]">Entrega prevista: {ENTREGA_PRE_VENDA.curta}</p>
+      {chegada && <p className="sans mt-6 inline-flex rounded-full border border-[var(--latao)]/60 px-4 py-2 text-[12px] uppercase tracking-[.14em]">Entrega prevista: até {formatarDia(chegada, { semana: false })}</p>}
     </section>}
 
     {pedido.rastreio && <p className="mt-6 rounded-[18px] border border-[var(--line)] bg-white/50 px-5 py-4"><span className="sans block text-[11px] uppercase tracking-[.14em] text-[var(--muted)]">Código de rastreio</span><b className="mt-1 block select-all text-lg tracking-[.06em]">{pedido.rastreio}</b></p>}

@@ -11,9 +11,6 @@ import type { StatusPedido } from "@/lib/pedido-status";
 // No Pix discount (owners, 2026-11-22): Pix and card cost the same. Kept as a number so it can come back.
 export const PIX_DESCONTO = 0;
 
-// Pre-sale delivery: up to 7 December (owners, 2026-11-24: "até 7 de dezembro"). Shown on the product, the payment page
-// and the order, after "entrega prevista".
-export const ENTREGA_PRE_VENDA = { curta: "até 7/12", longa: "até 7 de dezembro" };
 // The Personalizador sells the same sizes as the shop.
 export const TAMANHOS_PERSONALIZADA = TAMANHOS_LOJA;
 export { STATUS_PEDIDO, type StatusPedido } from "@/lib/pedido-status";
@@ -67,6 +64,8 @@ export type ItemPedido = { productId: string | null; criacaoId: string | null; n
 export type CupomAplicado = { codigo: string; percentual: number };
 // What the order keeps about its online payment. `checkouts` are all the Asaas checkouts opened for it.
 export type PagamentoRegistro = { forma?: string; provedor?: string; id?: string; mp_id?: string; status?: string; metodo?: string; atualizado?: string; link?: string; preferencia?: string; checkout?: string; checkouts?: string[];
+  // When the order became paid: the delivery estimate (lib/entrega) counts from here.
+  pago_em?: string;
   // Set when the order is cancelled (lib/cancelamento): who did it, when, and the money given back through Asaas.
   estorno?: { valor: number; em: string; por: string }; cancelado_em?: string; cancelado_por?: string };
 
@@ -175,7 +174,9 @@ export async function registrarPagamento(admin: SupabaseClient, pagamento: { id:
   if (!pedido) return null;
   const pago = pagamento.pago && Math.abs(Number(pedido.total) - pagamento.valor) < 0.06;
   const novoStatus = pago && pedido.status === "aguardando_pagamento" ? "pago" : pedido.status;
-  const registro = { ...pedido.pagamento, id: pagamento.id, provedor: pagamento.provedor ?? pedido.pagamento?.provedor, status: pagamento.status, metodo: pagamento.metodo, atualizado: new Date().toISOString() };
-  await admin.from("pedidos").update({ status: novoStatus, pagamento: registro, atualizado_em: new Date().toISOString() }).eq("id", pedido.id);
+  const agora = new Date().toISOString();
+  const registro = { ...pedido.pagamento, id: pagamento.id, provedor: pagamento.provedor ?? pedido.pagamento?.provedor, status: pagamento.status, metodo: pagamento.metodo, atualizado: agora,
+    ...(novoStatus === "pago" && pedido.status !== "pago" ? { pago_em: agora } : {}) };
+  await admin.from("pedidos").update({ status: novoStatus, pagamento: registro, atualizado_em: agora }).eq("id", pedido.id);
   return novoStatus as StatusPedido;
 }

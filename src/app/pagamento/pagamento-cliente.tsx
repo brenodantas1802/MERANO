@@ -13,7 +13,8 @@ import { CUPOM_KEY } from "@/components/first-purchase-popup";
 import { saveOrder } from "@/lib/orders";
 import { percentualPreVenda, formatPrice, products, currentImage, parcelado } from "@/lib/products";
 import { Illustration } from "@/components/illustration";
-import { CEP_KEY, prazoTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
+import { CEP_KEY, chegadaTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
+import { POSTAGEM_DIAS_UTEIS } from "@/lib/entrega";
 
 // Payment page (owners, 2026-11-24: laid out like the Saint Tropez checkout, with the Ermos payment list): the brand on
 // top, the form on a white column, the order on an ice column beside it with a big photo of each piece, a wine button.
@@ -149,7 +150,7 @@ function Resumo({ items, totais, email, onCupom }: { items: CartItem[]; totais: 
 
 type Feito = { id: string; numero: string; total: number; whatsapp: string };
 
-export function Pagamento({ online, provedor, entrega }: { online: boolean; provedor: string; entrega: string }) {
+export function Pagamento({ online, provedor }: { online: boolean; provedor: string }) {
   const { items, total: subtotal, count, clear, openDrawer } = useCart();
   const router = useRouter();
   const [cep, setCep] = useState(() => lerLocal(CEP_KEY));
@@ -322,13 +323,13 @@ export function Pagamento({ online, provedor, entrega }: { online: boolean; prov
                   {frete.erro && <p className="rounded-[10px] bg-[var(--gelo)] px-5 py-4 text-[14px] text-[var(--muted)]">{frete.erro}</p>}
                   {frete.opcoes.length > 0 && <div className="overflow-hidden rounded-[10px] border border-[var(--borda-campo)]">
                     {frete.opcoes.map((option, indice) => <label key={option.id} className={`flex min-h-[60px] cursor-pointer items-center justify-between gap-4 px-4 py-3 transition-colors ${indice ? "border-t border-[var(--borda-campo)]" : ""} ${freteSelecionado(option) ? "bg-[var(--vinho)]/[.05] shadow-[inset_0_0_0_1px_var(--vinho)]" : ""}`}>
-                      <span className="flex items-center gap-3.5"><input type="radio" name="frete" required checked={freteSelecionado(option)} onChange={() => setShippingId(option.id)} className="h-[18px] w-[18px] accent-[var(--vinho)]" /><span><span className="block text-[14px] font-medium">{option.nome}{option.empresa && option.empresa !== "Correios" ? ` · ${option.empresa}` : ""}</span><span className="block text-[13px] text-[var(--muted)]">{prazoTexto(option)} após o envio</span></span></span>
+                      <span className="flex items-center gap-3.5"><input type="radio" name="frete" required checked={freteSelecionado(option)} onChange={() => setShippingId(option.id)} className="h-[18px] w-[18px] accent-[var(--vinho)]" /><span><span className="block text-[14px] font-medium">{option.nome}{option.empresa && option.empresa !== "Correios" ? ` · ${option.empresa}` : ""}</span><span className="block text-[13px] text-[var(--muted)]">{chegadaTexto(option)}</span></span></span>
                       <span className="text-[14px] font-medium tabular-nums">{formatPrice(option.preco)}</span>
                     </label>)}
                   </div>}
                   {frete.exemplo && <p className="mt-2 text-[12px] uppercase tracking-[.12em] text-[var(--latao)]">Valores de exemplo</p>}
                 </div>}
-              <p className="mt-3 text-[13px] text-[var(--muted)]">Pré-venda: entrega prevista <b className="font-medium text-[var(--ink)]">{entrega}</b>.</p>
+              <p className="mt-3 text-[13px] text-[var(--muted)]">Postamos em até {POSTAGEM_DIAS_UTEIS} dias úteis depois do pagamento; a data de chegada já conta com isso.</p>
             </section>
 
             <section>

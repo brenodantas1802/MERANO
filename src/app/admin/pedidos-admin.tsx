@@ -6,6 +6,7 @@ import { Check, Copy, Download, Package, Search } from "lucide-react";
 import { STATUS_PEDIDO, type StatusPedido } from "@/lib/pedido-status";
 import type { Pedido } from "@/lib/pedidos";
 import { formatPrice, getProduct } from "@/lib/products";
+import { dataChegada, dataPostagem, formatarDia } from "@/lib/entrega";
 import { cancelarPedidoEquipe, editarPedido, mudarStatusPedido, salvarRastreio, type Resposta } from "./pedidos-acoes";
 
 // The real orders, newest first, saved the moment the customer finishes the checkout: filter, search, see them one by
@@ -72,6 +73,13 @@ function baixarCsv(pedidos: Pedido[]) {
   link.download = `pedidos-meranno-${new Date().toISOString().slice(0, 10)}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
+}
+
+// What the customer was promised (lib/entrega), counted from the payment: the team posts by the first date.
+function Prazos({ pedido }: { pedido: Pedido }) {
+  const pagoEm = new Date(pedido.pagamento?.pago_em ?? pedido.criado_em);
+  const chegada = dataChegada(pedido.frete?.prazoMax, pagoEm);
+  return <p className="font-medium text-[var(--vinho)]">Postar até {formatarDia(dataPostagem(pagoEm))}{chegada ? ` · chega até ${formatarDia(chegada)}` : ""}</p>;
 }
 
 function Copiar({ texto, nome }: { texto: string; nome: string }) {
@@ -158,6 +166,7 @@ function Linha({ pedido, comCliente = true }: { pedido: Pedido; comCliente?: boo
         {pedido.itens.map((item, indice) => <p key={indice}>{item.quantidade}× {item.nome} · <b>{item.tamanho}</b>{item.cor ? ` · ${item.cor}` : ""}{item.criacaoId ? " · personalizada" : ""} · {formatPrice(Number(item.preco))}</p>)}
         <p className="pt-3 text-[var(--muted)]">Subtotal {formatPrice(Number(pedido.subtotal))}{pedido.cupom ? ` · cupom ${pedido.cupom} −${formatPrice(Number(pedido.desconto_cupom))}` : ""}{Number(pedido.desconto_pix) > 0 ? ` · Pix −${formatPrice(Number(pedido.desconto_pix))}` : ""} · {pedido.frete?.nome} {formatPrice(Number(pedido.frete?.preco ?? 0))}</p>
         <p className="text-[var(--muted)]">{formaPagamento(pedido)}{pedido.pagamento?.status ? ` · ${provedorDo(pedido)}: ${pedido.pagamento.status}` : ""}</p>
+        {["pago", "em_separacao"].includes(pedido.status) && <Prazos pedido={pedido} />}
         {pedido.status === "cancelado" && <p className="pt-2 text-[var(--vinho)]">Cancelado{pedido.pagamento?.cancelado_em ? ` em ${data(pedido.pagamento.cancelado_em)}` : ""}{pedido.pagamento?.cancelado_por ? ` por ${pedido.pagamento.cancelado_por === "cliente" ? "o cliente" : pedido.pagamento.cancelado_por}` : ""}{estorno ? ` · estorno de ${formatPrice(estorno.valor)} pelo Asaas` : ""}.</p>}
       </div>
       <div className="sans space-y-1 text-sm">

@@ -9,7 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ShirtFan } from "@/components/try-on-visuals";
 import { PillLink } from "@/components/ui/pill-link";
 import { currentImage, percentualPreVenda, formatPrice, parcelado } from "@/lib/products";
-import { CEP_KEY, prazoTexto, useFrete } from "@/lib/use-frete";
+import { CEP_KEY, chegadaTexto, useFrete } from "@/lib/use-frete";
 
 const maskCep = (value: string) => value.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
 
@@ -76,7 +76,7 @@ function CartContent() {
         <label className="sans flex items-center gap-3 text-[12px] text-[var(--muted)]">CEP
           <input inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} placeholder="00000-000" aria-label="CEP para calcular o frete" className="h-11 min-w-0 flex-1 rounded-full border border-[var(--borda-campo)] bg-[var(--paper)] px-4 text-[15px] text-[var(--ink)] outline-none placeholder:text-[var(--muted)]/60 focus:border-[var(--vinho)]" />
         </label>
-        <p aria-live="polite" className="sans min-h-4 text-xs text-[var(--muted)]">{frete.erro ?? (maisBarato ? `${maisBarato.nome} · ${prazoTexto(maisBarato)} após o envio${frete.opcoes.length > 1 ? ` · mais ${frete.opcoes.length - 1} ${frete.opcoes.length > 2 ? "opções" : "opção"} no pagamento` : ""}` : "")}{frete.exemplo && " · valores de exemplo"}</p>
+        <p aria-live="polite" className="sans min-h-4 text-xs text-[var(--muted)]">{frete.erro ?? (maisBarato ? `${maisBarato.nome} · ${chegadaTexto(maisBarato).toLowerCase()}${frete.opcoes.length > 1 ? ` · mais ${frete.opcoes.length - 1} ${frete.opcoes.length > 2 ? "opções" : "opção"} no pagamento` : ""}` : "")}{frete.exemplo && " · valores de exemplo"}</p>
       </div>
       <div className="mt-5 flex items-baseline justify-between"><span className="text-lg">Total</span><span className="display text-4xl">{formatPrice(totalComFrete)}</span></div>
       <p className="sans mt-1 text-right text-xs text-[var(--muted)]">ou {parcelado(totalComFrete)}</p>
