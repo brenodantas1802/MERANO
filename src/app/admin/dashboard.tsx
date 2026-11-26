@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { RevisaoEstampa } from "./revisao-estampa";
 import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { SignOutButton } from "@/components/auth-buttons";
@@ -19,7 +20,7 @@ export type CriacaoAdmin = {
   status: string;
   tamanho: string;
   painel: { modelagem?: string; paleta?: string[]; fonte?: string; fabric?: string; fabricName?: string; fitName?: string; marca?: boolean; posicao?: string; colecao?: string };
-  ficha: { ideia?: string; texto?: string; assinatura?: string; producao?: { id?: string; arteCm?: { largura: number; altura: number }; artePx?: { largura: number; altura: number }; arteOriginal?: boolean; marcaCm?: number | null; layout?: { offsetXCM?: number; offsetYCM?: number } | null } };
+  ficha: { revisao?: {automatica?:string;humana?:string;responsavel?:string;data?:string}; ideia?: string; texto?: string; assinatura?: string; producao?: { layouts?:Partial<Record<"front"|"back"|"brand",{widthCM:number;heightCM?:number;offsetXCM:number;offsetYCM:number}>>; id?: string; arteCm?: { largura: number; altura: number }; artePx?: { largura: number; altura: number }; arteOriginal?: boolean; marcaCm?: number | null; layout?: { offsetXCM?: number; offsetYCM?: number } | null } };
   arte_path: string;
   arte_url: string | null;
   arquivos_url: Record<string, string | null>;
@@ -44,7 +45,7 @@ function Criacoes({ criacoes }: { criacoes: CriacaoAdmin[] | null }) {
           const producao = c.ficha.producao;
           const capa = c.painel.posicao === "front" ? c.arquivos_url.mockupFrente : c.arquivos_url.mockupCostas;
           const foto = capa ?? c.arte_url ?? "";
-          const links = ([["Arte 300 DPI", c.arte_url], ["Marca do peito", c.arquivos_url.marca], ["Mockup frente", c.arquivos_url.mockupFrente], ["Mockup costas", c.arquivos_url.mockupCostas]] as [string, string | null | undefined][]).filter((link): link is [string, string] => !!link[1]);
+          const links = ([["Arte 300 DPI", c.arte_url], ["Arte frente",c.arquivos_url.arteFrente],["Marca do peito", c.arquivos_url.marca], ["Mockup frente", c.arquivos_url.mockupFrente], ["Mockup costas", c.arquivos_url.mockupCostas]] as [string, string | null | undefined][]).filter((link): link is [string, string] => !!link[1]);
           return <article key={c.id} className="border border-[var(--line)]">
             <div className="aspect-[3/4] bg-[var(--cartao)]" style={capa ? undefined : { background: c.painel.paleta?.[0] ?? "#eee" }}>
               {/* eslint-disable-next-line @next/next/no-img-element -- signed Supabase link */}
@@ -55,8 +56,10 @@ function Criacoes({ criacoes }: { criacoes: CriacaoAdmin[] | null }) {
               <p className="text-[var(--muted)]">{new Date(c.criada_em).toLocaleString("pt-BR")}</p>
               {c.painel.fabricName && <p>Malha {c.painel.fabricName.toLowerCase()} · estampa {POSICAO[c.painel.posicao ?? "back"]}{c.painel.marca === false ? " · sem marca no peito" : ""}</p>}
               {producao?.arteCm && <p>Arte {cm(producao.arteCm.largura)} × {cm(producao.arteCm.altura)} cm{producao.marcaCm ? ` · marca ${cm(producao.marcaCm)} cm` : ""}{producao.layout?.offsetYCM != null ? ` · ${cm(producao.layout.offsetYCM)} cm do topo da área` : ""}</p>}
+              {producao?.layouts&&Object.entries(producao.layouts).map(([side,layout])=>layout&&<p key={side}>{({front:"Frente",back:"Costas",brand:"Marca frontal"} as Record<string,string>)[side]}: {cm(layout.widthCM)} cm de largura · {cm(layout.offsetXCM)} cm do centro · {cm(layout.offsetYCM)} cm do topo.</p>)}
               {producao?.arteOriginal && <p className="text-[var(--vinho)]">Arte na resolução original (grande demais a 300 DPI): ampliar na confecção para o tamanho acima.</p>}
               {producao?.id && <p className="text-[var(--muted)]">Ficha {producao.id}</p>}
+              <RevisaoEstampa id={c.id} status={c.status} revisao={c.ficha.revisao} />
               {c.ficha.ideia && <p className="text-sm">{c.ficha.ideia}</p>}
               {c.ficha.texto && <p>Texto: “{c.ficha.texto}”</p>}
               {c.ficha.assinatura && <p>Cartão “Criado por você”: {c.ficha.assinatura}</p>}

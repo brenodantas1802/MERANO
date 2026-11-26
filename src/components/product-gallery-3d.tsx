@@ -36,7 +36,7 @@ const subscribeViewport = (onChange: () => void) => {
 const pinchedIn = () => (window.visualViewport?.scale ?? 1) > 1.01;
 
 // Each photo sits beside the current one at its distance around the loop, so every move is the same sideways slide, wrapping included.
-function Slide({ frame, alt, order, count, position }: { frame: Frame; alt: string; order: number; count: number; position: MotionValue<number> }) {
+function Slide({ frame, alt, order, count, position, magnified }: { frame: Frame; alt: string; order: number; count: number; position: MotionValue<number>; magnified: boolean }) {
   const x = useTransform(position, (current) => {
     let slot = (((order - current) % count) + count) % count;
     if (slot >= count / 2) slot -= count;
@@ -45,7 +45,7 @@ function Slide({ frame, alt, order, count, position }: { frame: Frame; alt: stri
   return (
     <motion.div style={{ x }} className="absolute inset-0">
       {/* The first photo is what the page is waiting for: it goes first. */}
-      <Image src={frame.src} alt={alt} fill draggable={false} loading="eager" fetchPriority={order === 0 ? "high" : "low"} sizes="(min-width: 768px) 55vw, 100vw" className="object-cover" />
+      <Image src={frame.src} alt={alt} fill quality={95} draggable={false} loading="eager" fetchPriority={order === 0 ? "high" : "low"} sizes={magnified ? "(min-width: 768px) 110vw, 200vw" : "(min-width: 768px) 55vw, 100vw"} className="object-cover" />
     </motion.div>
   );
 }
@@ -124,7 +124,7 @@ export function ProductGallery3D({ id, name, images, views }: { id: string; name
             <Lens zoomFactor={2} lensSize={190} hovering={hovering && !dragging} setHovering={setHovering}>
               <div className="foto-gelo relative aspect-[.9] w-full overflow-hidden">
                 {frames.map((frame, order) => (
-                  <Slide key={frame.src} frame={frame} alt={`${name}, ${frame.label.toLowerCase()}`} order={order} count={count} position={position} />
+                  <Slide key={frame.src} frame={frame} alt={`${name}, ${frame.label.toLowerCase()}`} order={order} count={count} position={position} magnified={hovering || zoomed} />
                 ))}
               </div>
             </Lens>

@@ -44,7 +44,7 @@ function Sugestoes({ produtos, onAbrir }: { produtos: Product[]; onAbrir: () => 
     </div>
     <div ref={trilho} onScroll={medir} className="shelf mt-3 auto-cols-[40%] gap-2.5 px-4 scroll-px-4">
       {produtos.map((product) => <Link key={product.id} href={`/produto/${product.id}`} onClick={onAbrir} className="press block min-w-0">
-        <span className="foto-gelo relative block aspect-[.82] overflow-hidden rounded-[14px]"><Image src={product.image} alt={product.name} fill sizes="170px" className="object-cover" /></span>
+        <span className="foto-gelo relative block aspect-[.82] overflow-hidden rounded-[14px]"><Image src={product.image} alt={product.name} fill quality={90} sizes="170px" className="object-cover" /></span>
         <span className="mt-2 block truncate text-[13px]">{product.name}</span>
         <span className="block text-[13px] text-[var(--muted)]">{formatPrice(getProductPrice(product))}</span>
       </Link>)}

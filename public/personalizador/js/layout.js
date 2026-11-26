@@ -9,8 +9,8 @@
   const widthCM=Math.max(1,Math.min(maxWidth,number(value.widthCM,Math.min(28,maxWidth)))),heightCM=widthCM*d.height/d.width,xMax=Math.max(0,(36-widthCM)/2),yMax=Math.max(0,45-heightCM);
   return {widthCM,heightCM,offsetXCM:Math.max(-xMax,Math.min(xMax,number(value.offsetXCM,0))),offsetYCM:Math.max(0,Math.min(yMax,number(value.offsetYCM,0)))};
  }
- // Original centered 300 × 360 viewport = 36 × 43.2 cm: preserve its composition.
- function initial(dims,visible){const d=dimensions(dims),b=bounds(visible,d),unit=Math.min(36/d.width,43.2/d.height),widthCM=b.width*unit;return normalize({widthCM,offsetXCM:(36-d.width*unit)/2+b.x*unit+widthCM/2-18,offsetYCM:(43.2-d.height*unit)/2+b.y*unit},b);}
+ // Fit visible artwork, not the transparent canvas, into the upper back.
+ function initial(dims,visible){const d=dimensions(dims),b=bounds(visible,d),widthCM=Math.min(32,36*b.width/b.height);return normalize({widthCM,offsetXCM:0,offsetYCM:Math.max(2,(40-widthCM*b.height/b.width)/2)},b);}
  function limits(value,dims){const d=dimensions(dims),l=normalize(value,d);return {widthMax:Math.min(36,45*d.width/d.height),xMax:Math.max(0,(36-l.widthCM)/2),yMax:Math.max(0,45-l.heightCM)};}
  globalThis.MerannoLayout={AREA,dimensions,bounds,normalize,initial,limits};
 })();

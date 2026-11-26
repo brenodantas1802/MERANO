@@ -1,3 +1,4 @@
+import { destinoLancamento, bloqueioPersonalizador } from "@/lib/personalizador-lancamento";
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { viaGoogle } from "@/lib/owners";
@@ -9,6 +10,17 @@ import { COOKIE_ACESSO, acessoValido, preVendaAtiva, rotaLivre } from "@/lib/pre
 //    and turns away anyone not signed in with Google before /admin renders. The admin page checks the administrator.
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  const agora = Date.now();
+  const destino = destinoLancamento(path, agora);
+  if (destino === "api") return bloqueioPersonalizador(agora)!;
+  if (destino === "redirecionar") {
+    const espera = NextResponse.redirect(new URL("/personalizar-estampa", request.url), 307);
+    espera.headers.set("Cache-Control", "private, no-store, max-age=0");
+    return espera;
+  }
+  if (destino === "pagina") return NextResponse.next();
+  // These routes used to be outside the matcher; keep their existing handler/asset behavior after launch.
+  if (path.startsWith("/api/") || path === "/personalizador" || path.startsWith("/personalizador/")) return NextResponse.next();
 
   if (preVendaAtiva() && !rotaLivre(path) && !(await acessoValido(request.cookies.get(COOKIE_ACESSO)?.value))) {
     const trancado = NextResponse.rewrite(new URL("/em-breve", request.url));
@@ -43,6 +55,6 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-// Every page (the lock needs them all), but not the API, Next's own files or anything with a file extension
-// (images, videos, the Personalizador's scripts).
-export const config = { matcher: ["/((?!api/|_next/|favicon\\.ico|.*\\.[a-zA-Z0-9]+$).*)"] };
+// Store pages for the existing pre-sale lock, plus editor entries and creation APIs for the scheduled launch.
+// Next assets and unrelated APIs/static files keep their prior behavior.
+export const config = { matcher: ["/personalizador/:path*", "/api/personalizador/:path*", "/api/estampa/envio", "/api/estampa/registrar", "/((?!api/|_next/|favicon\\.ico|.*\\.[a-zA-Z0-9]+$).*)"] };

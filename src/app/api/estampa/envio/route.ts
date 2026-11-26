@@ -1,3 +1,4 @@
+import { bloqueioPersonalizador } from "@/lib/personalizador-lancamento";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
@@ -10,6 +11,8 @@ const isRateLimited = createRateLimiter(12);
 const pedidoSchema = z.object({ tipos: z.array(z.enum(["png", "jpg"])).min(1).max(5) });
 
 export async function POST(request: Request) {
+  const bloqueio = bloqueioPersonalizador();
+  if (bloqueio) return bloqueio;
   if (isRateLimited(clientKey(request))) return NextResponse.json({ error: "Muitas tentativas seguidas. Aguarde alguns minutos." }, { status: 429 });
   const corpo = pedidoSchema.safeParse(await request.json().catch(() => null));
   if (!corpo.success) return NextResponse.json({ error: "Pedido inválido." }, { status: 400 });

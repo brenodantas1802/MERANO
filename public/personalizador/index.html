@@ -16,6 +16,10 @@
   <link rel="stylesheet" href="css/creations.css">
   <link rel="stylesheet" href="css/print-editor.css">
   <link rel="stylesheet" href="css/meranno-site.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/manual-editor.css">
+<link rel="stylesheet" href="css/refinement.css">
+<link rel="stylesheet" href="css/simple-editor.css">
 </head>
 <body>
   <div class="preview-bar" role="status"><span><i></i>Protótipo MERANNO</span><span id="preview-status">IA aguardando conexão</span></div>
@@ -30,6 +34,7 @@
     <button type="button" id="my-creations">Minhas criações</button>
   </nav>
 
+  <nav class="studio-nav" aria-label="Ferramentas do personalizador"><button type="button" data-panel="creation" aria-pressed="true">Sua criação</button><button type="button" data-panel="ai" aria-pressed="false">Criar com IA</button></nav>
   <main class="studio">
     <!-- CHAT -->
     <section class="chat" aria-label="Conversa com a MERANNO">
@@ -46,6 +51,7 @@
       </div>
       <ol class="chat__log" id="chat-log" aria-live="polite"></ol>
       <div class="chat__chips" id="chat-chips"></div>
+      <p class="block__desc" role="note">A IA cria somente a arte; o mockup e o posicionamento ficam no editor. Não aceitamos discriminação, símbolos de ódio, conteúdo sexual explícito ou ilegal. Toda prévia passa por revisão humana antes da produção.</p>
       <form class="chat__form" id="chat-form" autocomplete="off">
         <textarea id="chat-input" rows="1" placeholder="Conte a ideia da sua estampa…" aria-label="Mensagem"></textarea>
         <button class="send-btn" type="submit" aria-label="Enviar"><span class="ms">arrow_upward</span></button>
@@ -53,7 +59,7 @@
     </section>
 
     <!-- PRÉVIA -->
-    <section class="stage" aria-label="Prévia da camiseta">
+    <section class="stage" aria-label="Prévia da camiseta"><nav class="side-switch" aria-label="Lado da camiseta"><button type="button" data-side="back" aria-pressed="true">Costas</button><button type="button" data-side="front" aria-pressed="false">Frente</button><button type="button" id="editor-undo" disabled>Desfazer</button><button type="button" id="editor-redo" disabled>Refazer</button></nav>
       <div class="viewer" id="viewer-back">
         <div class="viewer__bar">
           <span class="viewer__name">Verso</span>
@@ -95,7 +101,19 @@
         <button class="text-btn" id="prefs-reset" type="button"><span class="ms">undo</span>Restaurar padrões</button>
       </div>
 
-      <section class="block direct-editor" aria-label="Editar sem chat">
+      <section class="block garment-options" id="garment-options">
+        <h3 class="block__title">Sua camiseta</h3><fieldset class="brand-choice"><legend>Marca na frente</legend><label><input type="radio" name="brand-choice" id="brand-name" value="wordmark" checked> Nome MERANNO</label><label><input type="radio" name="brand-choice" id="brand-logo" value="logo" disabled> Logo MERANNO <small id="brand-logo-note">Disponível após envio da logo oficial</small></label></fieldset><h4 class="options-label">Modelagem</h4>
+        <div class="fits" id="fits" role="radiogroup" aria-label="Modelagem"></div>
+        <div class="fabric-heading"><h4>Cores disponíveis</h4><span id="fabric-name"></span></div>
+        <button type="button" id="palette-toggle" class="palette-toggle" aria-expanded="true" aria-controls="fabric-palette">Paleta da malha <span aria-hidden="true">⌄</span></button><div id="fabric-palette"><div class="fabric-colors" id="fabric-colors" role="radiogroup" aria-label="Cor da camiseta"></div><p class="block__desc">Estas cores alteram somente a camiseta. A paleta acompanha a modelagem escolhida.</p></div>
+      </section>
+      <section id="manual-tools" class="block">
+        <h3 class="block__title">Monte sua estampa</h3><p class="block__desc">Adicione imagens e textos. Selecione uma camada para ajustar. Escolha sua arte e arraste na camiseta para posicionar. A marca frontal é obrigatória.</p>
+        <div id="manual-add"><button class="btn btn--solid" type="button" id="manual-add-image">Adicionar imagem</button><input id="manual-image" type="file" accept="image/png" hidden><button class="btn btn--ghost" type="button" id="manual-add-text">Escrever texto</button><p class="block__desc">PNG transparente · até 9 MB. Até 12 camadas.</p></div>
+        <div id="manual-layers" aria-label="Camadas da sua criação"></div>
+        <form id="manual-form" hidden><h4 id="manual-title">Editar camada</h4><label>Texto<textarea id="manual-text" maxlength="300" rows="3"></textarea></label><label>Fonte<select id="manual-font"><option value="Barlow">Barlow</option><option value="Barlow Condensed">Barlow Condensed</option><option value="Cormorant Garamond">Cormorant</option><option value="Pinyon Script">Manuscrita</option></select></label><label>Paleta do texto<input id="manual-color" type="color" value="#551e2b"></label><div class="manual-measures" hidden><label>Largura (cm)<input id="manual-width" type="number" min="1" max="36" step="0.1"></label><label>Rotação (°)<input id="manual-angle" type="number" min="-180" max="180" step="1"></label><label>Centro horizontal (cm)<input id="manual-x" type="number" step="0.1" min="0" max="36"></label><label>Centro vertical (cm)<input id="manual-y" type="number" step="0.1" min="0" max="45"></label></div><p id="manual-dimensions" role="status" hidden></p><div class="manual-buttons"><button type="button" data-manual="smaller">Diminuir −</button><button type="button" data-manual="larger">Aumentar +</button><button type="button" data-manual="center-x">Centralizar</button><button type="button" data-manual="delete">Excluir camada</button></div><p class="text-auto-note">Seu texto é atualizado automaticamente. Você também pode dar dois cliques no texto da camiseta para editar.</p></form><div id="art-simple-tools" hidden><p>Arraste a estampa na camiseta. Use a alça do canto para mudar o tamanho.</p><button type="button" id="art-smaller">Diminuir −</button><button type="button" id="art-larger">Aumentar +</button><button type="button" id="art-center">Centralizar</button><button type="button" id="art-delete">Excluir estampa</button></div><p id="manual-status" role="status" aria-live="polite"></p>
+      </section>
+      <section hidden class="block direct-editor" aria-label="Editar sem chat">
         <h3 class="block__title">Editar sem chat</h3>
         <p class="block__desc">Clique em uma aplicação na camiseta ou selecione abaixo.</p>
         <button type="button" class="btn btn--solid" id="add-art">Adicionar estampa PNG</button>
@@ -109,11 +127,14 @@
           <button type="button" class="text-btn" id="add-brand">Adicionar MERANNO</button>
           <button type="button" class="text-btn" id="direct-download" disabled>Baixar para produção</button>
         </div>
-        <p class="block__desc">Arraste a estampa das costas para mover. Cada imagem é uma aplicação única.</p>
+        <label for="art-placement">Aplicar estampa em</label><select id="art-placement"><option value="back">Costas</option><option value="front">Frente</option><option value="both">Frente e costas</option></select>
+        <label for="front-brand-kind">Marca na frente</label><select id="front-brand-kind"><option value="wordmark">Nome MERANNO</option><option value="logo">Logo enviada</option></select>
+        <button type="button" class="text-btn" id="upload-brand">Enviar logo MERANNO em PNG</button><input type="file" id="brand-file" accept="image/png" hidden>
+        <p class="block__desc">Arraste a estampa ou a marca na frente e nas costas. Use as setas para ajustes finos; Shift + seta move 1 cm. O limite é a área imprimível da peça.</p>
       </section>
       <section class="block print-editor" id="print-editor" hidden>
-        <h3 class="block__title">Ajustar estampa</h3>
-        <p class="block__desc">Tamanho e posição nas costas, sem usar IA.</p>
+        <h3 class="block__title" id="print-target-name">Ajustar aplicação</h3><label for="print-part">Editar aplicação</label><select id="print-part"><option value="back">Estampa · costas</option><option value="front">Estampa · frente</option><option value="brand">Marca frontal</option></select>
+        <p class="block__desc">Tamanho e posição independentes para cada aplicação, sem gerar a imagem novamente.</p>
         <label for="print-width">Largura <output id="print-width-value"></output></label><input type="range" id="print-width" min="1" max="36" step="0.1" disabled>
         <p id="print-height" class="print-size"></p>
         <label for="print-x">Esquerda / direita <output id="print-x-value"></output></label><input type="range" id="print-x" min="-10" max="10" step="0.1" disabled>
@@ -122,22 +143,9 @@
         <p class="print-quality" id="print-quality" role="status"></p>
         <p class="print-area-note">Área máxima: 36 × 45 cm. Posição relativa à área de impressão; confirme a distância da gola com a confecção.</p>
       </section>
-      <section class="block">
-        <h3 class="block__title">Modelagem</h3>
-        <div class="fits" id="fits" role="radiogroup" aria-label="Modelagem"></div>
-        <div class="fabric-heading"><h4>Cores disponíveis</h4><span id="fabric-name"></span></div>
-        <div class="fabric-colors" id="fabric-colors" role="radiogroup" aria-label="Cor da camiseta"></div>
-      </section>
 
-      <section class="block">
-        <div class="block__row">
-          <h3 class="block__title">Paleta</h3>
-          <span class="block__hint">A primeira cor é a da malha</span>
-        </div>
-        <div class="palette" id="palette"></div>
-      </section>
 
-      <section class="block">
+<section class="block" hidden>
         <h3 class="block__title">Fonte</h3>
         <div class="fonts" id="fonts" role="radiogroup" aria-label="Fonte do texto"></div>
       </section>
@@ -147,16 +155,6 @@
           <h3 class="block__title">Estampas da casa</h3>
           <span class="block__hint" id="sugg-count" role="status" aria-live="polite"></span>
         </div>
-        <div class="house-categories" role="group" aria-label="Categorias das estampas">
-          <button type="button" data-house-category="all" aria-pressed="true">Todas</button>
-          <button type="button" data-house-category="natureza" aria-pressed="false">Natureza</button>
-          <button type="button" data-house-category="esportes" aria-pressed="false">Esportes</button>
-          <button type="button" data-house-category="frases" aria-pressed="false">Frases</button>
-        </div>
-        <label class="house-search-label" for="house-search">Buscar estampa</label>
-        <input class="house-search" id="house-search" type="search" maxlength="80" placeholder="Nome ou tema" autocomplete="off" aria-controls="car-track">
-        <button class="text-btn house-clear" id="house-clear" type="button" hidden>Limpar filtros</button>
-        <p class="house-empty" id="house-empty" hidden>Nenhuma estampa encontrada. Tente outro nome ou limpe os filtros.</p>
         <div class="carousel" id="carousel">
           <button class="car-arrow" data-dir="-1" type="button" aria-label="Estampa anterior"><span class="ms">chevron_left</span></button>
           <div class="car-viewport"><div class="car-track" id="car-track"></div></div>
@@ -177,7 +175,7 @@
           <div class="ref-colors" id="ref-colors" aria-label="Cores extraídas das referências"></div>
           <label class="ref-toggle"><input id="refs-use-colors" type="checkbox" checked>Inspirar as cores da estampa nas imagens</label>
           <label class="ref-note-label" for="refs-notes">O que você quer trazer da referência?</label>
-          <textarea id="refs-notes" rows="2" maxlength="600" placeholder="Ex.: o clima de jazz, a tipografia ou a composição…"></textarea>
+          <textarea id="refs-notes" rows="2" maxlength="600" placeholder="Ex.: o traço da primeira imagem, as cores da segunda; sem copiar a marca…"></textarea>
           <button type="button" class="btn btn--solid ref-apply" id="refs-apply">Conversar sobre referências</button>
           <p class="ref-disclaimer">As imagens serão enviadas à OpenRouter para orientar a conversa e a estampa. A geração só começa após você aprovar o prompt.</p>
         </div>
@@ -201,7 +199,7 @@
     <form id="connection-form">
       <h2 id="connection-title">Conectar a criação com IA</h2>
       <p>Use sua chave da OpenRouter. Ela fica apenas na memória desta aba, é enviada por conexão segura ao servidor e não é salva no navegador. Ao atualizar a página, conecte novamente.</p>
-      <p>Conversa: GPT-4.1 mini. Estampa: GPT Image 2.5 Sunburst. Os pedidos usam os créditos da sua conta OpenRouter.</p>
+      <p>Conversa: GPT-4.1. Estampa: GPT Image 2.5 Sunburst. Os pedidos usam os créditos da sua conta OpenRouter.</p>
       <label for="router-key">Chave da OpenRouter</label>
       <input id="router-key" type="password" autocomplete="off" spellcheck="false" minlength="16" maxlength="512" required placeholder="sk-or-…">
       <p id="connection-error" role="status" aria-live="polite"></p>
@@ -222,6 +220,8 @@
   <script src="js/creations-client.js"></script>
   <script src="js/print-editor.js"></script>
   <script src="js/direct-editor.js"></script>
+  <script src="js/keyboard.js"></script>
+  <script src="js/manual-editor.js"></script>
   <script src="js/meranno-compra.js"></script>
 
 </body>

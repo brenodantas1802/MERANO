@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const context=vm.createContext({structuredClone,console,setTimeout,clearTimeout});
+vm.runInContext(`window=globalThis;MERANNO={BRAND_LOGO:null};document={querySelector:()=>({addEventListener(){},querySelector(){return null;},replaceChildren(){},append(){},setAttribute(){},elements:[],textContent:'',hidden:false}),querySelectorAll:()=>[],createElement:()=>({setAttribute(){}}),addEventListener(){},body:{dataset:{}}};MerannoStudio={getEditState:()=>({design:null,busy:false,brand:{kind:"wordmark"}})};`,context);
+for(const file of ['layout.js','snapshot.js','keyboard.js','manual-editor.js'])vm.runInContext(readFileSync(new URL('../public/personalizador/js/'+file,import.meta.url),'utf8'),context);
+const png='data:image/png;base64,aGVsbG8=';
+const base={version:1,fit:'regular',palette:['preto'],font:'cormorant',design:{aiImage:png,placement:'back',manualLayers:[{type:'text',src:png,text:'Why not me?',font:'Barlow',color:'#551e2b',ratio:.2,width:30,x:18,y:15,angle:15,visible:true,apiKey:'secret'}]}};
+test('manual text, physical position and visibility survive a saved draft, without unknown fields',()=>{const d=context.MerannoSnapshot.normalize(base).design;assert.equal(d.manualLayers[0].text,'Why not me?');assert.equal(d.manualLayers[0].width,30);assert.equal(d.manualLayers[0].angle,15);assert.equal(d.manualLayers[0].apiKey,undefined);const hidden=structuredClone(base);hidden.design.manualLayers[0].visible=false;hidden.design.manualHidden=true;assert.equal(context.MerannoSnapshot.normalize(hidden).design.manualHidden,true);});
+test('manual draft rejects invalid sources, dimensions and more than twelve layers',()=>{for(const change of [l=>l.src='https://example.org/tracker.png',l=>l.width=Infinity,l=>l.width=80,l=>l.angle=190,l=>l.font='untrusted-font']){const value=structuredClone(base);change(value.design.manualLayers[0]);assert.throws(()=>context.MerannoSnapshot.normalize(value));}const value=structuredClone(base);value.design.manualLayers=Array(13).fill(value.design.manualLayers[0]);assert.throws(()=>context.MerannoSnapshot.normalize(value));});
+test('initial back placement is centered and independent of transparent margins',()=>{const a=context.MerannoLayout.initial({width:100,height:150}),b=context.MerannoLayout.initial({width:600,height:600},{x:200,y:100,width:100,height:150});assert.deepEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));assert.equal(a.offsetXCM,0);assert.equal(a.heightCM,36);assert.equal(a.offsetYCM,2);});
+test('horizontal, square and tall prints remain complete inside the physical limits',()=>{for(const [width,height]of [[300,100],[100,100],[100,500]]){const l=context.MerannoLayout.initial({width,height});assert.ok(l.widthCM<=32);assert.ok(l.heightCM<=36);assert.ok(l.offsetYCM+l.heightCM<=45);assert.equal(l.offsetXCM,0);assert.ok(Math.abs(l.heightCM/l.widthCM-height/width)<1e-9);}});
+test('rotated manual layers stay entirely inside the print zone while preserving aspect ratio',()=>{for(const angle of [-180,-135,-45,0,30,90,180])for(const ratio of [.1,1,4]){const l=context.MerannoManual.fit({width:36,x:-999,y:999,angle,ratio});const a=angle*Math.PI/180,w=l.width*(Math.abs(Math.cos(a))+ratio*Math.abs(Math.sin(a))),h=l.width*(Math.abs(Math.sin(a))+ratio*Math.abs(Math.cos(a)));assert.ok(l.x-w/2>=-1e-8);assert.ok(l.x+w/2<=36+1e-8);assert.ok(l.y-h/2>=-1e-8);assert.ok(l.y+h/2<=45+1e-8);assert.equal(l.ratio,ratio);}});
+
+test('keyboard deletion never steals typing from text fields or an open dialog',()=>{
+ for(const tag of ['input','textarea','select','contenteditable','dialog'])assert.equal(context.MerannoKeyboard.outsideText({closest:selector=>selector.includes(tag)?{}:null}),false);
+ assert.equal(context.MerannoKeyboard.outsideText({closest:()=>null}),true);
+});

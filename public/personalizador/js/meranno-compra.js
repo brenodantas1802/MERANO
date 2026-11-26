@@ -34,7 +34,7 @@
   async function open() {
     const edit = S.getEditState();
     if (edit.busy) return S.toast('Aguarde a operação atual terminar.');
-    if (!edit.design?.aiImage) return S.toast('Crie ou escolha uma estampa antes de comprar.');
+    if (!edit.design?.aiImage || edit.design.manualHidden) return S.toast('Crie ou escolha uma estampa antes de comprar.');
     const snap = await S.snapshot().catch(() => null);
     if (!snap) return S.toast('Não consegui ler a sua criação. Tente de novo.');
     const fabric = M.colorById(snap.palette[0]);
@@ -85,8 +85,8 @@
     // Same width the programmer's production dialog starts with.
     const widthCM = design.layout?.widthCM ?? Math.min(28, 45 * prepared.width / prepared.height, prepared.width / 300 * 2.54);
     say('Preparando os arquivos da sua peça…');
-    const pack = await P.build({ design, brandVisible: snap.brandVisible, fit: snap.fit, fitName: FIT_NAMES[snap.fit], fabric: fabric.hex, fabricName: fabric.name },
-      { size, quantity: 1, widthCM: Math.max(1, Math.floor(widthCM * 100) / 100), brandWidthCM: 8, notes: '' }, prepared);
+    const pack = await P.build({ design, brandVisible: snap.brandVisible, brand: snap.brand, fit: snap.fit, fitName: FIT_NAMES[snap.fit], fabric: fabric.hex, fabricName: fabric.name },
+      { size, quantity: 1, widthCM: Math.max(1, Math.floor(widthCM * 100) / 100), brandWidthCM: snap.brand.layout.widthCM, notes: '' }, prepared);
     const file = (name) => pack.files.find((item) => item.name === name)?.data;
     let art = file('estampa-costas.png') || file('estampa-frente.png');
     const front = file('mockup-frente-referencia.jpg'), back = file('mockup-costas-referencia.jpg'), mark = file('marca-frente-meranno.png');
@@ -98,19 +98,20 @@
     if (art.length > MAX_UPLOAD) throw Error('A arte é grande demais para enviar. Gere uma versão mais simples ou menor.');
 
     say('Enviando a arte…');
-    const types = ['png', 'jpg', 'jpg', ...(mark ? ['png'] : [])];
+    const extraFront=design.placement==='both'?file('estampa-frente.png'):null;
+    const types = ['png', 'jpg', 'jpg', ...(mark ? ['png'] : []), ...(extraFront?['png']:[])];
     const { envios } = await api('/api/estampa/envio', { tipos: types });
-    await Promise.all([upload(envios[0].url, art, 'image/png'), upload(envios[1].url, front, 'image/jpeg'), upload(envios[2].url, back, 'image/jpeg'), ...(mark ? [upload(envios[3].url, mark, 'image/png')] : [])]);
+    await Promise.all([upload(envios[0].url, art, 'image/png'), upload(envios[1].url, front, 'image/jpeg'), upload(envios[2].url, back, 'image/jpeg'), ...(mark ? [upload(envios[3].url, mark, 'image/png')] : []),...(extraFront?[upload(envios[mark?4:3].url,extraFront,'image/png')]:[])]);
 
-    say('Registrando a peça…');
+    say('Verificando conteúdo e registrando para revisão humana…');
     const meta = pack.meta;
     const { id, preco } = await api('/api/estampa/registrar', {
       arte: envios[0].caminho,
-      arquivos: { mockupFrente: envios[1].caminho, mockupCostas: envios[2].caminho, ...(mark ? { marca: envios[3].caminho } : {}) },
+      arquivos: { mockupFrente: envios[1].caminho, mockupCostas: envios[2].caminho, ...(mark ? { marca: envios[3].caminho } : {}),...(extraFront?{arteFrente:envios[mark?4:3].caminho}:{}) },
       tamanho: size,
       prompt: String(design.prompt || '').slice(0, 6000),
-      painel: { fit: snap.fit, fitName: FIT_NAMES[snap.fit], fabric: fabric.hex, fabricName: fabric.name, paleta: snap.palette.map((id) => M.colorById(id).hex), fonte: snap.font, marca: snap.brandVisible, posicao: design.houseId ? 'back' : design.placement || 'back', ...(design.houseName ? { colecao: String(design.houseName).slice(0, 100) } : {}) },
-      producao: { id: meta.id, arteCm: { largura: +meta.art.widthCM.toFixed(2), altura: +meta.art.heightCM.toFixed(2) }, artePx: { largura: meta.art.width, altura: meta.art.height }, arteOriginal: original, marcaCm: snap.brandVisible ? 8 : null, layout: meta.printLayout ? { offsetXCM: meta.printLayout.offsetXCM, offsetYCM: meta.printLayout.offsetYCM } : null },
+      painel: { fit: snap.fit, fitName: FIT_NAMES[snap.fit], fabric: fabric.hex, fabricName: fabric.name, paleta: snap.palette.map((id) => M.colorById(id).hex), fonte: snap.font, marca: snap.brandVisible, tipoMarca:snap.brand.kind, posicao: design.houseId ? 'back' : design.placement || 'back', ...(design.houseName ? { colecao: String(design.houseName).slice(0, 100) } : {}) },
+      producao: { id: meta.id, arteCm: { largura: +meta.art.widthCM.toFixed(2), altura: +meta.art.heightCM.toFixed(2) }, artePx: { largura: meta.art.width, altura: meta.art.height }, arteOriginal: original, marcaCm: snap.brandVisible ? meta.brand.widthCM : null, layouts:{...meta.applications,...(meta.brand?{brand:meta.brand.layout}:{})}, layout: meta.printLayout ? { offsetXCM: meta.printLayout.offsetXCM, offsetYCM: meta.printLayout.offsetYCM } : null },
     });
 
     const image = await thumbnail(design.placement === 'front' ? front : back);

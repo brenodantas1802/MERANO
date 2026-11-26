@@ -1,20 +1,19 @@
 (()=>{
- 'use strict';const S=MerannoStudio,L=MerannoLayout,$=s=>document.querySelector(s),panel=$('#print-editor');let preparedSource=null,pending=false,transparent=true,errorText='';
- const cm=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' cm';
- function render(){const state=S.getPrintState(),enabled=!!state.source&&state.placement!=='front';panel.hidden=!enabled;if(!enabled)return;
-  const ready=state.layout&&state.dimensions&&state.bounds&&!pending,blocked=!ready||state.busy;
+ const S=MerannoStudio,L=MerannoLayout,$=s=>document.querySelector(s);let pending=false,error='';
+ const cm=n=>n.toLocaleString('pt-BR',{maximumFractionDigits:1})+' cm';
+ function render(){const edit=S.getEditState();for(const option of $('#print-part').options){option.disabled=option.value==='brand'?true:!edit.design||!(edit.design.placement===option.value||edit.design.placement==='both');}const s=S.getPrintState();$('#print-editor').hidden=!s.source;if(!s.source)return;
+  $('#print-part').value=s.part;$('#print-target-name').textContent={back:'Estampa das costas',front:'Estampa da frente',brand:'Marca frontal'}[s.part];
+  const ready=s.layout&&s.bounds,blocked=!ready||s.busy||pending;
   for(const id of ['print-width','print-x','print-y','print-center','print-reset'])$('#'+id).disabled=blocked;
-  if(ready){const layout=L.normalize(state.layout,state.bounds),limits=L.limits(layout,state.bounds);
-   for(const[id,value,min,max]of[['print-width',layout.widthCM,1,limits.widthMax],['print-x',layout.offsetXCM,-limits.xMax,limits.xMax],['print-y',layout.offsetYCM,0,limits.yMax]]){const field=$('#'+id);field.min=min;field.max=max;field.value=value;$('#'+id+'-value').textContent=cm(value);}
-   $('#print-height').textContent='Altura proporcional: '+cm(layout.heightCM);
-   const w=Math.floor(layout.widthCM/2.54*300),h=Math.floor(layout.heightCM/2.54*300),upscaled=w>state.bounds.width||h>state.bounds.height;
-   $('#print-quality').textContent=errorText||(!transparent?'A arte não tem fundo transparente; isso precisa ser corrigido antes da produção.':upscaled?'Para '+cm(layout.widthCM)+' × '+cm(layout.heightCM)+' a 300 DPI, use um original maior. Ampliar não recupera detalhes.':'Resolução original suficiente para estas medidas a 300 DPI.');
-  }else $('#print-quality').textContent=errorText||'Lendo as dimensões da arte…';
+  if(!ready)return;const layout=L.normalize(s.layout,s.bounds),limits=L.limits(layout,s.bounds);
+  for(const[id,value,min,max]of[['print-width',layout.widthCM,1,limits.widthMax],['print-x',layout.offsetXCM,-limits.xMax,limits.xMax],['print-y',layout.offsetYCM,0,limits.yMax]]){const f=$('#'+id);f.min=min;f.max=max;f.value=value;$('#'+id+'-value').textContent=cm(value);}
+  $('#print-height').textContent='Altura proporcional: '+cm(layout.heightCM);
+  $('#print-quality').textContent=error||'Posição e escala preservadas nos arquivos. A equipe confere nitidez, transparência e conteúdo antes da produção.';
  }
- async function update(){render();const state=S.getPrintState();if(pending||state.busy||!state.source||state.placement==='front'||(preparedSource===state.source&&(errorText||(state.layout&&state.dimensions&&state.bounds))))return;const source=state.source;pending=true;preparedSource=source;errorText='';render();try{const result=await S.preparePrint();if(result)transparent=result.transparent;else preparedSource=null;}catch(error){errorText=error.message;}finally{pending=false;render();if(S.getPrintState().source!==source||preparedSource===null)update();}}
- document.addEventListener('meranno:change',update);
- for(const id of ['print-width','print-x','print-y'])$('#'+id).addEventListener('input',()=>{const state=S.getPrintState();if(!state.layout)return;const value={...state.layout};if(id==='print-width')value.widthCM=+$('#print-width').value;if(id==='print-x')value.offsetXCM=+$('#print-x').value;if(id==='print-y')value.offsetYCM=+$('#print-y').value;S.setPrintLayout(value);});
- $('#print-center').onclick=()=>{const state=S.getPrintState();if(!state.layout)return;const height=state.layout.heightCM;S.setPrintLayout({...state.layout,offsetXCM:0,offsetYCM:(45-height)/2});};
- $('#print-reset').onclick=()=>{const state=S.getPrintState();if(state.dimensions)S.setPrintLayout(L.initial(state.dimensions,state.bounds));};
+ async function update(){render();const s=S.getPrintState();if(pending||s.busy||!s.source||s.part==='brand'||s.layout&&s.bounds)return;pending=true;try{await S.preparePrint();error='';}catch(e){error=e.message;}finally{pending=false;render();}}
+ document.addEventListener('meranno:change',update);$('#print-part').onchange=e=>S.setEditPart(e.target.value);
+ for(const id of ['print-width','print-x','print-y'])$('#'+id).oninput=()=>{const s=S.getPrintState();if(!s.layout)return;const v={...s.layout};v[{'print-width':'widthCM','print-x':'offsetXCM','print-y':'offsetYCM'}[id]]=+$('#'+id).value;S.setPrintLayout(v);};
+ $('#print-center').onclick=()=>{const s=S.getPrintState();if(s.layout)S.setPrintLayout({...s.layout,offsetXCM:0,offsetYCM:(45-s.layout.heightCM)/2});};
+ $('#print-reset').onclick=()=>{const s=S.getPrintState();if(s.dimensions)S.setPrintLayout(s.part==='brand'?{widthCM:8,offsetXCM:8,offsetYCM:5}:L.initial(s.dimensions,s.bounds));};
  update();
 })();

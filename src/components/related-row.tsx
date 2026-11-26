@@ -63,7 +63,7 @@ export function RelatedRow({ items }: { items: RelatedItem[] }) {
     <div ref={row} id="related" className={`-mx-6 mt-4 flex ${free ? "snap-none" : "snap-x snap-mandatory"} scroll-px-6 gap-3 overflow-x-auto px-6 [scrollbar-width:none] md:mx-0 md:gap-4 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden`}>
       {items.map((item) => <Link key={item.id} href={`/produto/${item.id}`} className="group w-[64vw] shrink-0 snap-start md:w-[calc((100%-3rem)/4)]">
         <div className="relative aspect-square overflow-hidden bg-[var(--cream)]/35">
-          <Image src={item.image} alt={item.name} fill sizes="(min-width: 768px) 25vw, 64vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+          <Image src={item.image} alt={item.name} fill quality={90} sizes="(min-width: 768px) 25vw, 64vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
         </div>
         <p className="mt-2.5 truncate text-[14px] font-semibold uppercase tracking-[.04em]">{item.name}</p>
       </Link>)}

@@ -13,7 +13,6 @@ import { PillLink } from "@/components/ui/pill-link";
 import { ShirtFan } from "@/components/try-on-visuals";
 import { EMPTY_PROFILE, measure, RANGES, useBodyProfile, type ProfileField } from "@/lib/body-profile";
 import { recommendSize } from "@/lib/size-recommendation";
-import { bodyModel, fitNote } from "@/lib/body-model";
 import { useOrders } from "@/lib/orders";
 import { currentImage, formatPrice, SIZE_CHART, similarProducts } from "@/lib/products";
 
@@ -87,8 +86,7 @@ export default function MeranoFitPage() {
   const [previewSize, setPreviewSize] = useState<string | null>(null);
   const shownSize = SIZE_CHART.find((row) => row.size === (previewSize ?? recommendation?.size ?? "M")) ?? SIZE_CHART[1];
   const filled = ALL.filter(({ field }) => measure(profile, field)).length;
-  // Same body the figure is drawn from; without a chest (measured or from height and weight) there's nothing to say.
-  const note = measure(profile, "busto") || (measure(profile, "altura") && measure(profile, "peso")) ? fitNote(bodyModel(profile), shownSize) : null;
+  const shownFit = recommendation?.fits.find((fit) => fit.size === shownSize.size);
 
   const boughtIds = [...new Set(orders.flatMap((order) => order.items.map((item) => item.productId)))];
   const suggestions = similarProducts(boughtIds, 3);
@@ -135,21 +133,27 @@ export default function MeranoFitPage() {
               const active = row.size === shownSize.size;
               return <button key={row.size} type="button" onClick={() => setPreviewSize(row.size)} aria-pressed={active} className={`sans relative h-11 w-11 rounded-full text-sm transition-colors duration-300 ${active ? "bg-[var(--paper)] text-[var(--ink)]" : "border border-white/25 text-white/85 hover:border-white/70"}`}>
                 {row.size}
-                {recommendation?.size === row.size && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-[var(--sol-2)] ring-2 ring-[#1b2a41]" aria-label="tamanho recomendado" />}
+                {recommendation?.size === row.size && !recommendation.comfortLimited && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-[var(--sol-2)] ring-2 ring-[#1b2a41]" aria-label="tamanho recomendado" />}
               </button>;
             })}
           </div>
           <p className="sans pb-6 text-center text-[13px] text-white/75">
             Peça estendida: tórax {shownSize.largura}, barra {shownSize.barra ?? shownSize.largura} e comprimento {String(shownSize.comprimento).replace(".", ",")} cm.
-            {note && <><br />No {shownSize.size}, a camiseta {note}.</>}
+            {shownFit && <><br />{shownFit.label}: no {shownSize.size}, a camiseta {shownFit.description}.</>}
           </p>
 
           <div className="m-3 mt-0 flex items-center gap-5 rounded-[2rem] bg-white/[.07] p-5 ring-1 ring-white/10 md:p-6">
             {recommendation ? <>
               <span className="display flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[var(--paper)] text-4xl text-[var(--ink)]">{recommendation.size}</span>
-              <div><p className="display text-2xl">Você veste {recommendation.size}.</p><p className="mt-1 text-[15px] leading-snug text-white/75">{recommendation.reason} A gente já deixa marcado em cada peça.</p></div>
+              <div><p className="display text-2xl">{recommendation.comfortLimited ? "Opção mais próxima" : "Seu tamanho ideal"}: {recommendation.size}.</p><p className="mt-1 text-[15px] leading-snug text-white/75">{recommendation.reason} {!recommendation.comfortLimited && "A gente já deixa marcado em cada peça."}</p></div>
             </> : <div><p className="display text-2xl">Falta pouco.</p><p className="mt-1 text-[15px] leading-snug text-white/75">Preencha altura e peso pra uma estimativa, ou o busto pra acertar em cheio.</p></div>}
           </div>
+          {recommendation && <ul aria-label="Caimento por tamanho" className="mx-3 mb-3 space-y-2 rounded-[2rem] bg-white/[.07] p-5 md:p-6">
+            {recommendation.fits.map((fit) => <li key={fit.size} className="flex items-start gap-3 text-sm">
+              <button type="button" onClick={() => setPreviewSize(fit.size)} aria-label={"Ver tamanho " + fit.size + ": " + fit.label} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/25 hover:bg-white/10">{fit.size}</button>
+              <p className="pt-1"><strong>{fit.label}</strong><span className="mt-0.5 block text-white/75">A camiseta {fit.description}.</span></p>
+            </li>)}
+          </ul>}
         </div>
       </aside>
     </section>
@@ -161,7 +165,7 @@ export default function MeranoFitPage() {
           <ol className="mt-8 grid gap-x-8 gap-y-7 sm:grid-cols-2">
             {STEPS.map((step, index) => <li key={step.title} className="flex gap-4"><span className="display flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--ink)] text-lg italic">{index + 1}</span><div><h3 className="text-xl">{step.title}</h3><p className="mt-1 leading-relaxed text-[var(--muted)]">{step.text}</p></div></li>)}
           </ol>
-          <p className="mt-10 border-l-2 border-[var(--sol-1)] pl-5 leading-relaxed text-[var(--muted)]">Nossas camisetas têm modelagem regular, de corte clássico: escolha o tamanho que você costuma usar. Se ficar entre dois tamanhos, o maior deixa mais folgada.</p>
+          <p className="mt-10 border-l-2 border-[var(--sol-1)] pl-5 leading-relaxed text-[var(--muted)]">Nossas camisetas têm modelagem regular, de corte clássico. Comparamos o tórax e a barra de cada tamanho com suas medidas e avaliamos o comprimento em relação à sua altura. O ideal equilibra folga e comprimento; os demais podem ficar justos, curtos ou mais soltos que o recomendado.</p>
         </div>
         <div>
           <h2 className="display text-4xl md:text-5xl">Tabela de medidas.</h2>

@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import sharp from 'sharp';
+import {fileURLToPath} from 'node:url';
+const require=createRequire(import.meta.url),ts=require('typescript');
+require.extensions['.ts']=(module,filename)=>module._compile(ts.transpileModule(readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,filename);
+const {products,collections}=require('../src/lib/products.ts'),{SHIRT_STORIES,thumbOf}=require('../src/lib/shirt-stories.ts');
+const asset=p=>fileURLToPath(new URL('../public'+p,import.meta.url));
+test('Arancia uses the new original consistently in gallery, catalog and try-on',async()=>{const p=products.find(p=>p.id==='arancia');assert.match(p.image,/arancia-verso-v2\.png$/);assert.equal(p.gallery[0],p.image);assert.equal(p.views.back,p.image);const m=await sharp(asset(p.image)).metadata();assert.equal(m.width,1122);assert.equal(m.height,1402);assert.equal(m.format,'png');assert.ok(!p.description.includes('Em boa companhia'));});
+test('every catalog view uses a full-size original rather than a tiny thumbnail',async()=>{for(const product of products)for(const src of product.gallery){const m=await sharp(asset(src)).metadata();assert.ok(m.width>=1000,src);assert.ok(m.height>=1200,src);}});
+test('home derivatives exist and their declared sizes and aspect ratios match the actual files',async()=>{for(const story of SHIRT_STORIES){for(const width of [story.cutout.small,story.cutout.large]){const m=await sharp(asset(`${story.cutout.src}-${width}.webp`)).metadata();assert.equal(m.width,width);assert.ok(Math.abs(m.height-width*story.cutout.ratio)<=1);}assert.ok(existsSync(asset(thumbOf(story))));}const arancia=SHIRT_STORIES.find(s=>s.id==='arancia');assert.match(arancia.cutout.src,/arancia-v2$/);assert.equal(arancia.cutout.studio,true);assert.ok(collections.every(c=>existsSync(asset(c.image))));});

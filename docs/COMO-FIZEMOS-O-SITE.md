@@ -182,3 +182,10 @@ Depois de cadastrar ou mudar qualquer variável, é preciso publicar de novo.
 - **Pré-venda**: `src/proxy.ts`, `src/lib/pre-venda.ts`, `src/lib/pre-venda-lista.ts` (lista e pedidos de acesso, tabela `pre_venda_pedidos`), `src/app/pre-venda/`, `src/components/entrada-pre-venda.tsx`. A `/em-breve` e a `/pre-venda` precisam continuar dinâmicas.
 - **Sem uso**: a tabela `convites_pre_venda` e a função `usar_convite_pre_venda` (primeiro modelo da pré-venda) e `src/lib/estampa-schema.ts` (Personalizador anterior). Podem ser apagadas.
 - **Recortes das camisetas e cartas do topo**: `public/imagens/merano-assets/recortes/` (as cartas são os `*-carta.webp`). A vitrine lê `src/lib/shirt-stories.ts`; o topo, `src/components/hero-topo.tsx`.
+
+
+### Fotos do catálogo — revisão Arancia
+
+O verso da Arancia usa agora `/imagens/merano-assets/produtos/arancia-verso-v2.png`, cópia sem alterações do novo original enviado pelo responsável (1122 × 1402 px). As referências de catálogo, galeria, provador e carrinho vêm do produto atualizado. Novos derivados `arancia-v2-*` substituem a arte antiga na vitrine, miniaturas e coleção. A vitrine apresenta esta referência como foto de estúdio, sem fingir transparência nem usar a máscara/brilho do recorte antigo. A foto de frente foi mantida, pois não houve um novo original de frente.
+
+Next Image permite qualidade 75/90/95: cards e sugestões de produtos usam 90, galeria 95. A lupa solicita o dobro da largura exibida enquanto ativa, em vez de apenas ampliar uma imagem pequena. As demais fotos oficiais existentes continuam como fontes originais; aumentar a qualidade da entrega reduz nova perda por compressão, mas não inventa resolução ausente do arquivo. Nenhuma arte foi redesenhada ou modificada por geração de imagem.

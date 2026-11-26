@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    // Preserve print detail in catalog tiles (90) and product galleries/magnification (95).
+    qualities: [75, 90, 95],
+  },
   async redirects() {
     // The measurements profile was "Sobre mim" (under /conta, then /sobre-mim) and "Meu perfil" before joining
     // Merano Fit; the brand page was "A marca".

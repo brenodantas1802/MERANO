@@ -27,6 +27,11 @@
     })()};}return printGeometryCache.promise;
   }
 
+  async function moderateImage(source,text){
+    await window.MerannoAI.ready;if(!window.MerannoAI.ensure())throw Error('Conecte a IA para verificar o conteúdo da imagem.');
+    const image=new Image();image.src=source;await image.decode();const canvas=document.createElement('canvas'),ratio=Math.min(1,1024/Math.max(image.naturalWidth,image.naturalHeight));canvas.width=Math.max(1,Math.round(image.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(image.naturalHeight*ratio));canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+    await window.MerannoAI.call('moderate',{preferences:{},references:[canvas.toDataURL('image/png')],text,artworkOnly:true});
+  }
   // ---------- dados ----------
   const FITS = [
     { id: 'regular', name: 'Regular', desc: 'Ombro alinhado, corte reto', img: 'assets/fits/regular.jpg' },
@@ -60,9 +65,14 @@
     busy: false,
     adding: false,
     slide: 0,
+    suggestions: [],
+    creativeBrief: {},
+    chatReady: false,
     history: [], // {role:'user'|'assistant', text}
     restoredPrompt: null,
     brandVisible: true,
+    brand: {kind:"wordmark",image:null,dimensions:{width:150,height:24},layout:{widthCM:8,offsetXCM:8,offsetYCM:5}},
+    editPart: "back",
     deleted: null,
   };
 
@@ -120,7 +130,7 @@
       });
       const up = (e) => { this.ptrs.delete(e.pointerId); if (!this.ptrs.size) cv.classList.remove('is-dragging'); };
       cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-      cv.addEventListener('dblclick', (e) => this.zoomAt(this.local(e), this.t.s > 1.4 ? 1 : 2.4));
+      cv.addEventListener('dblclick', (e) => {if(e.defaultPrevented||e.target.closest('[data-manual-index]')||window.MerannoManual?.isTextSelected())return;this.zoomAt(this.local(e), this.t.s > 1.4 ? 1 : 2.4);});
       cv.addEventListener('keydown', (e) => {
         const step = 40;
         if (e.key === '+' || e.key === '=') this.zoomAt({ x: 0, y: 0 }, this.t.s * 1.3);
@@ -187,8 +197,9 @@
       const svg=this.content.firstElementChild;
       if(svg){
         const rect=svg.getBoundingClientRect(),unit=Math.min(rect.width/400,rect.height/414)||1;
-        const w=rect.width/(unit*c.s),h=rect.height/(unit*c.s);
-        svg.setAttribute('viewBox',[200-w/2-c.x/(unit*c.s),207-h/2-c.y/(unit*c.s),w,h].join(' '));
+        const camera={regular:1.31,oversized:1.13,boxy:1.10}[svg.dataset.garment]||1.2;
+        const w=rect.width/(unit*c.s*camera),h=rect.height/(unit*c.s*camera);
+        svg.setAttribute('viewBox',[200-w/2-c.x/(unit*c.s*camera),190-h/2-c.y/(unit*c.s*camera),w,h].join(' '));
       }
       const zoomIn=this.root.querySelector('[data-zoom="in"]');
       zoomIn.disabled=this.t.s>=this.maxZoom()-.01;
@@ -201,13 +212,17 @@
   const viewFront = new PanZoom($('#viewer-front'));
 
   function renderShirts(reveal) {
+    const focusPart=document.activeElement?.dataset?.editPart;
+    state.brandVisible=true;state.brand=M.frontBrand(state.brand.kind);
     invalidateIfChanged();
+    $('#brand-name').checked=state.brand.kind==='wordmark';$('#brand-logo').checked=state.brand.kind==='logo';
     const fabric = hex(state.palette[0]);
     const fitName = FITS.find((f) => f.id === state.fit).name;
-    viewBack.content.innerHTML = M.shirtSVG({ fit: state.fit, side: 'back', fabric, brandVisible:state.brandVisible, design: state.design, label: `Verso da camiseta ${fitName}` });
-    viewFront.content.innerHTML = M.shirtSVG({ fit: state.fit, side: 'front', fabric, brandVisible:state.brandVisible, design: state.design, label: `Frente da camiseta ${fitName}` });
+    viewBack.content.innerHTML = M.shirtSVG({ fit: state.fit, side: 'back', fabric, brandVisible:state.brandVisible,brand:state.brand, design: state.design, label: `Verso da camiseta ${fitName}` });
+    viewFront.content.innerHTML = M.shirtSVG({ fit: state.fit, side: 'front', fabric, brandVisible:state.brandVisible,brand:state.brand, design: state.design, label: `Frente da camiseta ${fitName}` });
     viewBack.refresh(); viewFront.refresh();
     changed();
+    if(focusPart)document.querySelector('[data-edit-part="'+focusPart+'"]')?.focus({preventScroll:true});
     if (reveal && !reduceMotion) {
       [viewBack, viewFront].forEach((v) => {
         v.content.classList.remove('is-reveal'); void v.content.offsetWidth; v.content.classList.add('is-reveal');
@@ -224,10 +239,10 @@
   function renderFits() {
     invalidateIfChanged();
     const el = $('#fits'); el.innerHTML = '';
-    FITS.filter((f) => f.id === 'regular').forEach((f) => {
+    FITS.forEach((f) => {
       el.append(h('button', {
         class: 'fit', type: 'button', role: 'radio', 'aria-checked': String(state.fit === f.id),
-        onclick: () => { if (state.fit !== f.id) { state.fit = f.id; ensureFabric(true); renderAll(); } },
+        onclick: () => { if (!state.busy&&!state.refsLoading&&state.fit !== f.id) { state.fit = f.id; ensureFabric(true); renderAll(); } },
       }, `<span class="fit__preview" aria-hidden="true">${M.shirtSVG({ fit: f.id, side: 'front', fabric: '#EEE9DF', design: null })}</span><span class="fit__name">${f.name}</span><span class="fit__desc">${f.desc}</span>`));
     });
   }
@@ -277,113 +292,15 @@
   // =====================================================================
   // PALETA
   // =====================================================================
-  let pop = null;
-  function closePop() { if (pop) { pop.remove(); pop = null; } $('#palette').querySelectorAll('.is-open').forEach((e) => e.classList.remove('is-open')); }
-
-  function optionsFor(i) {
-    if (i === 0) return M.COLORS.filter(c => c.fits.includes(state.fit));
-    const used = new Set(state.palette.filter((_, k) => k !== i && k !== 0));
-    return M.COLORS.filter((c) => !used.has(c.id));
-  }
-
-  function placePop(p, col) {
-    const wrap = $('#palette');
-    wrap.append(p);
-    const W = wrap.clientWidth, pw = p.offsetWidth;
-    const cx = col.offsetLeft + col.offsetWidth / 2;
-    const left = Math.max(0, Math.min(W - pw, cx - pw / 2));
-    p.style.left = left + 'px';
-    p.style.top = (col.offsetTop + col.offsetHeight + 10) + 'px';
-    p.style.setProperty('--arrow', (cx - left) + 'px');
-  }
-
-  function openBubble(i, col, btn) {
-    const was = btn.classList.contains('is-open');
-    closePop(); state.adding = false;
-    if (was) return;
-    btn.classList.add('is-open');
-    const opts = optionsFor(i);
-    pop = h('div', { class: 'pop pop--bubble', role: 'listbox', 'aria-label': 'Trocar cor' });
-    pop.append(h('div', { class: 'pop__title' }, i === 0 ? `Cores de malha da ${FITS.find((f) => f.id === state.fit).name}` : 'Trocar por'));
-    opts.forEach((c) => {
-      const cur = c.id === state.palette[i];
-      pop.append(h('button', {
-        class: 'dot', type: 'button', role: 'option', 'aria-selected': String(cur), 'data-name': c.name, 'aria-label': c.name,
-        style: `background:${c.hex};${cur ? 'box-shadow:0 0 0 2px var(--marfim),0 0 0 3.5px var(--bordo)' : ''}`,
-        onclick: (e) => { e.stopPropagation(); state.palette[i] = c.id; closePop(); renderPalette(); renderFabricColors(); renderShirts(); },
-      }));
-    });
-    placePop(pop, col);
-    pop.querySelector('.dot')?.focus({ preventScroll: true });
-  }
-
-  function openAddList(col) {
-    const opts = optionsFor(state.palette.length);
-    pop = h('div', { class: 'pop pop--list', role: 'listbox', 'aria-label': 'Escolher nova cor' });
-    if (!opts.length) pop.append(h('p', { class: 'pop__empty' }, 'Todas as cores disponíveis já estão na paleta.'));
-    opts.forEach((c) => pop.append(h('button', {
-      type: 'button', role: 'option',
-      onclick: (e) => { e.stopPropagation(); state.palette.push(c.id); state.adding = false; closePop(); renderPalette(); },
-    }, `<i style="background:${c.hex}"></i><b>${c.name}</b><small>${c.hex}</small>`)));
-    placePop(pop, col);
-    pop.querySelector('button')?.focus({ preventScroll: true });
-  }
-
-  function renderPalette() {
-    invalidateIfChanged();
-    changed();
-    closePop();
-    const el = $('#palette'); el.innerHTML = '';
-    const bar = h('div', { class: 'pal-bar' });
-    const dels = h('div', { class: 'pal-dels' });
-    state.palette.forEach((id, i) => {
-      const c = M.colorById(id);
-      const col = h('div', { class: 'pal-col' });
-      const light = M.lum(c.hex) > 0.45;
-      const btn = h('button', {
-        class: 'pal-sw' + (light ? ' is-light' : ''), type: 'button', style: `background:${c.hex}`,
-        'aria-label': `${i === 0 ? 'Cor da malha' : 'Cor'} ${c.name}, ${c.hex}. Clique para trocar.`,
-      }, `${i === 0 ? '<span class="pal-sw__tag">malha</span>' : ''}<span class="pal-sw__name">${c.name}</span><span class="pal-sw__hex">${c.hex}</span>`);
-      btn.addEventListener('click', (e) => { e.stopPropagation(); openBubble(i, col, btn); });
-      col.append(btn); bar.append(col);
-      dels.append(h('div', {}, '').appendChild(h('button', {
-        class: 'pal-del', type: 'button', 'aria-label': `Remover ${c.name}`, disabled: state.palette.length === 1,
-        onclick: () => {
-          state.palette.splice(i, 1);
-          if (i === 0) ensureFabric(false);
-          renderPalette(); renderFabricColors(); renderShirts();
-        },
-      }, '<span class="ms">delete</span>')).parentNode);
-    });
-    if (state.adding) {
-      const col = h('div', { class: 'pal-col' }, '<div class="pal-pending" aria-hidden="true"></div>');
-      bar.append(col); dels.append(h('div'));
-      el.append(bar, dels);
-      requestAnimationFrame(() => openAddList(col));
-      return;
-    }
-    if (state.palette.length < MAX_COLORS) {
-      const col = h('div', { class: 'pal-col' });
-      col.append(h('button', {
-        class: 'pal-add', type: 'button',
-        onclick: (e) => { e.stopPropagation(); state.adding = true; renderPalette(); },
-      }, '<span class="ms">add</span>Adicionar cor'));
-      bar.append(col); dels.append(h('div'));
-    }
-    el.append(bar, dels);
-  }
-
-  document.addEventListener('click', (e) => {
-    if (pop && !pop.contains(e.target)) {
-      closePop();
-      if (state.adding) { state.adding = false; renderPalette(); }
-    }
+  // The fabric palette only changes the garment. Text has its own color picker.
+  function renderPalette(){invalidateIfChanged();changed();}
+  $('#palette-toggle').addEventListener('click',()=>{
+    const open=$('#fabric-palette').hidden;
+    $('#fabric-palette').hidden=!open;
+    $('#palette-toggle').setAttribute('aria-expanded',String(open));
   });
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (!$('#modal').hidden) return closeModal();
-    if (pop) { closePop(); if (state.adding) { state.adding = false; renderPalette(); } }
-  });
+  for(const radio of document.querySelectorAll('[name=brand-choice]'))radio.addEventListener('change',e=>{if(e.target.checked)window.MerannoStudio.setBrandKind(e.target.value);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#modal').hidden)closeModal();});
 
   // =====================================================================
   // FONTES
@@ -402,24 +319,7 @@
   // =====================================================================
   // SUGESTÕES (carrossel)
   // =====================================================================
-  let houseCategory='all',visibleSuggestions=SUGGESTIONS;
-  const searchText=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  function filterHouse(){
-    const words=searchText($('#house-search').value.trim()).split(/\s+/).filter(Boolean);
-    visibleSuggestions=SUGGESTIONS.filter(item=>(houseCategory==='all'||item.categories?.includes(houseCategory))&&words.every(word=>searchText(item.name+' '+(item.tags||'')).includes(word)));
-    state.slide=0;renderCarousel();
-  }
-  document.querySelectorAll('[data-house-category]').forEach(button=>button.addEventListener('click',()=>{
-    houseCategory=button.dataset.houseCategory;
-    document.querySelectorAll('[data-house-category]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-    filterHouse();
-  }));
-  $('#house-search').addEventListener('input',filterHouse);
-  $('#house-clear').addEventListener('click',()=>{
-    houseCategory='all';$('#house-search').value='';
-    document.querySelectorAll('[data-house-category]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.houseCategory==='all')));
-    filterHouse();$('#house-search').focus();
-  });
+  const visibleSuggestions=SUGGESTIONS;
   function renderCarousel() {
     const track=$('#car-track');track.innerHTML='';
     visibleSuggestions.forEach((item,i)=>{
@@ -433,12 +333,10 @@
       if(ready)card.addEventListener('click',()=>applySuggestion(item));track.append(card);
     });
     $('#carousel').hidden=!visibleSuggestions.length;
-    $('#house-empty').hidden=!!visibleSuggestions.length;
-    $('#house-clear').hidden=houseCategory==='all'&&!$('#house-search').value;
     $('#carousel').querySelectorAll('.car-arrow').forEach(b=>b.disabled=visibleSuggestions.length<2);
     moveCarousel(0);
     let note=$('#house-note');if(!note){note=h('p',{id:'house-note',class:'house-note'});$('#carousel').after(note);}
-    note.textContent='Personalize as costas. A marca frontal é uma aplicação separada.';
+    note.textContent='Personalize as costas. A frente sempre leva o nome ou a logo MERANNO.';
   }
   function moveCarousel(dir) {
     const n=visibleSuggestions.length;if(!n){$('#sugg-count').textContent='0 resultados';return;}
@@ -450,6 +348,13 @@
     const slides=$('#car-track').querySelectorAll('.slide');[state.slide,(state.slide+1)%n].forEach(i=>slides[i]?._mostrarArte?.());
   }
   $('#carousel').querySelectorAll('.car-arrow').forEach(b=>b.addEventListener('click',()=>moveCarousel(+b.dataset.dir)));
+  let swipeStart=null;
+  const houseViewport=$('#carousel .car-viewport');
+  houseViewport.addEventListener('pointerdown',e=>{swipeStart={x:e.clientX,y:e.clientY};});
+  houseViewport.addEventListener('pointerup',e=>{if(!swipeStart)return;const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y;swipeStart=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.4){moveCarousel(dx<0?1:-1);houseViewport.dataset.swiped='true';setTimeout(()=>delete houseViewport.dataset.swiped,0);}});
+  houseViewport.addEventListener('pointercancel',()=>{swipeStart=null;});
+  houseViewport.addEventListener('click',e=>{if(houseViewport.dataset.swiped){e.preventDefault();e.stopImmediatePropagation();}},true);
+
   // preview: the carousel shows a light WebP (assets/house/previas); the PNG at print quality loads only when applied.
   async function loadHouse(item,preview){
     const chave=item.id+(preview?':previa':'');
@@ -465,16 +370,17 @@
   }
   function addDownload(message,design){
     const download=h('button',{class:'art-download btn btn--solid',type:'button'});download.textContent='Baixar para produção';
-    download.addEventListener('click',async()=>{if(state.busy||state.refsLoading)return;download.disabled=true;try{if(design===state.design&&design.placement!=='front')await window.MerannoStudio.preparePrint();await window.MerannoProduction.open({design,brandVisible:state.brandVisible,fit:state.fit,fitName:FITS.find(f=>f.id===state.fit).name,fabric:hex(state.palette[0]),fabricName:M.colorById(state.palette[0]).name});}catch(error){toast(error.message);}finally{download.disabled=false;}});message.append(download);
-    if(design.placement!=='front'){const adjust=h('button',{class:'art-adjust btn btn--ghost',type:'button'});adjust.textContent='Ajustar tamanho e posição';adjust.addEventListener('click',()=>{const editor=$('#print-editor');editor.hidden=false;editor.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'nearest'});$('#print-width').focus({preventScroll:true});});message.append(adjust);}
+    download.addEventListener('click',async()=>{if(state.busy||state.refsLoading)return;download.disabled=true;try{if(design===state.design)await window.MerannoStudio.preparePrint();await window.MerannoProduction.open({design,brandVisible:state.brandVisible,brand:state.brand,fit:state.fit,fitName:FITS.find(f=>f.id===state.fit).name,fabric:hex(state.palette[0]),fabricName:M.colorById(state.palette[0]).name});}catch(error){toast(error.message);}finally{download.disabled=false;}});message.append(download);
+    // The artwork itself is the editing surface; no numeric editor is opened.
+
   }
   async function applySuggestion(item) {
     if(state.busy||state.refsLoading)return toast('Aguarde a operação atual terminar.');
     invalidateReview();setBusy(true);
     try{
       const design=await loadHouse(item);
-      state.fit='regular';state.palette[0]=item.fabric;ensureFabric(false);
-      state.design={...design};state.brandVisible=true;state.deleted=null;state.history=[];state.restoredPrompt=null;log.innerHTML='';renderAll();
+      ensureFabric(false);
+      state.design={...design};state.deleted=null;state.history=[];state.creativeBrief={};state.suggestions=[];state.chatReady=false;state.restoredPrompt=null;log.innerHTML='';renderAll();
       viewBack.reset();viewFront.reset();
       const msg='“'+item.name+'” aplicada nas costas. Use o editor da peça para mover ou apagar; o chat pode criar variações.';
       const message=pushMsg('ai',msg);addDownload(message,state.design);
@@ -587,8 +493,8 @@
   // CHAT
   // =====================================================================
   const log = $('#chat-log');
-  const INTRO = 'Qual é a ideia da sua estampa?\n\nUse o editor da peça sem chat ou conte sua ideia para criar com IA.';
-  const CHIPS = ['Quero uma estampa cartoon', 'Algo gráfico e tecnológico', 'Desenho ou rascunho', 'Usar minhas referências'];
+  const INTRO = 'O que você imagina para a sua estampa? Conte sua ideia, mesmo que ainda esteja no começo.\n\nVou ajudar com poucas perguntas e sugestões. Você pode escrever livremente ou escolher as opções que aparecerem.';
+  const CHIPS = ['Quero uma flor', 'Tenho uma frase para estampar', 'Quero explorar uma ideia'];
 
   function pushMsg(kind, text, prompt) {
     const li = h('li', { class: `msg msg--${kind}` });
@@ -612,32 +518,34 @@
   }
   function renderChips() {
     const el = $('#chat-chips'); el.innerHTML = '';
-    if (state.history.length) return;
-    CHIPS.forEach((c) => el.append(h('button', { class: 'chip', type: 'button', onclick: () => send(c) }, escHTML(c))));
+    if(state.chatReady)return;
+    const choices=state.history.length?state.suggestions:CHIPS;
+    choices.forEach(c=>el.append(h('button',{class:'chip',type:'button',disabled:state.busy,onclick:()=>send(c)},escHTML(c))));
+    el.append(h('button',{class:'chip',type:'button',disabled:state.busy,id:'chat-attach-reference',onclick:()=>$('#refs-input').click()},'Anexar referências (opcional)'));
   }
   function resetChat() {
     invalidateReview();
     state.design = null;
     state.restoredPrompt = null;
-    state.history = [];
+    state.history=[];state.creativeBrief={};state.suggestions=[];state.chatReady=false;
     log.innerHTML = '';
     pushMsg('ai', INTRO);
     renderShirts();
   }
 
-  function setBusy(on) {
+  function setBusy(on,allowText=false) {
     state.busy = on;
-    $('.prefs').inert = on;
+    $('.prefs').inert = on&&!allowText;
     $('#connect-ai').disabled = on;
     $('.send-btn').disabled = on;
     $('#chat-reset').disabled = on;
     $('#prefs-reset').disabled = on || state.refsLoading;
-    renderRefs();
+    renderRefs();renderChips();
   }
 
   // Conversation and image generation are separate actions and separate endpoints.
   function prefsSummary() {
-    return {marcaFrontal:state.brandVisible,fit: FITS.find(f=>f.id===state.fit).name,
+    return {marcaFrontal:state.brandVisible,tipoMarca:state.brand.kind,fit: FITS.find(f=>f.id===state.fit).name,
       malha: M.colorById(state.palette[0]).name + ' ' + hex(state.palette[0]),
       cores: referenceColors().length ? referenceColors() : state.palette.slice(1).map(hex),
       fonte: M.fontById(state.font).name,
@@ -674,7 +582,7 @@
       canvas.width=Math.round(image.width*ratio);canvas.height=Math.round(image.height*ratio);canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
       references.unshift(canvas.toDataURL('image/webp',.92));
     }
-    return {preferences:prefsSummary(),references};
+    return {preferences:prefsSummary(),references,brief:structuredClone(state.creativeBrief)};
   }
   function showReview(result,context) {
     invalidateReview();
@@ -688,7 +596,7 @@
     const placementLabel=h('label',{for:id+'-side'});placementLabel.textContent='Aplicar a arte em';
     const placement=h('select',{id:id+'-side'});
     (state.design?.houseId?[['back','Costas · frente fixa']]:[['back','Costas · padrão'],['front','Frente'],['both','Frente e costas (mesma arte)']]).forEach(([value,text])=>{const opt=h('option',{value});opt.textContent=text;placement.append(opt);});placement.value=result.draft.placement || 'back';
-    const brandNote=h('p',{class:'brand-note'});brandNote.textContent='“MERANNO” no peito esquerdo de quem veste, separado da arte.';
+    const brandNote=h('p',{class:'brand-note'});brandNote.textContent='A frente sempre leva a marca MERANNO escolhida nas opções da camiseta. A prévia e os arquivos passarão por revisão humana antes da produção.';
     const status=h('p',{class:'review-status',role:'status','aria-live':'polite'});
     status.textContent='Aguardando sua aprovação.';
     const save=h('button',{class:'btn btn--ghost',type:'button',hidden:true});save.textContent='Salvar revisão do prompt';
@@ -701,7 +609,7 @@
       if(state.busy || state.review!==review)return;
       setBusy(true);save.disabled=true;area.disabled=true;placement.disabled=true;
       try{
-        const update=await window.MerannoAI.call('review',{...context,reviewToken:review.token,draft:{prompt:area.value.trim(),placement:placement.value}});
+        const update=await window.MerannoAI.call('review',{...context,reviewToken:review.token,draft:{prompt:area.value.trim(),placement:placement.value,aspectRatio:review.draft.aspectRatio}});
         review.draft=update.draft;review.token=update.reviewToken;save.hidden=true;approve.disabled=false;status.textContent='Revisão salva. Confira e aprove para gerar.';
       }catch(error){status.textContent=error.message;}
       finally{save.disabled=false;area.disabled=false;placement.disabled=false;setBusy(false);}
@@ -714,10 +622,11 @@
       status.textContent='Gerando a estampa aprovada. Isso pode levar alguns minutos.';
       try{
         const result=await window.MerannoAI.generate({...context,reviewToken:review.token,draft:review.draft,approved:true},message=>{status.textContent=message;});
-        state.design={houseId:state.design?.houseId,houseName:state.design?.houseName,layout:state.design?.layout,aiImage:result.image,placement:state.design?.houseId?'back':result.placement,prompt:review.draft.prompt,approvedAt:new Date().toISOString(),costUSD:result.costUSD};state.review=null;
+        const generatedImage=new Image();generatedImage.src=result.image;await generatedImage.decode();await MerannoProduction.prepareArt(generatedImage);
+        state.design={houseId:state.design?.houseId,houseName:state.design?.houseName,layout:state.design?.layout,layouts:structuredClone(state.design?.layouts||{}),aiImage:result.image,placement:state.design?.houseId?'back':result.placement,prompt:review.draft.prompt,approvedAt:new Date().toISOString(),costUSD:result.costUSD};state.review=null;
         renderShirts(true);status.textContent='Estampa criada e aplicada na prévia da camiseta.';approve.textContent='Prévia gerada';
         const completedDesign=state.design;
-        const message=pushMsg('ai','Sua prévia está pronta. Quer ajustar algo?');
+        const message=pushMsg('ai','Sua prévia está pronta. Arraste a arte ou ajuste tamanho e posição no editor. A produção depende de revisão humana.');
         if(typeof result.costUSD==='number') {const cost=h('p',{class:'generation-cost'});cost.textContent='Custo da imagem: '+new Intl.NumberFormat('pt-BR',{style:'currency',currency:'USD',minimumFractionDigits:4}).format(result.costUSD)+' · conversa à parte';message.append(cost);}
         addDownload(message,completedDesign);
         state.history.push({role:'assistant',text:'Estampa gerada após aprovação. Prompt usado: '+review.draft.prompt});
@@ -731,11 +640,12 @@
     if(text.length>6000){toast('Envie uma mensagem com até 6.000 caracteres.');return false;}
     if(state.refsLoading){toast('Aguarde as referências terminarem de carregar.');return false;}
     await window.MerannoAI.ready;if(!window.MerannoAI.ensure())return false;
-    invalidateReview();setBusy(true);pushMsg('user',text);
+    invalidateReview();state.chatReady=false;setBusy(true);pushMsg('user',text);
     const message={role:'user',text};state.history.push(message);const tp=typing();
     try{
       const context=await requestContext();
       const result=await window.MerannoAI.call('chat',{...context,messages:state.history});
+      state.creativeBrief=result.brief||state.creativeBrief;state.chatReady=result.ready===true;state.suggestions=Array.isArray(result.suggestions)?result.suggestions:[];
       tp.remove();pushMsg('ai',result.reply);state.history.push({role:'assistant',text:result.reply+(result.ready?'\nPrompt proposto: '+result.draft.prompt:'')});
       if(result.ready)showReview(result,context);
       return true;
@@ -773,7 +683,7 @@
   // ---------- reset das preferências ----------
   $('#prefs-reset').addEventListener('click', () => {
     if (state.busy || state.refsLoading) return;
-    invalidateReview();state.design=null;state.brandVisible=false;state.deleted=null;state.history=[];state.restoredPrompt=null;
+    invalidateReview();state.design=null;state.brandVisible=true;state.deleted=null;state.history=[];state.creativeBrief={};state.suggestions=[];state.chatReady=false;state.restoredPrompt=null;
     log.innerHTML='';input.value='';grow();
     state.fit = DEFAULTS.fit; state.palette = ['offwhite',...DEFAULTS.palette.slice(1)]; state.font = DEFAULTS.font;
     viewBack.reset();viewFront.reset();
@@ -788,37 +698,58 @@
 
   function renderAll() { renderFits(); renderFabricColors(); renderPalette(); renderFonts(); renderRefs(); renderShirts(); }
   window.MerannoStudio = {
-    getEditState:()=>({busy:state.busy||state.refsLoading,brandVisible:state.brandVisible,design:state.design,canUndo:!!state.deleted}),
+    async commitManual(design,check=true,allowText=false){
+      if(state.busy||state.refsLoading)throw Error('Aguarde a operação atual.');
+      setBusy(true,allowText);try{if(design&&check)await moderateImage(design.aiImage,'Estampa manual, incluindo os textos visíveis.');invalidateReview();state.restoredPrompt=null;state.design=design;state.editPart='back';renderShirts();}finally{setBusy(false);}
+    },
+
+    getEditState:()=>({busy:state.busy||state.refsLoading,brandVisible:state.brandVisible,brand:state.brand,editPart:state.editPart,design:state.design,canUndo:!!state.deleted}),
     deletePart(part){
-      if(state.busy||state.refsLoading)return;
+      if(state.busy||state.refsLoading||part==='brand'||!part)return;
       state.deleted={design:structuredClone(state.design),brandVisible:state.brandVisible};invalidateReview();state.restoredPrompt=null;
-      if(part==='brand')state.brandVisible=false;
+      if(part==='brand')state.brandVisible=true;
       else if(state.design?.placement==='both')state.design={...state.design,placement:part==='back'?'front':'back'};
       else state.design=null;
       document.querySelectorAll('.art-download,.art-adjust').forEach(el=>el.remove());renderShirts();
     },
     undoDelete(){if(!state.deleted||state.busy||state.refsLoading)return;invalidateReview();Object.assign(state,state.deleted);state.deleted=null;renderShirts();},
-    showBrand(){if(state.busy||state.refsLoading)return;state.brandVisible=true;renderShirts();},
+    showBrand(){this.setBrandVisible(true);},
+    setBrandVisible(){state.brandVisible=true;renderShirts();},
     async uploadArt(file){
       if(state.busy||state.refsLoading)return;if(!file||file.type!=='image/png'||file.size>9000000)throw Error('Envie um PNG transparente de até 9 MB.');
       setBusy(true);try{const url=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('Não foi possível ler a arte.'));r.readAsDataURL(file);});
+      await moderateImage(url,'Arte enviada para estampa');
       const image=new Image();image.src=url;await image.decode();MerannoLayout.dimensions({width:image.naturalWidth,height:image.naturalHeight});await MerannoProduction.prepareArt(image);
       invalidateReview();state.restoredPrompt=null;state.design={aiImage:url,placement:'back',houseName:file.name.slice(0,100),prompt:''};state.deleted=null;renderShirts();
       }finally{setBusy(false);}
     },
-    async downloadCurrent(){if(!state.design||state.busy||state.refsLoading)return;try{await this.preparePrint();await MerannoProduction.open({design:state.design,brandVisible:state.brandVisible,fit:state.fit,fitName:FITS.find(f=>f.id===state.fit).name,fabric:hex(state.palette[0]),fabricName:M.colorById(state.palette[0]).name});}catch(error){toast(error.message);}},
-    getState: () => ({ busy:state.busy||state.refsLoading, hasDesign:!!state.design, name:state.design?.houseName||'Minha criação' }),
-    getPrintState:()=>({busy:state.busy||state.refsLoading,source:state.design?.aiImage||null,placement:state.design?.placement||'back',layout:state.design?.layout?{...state.design.layout}:null,dimensions:state.design?.artDimensions?{...state.design.artDimensions}:null,bounds:state.design?.printBounds?{...state.design.printBounds}:null}),
+    async downloadCurrent(){if(!state.design||state.busy||state.refsLoading)return;try{await this.preparePrint();await MerannoProduction.open({design:state.design,brandVisible:state.brandVisible,brand:state.brand,fit:state.fit,fitName:FITS.find(f=>f.id===state.fit).name,fabric:hex(state.palette[0]),fabricName:M.colorById(state.palette[0]).name});}catch(error){toast(error.message);}},
+    getState: () => ({ busy:state.busy||state.refsLoading, hasDesign:!!state.design&&!state.design.manualHidden, name:state.design?.houseName||'Minha criação' }),
+    setEditPart(part){if(!['back','front'].includes(part)||state.editPart===part)return;state.editPart=part;changed();},
+    setPlacement(placement){if(state.busy||!state.design||state.design.houseId||!['back','front','both'].includes(placement))return;state.design.placement=placement;state.editPart=placement==='front'?'front':'back';invalidateReview();renderShirts();},
+    setBrandKind(kind){if(state.busy||state.refsLoading||!['wordmark','logo'].includes(kind)||kind==='logo'&&!M.BRAND_LOGO)return;state.brand=M.frontBrand(kind);state.brandVisible=true;invalidateReview();renderShirts();},
+    async uploadBrand(){},
+    getPrintState(){
+      const part=state.editPart;
+      if(part==='brand')return {part,busy:state.busy||state.refsLoading,source:state.brandVisible?M.brandSource(hex(state.palette[0]),state.brand):null,layout:MerannoLayout.normalize(state.brand.layout,state.brand.kind==='logo'?state.brand.dimensions:{width:150,height:24}),dimensions:state.brand.kind==='logo'?state.brand.dimensions:{width:150,height:24},bounds:state.brand.kind==='logo'?{x:0,y:0,...state.brand.dimensions}:{x:0,y:0,width:150,height:24},placement:'front'};
+      const exists=state.design&&(state.design.placement===part||state.design.placement==='both');
+      return {part,busy:state.busy||state.refsLoading,source:exists?state.design.aiImage:null,placement:state.design?.placement||'back',layout:state.design?.layouts?.[part]||(part==='back'?state.design?.layout:null),dimensions:state.design?.artDimensions||null,bounds:state.design?.printBounds||null};
+    },
     async preparePrint(){
       if(state.busy||state.refsLoading||!state.design?.aiImage)return null;const design=state.design,geometry=await inspectPrint(design.aiImage);
       if(state.design!==design||state.busy||state.refsLoading)return null;
-      const layout=design.layout?MerannoLayout.normalize(design.layout,geometry.bounds):MerannoLayout.initial(geometry.dims,geometry.bounds);
-      const before=JSON.stringify([design.artDimensions,design.printBounds,design.layout]);design.artDimensions=geometry.dims;design.printBounds=geometry.bounds;design.layout=layout;
-      if(JSON.stringify([design.artDimensions,design.printBounds,design.layout])!==before)renderShirts();return {transparent:geometry.transparent};
+      const before=JSON.stringify(design.layouts);design.layouts=design.layouts||{};
+      for(const side of ['back','front'])if(design.placement===side||design.placement==='both')design.layouts[side]=MerannoLayout.normalize(design.layouts[side]||(side==='back'?design.layout:null)||MerannoLayout.initial(geometry.dims,geometry.bounds),geometry.bounds);
+      design.artDimensions=geometry.dims;design.printBounds=geometry.bounds;design.layout=design.layouts.back||design.layouts.front;
+      if(JSON.stringify(design.layouts)!==before)renderShirts();return {transparent:geometry.transparent};
     },
-    setPrintLayout(value){if(state.busy||state.refsLoading||!state.design?.artDimensions||state.design.placement==='front')return false;state.design.layout=MerannoLayout.normalize(value,state.design.printBounds||state.design.artDimensions);renderShirts();return true;},
+    setPrintLayout(value,part=state.editPart){
+      if(state.busy||state.refsLoading)return false;
+      if(part==='brand')return false;
+      if(!state.design?.artDimensions)return false;state.design.layouts=state.design.layouts||{};state.design.layouts[part]=MerannoLayout.normalize(value,state.design.printBounds||state.design.artDimensions);state.design.layout=state.design.layouts.back||state.design.layouts.front;renderShirts();return true;
+    },
     async snapshot() {
-      const captured={version:1,brandVisible:state.brandVisible,fit:state.fit,palette:[...state.palette],font:state.font,design:structuredClone(state.design),history:structuredClone(state.history),referenceNotes:$('#refs-notes').value,useReferenceColors:$('#refs-use-colors').checked,messageDraft:input.value};
+      const captured={version:1,creativeBrief:structuredClone(state.creativeBrief),brandVisible:state.brandVisible,brand:state.brand,fit:state.fit,palette:[...state.palette],font:state.font,design:structuredClone(state.design),history:structuredClone(state.history),referenceNotes:$('#refs-notes').value,useReferenceColors:$('#refs-use-colors').checked,messageDraft:input.value};
       const sourceRefs=[...state.refs];
       let reviewDraft=state.restoredPrompt?{...state.restoredPrompt}:null;
       if(state.review)reviewDraft={prompt:state.review.element.querySelector('textarea').value,placement:state.review.element.querySelector('select').value};
@@ -834,7 +765,7 @@
       try {
         for(const ref of snapshot.refs){const blob=await(await fetch(ref.dataURL)).blob(),item=await MerannoReferences.prepare(new File([blob],ref.name,{type:blob.type}));item.savedDataURL=ref.dataURL;prepared.push(item);}
         invalidateReview();state.refs.forEach(ref=>URL.revokeObjectURL(ref.url));
-        state.brandVisible=snapshot.brandVisible;state.deleted=null;state.fit='regular';state.palette=[...snapshot.palette];state.font=snapshot.font;state.design=snapshot.design;state.refs=prepared;state.history=snapshot.history;state.restoredPrompt=snapshot.reviewDraft;
+        state.brand=M.frontBrand(snapshot.brand.kind);state.editPart="back";state.brandVisible=true;state.deleted=null;state.fit=snapshot.fit;state.palette=[...snapshot.palette];state.font=snapshot.font;state.design=snapshot.design;state.refs=prepared;state.history=snapshot.history;state.creativeBrief=snapshot.creativeBrief||{};state.suggestions=[];state.chatReady=false;state.restoredPrompt=snapshot.reviewDraft;
         $('#refs-notes').value=snapshot.referenceNotes;$('#refs-use-colors').checked=snapshot.useReferenceColors;input.value=snapshot.messageDraft;grow();
         log.innerHTML='';for(const msg of state.history)pushMsg(msg.role==='user'?'user':'ai',msg.text);if(!state.history.length)pushMsg('ai',INTRO);
         if(state.restoredPrompt){const note=pushMsg('note','Prompt salvo. Peça uma nova revisão no chat antes de gerar.');note.classList.add('saved-prompt');const area=h('textarea',{'aria-label':'Prompt salvo para retomar',readonly:true});area.value=state.restoredPrompt.prompt;note.append(area);}
@@ -850,5 +781,5 @@
   renderAll();
   renderCarousel();
   pushMsg('ai', INTRO);
-  addEventListener('resize', () => { closePop(); viewBack.refresh();viewFront.refresh(); });
+  addEventListener('resize', () => { viewBack.refresh();viewFront.refresh(); });
 })();

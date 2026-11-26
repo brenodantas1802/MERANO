@@ -31,7 +31,7 @@ export function ProductCard({ product, destaque = false }: { product: Product; d
     <Link href={`/produto/${product.id}`} aria-label={`Ver ${product.name}`} transitionTypes={["nav-forward"]}>
       <ViewTransition name={`produto-${product.id}`} share="morph" default="none">
         <div onPointerEnter={() => setWarm(true)} className="foto-gelo relative aspect-[.82] overflow-hidden">
-          {photos.map((src, photo) => (photo === index || warm) && <Image key={src} src={src} alt={photo ? `${product.name}, vista ${photo + 1}` : product.name} {...(destaque && photo === 0 ? { loading: "eager" as const, fetchPriority: "high" as const } : {})} fill sizes="(min-width: 768px) 33vw, 50vw" className={`object-cover transition-opacity duration-500 ${photo === index ? "opacity-100" : "opacity-0"}`} />)}
+          {photos.map((src, photo) => (photo === index || warm) && <Image key={src} src={src} alt={photo ? `${product.name}, vista ${photo + 1}` : product.name} {...(destaque && photo === 0 ? { loading: "eager" as const, fetchPriority: "high" as const } : {})} fill quality={90} sizes="(min-width: 768px) 33vw, 50vw" className={`object-cover transition-opacity duration-500 ${photo === index ? "opacity-100" : "opacity-0"}`} />)}
           <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-col items-start gap-1.5">
             {/* A crossed-out price (the owners' pre-sale price, /admin "Preços") gets a badge; otherwise the launch one. */}
             {(cheio || product.lancamento) && <span className="rounded-full bg-[var(--vinho)] px-2.5 py-1 text-[11px] font-medium text-[var(--creme)]">{cheio ? "Pré-venda" : "Lançamento"}</span>}

@@ -24,16 +24,16 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
     tiltX.set(-((event.clientY - rect.top) / rect.height - 0.5) * 10);
   };
   const onPointerLeave = () => { tiltX.set(0); tiltY.set(0); };
-  const { src, small, large, ratio } = story.cutout;
+  const { src, small, large, ratio, studio } = story.cutout;
 
   return (
     <div onPointerMove={onPointerMove} onPointerLeave={onPointerLeave} className="flex h-full w-full items-center justify-center [perspective:1600px]">
       <div className={`relative ${className}`}>
         {/* The shadow is the shirt's own outline, blurred once and kept flat under the turning shirt. As a filter inside the
             3D layer it came out square on iPhones and was redrawn on every scroll frame. */}
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 translate-y-[45px] opacity-[.28] blur-[20px]" style={{ aspectRatio: `1 / ${ratio}` }}>
+        {!studio && <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 translate-y-[45px] opacity-[.28] blur-[20px]" style={{ aspectRatio: `1 / ${ratio}` }}>
           <div className="h-full w-full bg-[rgb(32,28,23)]" style={{ WebkitMaskImage: `url(${src}-${small}.webp)`, maskImage: `url(${src}-${small}.webp)`, WebkitMaskSize: "100% 100%", maskSize: "100% 100%" }} />
-        </div>
+        </div>}
         <motion.div style={{ rotateY, rotateX: tiltX, transformStyle: "preserve-3d" }} className="relative will-change-transform">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -44,7 +44,7 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
               style={{ transformStyle: "preserve-3d" }}
               className="relative"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- pre-sized renders of the AI-upscaled cutouts; Next's optimizer would recompress them */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- pre-sized photo derivatives; preserve their existing encoding */}
               <img
                 src={`${src}-${small}.webp`}
                 srcSet={`${src}-${small}.webp ${small}w, ${src}-${large}.webp ${large}w`}
@@ -54,17 +54,17 @@ export function ShirtStage({ story, alt, sizes, className = "", turn, sheen, pri
                 alt={alt}
                 fetchPriority={priority ? "high" : undefined}
                 decoding="async"
-                className="relative h-auto w-full"
+                className={`relative h-auto w-full ${studio ? "rounded-[24px]" : ""}`}
               />
               {/* Light gliding over the cotton, clipped to the shirt's outline (mouse screens only: on phones the blend inside
                   the 3D layer is costly and adds nothing to a scroll). */}
-              <div className="pointer-events-none absolute inset-0 overflow-hidden mix-blend-soft-light [@media(hover:none)]:hidden" style={{ WebkitMaskImage: `url(${src}-${small}.webp)`, maskImage: `url(${src}-${small}.webp)`, WebkitMaskSize: "100% 100%", maskSize: "100% 100%" }}>
+              {!studio && <div className="pointer-events-none absolute inset-0 overflow-hidden mix-blend-soft-light [@media(hover:none)]:hidden" style={{ WebkitMaskImage: `url(${src}-${small}.webp)`, maskImage: `url(${src}-${small}.webp)`, WebkitMaskSize: "100% 100%", maskSize: "100% 100%" }}>
                 <motion.div style={{ x: sheenX }} className="absolute inset-y-0 -left-1/2 w-[200%] bg-[linear-gradient(105deg,transparent_38%,rgba(255,255,255,.5)_50%,transparent_62%)] will-change-transform" />
-              </div>
+              </div>}
             </motion.div>
           </AnimatePresence>
         </motion.div>
-        <div className="mx-auto -mt-2 h-7 w-3/5 rounded-[50%] bg-[var(--terra-dark)]/25 blur-2xl" />
+        {!studio && <div className="mx-auto -mt-2 h-7 w-3/5 rounded-[50%] bg-[var(--terra-dark)]/25 blur-2xl" />}
       </div>
     </div>
   );

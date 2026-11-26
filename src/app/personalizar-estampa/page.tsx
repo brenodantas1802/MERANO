@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
-import { PersonalizadorFrame } from "./personalizador-frame";
+import { PersonalizadorAbertura } from "./personalizador-abertura";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Personalizador | MERANNO",
@@ -12,6 +14,6 @@ export const metadata: Metadata = {
 export default function PersonalizadorPage() {
   return <main>
     <SiteHeader />
-    <PersonalizadorFrame />
+    <PersonalizadorAbertura agoraServidor={Date.now()} />
   </main>;
 }

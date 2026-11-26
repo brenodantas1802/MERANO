@@ -1,56 +1,78 @@
 import { measure, type BodyProfile } from "./body-measure";
-import { AMPLE_EASE, bodyModel, HEM_ABOVE_CROTCH, wearTee } from "./body-model";
+import { bodyModel, wearTee } from "./body-model";
 import type { SizeRow } from "./products";
 
-// `beyond`: the body asks for more than the largest size sold; that size is suggested, and it sits closer than designed.
-export type SizeRecommendation = { size: string; reason: string; beyond?: boolean };
+export type SizeFit = { size: string; label: "Justo" | "Ideal" | "Não indicado"; description: string };
+export type SizeRecommendation = { size: string; reason: string; beyond?: boolean; comfortLimited?: boolean; fits: SizeFit[] };
 
-// Room the tee needs over the belly and the hips (cm of circumference), against the hem width; the chest takes
-// AMPLE_EASE against the chest width.
-const WAIST_EASE = 6;
-const HIP_EASE = 4;
+type Dimension = {
+  kind: "width" | "length";
+  gap: (row: SizeRow) => number;
+  minimum: number;
+  comfortable: number;
+  maximum?: number;
+  scale: number;
+};
 
-// `label` completes "Pensado ...", so it carries its own preposition (no seu / na sua / nos seus).
-type Constraint = { label: string; fits: (row: SizeRow) => boolean };
+// Fit preferences in centimetres, applied to actual garment/body differences, never to named sizes or profiles.
+// Circumference margins are total fabric ease; length margins are relative to the estimated crotch.
+const EASE = { chest: { minimum: 6, comfortable: 12 }, waist: { minimum: 6, comfortable: 8 }, hip: { minimum: 4, comfortable: 8 } };
+const LENGTH = { minimum: -2, comfortable: 0, maximum: 11 };
 
-// Picks the smallest size that fits every measurement the customer gave, and names the measurement that decided it.
-// The chart is the garment's own flat measurements (width is half the circumference). The chest decides almost
-// always: measured, or estimated from height and weight. The shoulders count only on charts that measure them, and
-// height only for very tall bodies, so a rough tape measure at home can't throw the size off.
 export function recommendSize(profile: BodyProfile, chart: SizeRow[]): SizeRecommendation | null {
-  const busto = measure(profile, "busto");
-  const quadril = measure(profile, "quadril");
-  const cintura = measure(profile, "cintura");
-  const ombro = measure(profile, "ombro");
+  if (!chart.length) return null;
   const altura = measure(profile, "altura");
   const peso = measure(profile, "peso");
   const body = bodyModel(profile);
-  const barra = (row: SizeRow) => (row.barra ?? row.largura) * 2;
-
-  const constraints: Constraint[] = [];
-  if (busto) constraints.push({ label: `no seu busto de ${busto} cm`, fits: (row) => row.largura * 2 >= busto + AMPLE_EASE });
-  else if (altura && peso) constraints.push({ label: `na sua altura e no seu peso (busto estimado em ${Math.round(body.busto)} cm)`, fits: (row) => row.largura * 2 >= body.busto + AMPLE_EASE });
-  if (cintura) constraints.push({ label: `na sua cintura de ${cintura} cm`, fits: (row) => barra(row) >= cintura + WAIST_EASE });
-  if (quadril) constraints.push({ label: `no seu quadril de ${quadril} cm`, fits: (row) => barra(row) >= quadril + HIP_EASE });
-  if (ombro && chart.every((row) => row.ombro)) constraints.push({ label: `nos seus ombros de ${ombro} cm`, fits: (row) => (row.ombro ?? 0) >= ombro });
-  // Width is what decides a tee; length alone isn't enough to recommend anything.
-  if (!constraints.length) return null;
-  // Length only moves the size for tall bodies: the hem has to reach close to the crotch.
-  if (altura) constraints.push({ label: `na sua altura de ${altura} cm`, fits: (row) => wearTee(body, row).hemOverCrotch <= HEM_ABOVE_CROTCH });
-
-  let index = 0;
-  let decidedBy = constraints[0];
-  let beyond: Constraint | null = null;
-  for (const constraint of constraints) {
-    const smallest = chart.findIndex(constraint.fits);
-    if (smallest === -1) beyond ??= constraint;
-    const needed = smallest === -1 ? chart.length - 1 : smallest;
-    if (needed > index) {
-      index = needed;
-      decidedBy = constraint;
-    }
+  const canEstimate = !!altura && !!peso;
+  const chest = measure(profile, "busto") ?? (canEstimate ? body.busto : null);
+  const waist = measure(profile, "cintura") ?? (canEstimate ? body.cintura : null);
+  const hip = measure(profile, "quadril") ?? (canEstimate ? body.quadril : null);
+  const shoulder = measure(profile, "ombro");
+  const hemCircumference = (row: SizeRow) => (row.barra ?? row.largura) * 2;
+  const dimensions: Dimension[] = [];
+  if (chest) dimensions.push({ kind: "width", gap: row => row.largura * 2 - chest, ...EASE.chest, scale: 6 });
+  if (waist) dimensions.push({ kind: "width", gap: row => hemCircumference(row) - waist, ...EASE.waist, scale: 6 });
+  if (hip) dimensions.push({ kind: "width", gap: row => hemCircumference(row) - hip, ...EASE.hip, scale: 6 });
+  if (shoulder && chart.every(row => row.ombro != null)) {
+    dimensions.push({ kind: "width", gap: row => row.ombro! - shoulder, minimum: 0, comfortable: 1, scale: 2 });
   }
-  const size = chart[index].size;
-  if (beyond) return { size, beyond: true, reason: `O ${size} é o nosso maior tamanho. Pensado ${beyond.label}, ele veste mais justo que o caimento regular.` };
-  return { size, reason: `Pensado ${decidedBy.label}, no caimento regular.` };
+  // Height or weight alone cannot establish how much room a body needs inside the garment.
+  if (!dimensions.length) return null;
+  if (altura) dimensions.push({ kind: "length", gap: row => -wearTee(body, row).hemOverCrotch, ...LENGTH, scale: 3 });
+
+  // Evaluate each row independently. No assumption that P/M/G are ordered or spaced equally.
+  const evaluated = chart.map(row => {
+    const margins = dimensions.map(dimension => ({ ...dimension, value: dimension.gap(row) }));
+    const fits = margins.every(d => d.value >= d.minimum && (d.maximum == null || d.value <= d.maximum));
+    const comfortable = fits && margins.every(d => d.value >= d.comfortable);
+    const score = margins.reduce((total, d) => total + Math.abs(d.value - d.comfortable) / d.scale, 0);
+    const deficit = margins.reduce((total, d) => total + (Math.max(0, d.minimum - d.value) + Math.max(0, d.value - (d.maximum ?? Infinity))) / d.scale, 0);
+    return { row, margins, fits, comfortable, score, deficit };
+  });
+  const ideals = evaluated.filter(item => item.comfortable).sort((a, b) => a.score - b.score);
+  const closer = evaluated.filter(item => item.fits).sort((a, b) => a.score - b.score);
+  const ideal = ideals[0];
+  const selected = ideal ?? closer[0] ?? [...evaluated].sort((a, b) => a.deficit - b.deficit || a.score - b.score)[0];
+  const fits: SizeFit[] = evaluated.map(item => {
+    const size = item.row.size;
+    const length = item.margins.find(d => d.kind === "length");
+    if (!item.fits) {
+      const description = length && length.value < length.minimum ? "fica curta para a sua altura"
+        : length && length.maximum != null && length.value > length.maximum ? "fica comprida demais para a sua altura"
+        : "fica apertada para as suas medidas";
+      return { size, label: "Não indicado", description };
+    }
+    if (item === ideal) return { size, label: "Ideal", description: "oferece folga confortável e comprimento adequado às suas medidas" };
+    if (!item.comfortable) return { size, label: "Justo", description: "tem menos folga no corpo ou no comprimento do que o ideal para conforto" };
+    return { size, label: "Não indicado", description: "fica mais solta ou comprida que o caimento recomendado" };
+  });
+  const context = [altura ? altura + " cm de altura" : null, peso ? peso + " kg" : null].filter(Boolean).join(" e ");
+  const basedOn = context ? "Para " + context + ", considerando suas medidas: " : "Considerando suas medidas: ";
+  const size = selected.row.size;
+  if (!ideal) return {
+    size, fits, comfortLimited: true, beyond: !closer.length,
+    reason: basedOn + (closer.length ? "o " + size + " é a opção mais próxima, mas falta folga no corpo ou no comprimento para um caimento confortável." : "nenhum dos tamanhos disponíveis atende às medidas para o caimento recomendado. Confira a tabela antes de escolher."),
+  };
+  return { size, fits, reason: basedOn + "o " + size + " equilibra a folga no corpo com o comprimento da peça." };
 }

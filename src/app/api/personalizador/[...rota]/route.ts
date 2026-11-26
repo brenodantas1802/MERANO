@@ -1,6 +1,8 @@
+import { bloqueioPersonalizador } from "@/lib/personalizador-lancamento";
 import type { NextRequest } from "next/server";
 import { handleApi } from "@/lib/personalizador/worker/api.js";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
+import { personalizadorUrl } from "@/lib/personalizador-request";
 
 // The programmer's Personalizador server (src/lib/personalizador/worker, kept as delivered) behind the site's address:
 // /api/personalizador/chat reaches his /api/chat, and so on.
@@ -11,18 +13,20 @@ export const maxDuration = 300;
 // His server has no request limits of its own; these are the same ones the site's earlier personalizer used.
 const isChatLimited = createRateLimiter(40);
 const isImageLimited = createRateLimiter(4);
+const isModerationLimited = createRateLimiter(12);
 
 async function handle(request: NextRequest, ctx: RouteContext<"/api/personalizador/[...rota]">) {
   const { rota } = await ctx.params;
+  const bloqueio = bloqueioPersonalizador();
+  if (bloqueio) return bloqueio;
   if (request.method === "POST") {
-    const limited = rota[0] === "generate" ? isImageLimited : rota[0] === "chat" ? isChatLimited : null;
+    const limited = rota[0] === "generate" ? isImageLimited : rota[0] === "chat" ? isChatLimited : rota[0] === "moderate" ? isModerationLimited : null;
     if (limited?.(clientKey(request))) {
       return Response.json({ error: rota[0] === "generate" ? "Limite de criações atingido. Aguarde alguns minutos e tente novamente." : "Muitas mensagens seguidas. Aguarde alguns minutos e continue." }, { status: 429 });
     }
   }
 
-  const url = new URL(request.url);
-  url.pathname = `/api/${rota.join("/")}`;
+  const url = personalizadorUrl(request, rota);
   const headers = new Headers(request.headers);
   // His server treats this header as a signed-in account set by his hosting; here a visitor could forge it.
   headers.delete("oai-authenticated-user-id");
