@@ -207,7 +207,7 @@ export function SignUpForm({ next }: { next?: string }) {
     <Field label="Nome e sobrenome" required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} />
     <Field label="E-mail" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
     <PasswordField label="Senha" hint="Pelo menos 8 caracteres." autoComplete="new-password" value={password} onChange={setPassword} />
-    <Field label={preVenda ? "WhatsApp (o mesmo do grupo)" : "Telefone (opcional)"} required={preVenda} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="(11) 98765-4321" value={phone} onChange={(event) => setPhone(formatPhone(event.target.value))} />
+    <Field label={preVenda ? "Número de telefone" : "Telefone (opcional)"} required={preVenda} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="(11) 98765-4321" value={phone} onChange={(event) => setPhone(formatPhone(event.target.value))} />
     {error && <p role="alert" className={ALERT}>{error}</p>}
     <button type="submit" disabled={busy} className={SUBMIT}>{busy ? "Criando sua conta…" : "Criar conta"}</button>
   </form>;
