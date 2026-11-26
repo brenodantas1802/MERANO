@@ -54,10 +54,10 @@ export function dataPostagem(pagoEm: Date = new Date()) {
 // While an order paid now still waits for the shirts to be made (pre-sale).
 export const esperaProducao = (agora: Date = new Date()) => somarDiasUteis(diaEmSaoPaulo(agora), POSTAGEM_DIAS_UTEIS) < PRIMEIRA_POSTAGEM;
 
-// The posting line shown next to the shipping options and on the product page. During the pre-sale it walks through
-// the whole way, as an estimate (owners, 2026-11-26): factory, the team, then the carrier to the customer's door.
+// The posting line shown next to the shipping options and on the product page. During the pre-sale it only speaks of
+// the delivery, as an estimate (owners, 2026-11-26: "não coloca a fábrica, só coloca a entrega").
 export const avisoPostagem = (agora: Date = new Date()) => esperaProducao(agora)
-  ? `Pré-venda, por estimativa: a fábrica termina as camisetas até ${formatarDia(PRONTAS_NA_FABRICA)}, elas chegam até nós na ${formatarDia(PRIMEIRA_POSTAGEM)} e postamos no mesmo dia. A data de chegada soma também o caminho da transportadora até a sua casa.`
+  ? "Pré-venda: a data de entrega é uma estimativa, calculada pelo seu CEP até a sua casa."
   : `Postamos em até ${POSTAGEM_DIAS_UTEIS} dias úteis depois do pagamento. A data de chegada já conta com isso.`;
 
 // Latest arrival day for a carrier taking up to `prazoMax` business days; null when the quote has no deadline.

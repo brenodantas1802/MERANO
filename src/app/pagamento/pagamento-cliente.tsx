@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Check, ChevronDown, Lock, Search, ShoppingBag, X } from "lucide-react";
 import { useCart, type CartItem } from "@/components/cart-provider";
@@ -15,6 +15,7 @@ import { percentualPreVenda, formatPrice, products, currentImage, parcelado } fr
 import { Illustration } from "@/components/illustration";
 import { CEP_KEY, chegadaTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
 import { avisoPostagem } from "@/lib/entrega";
+import type { DadosSalvos } from "@/lib/dados-salvos";
 
 // Payment page (owners, 2026-11-24: laid out like the Saint Tropez checkout, with the Ermos payment list): the brand on
 // top, the form on a white column, the order on an ice column beside it with a big photo of each piece, a wine button.
@@ -50,7 +51,7 @@ const rotuloFlutuante = "pointer-events-none absolute left-3.5 max-w-[calc(100%-
 const rotuloEmCima = "top-2 text-[11px]";
 const rotuloNoMeio = "top-1/2 -translate-y-1/2 text-[15px] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[11px] peer-autofill:top-2 peer-autofill:translate-y-0 peer-autofill:text-[11px]";
 
-function Campo({ rotulo, className = "", icone, onInput, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { rotulo: string; icone?: React.ReactNode }) {
+function Campo({ rotulo, className = "", icone, onInput, ...props }: React.ComponentProps<"input"> & { rotulo: string; icone?: React.ReactNode }) {
   // Fields the page controls (value) say it themselves; the others (like "Número") are followed as the customer types.
   const [digitado, setDigitado] = useState(Boolean(props.defaultValue));
   const temTexto = props.value !== undefined ? String(props.value) !== "" : digitado;
@@ -150,17 +151,37 @@ function Resumo({ items, totais, email, onCupom }: { items: CartItem[]; totais: 
 
 type Feito = { id: string; numero: string; total: number; whatsapp: string };
 
-export function Pagamento({ online, provedor }: { online: boolean; provedor: string }) {
+// The details of the last purchase on this device, for customers who aren't signed in (no CPF: that one only comes from
+// the account, on the server). Signed-in customers get theirs from the account's last order (lib/dados-salvos).
+const ENTREGA_KEY = "meranno-entrega";
+function lerEntregaLocal(): DadosSalvos | null {
+  try {
+    const salvo = JSON.parse(lerLocal(ENTREGA_KEY) || "null");
+    return salvo && typeof salvo === "object" ? { ...salvo, cpf: "" } : null;
+  } catch {
+    return null;
+  }
+}
+
+export function Pagamento({ online, provedor, salvos: doServidor }: { online: boolean; provedor: string; salvos: DadosSalvos | null }) {
   const { items, total: subtotal, count, clear, openDrawer } = useCart();
   const router = useRouter();
-  const [cep, setCep] = useState(() => lerLocal(CEP_KEY));
-  const [address, setAddress] = useState({ street: "", district: "", city: "", uf: "" });
+  const [salvos] = useState(() => doServidor ?? lerEntregaLocal());
+  const enderecoSalvo = salvos?.endereco ?? null;
+  // The CEP typed in the cart wins (it is what the customer wants now); otherwise the saved address's.
+  const [cep, setCep] = useState(() => lerLocal(CEP_KEY) || enderecoSalvo?.cep || "");
+  const mesmoCep = (valor: string) => !!enderecoSalvo && onlyDigits(valor) === onlyDigits(enderecoSalvo.cep);
+  const [address, setAddress] = useState(() => enderecoSalvo && mesmoCep(cep) ? { street: enderecoSalvo.rua, district: enderecoSalvo.bairro, city: enderecoSalvo.cidade, uf: enderecoSalvo.uf } : { street: "", district: "", city: "", uf: "" });
+  const [numero, setNumero] = useState(() => enderecoSalvo && mesmoCep(cep) ? enderecoSalvo.numero : "");
+  const [complemento, setComplemento] = useState(() => enderecoSalvo && mesmoCep(cep) ? enderecoSalvo.complemento : "");
+  const [cepAviso, setCepAviso] = useState("");
+  const numeroRef = useRef<HTMLInputElement>(null);
   const [shippingId, setShippingId] = useState<number | null>(null);
   const frete = useFrete(cep, count);
   const [method, setMethod] = useState<Method>("pix");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [cpf, setCpf] = useState("");
+  const [email, setEmail] = useState(salvos?.email ?? "");
+  const [phone, setPhone] = useState(salvos?.celular ?? "");
+  const [cpf, setCpf] = useState(() => maskCpf(salvos?.cpf ?? ""));
   const [cupom, setCupom] = useState<Cupom | null>(null);
   const [status, setStatus] = useState<"form" | "processing" | "redirecting">("form");
   const [erro, setErro] = useState("");
@@ -179,19 +200,37 @@ export function Pagamento({ online, provedor }: { online: boolean; provedor: str
   function updateCep(value: string) {
     const masked = maskCep(value);
     setCep(masked);
+    setCepAviso("");
     try { window.localStorage.setItem(CEP_KEY, masked); } catch { /* the CEP just won't be remembered */ }
+    // Back to the saved address's CEP: its street, number and complement come back without a lookup.
+    if (enderecoSalvo && mesmoCep(masked)) {
+      setAddress({ street: enderecoSalvo.rua, district: enderecoSalvo.bairro, city: enderecoSalvo.cidade, uf: enderecoSalvo.uf });
+      setNumero((atual) => atual || enderecoSalvo.numero);
+      setComplemento((atual) => atual || enderecoSalvo.complemento);
+    }
   }
 
-  // Street, district and city from ViaCEP once the CEP is complete. The customer can still type over them.
+  // Street, district, city and state come from the CEP (our /api/cep, which asks ViaCEP and then BrasilAPI), so the
+  // customer only types the number and the complement; the cursor jumps to "Número" (owners, 2026-11-26). The saved
+  // address's CEP needs no lookup. The customer can still type over any field.
   const cepDigits = onlyDigits(cep);
   useEffect(() => {
-    if (cepDigits.length !== 8) return;
+    if (cepDigits.length !== 8 || mesmoCep(cepDigits)) return;
     const controller = new AbortController();
-    fetch(`https://viacep.com.br/ws/${cepDigits}/json/`, { signal: controller.signal })
-      .then((response) => response.json())
-      .then((data) => { if (!data.erro) setAddress((current) => ({ street: data.logradouro || current.street, district: data.bairro || current.district, city: data.localidade || current.city, uf: data.uf || current.uf })); })
-      .catch(() => {});
+    const digitando = document.activeElement?.getAttribute("autocomplete") === "postal-code";
+    fetch(`/api/cep/${cepDigits}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(response.status === 404 ? "naoachou" : "falhou");
+        const data: { rua: string; bairro: string; cidade: string; uf: string } = await response.json();
+        setAddress({ street: data.rua, district: data.bairro, city: data.cidade, uf: data.uf });
+        // A different CEP from the saved one: its number and complement no longer apply.
+        if (enderecoSalvo) { setNumero((atual) => atual === enderecoSalvo.numero ? "" : atual); setComplemento((atual) => atual === enderecoSalvo.complemento ? "" : atual); }
+        if (digitando) numeroRef.current?.focus();
+      })
+      .catch((problema) => { if (!controller.signal.aborted) setCepAviso(problema instanceof Error && problema.message === "naoachou" ? "Não achamos esse CEP. Confira os números ou escreva o endereço abaixo." : "Não deu para buscar o endereço agora. Escreva abaixo, por favor."); });
     return () => controller.abort();
+    // mesmoCep and enderecoSalvo come from the details saved when the page opened, which don't change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cepDigits]);
 
   async function pay(event: React.FormEvent<HTMLFormElement>) {
@@ -209,7 +248,7 @@ export function Pagamento({ online, provedor }: { online: boolean; provedor: str
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cliente: { nome, email, celular: phone, cpf },
-          endereco: { cep, rua: address.street, numero: String(form.get("numero") ?? ""), complemento: String(form.get("complemento") ?? ""), bairro: address.district, cidade: address.city, uf: address.uf },
+          endereco: { cep, rua: address.street, numero, complemento, bairro: address.district, cidade: address.city, uf: address.uf },
           itens: items.map((item) => ({ productId: item.criacaoId ? undefined : productIdOf(item), criacaoId: item.criacaoId, tamanho: item.size, cor: item.color, quantidade: item.quantity })),
           freteId: shipping.id,
           cupom: cupom?.codigo,
@@ -219,6 +258,9 @@ export function Pagamento({ online, provedor }: { online: boolean; provedor: str
       const dados = await resposta.json();
       if (dados.campo === "cupom") setCupom(null);
       if (!resposta.ok && !dados.id) throw new Error(dados.error || "Não deu para registrar o pedido. Tente de novo.");
+      // Next purchase on this device comes filled in (signed-in customers also get it from the account's orders).
+      const [primeiro = "", ...resto] = nome.split(/\s+/);
+      try { window.localStorage.setItem(ENTREGA_KEY, JSON.stringify({ email, nome: primeiro, sobrenome: resto.join(" "), celular: phone, endereco: { cep, rua: address.street, numero, complemento, bairro: address.district, cidade: address.city, uf: address.uf } })); } catch { /* just not remembered */ }
       saveOrder({ id: dados.numero, date: new Date().toISOString(), total, items: items.map((item) => ({ productId: productIdOf(item) ?? item.id, criacaoId: item.criacaoId, name: item.name, size: item.size, color: item.color, price: item.price, quantity: item.quantity, image: item.image })) });
       clear();
       try { window.localStorage.removeItem(CUPOM_KEY); } catch { /* nothing kept */ }
@@ -292,17 +334,18 @@ export function Pagamento({ online, provedor }: { online: boolean; provedor: str
             <section>
               <h2 className={`${titulo} mb-4`}>Entrega</h2>
               <div className="grid grid-cols-2 gap-3">
-                <Campo rotulo="Nome" required name="nome" autoComplete="given-name" />
-                <Campo rotulo="Sobrenome" required name="sobrenome" autoComplete="family-name" />
+                <Campo rotulo="Nome" required name="nome" autoComplete="given-name" defaultValue={salvos?.nome || undefined} />
+                <Campo rotulo="Sobrenome" required name="sobrenome" autoComplete="family-name" defaultValue={salvos?.sobrenome || undefined} />
                 <Campo rotulo="CPF" required inputMode="numeric" value={cpf} onChange={(event) => setCpf(maskCpf(event.target.value))} className="col-span-2" />
                 <Campo rotulo="CEP" required inputMode="numeric" autoComplete="postal-code" value={cep} onChange={(event) => updateCep(event.target.value)} icone={<Search size={17} />} className="col-span-2" />
+                {cepAviso && <p role="alert" className="col-span-2 -mt-1 text-[13px] text-[#8a3a2c]">{cepAviso}</p>}
               </div>
               <div className="mt-3 grid grid-cols-[1fr_120px] gap-3">
                 <Campo rotulo="Endereço" required autoComplete="address-line1" value={address.street} onChange={(event) => setAddress({ ...address, street: event.target.value })} />
-                <Campo rotulo="Número" required name="numero" />
+                <Campo ref={numeroRef} rotulo="Número" required name="numero" value={numero} onChange={(event) => setNumero(event.target.value)} />
               </div>
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <Campo rotulo="Complemento" name="complemento" autoComplete="address-line2" />
+                <Campo rotulo="Complemento" name="complemento" autoComplete="address-line2" value={complemento} onChange={(event) => setComplemento(event.target.value)} />
                 <Campo rotulo="Bairro" required value={address.district} onChange={(event) => setAddress({ ...address, district: event.target.value })} />
                 <Campo rotulo="Cidade" required autoComplete="address-level2" value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} />
                 <label className="relative block">

@@ -68,7 +68,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <Detail title="Detalhes do produto">
           <p>{product.description}</p>
           <p className="mt-2">Modelagem regular, de corte clássico, de {product.fits[0]} a {product.fits[product.fits.length - 1]}. Escolha o tamanho que você costuma usar.</p>
-          <p className="mt-2">{avisoPostagem()} Ela aparece no carrinho, pelo seu CEP.</p>
+          <p className="mt-2">{avisoPostagem()} Ela aparece no carrinho e no pagamento.</p>
         </Detail>
         <Detail title="Composição e cuidados">
           <p>{product.material}.</p>

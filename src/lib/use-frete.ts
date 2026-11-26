@@ -16,7 +16,7 @@ export const prazoTexto = (opcao: OpcaoFrete) => opcao.prazoMin === opcao.prazoM
 // 2026-11-26), since it depends on Remix making the shirts. The carrier's own deadline when the quote has no date.
 export const chegadaTexto = (opcao: OpcaoFrete) => {
   const dia = dataChegada(opcao.prazoMax);
-  return dia ? `${esperaProducao() ? "Estimativa: chega até" : "Chega até"} ${formatarDia(dia)}` : `${prazoTexto(opcao)} após o envio`;
+  return dia ? `${esperaProducao() ? "Estimamos a entrega até" : "Chega até"} ${formatarDia(dia)}` : `${prazoTexto(opcao)} após o envio`;
 };
 
 // Quotes the shipping once the CEP is complete (8 digits) and again when the number of pieces changes.

@@ -23,7 +23,8 @@ test('pre-sale orders are posted on the first posting day, after Remix makes the
   assert.equal(PRIMEIRA_POSTAGEM, '2026-12-08');
   assert.equal(dataPostagem(quinta), '2026-12-08');
   assert.equal(esperaProducao(quinta), true);
-  assert.match(avisoPostagem(quinta), /até segunda, 7\/12, elas chegam até nós na terça, 8\/12 e postamos no mesmo dia/);
+  assert.match(avisoPostagem(quinta), /data de entrega é uma estimativa/);
+  assert.doesNotMatch(avisoPostagem(quinta), /fábrica/);
 });
 
 test('with the shirts in hand, posts within two business days, skipping the weekend', () => {
