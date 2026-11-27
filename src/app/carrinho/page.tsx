@@ -8,7 +8,7 @@ import { MAX_POR_PECA, useCart } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
 import { ShirtFan } from "@/components/try-on-visuals";
 import { PillLink } from "@/components/ui/pill-link";
-import { currentImage, percentualPreVenda, formatPrice, parcelado } from "@/lib/products";
+import { currentImage, percentualPreVenda, formatPrice, parcelado, produtoDoItem } from "@/lib/products";
 import { CEP_KEY, chegadaTexto, useFrete } from "@/lib/use-frete";
 import { TrocarTamanho } from "@/components/trocar-tamanho";
 
@@ -47,12 +47,12 @@ function CartContent() {
       {items.map((item) => {
         const image = currentImage(item);
         return <li key={item.chave ?? item.id} className="flex gap-4 rounded-[1.75rem] bg-[var(--paper)] p-4 shadow-[0_24px_50px_-40px_rgba(32,28,23,.6)] md:gap-7 md:p-5">
-          <Link href={item.productId ? `/produto/${item.productId}` : "/shop"} className="foto-gelo relative aspect-[.82] w-24 shrink-0 overflow-hidden rounded-2xl md:w-36">
+          <Link href={item.criacaoId ? "/personalizar-estampa" : `/produto/${produtoDoItem(item)?.id ?? item.productId ?? ""}`} className="foto-gelo relative aspect-[.82] w-24 shrink-0 overflow-hidden rounded-2xl md:w-36">
             {image ? <Image src={image} alt={item.name} fill sizes="144px" className="object-cover" /> : <div className="product-wash h-full w-full" />}
           </Link>
           <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
             <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0"><h2 className="text-2xl leading-tight [overflow-wrap:anywhere] md:text-3xl">{item.name}</h2>{item.criacaoId ? <p className="sans mt-1 text-sm text-[var(--muted)]">Tamanho {item.size} · {item.color}</p> : <><p className="sans mt-1 text-sm text-[var(--muted)]">{item.color}</p><TrocarTamanho item={item} className="mt-3" /></>}</div>
+              <div className="min-w-0"><h2 className="text-2xl leading-tight [overflow-wrap:anywhere] md:text-3xl">{item.criacaoId ? item.name : <Link href={`/produto/${produtoDoItem(item)?.id ?? item.productId ?? ""}`} className="hover:underline hover:underline-offset-4">{item.name}</Link>}</h2>{item.criacaoId ? <p className="sans mt-1 text-sm text-[var(--muted)]">Tamanho {item.size} · {item.color}</p> : <><p className="sans mt-1 text-sm text-[var(--muted)]">{item.color}</p><TrocarTamanho item={item} className="mt-3" /></>}</div>
               <button onClick={() => removeItem(item.id)} aria-label={`Remover ${item.name}`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"><Trash2 size={16} strokeWidth={1.6} /></button>
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
