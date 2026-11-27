@@ -10,13 +10,14 @@ import { createClient } from "@/lib/supabase/client";
 const safeNext = (next?: string) => (next && next.startsWith("/") && !next.startsWith("//") ? next : "/conta");
 
 // Supabase's error codes, in words a customer can act on.
-function messageFor(error: { code?: string; message?: string }) {
+function messageFor(error: { code?: string; message?: string; reasons?: string[] }) {
   switch (error.code) {
     case "invalid_credentials": return "E-mail ou senha incorretos.";
     case "email_not_confirmed": return "Falta confirmar seu e-mail: abra o link que enviamos para ele.";
     case "user_already_exists":
     case "email_exists": return "Já existe uma conta com esse e-mail. É só entrar com ele.";
-    case "weak_password": return "Senha fraca: use pelo menos 8 caracteres, misturando letras e números.";
+    // "pwned": the password shows up in known leaks (Supabase Pro → Attack Protection, on since 2026-11-26).
+    case "weak_password": return error.reasons?.includes("pwned") ? "Essa senha já apareceu em vazamentos na internet e não é segura. Escolha outra." : "Senha fraca: use pelo menos 8 caracteres, misturando letras e números.";
     case "same_password": return "Escolha uma senha diferente da anterior.";
     case "email_address_invalid":
     case "validation_failed": return "Confira o e-mail digitado.";
