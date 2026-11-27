@@ -16,6 +16,7 @@ import { Illustration } from "@/components/illustration";
 import { CEP_KEY, chegadaTexto, useFrete, type OpcaoFrete } from "@/lib/use-frete";
 import { avisoPostagem } from "@/lib/entrega";
 import type { DadosSalvos } from "@/lib/dados-salvos";
+import { TrocarTamanho } from "@/components/trocar-tamanho";
 
 // Payment page (owners, 2026-11-24: laid out like the Saint Tropez checkout, with the Ermos payment list): the brand on
 // top, the form on a white column, the order on an ice column beside it with a big photo of each piece, a wine button.
@@ -126,13 +127,13 @@ function Resumo({ items, totais, email, onCupom }: { items: CartItem[]; totais: 
   const pecas = items.reduce((soma, item) => soma + item.quantity, 0);
   const desconto = percentualPreVenda(items);
   return <div>
-    <ul className="space-y-5">{items.map((item) => <li key={item.id} className="flex items-center gap-5">
+    <ul className="space-y-5">{items.map((item) => <li key={item.chave ?? item.id} className="flex items-center gap-5">
       <div className="relative shrink-0">
         <div className="foto-gelo relative h-[130px] w-[104px] overflow-hidden rounded-[12px] border border-[var(--line)] md:h-[160px] md:w-[128px]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="128px" className="object-cover" unoptimized={currentImage(item)!.startsWith("data:")} />}</div>
         <span className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-[var(--ink)] px-1.5 text-[12px] font-semibold text-[var(--paper)]">{item.quantity}</span>
       </div>
       <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
-        <div className="min-w-0"><p className="text-[15px] font-medium uppercase leading-snug tracking-[.04em]">{item.name}</p><p className="mt-1 text-[13px] uppercase text-[var(--muted)]">{[item.color, item.size].filter(Boolean).join(" / ")}</p></div>
+        <div className="min-w-0"><p className="text-[15px] font-medium uppercase leading-snug tracking-[.04em]">{item.name}</p><p className="mt-1 text-[13px] uppercase text-[var(--muted)]">{item.criacaoId ? [item.color, item.size].filter(Boolean).join(" / ") : item.color}</p><TrocarTamanho item={item} className="mt-2" compacto /></div>
         <span className="shrink-0 text-[15px] tabular-nums">{formatPrice(item.price * item.quantity)}</span>
       </div>
     </li>)}</ul>

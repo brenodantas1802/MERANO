@@ -5,10 +5,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { CartDrawer } from "./cart-drawer";
 import { getProductPrice, precoPersonalizada, produtoDoItem } from "@/lib/products";
 
-// `criacaoId` marks a tee made in the Personalizador: its art is stored in Supabase (criacoes_estampa).
-export type CartItem = { id: string; productId?: string; criacaoId?: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
+// `criacaoId` marks a tee made in the Personalizador: its art is stored in Supabase (criacoes_estampa). `id` is
+// "<product>-<size>-<colour>" (one line per piece); `chave` stays the same when the size is changed in the cart, so the
+// line doesn't jump.
+export type CartItem = { id: string; chave?: string; productId?: string; criacaoId?: string; name: string; price: number; size: string; fit: string; color: string; image: string; quantity: number };
 type NovoItem = Omit<CartItem, "quantity">;
-type CartContextValue = { items: CartItem[]; addItem: (item: NovoItem) => void; adicionar: (item: NovoItem, aoConfirmar?: () => void) => boolean; removeItem: (id: string) => void; updateQuantity: (id: string, quantity: number) => void; clear: () => void; total: number; count: number; drawerOpen: boolean; openDrawer: () => void; closeDrawer: () => void };
+type CartContextValue = { items: CartItem[]; addItem: (item: NovoItem) => void; adicionar: (item: NovoItem, aoConfirmar?: () => void) => boolean; removeItem: (id: string) => void; updateQuantity: (id: string, quantity: number) => void; trocarTamanho: (id: string, tamanho: string) => void; clear: () => void; total: number; count: number; drawerOpen: boolean; openDrawer: () => void; closeDrawer: () => void };
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -34,7 +36,7 @@ function precoAtual(item: CartItem) {
 function readStorage(): CartItem[] {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved ? (JSON.parse(saved) as CartItem[]).map((item) => ({ ...item, price: precoAtual(item), quantity: limitar(item.quantity) })) : [];
+    return saved ? (JSON.parse(saved) as CartItem[]).map((item) => ({ ...item, chave: item.chave ?? item.id, price: precoAtual(item), quantity: limitar(item.quantity) })) : [];
   } catch {
     return [];
   }
@@ -75,12 +77,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   function addItem(item: Omit<CartItem, "quantity">) {
     setItems((current) => {
       const match = current.find((entry) => entry.id === item.id);
-      return match ? current.map((entry) => entry.id === item.id ? { ...entry, quantity: limitar(entry.quantity + 1) } : entry) : [...current, { ...item, quantity: 1 }];
+      return match ? current.map((entry) => entry.id === item.id ? { ...entry, quantity: limitar(entry.quantity + 1) } : entry) : [...current, { ...item, chave: `${item.id}-${Date.now().toString(36)}`, quantity: 1 }];
     });
   }
   function removeItem(id: string) { setItems((current) => current.filter((item) => item.id !== id)); }
   function updateQuantity(id: string, quantity: number) { setItems((current) => quantity < 1 ? current.filter((item) => item.id !== id) : current.map((item) => item.id === id ? { ...item, quantity: limitar(quantity) } : item)); }
   function clear() { setItems(() => []); }
+  // Changes the size of a piece already in the cart (a customer, 2026-11-26: he had to remove the tee and pick it again).
+  // The line keeps its place; if that size is already in the cart, the two lines join (up to MAX_POR_PECA). Personalised
+  // tees keep the size chosen in the Personalizador: the server reads it from the saved creation.
+  function trocarTamanho(id: string, tamanho: string) {
+    setItems((current) => {
+      const item = current.find((entry) => entry.id === id);
+      const produto = item && !item.criacaoId ? produtoDoItem(item) : undefined;
+      if (!item || !produto || item.size === tamanho || !produto.fits.includes(tamanho)) return current;
+      const novoId = `${produto.id}-${tamanho}-${item.color}`;
+      if (current.some((entry) => entry.id === novoId)) {
+        return current.filter((entry) => entry.id !== id).map((entry) => entry.id === novoId ? { ...entry, quantity: limitar(entry.quantity + item.quantity) } : entry);
+      }
+      return current.map((entry) => entry.id === id ? { ...entry, id: novoId, productId: produto.id, size: tamanho } : entry);
+    });
+  }
   // The shop's add buttons (owners, 2026-11-24): a tee already in the cart in the same size asks first. "Sim" adds one
   // more (then `aoConfirmar`, e.g. opening the bag), "Não" leaves the cart as it was. The + inside the cart adds straight
   // away. Returns whether the piece went in now.
@@ -98,7 +115,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     repetida.aoConfirmar?.();
     setRepetida(null);
   }
-  return <CartContext.Provider value={{ items, addItem, adicionar, removeItem, updateQuantity, clear, total: items.reduce((sum, item) => sum + item.price * item.quantity, 0), count: items.reduce((sum, item) => sum + item.quantity, 0), drawerOpen, openDrawer: () => setDrawerOpen(true), closeDrawer: () => setDrawerOpen(false) }}>{children}<CartDrawer /><AvisoRepetida item={repetida?.item ?? null} onSim={confirmarRepetida} onNao={() => setRepetida(null)} /></CartContext.Provider>;
+  return <CartContext.Provider value={{ items, addItem, adicionar, removeItem, updateQuantity, trocarTamanho, clear, total: items.reduce((sum, item) => sum + item.price * item.quantity, 0), count: items.reduce((sum, item) => sum + item.quantity, 0), drawerOpen, openDrawer: () => setDrawerOpen(true), closeDrawer: () => setDrawerOpen(false) }}>{children}<CartDrawer /><AvisoRepetida item={repetida?.item ?? null} onSim={confirmarRepetida} onNao={() => setRepetida(null)} /></CartContext.Provider>;
 }
 
 export function useCart() {

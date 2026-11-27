@@ -6,6 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, Trash2, X } from "lucide-react";
 import { MAX_POR_PECA, useCart } from "./cart-provider";
+import { TrocarTamanho } from "./trocar-tamanho";
 import { currentImage, percentualPreVenda, formatPrice, getProductPrice, parcelado, similarProducts, type Product } from "@/lib/products";
 
 // Free shipping above this subtotal (R$). null hides the progress bar: the owners haven't set a threshold yet.
@@ -153,13 +154,14 @@ export function CartDrawer() {
             </div>
 
             <AnimatePresence initial={false}>
-              {items.map((item) => <motion.div key={item.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 40, height: 0, marginTop: 0 }} transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }} className="glass-tile flex gap-4 overflow-hidden rounded-[22px] p-3.5">
+              {items.map((item) => <motion.div key={item.chave ?? item.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 40, height: 0, marginTop: 0 }} transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }} className="glass-tile flex gap-4 overflow-hidden rounded-[22px] p-3.5">
                 <div className="foto-gelo relative h-[120px] w-[96px] shrink-0 overflow-hidden rounded-[14px]">{currentImage(item) && <Image src={currentImage(item)!} alt={item.name} fill sizes="96px" className="object-cover" unoptimized={currentImage(item)!.startsWith("data:")} />}</div>
                 <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
                   <div>
                     <h3 className="line-clamp-2 text-[15px] leading-snug">{item.name}</h3>
                     <p className="mt-0.5 text-[15px]">{formatPrice(item.price)}</p>
-                    <p className="mt-0.5 truncate text-[13px] text-[var(--muted)]">{item.size}{item.color ? ` · ${item.color}` : ""}</p>
+                    {item.criacaoId ? <p className="mt-0.5 truncate text-[13px] text-[var(--muted)]">{item.size}{item.color ? ` · ${item.color}` : ""}</p>
+                      : <>{item.color && <p className="mt-0.5 truncate text-[13px] text-[var(--muted)]">{item.color}</p>}<TrocarTamanho item={item} className="mt-2" /></>}
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center rounded-full bg-white/90 shadow-[inset_0_0_0_1px_rgba(0,0,0,.07)]">
