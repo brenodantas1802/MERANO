@@ -1,6 +1,23 @@
 import type { NextConfig } from "next";
 
+// Security headers on every response (owners, 2026-11-26, after the security review). The site may be framed only by
+// itself: /personalizar-estampa shows the Personalizador (/personalizador/index.html) in an iframe of the same site,
+// and nobody else can put the store inside their page to trick a click (clickjacking). No script policy yet: a strict
+// CSP needs testing with the Personalizador, the try-on and Clarity first. Strict-Transport-Security comes from Vercel.
+const SEGURANCA = [
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // The site never asks for the camera (photos come from a file picker), the microphone or the location.
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+];
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: "/:path*", headers: SEGURANCA }];
+  },
   images: {
     // Preserve print detail in catalog tiles (90) and product galleries/magnification (95).
     qualities: [75, 90, 95],
