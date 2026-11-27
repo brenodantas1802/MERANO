@@ -142,6 +142,25 @@ export async function cancelarPedidoEquipe(id: string): Promise<Resposta> {
   return { tipo: "ok", texto: resultado.estornado ? `Cancelado e estornado: ${formatPrice(resultado.estornado)} voltaram para o cliente.` : "Cancelado." };
 }
 
+// Deletes an order for good (owners, 2026-11-26: the cancelled ones clutter the panel). Only cancelled orders, so a
+// paid one can't go by mistake; whatever was refunded stays recorded in Asaas. Nothing else in the database points to
+// an order, so the row just goes.
+export async function excluirPedido(id: string): Promise<Resposta> {
+  if (!UUID.test(id)) return { tipo: "erro", texto: "Pedido inválido." };
+  const sessao = await dono();
+  if (!sessao) return { tipo: "erro", texto: "Só os donos podem excluir pedidos." };
+  const { data } = await sessao.admin.from("pedidos").select("numero, status").eq("id", id).maybeSingle();
+  if (!data) return { tipo: "erro", texto: "Pedido não encontrado." };
+  if (data.status !== "cancelado") return { tipo: "erro", texto: "Só dá para excluir pedido cancelado. Cancele primeiro." };
+  const { error } = await sessao.admin.from("pedidos").delete().eq("id", id).eq("status", "cancelado");
+  if (error) {
+    console.error("excluirPedido failed:", error.message);
+    return { tipo: "erro", texto: "Não consegui excluir agora. Tente de novo." };
+  }
+  refresh();
+  return { tipo: "ok", texto: `Pedido ${data.numero} excluído.` };
+}
+
 // Fixes an order's customer and delivery data and the size of each piece (a wrong address, a size change). Prices,
 // pieces and quantities don't change here: that would change what was charged.
 export async function editarPedido(id: string, _anterior: Resposta, form: FormData): Promise<Resposta> {

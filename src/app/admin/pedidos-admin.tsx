@@ -7,7 +7,7 @@ import { STATUS_PEDIDO, type StatusPedido } from "@/lib/pedido-status";
 import type { Pedido } from "@/lib/pedidos";
 import { formatPrice, getProduct, TAMANHOS_LOJA } from "@/lib/products";
 import { dataChegada, dataPostagem, formatarDia } from "@/lib/entrega";
-import { cancelarPedidoEquipe, editarPedido, mudarStatusPedido, salvarRastreio, type Resposta } from "./pedidos-acoes";
+import { cancelarPedidoEquipe, editarPedido, excluirPedido, mudarStatusPedido, salvarRastreio, type Resposta } from "./pedidos-acoes";
 
 // The real orders, newest first, saved the moment the customer finishes the checkout: filter, search, see them one by
 // one or by customer, change the status, add the tracking code, fix the data, cancel with the refund (owners, 2026-11-25).
@@ -142,11 +142,24 @@ function EditarPedido({ pedido, fechar }: { pedido: Pedido; fechar: (resposta: R
 }
 
 // Cancel, with a second tap that says what happens to the money.
+// A cancelled order can be deleted for good, after a confirmation (owners, 2026-11-26), or simply left in the list.
+function Excluir({ pedido, agir, salvando }: { pedido: Pedido; agir: (acao: () => Promise<Resposta>) => void; salvando: boolean }) {
+  const [confirmando, setConfirmando] = useState(false);
+  if (!confirmando) return <button type="button" onClick={() => setConfirmando(true)} className={`${botao} text-[var(--vinho)]`}>Excluir pedido</button>;
+  return <div className="rounded-[16px] border border-[var(--vinho)]/40 bg-[var(--vinho)]/[.05] p-4 text-sm">
+    <p><b className="font-medium">Excluir o pedido {pedido.numero} para sempre?</b> Ele some do painel e da página do cliente. Não dá para desfazer.{pedido.pagamento?.estorno ? " O estorno continua registrado no Asaas." : ""}</p>
+    <div className="mt-3 flex flex-wrap gap-2">
+      <button type="button" onClick={() => setConfirmando(false)} className={botao}>Voltar</button>
+      <button type="button" disabled={salvando} onClick={() => { setConfirmando(false); agir(() => excluirPedido(pedido.id)); }} className="press h-10 rounded-full bg-[var(--vinho)] px-5 text-[11px] uppercase tracking-[.12em] text-[var(--creme)]">Sim, excluir</button>
+    </div>
+  </div>;
+}
+
 function Cancelar({ pedido, agir, salvando }: { pedido: Pedido; agir: (acao: () => Promise<Resposta>) => void; salvando: boolean }) {
   const [confirmando, setConfirmando] = useState(false);
   const pago = PAGOS.includes(pedido.status);
   const estornaSozinho = pago && pedido.pagamento?.provedor === "asaas";
-  if (pedido.status === "cancelado") return null;
+  if (pedido.status === "cancelado") return <Excluir pedido={pedido} agir={agir} salvando={salvando} />;
   if (!confirmando) return <button type="button" onClick={() => setConfirmando(true)} className={`${botao} text-[var(--vinho)]`}>{estornaSozinho ? "Cancelar e estornar" : "Cancelar pedido"}</button>;
   return <div className="rounded-[16px] border border-[var(--vinho)]/40 bg-[var(--vinho)]/[.05] p-4 text-sm">
     <p><b className="font-medium">Cancelar o pedido {pedido.numero}?</b> {estornaSozinho ? `Os ${formatPrice(Number(pedido.total))} voltam agora pelo Asaas para onde o cliente pagou (Pix: precisa ter saldo no Asaas; cartão: crédito na fatura).` : pago ? "O pagamento não foi pelo Asaas: o estorno é com vocês." : "Ele ainda não foi pago: só sai da lista."} Não dá para desfazer.</p>
