@@ -21,6 +21,12 @@ type RespostaSuperFrete = { id: number; name: string; price?: number; delivery_r
 
 export const freteConfigurado = () => Boolean(process.env.SUPERFRETE_TOKEN && process.env.FRETE_CEP_ORIGEM);
 
+// SuperFrete refuses the CEP itself (answers 400/404/422), as it does for a city's general CEP ending in 000 where the
+// streets have their own (Rio Branco, 69900-000). That isn't the site failing, so the customer is told what to do
+// instead of "try again" (owners, 2026-11-26).
+export class CepRecusado extends Error {}
+export const AVISO_CEP_RECUSADO = "Não encontramos frete para esse CEP. Confira os números. Se ele termina em 000 (o CEP geral da cidade), use o CEP da sua rua: dá para buscar no site dos Correios.";
+
 // Drops an option when another one costs the same or less and arrives just as fast or faster (owners, 2026-11-26: in
 // São Paulo SEDEX came out cheaper than PAC, so PAC was pricier and slower at once). Options tied on both stay.
 export function semOpcoesPiores(opcoes: OpcaoFrete[]): OpcaoFrete[] {
@@ -53,6 +59,10 @@ export async function cotarFrete(cep: string, pecas: number): Promise<OpcaoFrete
     signal: AbortSignal.timeout(8000),
     cache: "no-store",
   });
+  if ([400, 404, 422].includes(response.status)) {
+    const motivo = await response.text().catch(() => "");
+    throw new CepRecusado(`SuperFrete ${response.status} para o CEP ${cep}: ${motivo.slice(0, 200)}`);
+  }
   if (!response.ok) throw new Error(`SuperFrete ${response.status}`);
   const data = (await response.json()) as RespostaSuperFrete[];
   const opcoes = data

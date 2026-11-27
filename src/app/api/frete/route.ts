@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
-import { cotarFrete, freteConfigurado, freteExemplo } from "@/lib/frete";
+import { AVISO_CEP_RECUSADO, CepRecusado, cotarFrete, freteConfigurado, freteExemplo } from "@/lib/frete";
 
 // Shipping quote for the cart and the payment page. The SuperFrete token stays on the server.
 const isRateLimited = createRateLimiter(40);
@@ -29,6 +29,10 @@ export async function POST(request: Request) {
     if (!opcoes.length) return NextResponse.json({ error: "Nenhuma transportadora atende esse CEP." }, { status: 404 });
     return NextResponse.json({ opcoes });
   } catch (error) {
+    if (error instanceof CepRecusado) {
+      console.warn("SuperFrete refused the CEP:", error.message);
+      return NextResponse.json({ error: AVISO_CEP_RECUSADO }, { status: 422 });
+    }
     console.error("SuperFrete quote failed:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Não deu para calcular o frete agora. Tente de novo." }, { status: 502 });
   }

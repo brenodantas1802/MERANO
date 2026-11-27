@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import { cotarFrete, freteConfigurado, freteExemplo, type OpcaoFrete } from "@/lib/frete";
+import { AVISO_CEP_RECUSADO, CepRecusado, cotarFrete, freteConfigurado, freteExemplo, type OpcaoFrete } from "@/lib/frete";
 import { formatPrice, getProduct, getProductPrice, TAMANHOS_LOJA, precoPersonalizada } from "@/lib/products";
 import type { StatusPedido } from "@/lib/pedido-status";
 
@@ -129,7 +129,8 @@ export async function escolherFrete(cep: string, pecas: number, freteId: number)
   let opcoes: OpcaoFrete[];
   try {
     opcoes = freteConfigurado() ? await cotarFrete(cep, pecas) : freteExemplo(pecas);
-  } catch {
+  } catch (error) {
+    if (error instanceof CepRecusado) return { erro: AVISO_CEP_RECUSADO };
     return { erro: "Não deu para calcular o frete agora. Tente de novo em instantes." };
   }
   const frete = opcoes.find((opcao) => opcao.id === freteId);

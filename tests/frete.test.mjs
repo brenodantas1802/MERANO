@@ -12,7 +12,7 @@ require.extensions['.ts'] = (module, filename) => {
   });
   module._compile(outputText, filename);
 };
-const { semOpcoesPiores } = require('../src/lib/frete.ts');
+const { semOpcoesPiores, cotarFrete, CepRecusado, AVISO_CEP_RECUSADO } = require('../src/lib/frete.ts');
 
 const opcao = (id, nome, preco, prazoMin, prazoMax) => ({ id, nome, empresa: 'Correios', preco, prazoMin, prazoMax });
 
@@ -48,4 +48,20 @@ test('one option alone always stays', () => {
   const pac = opcao(1, 'PAC', 30, 7, 12);
   assert.deepEqual(semOpcoesPiores([pac]), [pac]);
   assert.deepEqual(semOpcoesPiores([]), []);
+});
+
+// SuperFrete refusing the CEP (Rio Branco's general 69900-000 got a 400 on 2026-11-26) is the customer's to fix, not
+// "try again"; a SuperFrete outage still is.
+test('a CEP SuperFrete refuses becomes CepRecusado; an outage stays a plain error', async () => {
+  const fetchOriginal = globalThis.fetch;
+  process.env.FRETE_CEP_ORIGEM = '01310100';
+  try {
+    globalThis.fetch = async () => new Response('{"message":"CEP de destino inválido"}', { status: 400 });
+    await assert.rejects(cotarFrete('69900000', 1), (erro) => erro instanceof CepRecusado);
+    globalThis.fetch = async () => new Response('', { status: 503 });
+    await assert.rejects(cotarFrete('01310100', 1), (erro) => !(erro instanceof CepRecusado));
+    assert.match(AVISO_CEP_RECUSADO, /CEP da sua rua/);
+  } finally {
+    globalThis.fetch = fetchOriginal;
+  }
 });
