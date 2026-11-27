@@ -64,11 +64,22 @@ O que ainda falta fazer está em [`PENDENCIAS-LEIA-ME.md`](../PENDENCIAS-LEIA-ME
 
 ## Como publicar uma mudança
 
-O Claude faz: commit no branch `lancamento-pre-venda`, junta no `main` (`git fetch . lancamento-pre-venda:main`), manda os dois para o GitHub, cria uma cópia limpa do `main` com `git worktree`, copia a pasta `.vercel` e roda `vercel --prod --yes`. A Vercel não publica sozinha quando o GitHub muda.
+Desde 26/11: commit no `main` e push para o GitHub. A integração da Vercel publica sozinha em uns 30 segundos; o Claude confere no site no ar depois. (Antes era `vercel --prod --yes` a partir de uma cópia limpa com `git worktree`, que ainda funciona se precisar.)
 
 ## Histórico detalhado
 
-O que entrou em cada rodada (texto que estava no PENDENCIAS até 24/11).
+O que entrou em cada rodada (texto que estava no PENDENCIAS).
+
+### O que entrou em 26/11, o dia em que a pré-venda abriu (tudo publicado)
+
+- **Pré-venda aberta** nos grupos: WhatsApp obrigatório para entrar, lista com 31 pessoas em Amigos e Familiares; no fim do dia, 16 já tinham entrado e 3 pedidos estavam pagos.
+- **Tamanho GG** em todas as camisetas (medidas da Remix: 59 × 79 cm), no produto, carrinho, tabela, Meranno Fit, Provador, Personalizador e painel.
+- **Entrega como estimativa:** pedido do estoque inteiro na Remix em 30/11, prontas até 7/12, com a equipe em 8/12 e postadas no mesmo dia. O site diz "Estimamos a entrega até ..." em cada frete, sem prometer.
+- **Pagamento:** o CEP preenche rua, bairro, cidade e estado pelo servidor (ViaCEP e, se falhar, BrasilAPI) e o cursor vai para "Número"; quem já comprou encontra os dados da última compra preenchidos; CEP que a SuperFrete recusa explica o que fazer.
+- **Painel:** "Falta o WhatsApp" em quem entrou sem dar o número; "como o cliente pagou" (Pix ou cartão, parcelas, quando o dinheiro cai no Asaas); excluir pedido cancelado.
+- **Cadastro:** campo "Número de telefone"; aviso próprio para senha que já vazou na internet.
+- **Supabase Pro** na organização nova "Meranno" (backup diário, 2FA obrigatório, segundo dono, SSL obrigatório, senhas vazadas bloqueadas).
+- **Segurança:** revisão completa (nota 86/100, documento "Segurança do site Meranno"), Next.js 16.4.6 sem falhas conhecidas, cabeçalhos de segurança e firewall da Vercel registrando excessos.
 
 ### O que entrou em 24/11 (tudo publicado)
 
@@ -169,11 +180,11 @@ Depois de cadastrar ou mudar qualquer variável, é preciso publicar de novo.
 
 ## Notas técnicas (para o Claude ou um programador)
 
-- **Publicação**: a Vercel não publica sozinha. `vercel --prod --yes` a partir de um `git worktree` limpo, com a pasta `.vercel` copiada (passo a passo no `README.md`).
+- **Publicação**: push no `main` publica sozinho pela integração Git da Vercel. Segurança: cabeçalhos em `next.config.ts` (`headers()`), firewall da Vercel com 4 regras de limite por IP (cupom, pedidos, Provador/estampas, envio de avaliação), em modo de registro desde 26/11.
 - **Pedidos**: `src/lib/pedidos.ts` (validação, preço, cupom, frete, totais, mensagem do WhatsApp, `registrarPagamento`, `ENTREGA_PRE_VENDA`), `src/app/api/pedidos/` (criar e "pagar agora"), `src/app/pagamento/`, `src/app/pedido/[id]/`. Tabelas `pedidos` e `cupons` (RLS ligada, sem políticas: só a chave secreta lê e grava).
 - **Pagamento**: `src/lib/pagamento.ts` liga o Asaas quando há `ASAAS_API_KEY` (o Mercado Pago saiu em 24/11). Asaas: `src/lib/asaas.ts` (Checkout com `externalReference` = id do pedido; cada checkout aberto fica em `pedidos.pagamento.checkouts`) e o webhook `src/app/api/pagamento/asaas/`, que lê as cobranças do checkout (`GET /payments?checkoutSession=`) e só marca pago com o valor inteiro. A chave do sandbox (`_hmlg_`) usa `api-sandbox.asaas.com` sozinha.
-- **Frete**: `src/lib/frete.ts` (`SERVICOS` = PAC, SEDEX e Jadlog; `PACOTE_CAMISETA` com o peso e a caixa estimados, trocar pelos reais). **Cores da mesma camiseta**: campo `familia` em `src/lib/products.ts` (Amore). **Parcelas**: `parcelado()` e `PARCELAS_MAX` em `src/lib/products.ts`, também usados no Asaas.
-- **Tamanhos e Fit**: `TAMANHOS_LOJA` (P, M, G), `REMIX_REGULAR` (tabela inteira da Remix), `SIZE_CHART` (só o que a loja vende), `MATERIAL`, `PRECO_LANCAMENTO` e `PRECO_PRE_VENDA` em `src/lib/products.ts`. O ombro não está na tabela da Remix: `ombroDa` em `src/lib/body-model.ts` estima 86% do tórax (trocar pelo valor medido numa peça real).
+- **Frete**: `src/lib/frete.ts` (`SERVICOS` = PAC, SEDEX e Jadlog; `PACOTE_CAMISETA` com o peso e a caixa estimados, trocar pelos reais; `CepRecusado` quando a SuperFrete recusa o CEP). **Entrega**: `src/lib/entrega.ts` (`PEDIDO_REMIX`, `PRONTAS_NA_FABRICA`, `PRIMEIRA_POSTAGEM`, `POSTAGEM_DIAS_UTEIS`; enquanto a pré-venda espera a produção, as datas são estimativa). **CEP e dados salvos**: `src/app/api/cep/[cep]/route.ts` e `src/lib/dados-salvos.ts`. **Cores da mesma camiseta**: campo `familia` em `src/lib/products.ts` (Amore). **Parcelas**: `parcelado()` e `PARCELAS_MAX` em `src/lib/products.ts`, também usados no Asaas.
+- **Tamanhos e Fit**: `TAMANHOS_LOJA` (P, M, G, GG), `REMIX_REGULAR` (tabela inteira da Remix), `SIZE_CHART` (só o que a loja vende), `MATERIAL`, `PRECO_LANCAMENTO` e `PRECO_PRE_VENDA` em `src/lib/products.ts`. O ombro não está na tabela da Remix: `ombroDa` em `src/lib/body-model.ts` estima 86% do tórax (trocar pelo valor medido numa peça real).
 - **Financeiro**: `src/lib/financeiro.ts` (contas e plano), `src/app/admin/financeiro-admin.tsx`, `financeiro-acoes.ts`. Tabelas `financeiro_config` (uma linha) e `despesas`. O lucro conta produção + acessórios por camiseta vendida, taxas do Asaas e despesas lançadas; o frete é repasse e fica de fora.
 - **Funções antigas do banco**: `enviar_avaliacao` e `registrar_email_cupom` já estão fechadas para o público (conferido em 24/11). Recomendação de tamanho: `src/lib/size-recommendation.ts` com `AMPLE_EASE` em `src/lib/body-model.ts` (10 cm de folga no busto).
 - **Cupom de primeira compra**: recusa o e-mail que já tem pedido pago, separado, enviado ou entregue.
